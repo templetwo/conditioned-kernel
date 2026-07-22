@@ -64,6 +64,18 @@ def _hint_for_violation(v: str, packet: dict[str, Any]) -> str | None:
             "FIX template_echo: do not copy placeholders. Write a real answer "
             "and real evidence strings from facts."
         )
+    if v == "goal_echo":
+        return (
+            "FIX goal_echo: do not paste the goal. Answer the user_input in your own words "
+            "while still using some goal keywords."
+        )
+    if v == "not_responsive":
+        q = str(packet.get("user_input") or "")[:120]
+        return f"FIX not_responsive: address the user question terms directly (question: {q})"
+    if v.startswith("contradicts_facts"):
+        return "FIX contradicts_facts: do not claim cloud/sensors/tools when facts forbid them."
+    if v.startswith("evidence_too_short"):
+        return "FIX evidence_too_short: copy a full fact string (at least 12 characters) from facts."
     if v.startswith("parse_failed") or v.startswith("json_"):
         return (
             'FIX parse: return only JSON like '

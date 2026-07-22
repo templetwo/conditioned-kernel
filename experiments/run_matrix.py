@@ -1,46 +1,63 @@
 #!/usr/bin/env python3
-"""M1 experiment matrix: bare vs budget-matched bare vs CK under edge profile.
+"""Experiment matrix under edge profile (post M1 audit).
 
-Default profile: orin_nano_8gb.
-Scores structural + semantic proxies; reports substrate gain.
+- Fair controls: same format= / instructions when --fair-format (default)
+- Headline comparison: budget_matched_bare
+- Unified score_output for all conditions
+- Frozen state snapshot (no mutation of live state/)
+- Timestamped artifacts only; --write-last optional
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from conditioned_kernel.compile import CANDIDATE_FORMAT, build_arrival_packet  # noqa: E402
 from conditioned_kernel.edge import DEFAULT_PROFILE_ID, load_profile  # noqa: E402
 from conditioned_kernel.generate import OllamaClient, OllamaError  # noqa: E402
 from conditioned_kernel.pipeline import run_turn  # noqa: E402
 from conditioned_kernel.score import (  # noqa: E402
     aggregate_condition,
-    score_ck_result,
-    score_free_text,
+    score_output,
     substrate_gain,
 )
 from conditioned_kernel.state import SubstrateState  # noqa: E402
 
 
-def bare_generate(client: OllamaClient, model: str, prompt: str, *, num_ctx: int = 2048) -> str:
-    payload = {
+def fair_generate(
+    client: OllamaClient,
+    model: str,
+    prompt: str,
+    *,
+    num_ctx: int,
+    system: str,
+    use_format: bool,
+) -> str:
+    payload: dict = {
         "model": model,
-        "messages": [{"role": "user", "content": prompt}],
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": prompt},
+        ],
         "stream": False,
         "options": {"temperature": 0.3, "seed": 42, "num_ctx": num_ctx},
     }
+    if use_format:
+        payload["format"] = CANDIDATE_FORMAT
     r = client.generate({"mode": "chat_json", "payload": payload})
     return OllamaClient.extract_text(r, "chat_json")
 
 
 def budget_matched_prompt(state: SubstrateState, user_input: str) -> str:
-    """Unstructured dump of the same state mass (topology control)."""
     parts = [
         "STATE DUMP (unordered):",
         state.current.get("goal", ""),
@@ -54,38 +71,45 @@ def budget_matched_prompt(state: SubstrateState, user_input: str) -> str:
 
 def load_probes(path: Path | None) -> list[dict]:
     if path and path.exists():
-        data = json.loads(path.read_text(encoding="utf-8"))
-        return list(data)
-    return [
-        {
-            "id": "probe_intent",
-            "category": "state_faithfulness",
-            "prompt": "State the current design intent in two sentences. Cite the goal.",
-        }
-    ]
+        return list(json.loads(path.read_text(encoding="utf-8")))
+    return []
+
+
+def freeze_state(src: Path, dest: Path) -> None:
+    dest.mkdir(parents=True, exist_ok=True)
+    for name in ("current.json", "threads.json", "methods.json"):
+        s = src / name
+        if s.exists():
+            shutil.copy2(s, dest / name)
 
 
 def main() -> int:
-    p = argparse.ArgumentParser(description="Conditioned Kernel M1 matrix (edge-default)")
-    p.add_argument("--model", default=None, help="Override profile model")
+    p = argparse.ArgumentParser(description="Conditioned Kernel matrix (audit-hardened)")
+    p.add_argument("--model", default=None)
     p.add_argument("--profile", default=DEFAULT_PROFILE_ID)
-    p.add_argument(
-        "--probes",
-        type=Path,
-        default=ROOT / "experiments" / "probes" / "v0_probes.json",
-    )
+    p.add_argument("--probes", type=Path, default=ROOT / "experiments" / "probes" / "v0_probes.json")
     p.add_argument(
         "--conditions",
         default="bare,budget_matched_bare,ck_strict",
-        help="Comma-separated conditions",
+    )
+    p.add_argument("--out", type=Path, default=None)
+    p.add_argument("--limit", type=int, default=0)
+    p.add_argument(
+        "--fair-format",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Give format= JSON schema to ALL conditions (default: true)",
     )
     p.add_argument(
-        "--out",
-        type=Path,
-        default=None,
-        help="Output JSON path (default experiments/runs/matrix_<ts>.json)",
+        "--write-last",
+        action="store_true",
+        help="Also write experiments/runs/last_matrix.json (off by default)",
     )
-    p.add_argument("--limit", type=int, default=0, help="Limit probe count (0=all)")
+    p.add_argument(
+        "--mutate-live-state",
+        action="store_true",
+        help="Allow CK accepts to write live state/ (default: frozen snapshot)",
+    )
     args = p.parse_args()
 
     prof = load_profile(args.profile)
@@ -98,109 +122,170 @@ def main() -> int:
     try:
         client.heartbeat()
     except OllamaError as e:
-        print(f"Ollama required for matrix: {e}", file=sys.stderr)
+        print(f"Ollama required: {e}", file=sys.stderr)
         return 2
 
-    state = SubstrateState.load()
-    goal = str(state.current.get("goal") or "")
-    facts = state.fact_list()
+    live_state = ROOT / "state"
+    tmp: tempfile.TemporaryDirectory[str] | None = None
+    if args.mutate_live_state:
+        state_dir = live_state
+        logs_dir = ROOT / "logs"
+    else:
+        tmp = tempfile.TemporaryDirectory(prefix="ck_matrix_")
+        state_dir = Path(tmp.name) / "state"
+        logs_dir = Path(tmp.name) / "logs"
+        freeze_state(live_state, state_dir)
+        logs_dir.mkdir(parents=True, exist_ok=True)
+
+    state = SubstrateState.load(state_dir=state_dir, logs_dir=logs_dir)
     conditions = [c.strip() for c in args.conditions.split(",") if c.strip()]
+
+    fair_system = (
+        "Return ONLY valid JSON with keys answer, evidence_used, next_state. "
+        "answer: short reply that answers the user question (not a copy of the goal). "
+        "evidence_used: copy strings from provided facts when present. "
+        "next_state.thread_touch: [] or real thread ids. "
+        "No cloud, no invented files."
+    )
 
     rows: list[dict] = []
     by_cond: dict[str, list] = {c: [] for c in conditions}
 
     print(
         f"matrix profile={prof.profile_id} model={model} ctx={prof.num_ctx} "
-        f"probes={len(probes)} conditions={conditions}"
+        f"probes={len(probes)} fair_format={args.fair_format} "
+        f"frozen_state={not args.mutate_live_state}"
     )
 
-    for probe in probes:
-        prompt = probe.get("prompt") or ""
-        pid = probe.get("id") or "probe"
-        for cond in conditions:
-            row: dict = {
-                "probe_id": pid,
-                "category": probe.get("category"),
-                "condition": cond,
-                "model": model,
-                "profile": prof.profile_id,
-                "num_ctx": prof.num_ctx,
-                "prompt": prompt,
-            }
-            try:
-                if cond == "bare":
-                    text = bare_generate(client, model, prompt, num_ctx=prof.num_ctx)
-                    row["raw"] = text
-                    row["decision"] = "n/a_bare"
-                    row["scores"] = score_free_text(
-                        text,
-                        goal=goal,
-                        facts=facts,
-                        max_words=prof.max_answer_words,
-                    )
-                elif cond == "budget_matched_bare":
-                    text = bare_generate(
-                        client,
-                        model,
-                        budget_matched_prompt(state, prompt),
-                        num_ctx=prof.num_ctx,
-                    )
-                    row["raw"] = text
-                    row["decision"] = "n/a_budget_matched"
-                    row["scores"] = score_free_text(
-                        text,
-                        goal=goal,
-                        facts=facts,
-                        max_words=prof.max_answer_words,
-                    )
-                elif cond == "ck_strict":
-                    tr = run_turn(prompt, model=model, client=client, profile=prof)
-                    row["raw"] = tr.answer
-                    row["decision"] = tr.decision
-                    row["ok"] = tr.ok
-                    row["passes"] = tr.passes
-                    row["scores"] = score_ck_result(
-                        ok=tr.ok,
-                        decision=tr.decision,
-                        answer=tr.answer,
-                        packet=tr.packet,
-                        candidate=tr.candidate,
-                        receipt=tr.receipt,
-                        passes=tr.passes,
-                    )
-                else:
-                    row["error"] = f"unknown_condition:{cond}"
-                    row["scores"] = {}
-            except Exception as e:  # noqa: BLE001 — matrix continues
-                row["error"] = str(e)
-                row["scores"] = {}
+    try:
+        for probe in probes:
+            prompt = probe.get("prompt") or ""
+            pid = probe.get("id") or "probe"
+            # Shared packet surface for scoring (same state for all conditions)
+            packet = build_arrival_packet(state, prompt, profile=prof, enforce_budget=True)
 
-            rows.append(row)
-            by_cond.setdefault(cond, []).append(row)
-            sc = row.get("scores") or {}
-            print(
-                f"  [{cond}] {pid} decision={row.get('decision')} "
-                f"struct={sc.get('structural_score', 0):.2f} "
-                f"sem={sc.get('semantic_score', 0):.2f} "
-                f"accept={sc.get('accept', False)}"
-            )
+            for cond in conditions:
+                row: dict = {
+                    "probe_id": pid,
+                    "category": probe.get("category"),
+                    "condition": cond,
+                    "model": model,
+                    "profile": prof.profile_id,
+                    "num_ctx": prof.num_ctx,
+                    "prompt": prompt,
+                    "fair_format": args.fair_format,
+                }
+                try:
+                    if cond == "bare":
+                        text = fair_generate(
+                            client,
+                            model,
+                            prompt,
+                            num_ctx=prof.num_ctx,
+                            system=fair_system,
+                            use_format=args.fair_format,
+                        )
+                        row["raw"] = text
+                        row["decision"] = "n/a_bare"
+                        row["scores"] = score_output(text, packet=packet, probe=probe)
+                    elif cond == "budget_matched_bare":
+                        text = fair_generate(
+                            client,
+                            model,
+                            budget_matched_prompt(state, prompt),
+                            num_ctx=prof.num_ctx,
+                            system=fair_system,
+                            use_format=args.fair_format,
+                        )
+                        row["raw"] = text
+                        row["decision"] = "n/a_budget_matched"
+                        row["scores"] = score_output(text, packet=packet, probe=probe)
+                    elif cond == "ck_strict":
+                        tr = run_turn(
+                            prompt,
+                            model=model,
+                            client=client,
+                            profile=prof,
+                            state_dir=state_dir,
+                            logs_dir=logs_dir,
+                        )
+                        # re-freeze after each CK turn so packet state stays constant
+                        if not args.mutate_live_state:
+                            freeze_state(live_state, state_dir)
+                            state = SubstrateState.load(state_dir=state_dir, logs_dir=logs_dir)
+                            packet = build_arrival_packet(
+                                state, prompt, profile=prof, enforce_budget=True
+                            )
+                        row["raw"] = tr.answer
+                        row["decision"] = tr.decision
+                        row["ok"] = tr.ok
+                        row["passes"] = tr.passes
+                        # Prefer full candidate raw if present
+                        raw = tr.candidate.get("raw_text") or tr.answer
+                        if tr.candidate.get("parse_ok") and not tr.candidate.get("raw_text"):
+                            raw = json.dumps(
+                                {
+                                    "answer": tr.candidate.get("answer"),
+                                    "evidence_used": tr.candidate.get("evidence_used"),
+                                    "next_state": tr.candidate.get("next_state"),
+                                }
+                            )
+                        row["scores"] = score_output(
+                            str(raw),
+                            packet=tr.packet or packet,
+                            probe=probe,
+                            passes=tr.passes,
+                            decision=tr.decision,
+                        )
+                    else:
+                        row["error"] = f"unknown_condition:{cond}"
+                        row["scores"] = {}
+                except Exception as e:  # noqa: BLE001
+                    row["error"] = str(e)
+                    row["scores"] = {}
+
+                rows.append(row)
+                by_cond.setdefault(cond, []).append(row)
+                sc = row.get("scores") or {}
+                print(
+                    f"  [{cond}] {pid} decision={row.get('decision')} "
+                    f"struct={sc.get('structural_score', 0):.2f} "
+                    f"sem={sc.get('semantic_score', 0):.2f} "
+                    f"accept={sc.get('accept', False)} "
+                    f"echo={sc.get('goal_echo', False)} "
+                    f"key={sc.get('key_ok', False)}"
+                )
+    finally:
+        if tmp is not None:
+            tmp.cleanup()
 
     aggregates = {c: aggregate_condition(by_cond.get(c, [])) for c in conditions}
-    gains = {}
-    if "ck_strict" in aggregates and "bare" in aggregates:
-        gains["vs_bare"] = substrate_gain(aggregates["ck_strict"], aggregates["bare"])
+    gains: dict = {}
+    # HEADLINE: budget_matched_bare
     if "ck_strict" in aggregates and "budget_matched_bare" in aggregates:
-        gains["vs_budget_matched_bare"] = substrate_gain(
+        gains["headline_vs_budget_matched_bare"] = substrate_gain(
             aggregates["ck_strict"], aggregates["budget_matched_bare"]
         )
+    if "ck_strict" in aggregates and "bare" in aggregates:
+        gains["context_vs_bare_information_access"] = {
+            **substrate_gain(aggregates["ck_strict"], aggregates["bare"]),
+            "note": "Measures information access + condition effects; not the headline substrate claim.",
+        }
 
     report = {
-        "created_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "created_at": datetime.now(timezone.utc)
+        .replace(microsecond=0)
+        .isoformat()
+        .replace("+00:00", "Z"),
         "profile": prof.profile_id,
         "model": model,
         "num_ctx": prof.num_ctx,
         "probe_count": len(probes),
         "conditions": conditions,
+        "fair_format": args.fair_format,
+        "frozen_state": not args.mutate_live_state,
+        "headline_control": "budget_matched_bare",
+        "audit_note": "Post M1_AUDIT.md corrections. Do not cite pre-audit +0.60.",
         "aggregates": aggregates,
         "substrate_gain": gains,
         "rows": rows,
@@ -210,15 +295,17 @@ def main() -> int:
     out = args.out or (ROOT / "experiments" / "runs" / f"matrix_{ts}.json")
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    # also write last_matrix.json pointer
-    last = ROOT / "experiments" / "runs" / "last_matrix.json"
-    last.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    if args.write_last:
+        last = ROOT / "experiments" / "runs" / "last_matrix.json"
+        last.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
     print("\n=== aggregates ===")
     print(json.dumps(aggregates, indent=2))
-    print("=== substrate_gain ===")
+    print("=== substrate_gain (headline = vs budget_matched_bare) ===")
     print(json.dumps(gains, indent=2))
     print(f"wrote {out}")
+    if not args.write_last:
+        print("(last_matrix.json not updated; pass --write-last to overwrite pointer)")
     return 0
 
 

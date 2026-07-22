@@ -1,5 +1,12 @@
 # M1 Results — repair + matrix under `orin_nano_8gb`
 
+> ⚠️ **SUPERSEDED — DO NOT CITE THE +0.60.** Two independent audits (2026-07-22) found the
+> accepted outputs are a single degenerate goal-echo constant, the controls are hardcoded to
+> fail, and the result is not reproducible. The numbers below are faithful to their artifact
+> and meaningless as evidence of substrate gain.
+> **Read [`M1_AUDIT.md`](M1_AUDIT.md) first.** This file is kept unedited below the line as the
+> corrected predecessor — the record of what was claimed, not a live result.
+
 **Date:** 2026-07-22  
 **Model:** `qwen2.5:0.5b`  
 **Profile:** `orin_nano_8gb` (ctx=2048, edge product default)  

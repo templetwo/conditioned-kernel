@@ -126,11 +126,8 @@ class SubstrateState:
                         t["last_touched_at"] = utc_now_iso()
                         notes.append(f"touched_thread:{t.get('id')}")
 
-        note = updates.get("proposed_note")
-        if isinstance(note, str) and note.strip():
-            # Do not invent free-form truth; park as a method-side memo counter only.
-            self.current["last_proposed_note"] = note.strip()[:500]
-            notes.append("recorded_proposed_note")
+        # proposed_note is intentionally not persisted (M1 audit F10):
+        # repair scaffolding leaked into state and is a contamination risk.
 
         if notes:
             self.save_current()

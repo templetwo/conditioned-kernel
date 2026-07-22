@@ -216,9 +216,9 @@ def _cmd_smoke(args: argparse.Namespace) -> int:
         dry = json.dumps(
             {
                 "answer": (
-                    "Design intent: demonstrate conditioned-kernel substrate gain "
-                    "over bare generation on a small local model under Jetson Orin "
-                    "Nano 8GB edge budgets, fully local."
+                    "Design intent is edge-first substrate conditioning: keep the model "
+                    "small and local, put continuity in the substrate, and measure gain "
+                    "under Jetson Orin Nano budgets without cloud or sensors."
                 ),
                 "evidence_used": [
                     "This system is fully local.",
@@ -226,7 +226,6 @@ def _cmd_smoke(args: argparse.Namespace) -> int:
                 ],
                 "next_state": {
                     "thread_touch": ["thread_min_model"],
-                    "proposed_note": "Smoke dry-run accepted.",
                 },
             }
         )
