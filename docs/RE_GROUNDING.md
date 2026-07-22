@@ -228,18 +228,37 @@ the event that actually occurred — including *where* it occurred.
 
 ---
 
-## 10. Claim-to-instrument judgment — [BLOCKED ON SECTION 1]
+## 10. Claim-to-instrument judgment — UNBLOCKED (Section 1 now exists)
 
-For each claim C1–C8: does an instrument actually test it? Could the score come from a shortcut?
-What would falsify it? What conclusion is forbidden?
+Section 1 is in place (the wager + the flotation position, commit c806c18 / a9d102a), so the
+forward-reading sections can now be written *from* it rather than backward from the instruments.
 
-**Not written yet.** Writing it now would mean judging the instruments against a thesis reconstructed
-from the instruments — the exact circularity this document exists to break. Blocked until Section 1
-is inserted.
+The first forward reading arrived as an external o1-pro deep-research spec, admitted to the repo as
+[`docs/BUOYANCY_EVOLUTION.md`](BUOYANCY_EVOLUTION.md) with a verification header. It reads C1–C8
+forward from the wager and is the plan-of-record candidate. The judgment it encodes, in brief:
 
-## 11. Smallest next experiment — [BLOCKED ON SECTION 10]
+- **C1/C2/C3 (substrate > model identity; convergence; gains survive swap)** → tested by Milestones
+  M2 (advantage) and M3 (kernel-swap invariance). Currently a *tie* at 1B on the surviving number,
+  and — per the editor's flag on BUOYANCY_EVOLUTION.md — leaning *loss* for the current nested packet
+  on the raw-text evidence. The falsifier is bound to the wager, not the goal.
+- **C7 (continuity)** → resolved not as component-or-central but as a **projection**: continuity and
+  convergence are the same phenomenon (substrate-carried behavior / externality) viewed across time
+  and across models. This is why Section 1 never says the word and everything is soaked in it.
+- **The database question** → drawn at **navigation**. If the kernel must traverse/select/look up, the
+  substrate failed to compile. Conditioning delivers the result already assembled; the kernel
+  transduces, it does not retrieve.
+- **The forbidden conclusion, everywhere** → no claim escapes its `{model, digest, quantization, host,
+  backend, runtime, load_state}` tuple.
 
-No replacement experiment proposed until the judgment exists. Recorded candidate direction only, not
-a decision: reduce to one unmistakable event (does one decision survive a process boundary the second
-prompt does not restate) across bare / static-prompt / flat-state / nested-packet / compiled-substrate
-arms, single narrow output, before any composite score. Deferred.
+## 11. Smallest next experiment — POINTS TO THE SPEC
+
+The five-arm primitive (bare / static-prompt / flat-state / nested-packet / compiled-substrate, one
+decision across a real process boundary, narrow `{decision, next_action}` output, permanent
+broken-packet validator) is specified in [`BUOYANCY_EVOLUTION.md`](BUOYANCY_EVOLUTION.md) §1–2 as the
+M0→M4 ladder.
+
+**Sequence, unchanged from the HALT:** M0 (instrument validation — the Grok qualification gate on the
+real Jetson) runs first and only. No scorer redesign, no ladder expansion, no metric change until the
+primitive runs and M0's gates pass. All numeric thresholds are proposed and require Anthony's sign-off
+before they bind. The external citations in the spec are UNVERIFIED until a citation-check pass; none
+reach a DOI paper before then.
