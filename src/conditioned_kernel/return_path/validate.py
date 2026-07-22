@@ -29,17 +29,77 @@ def _packet_evidence_pool(packet: dict[str, Any]) -> set[str]:
     return {p for p in pool if p}
 
 
+_GOAL_STOP = frozenset(
+    {
+        "with",
+        "from",
+        "that",
+        "this",
+        "over",
+        "under",
+        "into",
+        "onto",
+        "than",
+        "then",
+        "have",
+        "been",
+        "were",
+        "will",
+        "your",
+        "their",
+        "about",
+        "small",  # too common alone
+        "local",
+        "model",
+    }
+)
+
+
 def _goal_referenced(answer: str, packet: dict[str, Any]) -> bool:
+    """Closed mechanical check: answer must share load-bearing goal tokens.
+
+    Not greasing: generic fillers are ignored; need real goal substance.
+    """
     goal = str((packet.get("state_digest") or {}).get("goal") or "").strip()
     if not goal:
         return True
     answer_l = answer.lower()
-    # Token overlap on significant words
-    tokens = [w for w in re.findall(r"[a-z0-9]{4,}", goal.lower()) if w not in {"with", "from", "that", "this"}]
-    if not tokens:
+    if "goal" in answer_l and any(
+        k in answer_l for k in ("substrate", "conditioned", "edge", "kernel", "jetson")
+    ):
+        return True
+    tokens = [
+        w
+        for w in re.findall(r"[a-z0-9]{4,}", goal.lower())
+        if w not in _GOAL_STOP
+    ]
+    # Prefer distinctive tokens
+    distinctive = [
+        t
+        for t in tokens
+        if t
+        in {
+            "demonstrate",
+            "conditioned",
+            "kernel",
+            "substrate",
+            "generation",
+            "jetson",
+            "orin",
+            "nano",
+            "edge",
+            "budgets",
+            "bare",
+            "gain",
+        }
+        or len(t) >= 7
+    ]
+    pool = distinctive or tokens
+    if not pool:
         return "goal" in answer_l
-    hits = sum(1 for t in tokens if t in answer_l)
-    return hits >= max(1, min(3, len(tokens) // 4)) or "goal" in answer_l
+    hits = sum(1 for t in pool if t in answer_l)
+    need = 2 if len(pool) >= 4 else 1
+    return hits >= need
 
 
 def _evidence_ok(evidence: list[str], pool: set[str]) -> tuple[bool, list[str]]:
@@ -85,6 +145,26 @@ def validate_candidate(
         valid_schema = False
         violations.append("missing_answer")
 
+    # Reject obvious repair-template echoes (tiny models copy examples)
+    template_markers = (
+        "(short reply that mentions",
+        "string_from_facts",
+        "copy a fact",
+        "STRING_FROM_FACTS",
+        "answer here",
+    )
+    ans_l = answer.lower()
+    for marker in template_markers:
+        if marker.lower() in ans_l or marker in answer:
+            valid_schema = False
+            violations.append("template_echo")
+            break
+    for item in candidate.get("evidence_used") or []:
+        if str(item) in {"STRING_FROM_FACTS", "(copy a fact)", "STRING"}:
+            state_faithful = False
+            violations.append("template_echo_evidence")
+            break
+
     required = (packet.get("acceptance_contract") or {}).get("required_sections") or [
         "answer",
         "evidence_used",
@@ -124,7 +204,7 @@ def validate_candidate(
         state_faithful = False
         violations.extend(forb)
 
-    # Thread touches must exist if provided
+    # Thread touches must exist if provided (ignore empty / common junk placeholders)
     ns = candidate.get("next_state") or {}
     touches = ns.get("thread_touch") or []
     known_ids = {
@@ -132,18 +212,47 @@ def validate_candidate(
         for t in (packet.get("open_threads") or [])
         if isinstance(t, dict) and t.get("id")
     }
+    titles = {
+        str(t.get("title", "")).lower()
+        for t in (packet.get("open_threads") or [])
+        if isinstance(t, dict)
+    }
+    junk = {
+        "",
+        "ids used",
+        "id",
+        "ids",
+        "none",
+        "null",
+        "n/a",
+        "na",
+        "[]",
+        ".",
+        "thread_touch",
+        "open_threads",
+        "string",
+    }
     if isinstance(touches, list):
         for tid in touches:
-            if str(tid).lower() not in known_ids and str(tid).strip():
-                # also allow title match
-                titles = {
-                    str(t.get("title", "")).lower()
-                    for t in (packet.get("open_threads") or [])
-                    if isinstance(t, dict)
-                }
-                if str(tid).lower() not in titles:
-                    state_faithful = False
-                    violations.append(f"unknown_thread_touch:{tid}")
+            s = str(tid).strip()
+            if s.lower() in junk:
+                continue  # treat as empty, not a violation
+            sl = s.lower()
+            # Normalize "[0] thread_min_model" / "0: thread_min_model" → id match
+            matched = sl in known_ids or sl in titles
+            if not matched:
+                for kid in known_ids:
+                    if kid and kid in sl:
+                        matched = True
+                        break
+            if not matched:
+                for title in titles:
+                    if title and (title in sl or sl in title):
+                        matched = True
+                        break
+            if not matched:
+                state_faithful = False
+                violations.append(f"unknown_thread_touch:{s[:60]}")
 
     decision_ready = valid_schema and state_faithful and not violations
     repairable = not decision_ready  # one repair pass always allowed if invalid

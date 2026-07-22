@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.0 — 2026-07-22
+
+### Added
+- M1 repair plans with actionable hints + allowed evidence/thread ids
+- Template-echo rejection; thread-touch normalization for small models
+- `score.py` structural/semantic metrics and substrate-gain composite
+- Multi-probe `experiments/run_matrix.py` under edge profiles
+- First measured result: CK vs bare composite **+0.60** on qwen2.5:0.5b / orin_nano_8gb
+
+### Notes
+- See `experiments/M1_RESULTS.md`
+
 ## 0.1.1 — 2026-07-22
 
 ### Added

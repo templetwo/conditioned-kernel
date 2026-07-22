@@ -13,7 +13,7 @@ from conditioned_kernel.ids import utc_now_iso
 from conditioned_kernel.return_path.accept import accept_candidate
 from conditioned_kernel.return_path.assess import assess
 from conditioned_kernel.return_path.parse import parse_candidate
-from conditioned_kernel.return_path.repair import build_repair_annotations
+from conditioned_kernel.return_path.repair import build_repair_plan
 from conditioned_kernel.return_path.validate import validate_candidate
 from conditioned_kernel.state import SubstrateState
 
@@ -59,7 +59,7 @@ def run_turn(
     passes: list[dict[str, Any]] = []
     repairs = prof.max_repair if max_repair is None else max_repair
 
-    repair_annotations: list[str] | None = None
+    repair_plan: dict[str, Any] | None = None
     last_packet: dict[str, Any] = {}
     last_candidate: dict[str, Any] = {}
     last_receipt: dict[str, Any] = {}
@@ -78,7 +78,7 @@ def run_turn(
                 user_input,
                 model=use_model,
                 mode=use_mode,
-                repair_annotations=repair_annotations,
+                repair_plan=repair_plan,
                 temperature=temperature,
                 seed=seed,
                 num_ctx=num_ctx,
@@ -188,7 +188,7 @@ def run_turn(
             )
 
         if receipt["decision"] == "repair" and pass_index < repairs:
-            repair_annotations = build_repair_annotations(receipt, candidate)
+            repair_plan = build_repair_plan(receipt, candidate, packet)
             state.log_candidate(candidate)
             state.log_receipt(receipt)
             continue

@@ -53,6 +53,7 @@ def build_arrival_packet(
     *,
     max_words: int | None = None,
     repair_annotations: list[str] | None = None,
+    repair_plan: dict[str, Any] | None = None,
     profile: EdgeProfile | None = None,
     enforce_budget: bool = True,
 ) -> dict[str, Any]:
@@ -88,7 +89,19 @@ def build_arrival_packet(
             "evidence_must_be_from_packet": True,
         },
     }
-    if repair_annotations:
+    if repair_plan:
+        packet["repair"] = {
+            "pass_index": 1,
+            "instruction": str(repair_plan.get("instruction") or "")[:220],
+            "hints": [str(h)[:140] for h in (repair_plan.get("hints") or [])[:4]],
+            "allowed_thread_ids": list(repair_plan.get("allowed_thread_ids") or [])[:6],
+            "allowed_evidence_samples": [
+                str(x)[:120] for x in (repair_plan.get("allowed_evidence_samples") or [])[:3]
+            ],
+            "goal_snippet": str(repair_plan.get("goal_snippet") or "")[:160],
+            "example_json": repair_plan.get("example_json") or {},
+        }
+    elif repair_annotations:
         # Keep repair payload short — edge tokens are scarce
         clipped = [str(v)[:100] for v in repair_annotations[:6]]
         packet["repair"] = {
@@ -196,6 +209,7 @@ def compile_turn(
     model: str | None = None,
     mode: Mode | None = None,
     repair_annotations: list[str] | None = None,
+    repair_plan: dict[str, Any] | None = None,
     temperature: float | None = None,
     seed: int | None = None,
     num_ctx: int | None = None,
@@ -208,6 +222,7 @@ def compile_turn(
         state,
         user_input,
         repair_annotations=repair_annotations,
+        repair_plan=repair_plan,
         profile=prof,
         enforce_budget=True,
     )
