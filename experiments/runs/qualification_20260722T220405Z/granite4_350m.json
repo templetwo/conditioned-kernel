@@ -1,0 +1,108 @@
+{
+  "model": "granite4:350m",
+  "checks": {
+    "installed": true,
+    "1_capability_probe": true,
+    "7_fits_memory": true,
+    "2_final_response_observed": true,
+    "3_reasoning_channel_separate": true,
+    "4_think_false_honoured": null,
+    "5_latency_under_budget": true,
+    "6_schema_compliance": true,
+    "8_raw_path_works": true,
+    "9_determinism_class": "stable"
+  },
+  "evidence": {
+    "show_ok": true,
+    "capabilities": [
+      "completion",
+      "tools"
+    ],
+    "details": {
+      "parameter_size": "352.38M",
+      "quantization_level": "BF16",
+      "family": "granite"
+    },
+    "size_bytes": 708458314,
+    "size_gb": 0.66,
+    "default_run": {
+      "status": "completed",
+      "output": "I am ready to assist you. How can I help you today?",
+      "error": null,
+      "elapsed_seconds": 1.65,
+      "timeout_seconds": 90.0,
+      "thinking_observed": false,
+      "thinking_chars": 0,
+      "final_response_observed": true,
+      "final_response_chars": 51,
+      "quality_admitted": true,
+      "valid_measurement": true
+    },
+    "think_false_run": {
+      "na": "no thinking capability observed"
+    },
+    "latency_s": 1.65,
+    "timeout_budget_s": 90.0,
+    "schema_run": {
+      "status": "completed",
+      "output": "{\"answer\":\"ready\",\"evidence_used\":[\"probe\"],\"next_state\":{\"thread_touch\":[]} }",
+      "error": null,
+      "elapsed_seconds": 0.317,
+      "timeout_seconds": 90.0,
+      "thinking_observed": false,
+      "thinking_chars": 0,
+      "final_response_observed": true,
+      "final_response_chars": 78,
+      "quality_admitted": true,
+      "valid_measurement": true
+    },
+    "raw_path": {
+      "status": "completed",
+      "output": "The answer is ready",
+      "error": null,
+      "elapsed_seconds": 0.501,
+      "timeout_seconds": 90.0,
+      "thinking_observed": false,
+      "thinking_chars": 0,
+      "final_response_observed": true,
+      "final_response_chars": 19,
+      "quality_admitted": true,
+      "valid_measurement": true
+    },
+    "determinism": {
+      "cold_a": {
+        "label": "cold_a",
+        "status": "completed",
+        "hash": "766203a6d43d",
+        "output": "The color of a clear sky is typically white or light blue.",
+        "elapsed_s": 0.603
+      },
+      "warm_a": {
+        "label": "warm_a",
+        "status": "completed",
+        "hash": "766203a6d43d",
+        "output": "The color of a clear sky is typically white or light blue.",
+        "elapsed_s": 0.181
+      },
+      "warm_b": {
+        "label": "warm_b",
+        "status": "completed",
+        "hash": "766203a6d43d",
+        "output": "The color of a clear sky is typically white or light blue.",
+        "elapsed_s": 0.151
+      },
+      "cold_b": {
+        "label": "cold_b",
+        "status": "completed",
+        "hash": "766203a6d43d",
+        "output": "The color of a clear sky is typically white or light blue.",
+        "elapsed_s": 0.586
+      },
+      "cold_stable": true,
+      "warm_stable": true,
+      "cold_eq_warm": true
+    }
+  },
+  "verdict": "QUALIFIED",
+  "disqualify_reasons": []
+}

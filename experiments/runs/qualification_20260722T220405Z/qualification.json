@@ -1,0 +1,618 @@
+{
+  "rows": [
+    {
+      "model": "qwen2.5:0.5b",
+      "checks": {
+        "installed": true,
+        "1_capability_probe": true,
+        "7_fits_memory": true,
+        "2_final_response_observed": true,
+        "3_reasoning_channel_separate": true,
+        "4_think_false_honoured": null,
+        "5_latency_under_budget": true,
+        "6_schema_compliance": true,
+        "8_raw_path_works": true,
+        "9_determinism_class": "stable"
+      },
+      "evidence": {
+        "show_ok": true,
+        "capabilities": [
+          "completion",
+          "tools"
+        ],
+        "details": {
+          "parameter_size": "494.03M",
+          "quantization_level": "Q4_K_M",
+          "family": "qwen2"
+        },
+        "size_bytes": 397821319,
+        "size_gb": 0.37,
+        "default_run": {
+          "status": "completed",
+          "output": "ready",
+          "error": null,
+          "elapsed_seconds": 1.309,
+          "timeout_seconds": 90.0,
+          "thinking_observed": false,
+          "thinking_chars": 0,
+          "final_response_observed": true,
+          "final_response_chars": 5,
+          "quality_admitted": true,
+          "valid_measurement": true
+        },
+        "think_false_run": {
+          "na": "no thinking capability observed"
+        },
+        "latency_s": 1.309,
+        "timeout_budget_s": 90.0,
+        "schema_run": {
+          "status": "completed",
+          "output": "{\"answer\":\"ready\",\"evidence_used\":[],\"next_state\":{\"thread_touch\":[]}}",
+          "error": null,
+          "elapsed_seconds": 0.385,
+          "timeout_seconds": 90.0,
+          "thinking_observed": false,
+          "thinking_chars": 0,
+          "final_response_observed": true,
+          "final_response_chars": 70,
+          "quality_admitted": true,
+          "valid_measurement": true
+        },
+        "raw_path": {
+          "status": "completed",
+          "output": "To prepare for a meeting, you should be in a position to:\nprepare\nprepared\npreparing\nto prepare\npreparedness\npreparedness\npreparedness\nready\n\u7b54\u6848\u662f\uff1aprepared\uff0c\u56e0\u4e3a\"meeting\"\u548c\"prepare\"\u4e4b\u95f4\u662f\u88ab\u52a8\u5173\u7cfb\uff0c\u6240\u4ee5\u5e94\u8be5\u7528\u8fc7\u53bb\u5206\u8bcd\u5f62\u5f0f\u3002\u53e6\u5916\uff0c\u6839\u636e\u8bed\u5883\uff0c\"you should be in a position to\"\u8868\u793a\u4f60\u5e94\u8be5\u5177\u5907\u67d0\u79cd\u80fd\u529b\u6216\u6761\u4ef6\uff0c\u56e0\u6b64\u4f7f\u7528\"prepared\"\u6700\u7b26\u5408\u8fd9\u4e2a\u610f\u601d\u3002\n\n\u5728\u51c6\u5907\u4f1a\u8bae\u4e0a\uff0c\u4f60\u5e94\u5177\u5907\u4ee5\u4e0b\u51e0\u70b9\uff1a\n1. \u719f\u6089\u4f1a\u8bae\u8bae\u7a0b\u548c\u5185\u5bb9\uff1b\n2. \u51c6\u5907\u597d\u81ea\u5df1\u7684\u53d1\u8a00\u6750\u6599\uff1b\n3. \u4e86\u89e3\u53c2\u4f1a\u8005\u7684\u9700\u6c42\u548c\u671f\u671b\u3002\u8fd9\u4e9b\u51c6\u5907\u5de5\u4f5c\u6709\u52a9\u4e8e\u4f60\u5728\u4f1a\u4e0a\u66f4\u6709\u6548\u5730\u8868\u8fbe\u610f\u89c1\u5e76\u8fbe\u6210\u5171\u8bc6\u3002",
+          "error": null,
+          "elapsed_seconds": 1.684,
+          "timeout_seconds": 90.0,
+          "thinking_observed": false,
+          "thinking_chars": 0,
+          "final_response_observed": true,
+          "final_response_chars": 362,
+          "quality_admitted": true,
+          "valid_measurement": true
+        },
+        "determinism": {
+          "cold_a": {
+            "label": "cold_a",
+            "status": "completed",
+            "hash": "20f9d7e945d2",
+            "output": "Clear Sky",
+            "elapsed_s": 0.565
+          },
+          "warm_a": {
+            "label": "warm_a",
+            "status": "completed",
+            "hash": "20f9d7e945d2",
+            "output": "Clear Sky",
+            "elapsed_s": 0.1
+          },
+          "warm_b": {
+            "label": "warm_b",
+            "status": "completed",
+            "hash": "20f9d7e945d2",
+            "output": "Clear Sky",
+            "elapsed_s": 0.073
+          },
+          "cold_b": {
+            "label": "cold_b",
+            "status": "completed",
+            "hash": "20f9d7e945d2",
+            "output": "Clear Sky",
+            "elapsed_s": 0.555
+          },
+          "cold_stable": true,
+          "warm_stable": true,
+          "cold_eq_warm": true
+        }
+      },
+      "verdict": "QUALIFIED",
+      "disqualify_reasons": []
+    },
+    {
+      "model": "gemma3:1b",
+      "checks": {
+        "installed": true,
+        "1_capability_probe": true,
+        "7_fits_memory": true,
+        "2_final_response_observed": true,
+        "3_reasoning_channel_separate": true,
+        "4_think_false_honoured": null,
+        "5_latency_under_budget": true,
+        "6_schema_compliance": true,
+        "8_raw_path_works": true,
+        "9_determinism_class": "stable"
+      },
+      "evidence": {
+        "show_ok": true,
+        "capabilities": [
+          "completion"
+        ],
+        "details": {
+          "parameter_size": "999.89M",
+          "quantization_level": "Q4_K_M",
+          "family": "gemma3"
+        },
+        "size_bytes": 815319791,
+        "size_gb": 0.759,
+        "default_run": {
+          "status": "completed",
+          "output": "ready",
+          "error": null,
+          "elapsed_seconds": 10.533,
+          "timeout_seconds": 90.0,
+          "thinking_observed": false,
+          "thinking_chars": 0,
+          "final_response_observed": true,
+          "final_response_chars": 5,
+          "quality_admitted": true,
+          "valid_measurement": true
+        },
+        "think_false_run": {
+          "na": "no thinking capability observed"
+        },
+        "latency_s": 10.533,
+        "timeout_budget_s": 90.0,
+        "schema_run": {
+          "status": "completed",
+          "output": "{\"answer\":\"ready\",\"evidence_used\":[\"probe\"],\"next_state\":{\"thread_touch\":[]}}",
+          "error": null,
+          "elapsed_seconds": 0.612,
+          "timeout_seconds": 90.0,
+          "thinking_observed": false,
+          "thinking_chars": 0,
+          "final_response_observed": true,
+          "final_response_chars": 77,
+          "quality_admitted": true,
+          "valid_measurement": true
+        },
+        "raw_path": {
+          "status": "completed",
+          "output": "",
+          "error": null,
+          "elapsed_seconds": 0.733,
+          "timeout_seconds": 90.0,
+          "thinking_observed": false,
+          "thinking_chars": 0,
+          "final_response_observed": false,
+          "final_response_chars": 0,
+          "quality_admitted": true,
+          "valid_measurement": true
+        },
+        "determinism": {
+          "cold_a": {
+            "label": "cold_a",
+            "status": "completed",
+            "hash": "9594eec95be7",
+            "output": "Blue",
+            "elapsed_s": 0.792
+          },
+          "warm_a": {
+            "label": "warm_a",
+            "status": "completed",
+            "hash": "9594eec95be7",
+            "output": "Blue",
+            "elapsed_s": 0.19
+          },
+          "warm_b": {
+            "label": "warm_b",
+            "status": "completed",
+            "hash": "9594eec95be7",
+            "output": "Blue",
+            "elapsed_s": 0.158
+          },
+          "cold_b": {
+            "label": "cold_b",
+            "status": "completed",
+            "hash": "9594eec95be7",
+            "output": "Blue",
+            "elapsed_s": 0.764
+          },
+          "cold_stable": true,
+          "warm_stable": true,
+          "cold_eq_warm": true
+        }
+      },
+      "verdict": "QUALIFIED",
+      "disqualify_reasons": []
+    },
+    {
+      "model": "gemma3:4b",
+      "checks": {
+        "installed": true,
+        "1_capability_probe": true,
+        "7_fits_memory": true,
+        "2_final_response_observed": true,
+        "3_reasoning_channel_separate": true,
+        "4_think_false_honoured": null,
+        "5_latency_under_budget": true,
+        "6_schema_compliance": true,
+        "8_raw_path_works": true,
+        "9_determinism_class": "stable"
+      },
+      "evidence": {
+        "show_ok": true,
+        "capabilities": [
+          "completion",
+          "vision"
+        ],
+        "details": {
+          "parameter_size": "4.3B",
+          "quantization_level": "Q4_K_M",
+          "family": "gemma3"
+        },
+        "size_bytes": 3338801804,
+        "size_gb": 3.11,
+        "default_run": {
+          "status": "completed",
+          "output": "ready",
+          "error": null,
+          "elapsed_seconds": 11.48,
+          "timeout_seconds": 90.0,
+          "thinking_observed": false,
+          "thinking_chars": 0,
+          "final_response_observed": true,
+          "final_response_chars": 5,
+          "quality_admitted": true,
+          "valid_measurement": true
+        },
+        "think_false_run": {
+          "na": "no thinking capability observed"
+        },
+        "latency_s": 11.48,
+        "timeout_budget_s": 90.0,
+        "schema_run": {
+          "status": "completed",
+          "output": "{\"answer\":\"ready\",\"evidence_used\":[\"probe\"],\"next_state\":{\"thread_touch\":[]}}",
+          "error": null,
+          "elapsed_seconds": 0.992,
+          "timeout_seconds": 90.0,
+          "thinking_observed": false,
+          "thinking_chars": 0,
+          "final_response_observed": true,
+          "final_response_chars": 77,
+          "quality_admitted": true,
+          "valid_measurement": true
+        },
+        "raw_path": {
+          "status": "completed",
+          "output": "Go.\nready",
+          "error": null,
+          "elapsed_seconds": 0.427,
+          "timeout_seconds": 90.0,
+          "thinking_observed": false,
+          "thinking_chars": 0,
+          "final_response_observed": true,
+          "final_response_chars": 9,
+          "quality_admitted": true,
+          "valid_measurement": true
+        },
+        "determinism": {
+          "cold_a": {
+            "label": "cold_a",
+            "status": "completed",
+            "hash": "9594eec95be7",
+            "output": "Blue",
+            "elapsed_s": 2.101
+          },
+          "warm_a": {
+            "label": "warm_a",
+            "status": "completed",
+            "hash": "9594eec95be7",
+            "output": "Blue",
+            "elapsed_s": 0.224
+          },
+          "warm_b": {
+            "label": "warm_b",
+            "status": "completed",
+            "hash": "9594eec95be7",
+            "output": "Blue",
+            "elapsed_s": 0.182
+          },
+          "cold_b": {
+            "label": "cold_b",
+            "status": "completed",
+            "hash": "9594eec95be7",
+            "output": "Blue",
+            "elapsed_s": 1.763
+          },
+          "cold_stable": true,
+          "warm_stable": true,
+          "cold_eq_warm": true
+        }
+      },
+      "verdict": "QUALIFIED",
+      "disqualify_reasons": []
+    },
+    {
+      "model": "granite4:350m",
+      "checks": {
+        "installed": true,
+        "1_capability_probe": true,
+        "7_fits_memory": true,
+        "2_final_response_observed": true,
+        "3_reasoning_channel_separate": true,
+        "4_think_false_honoured": null,
+        "5_latency_under_budget": true,
+        "6_schema_compliance": true,
+        "8_raw_path_works": true,
+        "9_determinism_class": "stable"
+      },
+      "evidence": {
+        "show_ok": true,
+        "capabilities": [
+          "completion",
+          "tools"
+        ],
+        "details": {
+          "parameter_size": "352.38M",
+          "quantization_level": "BF16",
+          "family": "granite"
+        },
+        "size_bytes": 708458314,
+        "size_gb": 0.66,
+        "default_run": {
+          "status": "completed",
+          "output": "I am ready to assist you. How can I help you today?",
+          "error": null,
+          "elapsed_seconds": 1.65,
+          "timeout_seconds": 90.0,
+          "thinking_observed": false,
+          "thinking_chars": 0,
+          "final_response_observed": true,
+          "final_response_chars": 51,
+          "quality_admitted": true,
+          "valid_measurement": true
+        },
+        "think_false_run": {
+          "na": "no thinking capability observed"
+        },
+        "latency_s": 1.65,
+        "timeout_budget_s": 90.0,
+        "schema_run": {
+          "status": "completed",
+          "output": "{\"answer\":\"ready\",\"evidence_used\":[\"probe\"],\"next_state\":{\"thread_touch\":[]} }",
+          "error": null,
+          "elapsed_seconds": 0.317,
+          "timeout_seconds": 90.0,
+          "thinking_observed": false,
+          "thinking_chars": 0,
+          "final_response_observed": true,
+          "final_response_chars": 78,
+          "quality_admitted": true,
+          "valid_measurement": true
+        },
+        "raw_path": {
+          "status": "completed",
+          "output": "The answer is ready",
+          "error": null,
+          "elapsed_seconds": 0.501,
+          "timeout_seconds": 90.0,
+          "thinking_observed": false,
+          "thinking_chars": 0,
+          "final_response_observed": true,
+          "final_response_chars": 19,
+          "quality_admitted": true,
+          "valid_measurement": true
+        },
+        "determinism": {
+          "cold_a": {
+            "label": "cold_a",
+            "status": "completed",
+            "hash": "766203a6d43d",
+            "output": "The color of a clear sky is typically white or light blue.",
+            "elapsed_s": 0.603
+          },
+          "warm_a": {
+            "label": "warm_a",
+            "status": "completed",
+            "hash": "766203a6d43d",
+            "output": "The color of a clear sky is typically white or light blue.",
+            "elapsed_s": 0.181
+          },
+          "warm_b": {
+            "label": "warm_b",
+            "status": "completed",
+            "hash": "766203a6d43d",
+            "output": "The color of a clear sky is typically white or light blue.",
+            "elapsed_s": 0.151
+          },
+          "cold_b": {
+            "label": "cold_b",
+            "status": "completed",
+            "hash": "766203a6d43d",
+            "output": "The color of a clear sky is typically white or light blue.",
+            "elapsed_s": 0.586
+          },
+          "cold_stable": true,
+          "warm_stable": true,
+          "cold_eq_warm": true
+        }
+      },
+      "verdict": "QUALIFIED",
+      "disqualify_reasons": []
+    },
+    {
+      "model": "functiongemma:270m",
+      "checks": {
+        "installed": false
+      },
+      "evidence": {},
+      "verdict": "DISQUALIFIED: not installed on this host",
+      "disqualify_reasons": [
+        "not_installed"
+      ]
+    },
+    {
+      "model": "qwen3.5:0.8b",
+      "checks": {
+        "installed": false
+      },
+      "evidence": {},
+      "verdict": "DISQUALIFIED: not installed on this host",
+      "disqualify_reasons": [
+        "not_installed"
+      ]
+    },
+    {
+      "model": "qwen3.5:2b",
+      "checks": {
+        "installed": false
+      },
+      "evidence": {},
+      "verdict": "DISQUALIFIED: not installed on this host",
+      "disqualify_reasons": [
+        "not_installed"
+      ]
+    },
+    {
+      "model": "gemma4:e2b",
+      "checks": {
+        "installed": true,
+        "1_capability_probe": true,
+        "7_fits_memory": false,
+        "2_final_response_observed": true,
+        "3_reasoning_channel_separate": true,
+        "4_think_false_honoured": true,
+        "5_latency_under_budget": true,
+        "6_schema_compliance": true,
+        "8_raw_path_works": true,
+        "9_determinism_class": "stable"
+      },
+      "evidence": {
+        "show_ok": true,
+        "capabilities": [
+          "completion",
+          "vision",
+          "audio",
+          "tools",
+          "thinking"
+        ],
+        "details": {
+          "parameter_size": "5.1B",
+          "quantization_level": "Q4_K_M",
+          "family": "gemma4"
+        },
+        "size_bytes": 7162405886,
+        "size_gb": 6.671,
+        "default_run": {
+          "status": "completed",
+          "output": "ready",
+          "error": null,
+          "elapsed_seconds": 20.26,
+          "timeout_seconds": 90.0,
+          "thinking_observed": false,
+          "thinking_chars": 0,
+          "final_response_observed": true,
+          "final_response_chars": 5,
+          "quality_admitted": true,
+          "valid_measurement": true
+        },
+        "think_false_run": {
+          "status": "completed",
+          "output": "ready",
+          "error": null,
+          "elapsed_seconds": 0.464,
+          "timeout_seconds": 90.0,
+          "thinking_observed": false,
+          "thinking_chars": 0,
+          "final_response_observed": true,
+          "final_response_chars": 5,
+          "quality_admitted": true,
+          "valid_measurement": true
+        },
+        "think_true_run": {
+          "status": "completed",
+          "output": "ready",
+          "error": null,
+          "elapsed_seconds": 0.328,
+          "timeout_seconds": 90.0,
+          "thinking_observed": false,
+          "thinking_chars": 0,
+          "final_response_observed": true,
+          "final_response_chars": 5,
+          "quality_admitted": true,
+          "valid_measurement": true
+        },
+        "latency_s": 20.26,
+        "timeout_budget_s": 90.0,
+        "schema_run": {
+          "status": "completed",
+          "output": "```json\n{\n\"answer\": \"ready\",\n\"evidence_used\": [\n\"probe\"\n],\n\"next_state\": {\n\"thread_touch\": []\n}\n}\n```",
+          "error": null,
+          "elapsed_seconds": 1.178,
+          "timeout_seconds": 90.0,
+          "thinking_observed": false,
+          "thinking_chars": 0,
+          "final_response_observed": true,
+          "final_response_chars": 101,
+          "quality_admitted": true,
+          "valid_measurement": true
+        },
+        "raw_path": {
+          "status": "completed",
+          "output": "",
+          "error": null,
+          "elapsed_seconds": 0.645,
+          "timeout_seconds": 90.0,
+          "thinking_observed": false,
+          "thinking_chars": 0,
+          "final_response_observed": false,
+          "final_response_chars": 0,
+          "quality_admitted": true,
+          "valid_measurement": true
+        },
+        "determinism": {
+          "cold_a": {
+            "label": "cold_a",
+            "status": "completed",
+            "hash": "9594eec95be7",
+            "output": "Blue",
+            "elapsed_s": 12.419
+          },
+          "warm_a": {
+            "label": "warm_a",
+            "status": "completed",
+            "hash": "9594eec95be7",
+            "output": "Blue",
+            "elapsed_s": 5.336
+          },
+          "warm_b": {
+            "label": "warm_b",
+            "status": "completed",
+            "hash": "9594eec95be7",
+            "output": "Blue",
+            "elapsed_s": 3.139
+          },
+          "cold_b": {
+            "label": "cold_b",
+            "status": "completed",
+            "hash": "9594eec95be7",
+            "output": "Blue",
+            "elapsed_s": 17.314
+          },
+          "cold_stable": true,
+          "warm_stable": true,
+          "cold_eq_warm": true
+        }
+      },
+      "verdict": "DISQUALIFIED: too_large:6.67GB_on_8.0GB_class; memory",
+      "disqualify_reasons": [
+        "too_large:6.67GB_on_8.0GB_class",
+        "memory"
+      ]
+    },
+    {
+      "model": "gemma4:e4b",
+      "checks": {
+        "installed": false
+      },
+      "evidence": {},
+      "verdict": "DISQUALIFIED: not installed on this host",
+      "disqualify_reasons": [
+        "not_installed"
+      ]
+    }
+  ],
+  "host": "Anthonys-MacBook-Pro.local arm64",
+  "note": "merged installed + missing"
+}

@@ -1,0 +1,107 @@
+{
+  "model": "gemma3:1b",
+  "checks": {
+    "installed": true,
+    "1_capability_probe": true,
+    "7_fits_memory": true,
+    "2_final_response_observed": true,
+    "3_reasoning_channel_separate": true,
+    "4_think_false_honoured": null,
+    "5_latency_under_budget": true,
+    "6_schema_compliance": true,
+    "8_raw_path_works": true,
+    "9_determinism_class": "stable"
+  },
+  "evidence": {
+    "show_ok": true,
+    "capabilities": [
+      "completion"
+    ],
+    "details": {
+      "parameter_size": "999.89M",
+      "quantization_level": "Q4_K_M",
+      "family": "gemma3"
+    },
+    "size_bytes": 815319791,
+    "size_gb": 0.759,
+    "default_run": {
+      "status": "completed",
+      "output": "ready",
+      "error": null,
+      "elapsed_seconds": 10.533,
+      "timeout_seconds": 90.0,
+      "thinking_observed": false,
+      "thinking_chars": 0,
+      "final_response_observed": true,
+      "final_response_chars": 5,
+      "quality_admitted": true,
+      "valid_measurement": true
+    },
+    "think_false_run": {
+      "na": "no thinking capability observed"
+    },
+    "latency_s": 10.533,
+    "timeout_budget_s": 90.0,
+    "schema_run": {
+      "status": "completed",
+      "output": "{\"answer\":\"ready\",\"evidence_used\":[\"probe\"],\"next_state\":{\"thread_touch\":[]}}",
+      "error": null,
+      "elapsed_seconds": 0.612,
+      "timeout_seconds": 90.0,
+      "thinking_observed": false,
+      "thinking_chars": 0,
+      "final_response_observed": true,
+      "final_response_chars": 77,
+      "quality_admitted": true,
+      "valid_measurement": true
+    },
+    "raw_path": {
+      "status": "completed",
+      "output": "",
+      "error": null,
+      "elapsed_seconds": 0.733,
+      "timeout_seconds": 90.0,
+      "thinking_observed": false,
+      "thinking_chars": 0,
+      "final_response_observed": false,
+      "final_response_chars": 0,
+      "quality_admitted": true,
+      "valid_measurement": true
+    },
+    "determinism": {
+      "cold_a": {
+        "label": "cold_a",
+        "status": "completed",
+        "hash": "9594eec95be7",
+        "output": "Blue",
+        "elapsed_s": 0.792
+      },
+      "warm_a": {
+        "label": "warm_a",
+        "status": "completed",
+        "hash": "9594eec95be7",
+        "output": "Blue",
+        "elapsed_s": 0.19
+      },
+      "warm_b": {
+        "label": "warm_b",
+        "status": "completed",
+        "hash": "9594eec95be7",
+        "output": "Blue",
+        "elapsed_s": 0.158
+      },
+      "cold_b": {
+        "label": "cold_b",
+        "status": "completed",
+        "hash": "9594eec95be7",
+        "output": "Blue",
+        "elapsed_s": 0.764
+      },
+      "cold_stable": true,
+      "warm_stable": true,
+      "cold_eq_warm": true
+    }
+  },
+  "verdict": "QUALIFIED",
+  "disqualify_reasons": []
+}

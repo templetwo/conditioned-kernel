@@ -1,0 +1,108 @@
+{
+  "model": "qwen2.5:0.5b",
+  "checks": {
+    "installed": true,
+    "1_capability_probe": true,
+    "7_fits_memory": true,
+    "2_final_response_observed": true,
+    "3_reasoning_channel_separate": true,
+    "4_think_false_honoured": null,
+    "5_latency_under_budget": true,
+    "6_schema_compliance": true,
+    "8_raw_path_works": true,
+    "9_determinism_class": "stable"
+  },
+  "evidence": {
+    "show_ok": true,
+    "capabilities": [
+      "completion",
+      "tools"
+    ],
+    "details": {
+      "parameter_size": "494.03M",
+      "quantization_level": "Q4_K_M",
+      "family": "qwen2"
+    },
+    "size_bytes": 397821319,
+    "size_gb": 0.37,
+    "default_run": {
+      "status": "completed",
+      "output": "ready",
+      "error": null,
+      "elapsed_seconds": 1.309,
+      "timeout_seconds": 90.0,
+      "thinking_observed": false,
+      "thinking_chars": 0,
+      "final_response_observed": true,
+      "final_response_chars": 5,
+      "quality_admitted": true,
+      "valid_measurement": true
+    },
+    "think_false_run": {
+      "na": "no thinking capability observed"
+    },
+    "latency_s": 1.309,
+    "timeout_budget_s": 90.0,
+    "schema_run": {
+      "status": "completed",
+      "output": "{\"answer\":\"ready\",\"evidence_used\":[],\"next_state\":{\"thread_touch\":[]}}",
+      "error": null,
+      "elapsed_seconds": 0.385,
+      "timeout_seconds": 90.0,
+      "thinking_observed": false,
+      "thinking_chars": 0,
+      "final_response_observed": true,
+      "final_response_chars": 70,
+      "quality_admitted": true,
+      "valid_measurement": true
+    },
+    "raw_path": {
+      "status": "completed",
+      "output": "To prepare for a meeting, you should be in a position to:\nprepare\nprepared\npreparing\nto prepare\npreparedness\npreparedness\npreparedness\nready\n答案是：prepared，因为\"meeting\"和\"prepare\"之间是被动关系，所以应该用过去分词形式。另外，根据语境，\"you should be in a position to\"表示你应该具备某种能力或条件，因此使用\"prepared\"最符合这个意思。\n\n在准备会议上，你应具备以下几点：\n1. 熟悉会议议程和内容；\n2. 准备好自己的发言材料；\n3. 了解参会者的需求和期望。这些准备工作有助于你在会上更有效地表达意见并达成共识。",
+      "error": null,
+      "elapsed_seconds": 1.684,
+      "timeout_seconds": 90.0,
+      "thinking_observed": false,
+      "thinking_chars": 0,
+      "final_response_observed": true,
+      "final_response_chars": 362,
+      "quality_admitted": true,
+      "valid_measurement": true
+    },
+    "determinism": {
+      "cold_a": {
+        "label": "cold_a",
+        "status": "completed",
+        "hash": "20f9d7e945d2",
+        "output": "Clear Sky",
+        "elapsed_s": 0.565
+      },
+      "warm_a": {
+        "label": "warm_a",
+        "status": "completed",
+        "hash": "20f9d7e945d2",
+        "output": "Clear Sky",
+        "elapsed_s": 0.1
+      },
+      "warm_b": {
+        "label": "warm_b",
+        "status": "completed",
+        "hash": "20f9d7e945d2",
+        "output": "Clear Sky",
+        "elapsed_s": 0.073
+      },
+      "cold_b": {
+        "label": "cold_b",
+        "status": "completed",
+        "hash": "20f9d7e945d2",
+        "output": "Clear Sky",
+        "elapsed_s": 0.555
+      },
+      "cold_stable": true,
+      "warm_stable": true,
+      "cold_eq_warm": true
+    }
+  },
+  "verdict": "QUALIFIED",
+  "disqualify_reasons": []
+}
