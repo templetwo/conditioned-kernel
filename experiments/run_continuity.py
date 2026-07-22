@@ -23,6 +23,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import subprocess
@@ -273,7 +274,11 @@ def main() -> int:
     tasks = json.loads(a.tasks.read_text())
     if a.limit:
         tasks = tasks[: a.limit]
-    print(f"continuity: {len(tasks)} tasks x {len(ARMS)} arms, model={model}, dry={a.dry}")
+    # flush=True throughout: a long run redirected to a file otherwise shows
+    # NOTHING until the block buffer fills, which is indistinguishable from a
+    # stall. Progress on a 15-minute experiment has to be observable.
+    print(f"continuity: {len(tasks)} tasks x {len(ARMS)} arms, model={model}, dry={a.dry}",
+          flush=True)
 
     rows = []
     for t in tasks:
@@ -281,7 +286,7 @@ def main() -> int:
         dry = ["--dry"] if a.dry else []
         ep_a = _spawn(["--episode", "a", "--model", model, "--profile", a.profile, *dry], {"task": t})
         if ep_a.get("error"):
-            print(f"  {tid}: episode A failed — {ep_a['error'][:120]}")
+            print(f"  {tid}: episode A failed — {ep_a['error'][:120]}", flush=True)
             continue
         if not a.dry:
             evict(model)  # boundary: nothing resident survives
@@ -304,7 +309,7 @@ def main() -> int:
                 **{k: v for k, v in ep_b.items() if k not in ("pid", "start_time", "primed")},
             })
             s = (ep_b.get("scores") or {}).get("continuity_score")
-            print(f"  {tid:34} {arm:16} score={s} pid_ok={boundary_ok}")
+            print(f"  {tid:34} {arm:16} score={s} pid_ok={boundary_ok}", flush=True)
 
     by_arm: dict[str, list[float]] = {}
     for r in rows:
@@ -312,8 +317,30 @@ def main() -> int:
             by_arm.setdefault(r["arm"], []).append(
                 float((r.get("scores") or {}).get("continuity_score") or 0.0))
     summary = {arm: (sum(v) / len(v) if v else None) for arm, v in by_arm.items()}
+    # Pin corpus identity. Two seats work this repo in tandem, and the corpus
+    # was edited mid-run once already: a result measured against a corpus that
+    # no longer exists is not interpretable unless it says which corpus.
+    corpus_bytes = a.tasks.read_bytes()
+    corpus_sha = hashlib.sha256(corpus_bytes).hexdigest()[:16]
+    try:
+        corpus_commit = subprocess.run(
+            ["git", "log", "-1", "--format=%h", "--", str(a.tasks)],
+            cwd=ROOT, capture_output=True, text=True).stdout.strip() or None
+        dirty = bool(subprocess.run(
+            ["git", "diff", "--quiet", "--", str(a.tasks)],
+            cwd=ROOT).returncode)
+    except Exception:
+        corpus_commit, dirty = None, None
+
     report = {
         "created_at": _now(), "model": model, "profile": prof.profile_id,
+        "corpus": {
+            "path": str(a.tasks.relative_to(ROOT)),
+            "sha256_16": corpus_sha,
+            "last_commit": corpus_commit,
+            "uncommitted_edits": dirty,
+            "n_tasks_in_file": len(json.loads(corpus_bytes)),
+        },
         "n_tasks": len(tasks), "arms": list(ARMS),
         "mean_continuity_by_arm": summary,
         "M1_ck_beats_broken": (
