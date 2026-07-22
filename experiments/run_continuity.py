@@ -59,7 +59,24 @@ ARMS = ("bare_serialized", "ck_packet", "broken_packet")
 # Same rules the CK system prompt states, minus the compiled structure. Fixed
 # here in code (and in the protocol) rather than chosen at run time, because
 # whoever writes the bare condition decides the outcome.
-BARE_SYSTEM = (
+# Two bare system prompts, because the first run conflated instruction with
+# structure. CK's system prompt says "answer: short reply THAT MENTIONS THE
+# GOAL" and its packet carries must_reference_goal; my original control said
+# only "short reply". A 0.5B model follows the goal instruction literally and
+# mentions nothing else -- so CK goal-echoed while the control answered, and
+# the measured gap was partly instruction, not structure.
+#
+# fair  = byte-identical wording to CK's system prompt. Isolates STRUCTURE.
+# plain = the original. Isolates INSTRUCTION+STRUCTURE together.
+BARE_SYSTEM_FAIR = (
+    "Local conditioned-kernel transducer. "
+    "Return ONLY valid JSON with keys answer, evidence_used, next_state. "
+    "answer: short reply that mentions the goal. "
+    "evidence_used: copy exact strings from facts or open_threads. "
+    "next_state.thread_touch: array of real open_threads id values, or []. "
+    "Never invent thread ids. No files, URLs, tools, or cloud."
+)
+BARE_SYSTEM_PLAIN = (
     "Local assistant. Return ONLY valid JSON with keys answer, evidence_used, next_state. "
     "answer: short reply. evidence_used: copy exact strings you relied on. "
     "next_state.thread_touch: array of thread ids, or []. "
@@ -140,7 +157,8 @@ def episode_a(task: dict[str, Any], model: str, prof: Any, dry: bool) -> dict[st
 
 
 def episode_b(task: dict[str, Any], arm: str, artifacts: dict, model: str,
-              prof: Any, dry: bool) -> dict[str, Any]:
+              prof: Any, dry: bool, bare_mode: str = "fair") -> dict[str, Any]:
+    bare_system = BARE_SYSTEM_FAIR if bare_mode == "fair" else BARE_SYSTEM_PLAIN
     start_pid, start_time = os.getpid(), _now()
     with tempfile.TemporaryDirectory(prefix="ck_epB_") as tmp:
         root = Path(tmp)
@@ -186,7 +204,7 @@ def episode_b(task: dict[str, Any], arm: str, artifacts: dict, model: str,
                 "payload": {
                     "model": model,
                     "messages": [
-                        {"role": "system", "content": BARE_SYSTEM},
+                        {"role": "system", "content": bare_system},
                         {"role": "user", "content": f"{bare_text}\n\nQUESTION: {prompt}"},
                     ],
                     "format": CANDIDATE_FORMAT,
@@ -251,6 +269,9 @@ def main() -> int:
     p.add_argument("--limit", type=int, default=0)
     p.add_argument("--out", type=Path, default=None)
     p.add_argument("--dry", action="store_true", help="no inference; exercises plumbing only")
+    p.add_argument("--bare-mode", choices=["fair", "plain"], default="fair",
+                   help="fair: control gets CK's exact system prompt (isolates structure). "
+                        "plain: control gets a neutral prompt (confounds instruction+structure).")
     p.add_argument("--episode", choices=["a", "b"], default=None, help="internal worker mode")
     p.add_argument("--arm", default=None)
     p.add_argument("--payload", type=Path, default=None)
@@ -266,7 +287,8 @@ def main() -> int:
         if a.episode == "a":
             res = episode_a(payload["task"], model, prof, a.dry)
         else:
-            res = episode_b(payload["task"], a.arm, payload["artifacts"], model, prof, a.dry)
+            res = episode_b(payload["task"], a.arm, payload["artifacts"], model, prof,
+                            a.dry, a.bare_mode)
         a.out_json.write_text(json.dumps(res))
         return 0
 
@@ -292,7 +314,7 @@ def main() -> int:
             evict(model)  # boundary: nothing resident survives
         for arm in ARMS:
             ep_b = _spawn(["--episode", "b", "--arm", arm, "--model", model,
-                           "--profile", a.profile, *dry],
+                           "--profile", a.profile, "--bare-mode", a.bare_mode, *dry],
                           {"task": t, "artifacts": ep_a["artifacts"]})
             boundary_ok = bool(ep_a.get("pid")) and ep_b.get("pid") not in (None, ep_a.get("pid"))
             rows.append({
@@ -334,6 +356,7 @@ def main() -> int:
 
     report = {
         "created_at": _now(), "model": model, "profile": prof.profile_id,
+        "bare_mode": a.bare_mode,
         "corpus": {
             "path": str(a.tasks.relative_to(ROOT)),
             "sha256_16": corpus_sha,
