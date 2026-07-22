@@ -142,6 +142,14 @@ That is a 16x wall-clock difference. For an edge node with an interactive budget
 this size is disqualifying on latency alone, whatever it does for quality. If Qwen3.5 is to be used
 here it should be evaluated in non-thinking mode.
 
+> **CORRECTION (2026-07-22, later): the paragraph above understates this and implies we observed
+> poor quality. We never observed its output at all.** Plain `/api/generate` shows
+> `qwen3.5:0.8b` writing **16,214 chars into `thinking` and returning a 0-char `response`**, and
+> `OllamaClient.extract_text` never reads `thinking`. So its `0.000` scores were an empty read, not
+> a quality measurement. It failed twice independently — 121s against a 90s timeout, AND an empty
+> response even on return. Fixing only the timeout would not have helped.
+> See [THINKING_MODE_FINDING.md](THINKING_MODE_FINDING.md).
+
 ## Two thresholds, deliberately not merged
 
 External review (2026-07-22) sharpened the framing, and the distinction is worth stating plainly:

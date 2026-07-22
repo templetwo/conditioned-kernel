@@ -42,3 +42,4 @@ logs/*.jsonl
 # CONTENTS (runs/*) so re-inclusion of ladder_*/ actually works.
 !experiments/runs/ladder_*/
 !experiments/runs/continuity_*/
+!experiments/runs/plaingen_*/
