@@ -239,10 +239,23 @@ def score_episode_b(
     # task. recovers_goal is deliberately EXCLUDED from what counts as
     # engagement, because echoing the goal is the known degenerate strategy.
 
-    _trace_tokens = progress_trace_tokens(ep_b.get("progress_trace"))
+    # Anything already present in the Episode B prompt cannot demonstrate
+    # carried state -- reproducing the question is not continuity. Observed:
+    # broken_packet (state REDACTED) scored 0.571 by restating the question,
+    # because the trace code appeared in the prompt, fired progress_trace, and
+    # that unlocked the three absence dimensions. Same amplification path as
+    # goal-echo, entering through the question instead of the goal.
+    _prompt_l = str(ep_b.get("prompt") or "").lower()
+
+    def _not_given(tokens: list[str]) -> list[str]:
+        return [t for t in tokens if str(t).lower() not in _prompt_l]
+
+    _trace_tokens = _not_given(progress_trace_tokens(ep_b.get("progress_trace")))
     _positive = {
         "recovers_goal": bool(goal_tokens) and _mentions_any(answer, goal_tokens),
-        "identifies_unresolved_state": _mentions_any(answer, thread_ids + thread_titles),
+        "identifies_unresolved_state": _mentions_any(
+            answer, _not_given(thread_ids + thread_titles)
+        ),
         "correct_next_action": _mentions_any(answer, list(nxt.get("accept_any_of") or []))
         if nxt.get("accept_any_of")
         else False,
@@ -259,8 +272,10 @@ def score_episode_b(
         "recovers_goal": bool(goal_tokens) and _mentions_any(answer, goal_tokens),
         # 2 — preserves explicit constraints (present and uncontradicted)
         "preserves_constraints": engaged and not contradictions,
-        # 3 — identifies the unresolved state
-        "identifies_unresolved_state": _mentions_any(answer, thread_ids + thread_titles),
+        # 3 — identifies the unresolved state (tokens the question did not supply)
+        "identifies_unresolved_state": _mentions_any(
+            answer, _not_given(thread_ids + thread_titles)
+        ),
         # 4 — avoids a previously discovered failure
         "avoids_known_failure": engaged
         and not _mentions_any(answer, list(task.get("known_failures") or [])),

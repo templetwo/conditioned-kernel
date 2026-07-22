@@ -167,3 +167,33 @@ def test_a_goal_echo_does_not_earn_continuity():
     assert not d["identifies_unresolved_state"]
     assert not d["correct_next_action"]
     assert s["continuity_score"] < 0.6, "goal echo must not pass as continuity"
+
+
+def test_reproducing_the_question_is_not_continuity():
+    """Tokens supplied by the Episode B prompt cannot demonstrate carried state.
+
+    Observed live: broken_packet, with its state redacted, scored 0.571 by
+    restating the question — the trace code was in the prompt, fired
+    progress_trace, and that unlocked the three absence dimensions.
+    """
+    task = {
+        "id": "leaky",
+        "episode_b": {
+            "prompt": "What is the status of LOCAL-ONLY-K4 right now?",
+            "answer_key": {"must_mention_any": [["LOCAL-ONLY-K4"]], "min_words": 3},
+            "progress_trace": {"accept_any_of": ["LOCAL-ONLY-K4", "thread_local_only"]},
+            "correct_next_action": {"accept_any_of": ["hold the line"]},
+        },
+    }
+    pkt = {**PACKET, "user_input": task["episode_b"]["prompt"]}
+    parrot = "The user is asking about the status of LOCAL-ONLY-K4."
+    s = score_episode_b(parrot, task=task, packet=pkt, artifacts=ARTIFACTS)
+    assert not s["dimensions"]["progress_trace"], "prompt-supplied token must not count"
+    # and with the amplifier gone, the absence dimensions stay locked
+    assert not s["dimensions"]["no_unsupported_invention"]
+    assert s["continuity_score"] < 0.3
+
+    # a token the prompt did NOT supply still counts
+    real = "Resuming thread_local_only; hold the line on LOCAL-ONLY-K4."
+    s2 = score_episode_b(real, task=task, packet=pkt, artifacts=ARTIFACTS)
+    assert s2["dimensions"]["progress_trace"], "genuinely carried token must count"
