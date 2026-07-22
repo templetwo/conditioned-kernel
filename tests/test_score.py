@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from conditioned_kernel.score import (
     aggregate_condition,
     score_output,
@@ -114,7 +116,25 @@ def test_hardcoded_composite_would_be_caught_by_structure():
         {"structural_score": good["structural_score"], "semantic_score": good["semantic_score"]},
         {"structural_score": bad["structural_score"], "semantic_score": bad["semantic_score"]},
     )
-    assert g["composite"] != 0.60 or good["structural_score"] != 0.875
+    # Derived, not asserted: composite must equal the mean of the two deltas.
+    expected = (
+        (good["structural_score"] - bad["structural_score"])
+        + (good["semantic_score"] - bad["semantic_score"])
+    ) / 2.0
+    assert g["composite"] == pytest.approx(expected)
+
+    # Two known input pairs pin the function to exact outputs. Any constant
+    # return value — 0.60 or otherwise — fails at least one of these.
+    hi = substrate_gain(
+        {"structural_score": 1.0, "semantic_score": 1.0},
+        {"structural_score": 0.0, "semantic_score": 0.0},
+    )
+    flat = substrate_gain(
+        {"structural_score": 0.5, "semantic_score": 0.5},
+        {"structural_score": 0.5, "semantic_score": 0.5},
+    )
+    assert hi["composite"] == pytest.approx(1.0)
+    assert flat["composite"] == pytest.approx(0.0)
 
 
 def test_aggregate_distinct_answers():

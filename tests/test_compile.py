@@ -36,3 +36,29 @@ def test_compile_packet_shape(tmp_path: Path):
 
     raw = build_model_input(packet, model="qwen2.5:0.5b", mode="generate_raw")
     assert raw["payload"]["raw"] is True
+
+
+def test_model_input_is_reproducible_across_builds(tmp_path: Path):
+    """Same state + same input must yield a byte-identical prompt.
+
+    packet_id and created_at change on every build. While they were serialized
+    into the model input, generation could not be reproduced even at fixed
+    temperature and seed, because the prompt itself differed run to run — the
+    matrix headline flipped sign between two back-to-back runs.
+    """
+    state_dir = tmp_path / "state"
+    state_dir.mkdir()
+    (state_dir / "current.json").write_text(
+        json.dumps({"goal": "Test goal for reproducibility.", "flags": {}})
+    )
+    (state_dir / "threads.json").write_text(json.dumps([]))
+    state = SubstrateState.load(state_dir=state_dir, logs_dir=tmp_path / "logs")
+
+    a = build_arrival_packet(state, "Same question?")
+    b = build_arrival_packet(state, "Same question?")
+    # The packets differ by construction...
+    assert a["packet_id"] != b["packet_id"]
+    # ...but what reaches the model must not.
+    ma = build_model_input(a, model="m", num_ctx=2048)
+    mb = build_model_input(b, model="m", num_ctx=2048)
+    assert ma["payload"] == mb["payload"]

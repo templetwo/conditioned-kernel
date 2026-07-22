@@ -1,6 +1,7 @@
 from conditioned_kernel.return_path.assess import assess
 from conditioned_kernel.return_path.parse import parse_candidate
 from conditioned_kernel.return_path.validate import (
+    _fact_contradictions,
     is_goal_echo,
     validate_candidate,
 )
@@ -130,3 +131,65 @@ def test_forbidden_phrase():
     receipt = validate_candidate(cand, PACKET)
     assert receipt["state_faithful"] is False
     assert any("forbidden" in v for v in receipt["violations"])
+
+
+# --- polarity of the contradiction check -------------------------------------
+# Both directions are pinned deliberately. The original bug was topic-matching
+# (any mention of a forbidden capability flagged, even a denial). The obvious
+# fix — ignore anything near a negation — regresses the other way, so the
+# assertions below must stay paired: denials clean, assertions still caught.
+
+CONSTRAINT_PACKET = {
+    **PACKET,
+    "user_input": "Is this system allowed to call cloud APIs or use sensors in v0? Answer briefly.",
+}
+
+
+def _contradictions(answer: str, packet: dict = CONSTRAINT_PACKET) -> list[str]:
+    return _fact_contradictions(answer, packet)
+
+
+def test_denial_mentioning_forbidden_capability_is_not_a_contradiction():
+    """Answering a question about cloud/sensors requires naming them."""
+    for answer in [
+        "No. Cloud APIs and sensors are out of scope for v0.",
+        "This system does not call cloud APIs.",
+        "Cloud APIs are forbidden in v0; the system is fully local.",
+        "No cloud API access and no sensor data are permitted.",
+        "Cloud APIs cannot be called and sensors are disabled.",
+    ]:
+        assert _contradictions(answer) == [], f"false positive on denial: {answer!r}"
+
+
+def test_assertion_of_forbidden_capability_is_still_flagged():
+    for answer in [
+        "This system routinely calls cloud APIs and streams sensor data.",
+        "Yes, cloud APIs are available in v0.",
+        "The kernel uses cloud inference for long prompts.",
+        "It reads sensor data from the camera.",
+    ]:
+        assert _contradictions(answer), f"missed real contradiction: {answer!r}"
+
+
+def test_negation_does_not_leak_across_clauses():
+    """A denial in one sentence must not excuse an assertion in the next."""
+    answer = "The system is not a toy. It calls cloud APIs on every request."
+    assert _contradictions(answer)
+
+
+def test_constraint_probe_is_answerable_end_to_end():
+    """Regression for the not_responsive / contradicts_facts catch-22.
+
+    A correct answer had to both contain 'cloud API' (to be responsive) and
+    not contain it (to avoid contradicts_facts). It was unpassable.
+    """
+    raw = """{
+      "answer": "No. Cloud APIs and sensors are out of scope for v0; the goal is demonstrating substrate gain on a small local model at the edge.",
+      "evidence_used": ["This system is fully local.", "Sensors are out of scope for v0."],
+      "next_state": {"thread_touch": []}
+    }"""
+    cand = parse_candidate(raw, packet_id="pkt_test")
+    receipt = validate_candidate(cand, CONSTRAINT_PACKET)
+    assert receipt["violations"] == []
+    assert receipt["valid_schema"] is True
+    assert receipt["state_faithful"] is True

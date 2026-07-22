@@ -83,6 +83,16 @@ _FACT_CONTRADICTION_RULES: list[tuple[list[str], list[str]]] = [
 ]
 
 
+# Clause-level denial/prohibition cues. Word-bounded so "no" does not fire on
+# "now"/"nothing". Used only to decide polarity of a contradiction marker.
+_NEGATION_CUE_RE = re.compile(
+    r"\b(?:no|not|never|none|neither|nor|cannot|can't|cant|don't|dont|doesn't|doesnt|"
+    r"won't|wont|isn't|isnt|aren't|arent|without|forbidden|prohibited|disallowed|"
+    r"denied|blocked|banned|excluded|disabled|refuse|refuses|unsupported)\b"
+    r"|out of scope|off[- ]limits|not allowed"
+)
+
+
 def _norm_ws(s: str) -> str:
     return re.sub(r"\s+", " ", (s or "").strip().lower())
 
@@ -237,19 +247,54 @@ def _forbidden_hits(answer: str, packet: dict[str, Any]) -> list[str]:
     return hits
 
 
+def _clauses(text: str) -> list[str]:
+    """Split on sentence/clause terminators only.
+
+    Deliberately NOT split on ' and '/','. Splitting there breaks denials that
+    carry the negation once for a conjoined list ("cloud APIs and sensors are
+    out of scope"), which would strand the bare topic term in its own clause
+    and re-create the false positive this function exists to avoid.
+    """
+    return [c for c in re.split(r"[.;!?\n]+", (text or "").lower()) if c.strip()]
+
+
+def _is_negated(clause: str) -> bool:
+    """True if the clause denies/prohibits rather than asserts.
+
+    Clause-scoped, not answer-scoped: a negation in one sentence must not
+    excuse an assertion in the next.
+    """
+    return bool(_NEGATION_CUE_RE.search(clause))
+
+
 def _fact_contradictions(answer: str, packet: dict[str, Any]) -> list[str]:
-    """Closed mechanical contradiction against packet facts (not open NLI)."""
+    """Closed mechanical contradiction against packet facts (not open NLI).
+
+    Polarity-aware. A marker only counts as a contradiction when the clause
+    containing it ASSERTS the capability. Mentioning a forbidden capability in
+    order to deny it ("cloud APIs are out of scope") is agreement with the
+    facts, not contradiction — and is the only way to answer a question that
+    asks about that capability. Matching on the bare topic term made the
+    constraint probe unanswerable: `not_responsive` required the term, this
+    check forbade it.
+
+    Known residual: double negation ("cloud APIs are not forbidden") reads as
+    denial and is not flagged. Accepted deliberately — closing it needs real
+    parsing, and the repo rule is mechanical checks, not NLI.
+    """
     if not (packet.get("acceptance_contract") or {}).get("must_not_contradict_facts", False):
         return []
     facts_blob = " ".join(str(f).lower() for f in (packet.get("facts") or []))
-    al = answer.lower()
     hits: list[str] = []
-    for fact_markers, contra_markers in _FACT_CONTRADICTION_RULES:
-        if not any(m in facts_blob for m in fact_markers):
+    for clause in _clauses(answer):
+        if _is_negated(clause):
             continue
-        for c in contra_markers:
-            if c in al:
-                hits.append(f"contradicts_facts:{c}")
+        for fact_markers, contra_markers in _FACT_CONTRADICTION_RULES:
+            if not any(m in facts_blob for m in fact_markers):
+                continue
+            for c in contra_markers:
+                if c in clause:
+                    hits.append(f"contradicts_facts:{c}")
     return hits
 
 

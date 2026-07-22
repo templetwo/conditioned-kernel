@@ -12,6 +12,10 @@ from conditioned_kernel.state import SubstrateState
 
 Mode = Literal["chat_json", "generate_raw"]
 
+# Per-build fields excluded from the serialized model input so that identical
+# state + input produce an identical prompt (reproducibility criterion).
+_VOLATILE_PACKET_FIELDS = frozenset({"packet_id", "created_at"})
+
 # Candidate schema for Ollama format= (subset of JSON Schema)
 CANDIDATE_FORMAT: dict[str, Any] = {
     "type": "object",
@@ -133,12 +137,21 @@ def build_model_input(
     keep_alive: str = "2m",
     compact: bool = True,
 ) -> dict[str, Any]:
-    # Compact JSON saves context tokens on edge devices
+    # Compact JSON saves context tokens on edge devices.
+    # Volatile fields are stripped from the MODEL INPUT only: packet_id and
+    # created_at change on every build, so leaving them in the serialized
+    # prompt makes generation non-reproducible even at fixed temperature and
+    # seed — the prompt itself differs run to run. They stay on the packet for
+    # receipts and logging; the model has no use for them.
+    model_packet = {
+        k: v
+        for k, v in packet.items()
+        if not str(k).startswith("_") and k not in _VOLATILE_PACKET_FIELDS
+    }
     if compact:
-        model_packet = {k: v for k, v in packet.items() if not str(k).startswith("_")}
         serialized = json.dumps(model_packet, ensure_ascii=False, separators=(",", ":"))
     else:
-        serialized = json.dumps(packet, ensure_ascii=False, indent=2)
+        serialized = json.dumps(model_packet, ensure_ascii=False, indent=2)
     system = (
         "Local conditioned-kernel transducer. "
         "Return ONLY valid JSON with keys answer, evidence_used, next_state. "
