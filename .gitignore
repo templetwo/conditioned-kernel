@@ -33,3 +33,7 @@ logs/*.jsonl
 *.pem
 *.key
 .env.*
+
+# Ladder artifacts are evidence for MODEL_LADDER.md — keep these
+!experiments/runs/ladder_*/
+!experiments/runs/ladder_*/*.json

@@ -166,6 +166,13 @@ def main() -> int:
     p.add_argument("--out", type=Path, default=None)
     p.add_argument("--limit", type=int, default=0)
     p.add_argument(
+        "--timeout",
+        type=int,
+        default=None,
+        help="Override profile timeout_s. Thinking models (Qwen3.5) exceed the "
+             "edge profile's 90s and time out, which scores as 0 rather than as failure.",
+    )
+    p.add_argument(
         "--fair-format",
         action=argparse.BooleanOptionalAction,
         default=True,
@@ -196,7 +203,8 @@ def main() -> int:
     if args.limit and args.limit > 0:
         probes = probes[: args.limit]
 
-    client = OllamaClient(timeout=prof.timeout_s)
+    timeout_s = args.timeout if args.timeout else prof.timeout_s
+    client = OllamaClient(timeout=timeout_s)
     try:
         client.heartbeat()
     except OllamaError as e:
@@ -372,6 +380,7 @@ def main() -> int:
         "frozen_state": not args.mutate_live_state,
         "headline_control": "budget_matched_bare",
         "environment": collect_environment(model),
+        "timeout_s": timeout_s,
         "load_state": {"prime": args.prime, "receipt": primed},
         "audit_note": "Post M1_AUDIT.md corrections. Do not cite pre-audit +0.60.",
         "aggregates": aggregates,
