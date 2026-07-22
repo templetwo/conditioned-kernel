@@ -354,8 +354,21 @@ def main() -> int:
     except Exception:
         corpus_commit, dirty = None, None
 
+    # Same environment block the matrix artifacts carry. Continuity runs were
+    # missing it, so they recorded WHICH CORPUS they measured but not which
+    # runtime or model build -- half a provenance record is not a provenance
+    # record, and cross-device continuity comparison would have hit the exact
+    # ollama-version confound already found on the ladder.
+    try:
+        sys.path.insert(0, str(ROOT / "experiments"))
+        from run_matrix import collect_environment  # noqa: E402
+        env = collect_environment(model)
+    except Exception as e:  # provenance must never fail a run
+        env = {"probe_error": f"{type(e).__name__}: {e}"}
+
     report = {
         "created_at": _now(), "model": model, "profile": prof.profile_id,
+        "environment": env,
         "bare_mode": a.bare_mode,
         "corpus": {
             "path": str(a.tasks.relative_to(ROOT)),
