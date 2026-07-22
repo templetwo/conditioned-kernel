@@ -27,6 +27,7 @@ class RunStatus(str, Enum):
     """
 
     COMPLETED = "completed"
+    NO_FINAL_RESPONSE = "no_final_response"
     TIMEOUT = "timeout"
     TRANSPORT_ERROR = "transport_error"
     INVALID_RESPONSE = "invalid_response"
@@ -39,6 +40,8 @@ class InferenceResult:
     error: str | None
     elapsed_seconds: float
     timeout_seconds: float
+    thinking_chars: int = 0
+    final_response_chars: int = 0
 
     @property
     def observed(self) -> bool:
@@ -53,6 +56,15 @@ class InferenceResult:
             "error": self.error,
             "elapsed_seconds": round(self.elapsed_seconds, 3),
             "timeout_seconds": self.timeout_seconds,
+            # Reasoning channel and final-response channel are recorded
+            # SEPARATELY and never merged. A trace that does not reach the
+            # substrate return path is not a successful transformation, so it
+            # is observed telemetry -- not an answer.
+            "thinking_observed": self.thinking_chars > 0,
+            "thinking_chars": self.thinking_chars,
+            "final_response_observed": self.final_response_chars > 0,
+            "final_response_chars": self.final_response_chars,
+            "quality_admitted": self.observed,
             "valid_measurement": self.observed,
         }
 
@@ -111,6 +123,8 @@ class OllamaClient:
         mode = model_input.get("mode", "chat_json")
         started = time.monotonic()
 
+        think_chars = 0
+
         def done(status: RunStatus, output: str | None, error: str | None) -> InferenceResult:
             return InferenceResult(
                 status=status,
@@ -118,6 +132,8 @@ class OllamaClient:
                 error=error,
                 elapsed_seconds=time.monotonic() - started,
                 timeout_seconds=float(self.timeout),
+                thinking_chars=think_chars,
+                final_response_chars=len(output or ""),
             )
 
         try:
@@ -138,9 +154,23 @@ class OllamaClient:
             text = OllamaClient.extract_text(response, mode)
         except Exception as e:  # noqa: BLE001
             return done(RunStatus.INVALID_RESPONSE, None, f"{type(e).__name__}: {e}")
+        # Reasoning channel, captured separately and never used as the answer.
+        msg = response.get("message") or {}
+        think_chars = len(str(msg.get("thinking") or response.get("thinking") or ""))
+
         if text is None:
             return done(RunStatus.INVALID_RESPONSE, None, "no text field in response")
-        # "" is a legitimate observed answer and is preserved as such
+        if not str(text).strip() and think_chars > 0:
+            # Observed live: qwen3.5:0.8b produced 16,214 chars of thinking and a
+            # 0-char response in 121s. Scoring that as an empty answer reports
+            # "no admitted measurement" as "quality zero" -- the exact
+            # measurement-admission bug this harness exists to avoid.
+            return done(
+                RunStatus.NO_FINAL_RESPONSE,
+                None,
+                f"model produced {think_chars} chars of thinking and no final response",
+            )
+        # "" is a legitimate observed answer when nothing was reasoned either
         return done(RunStatus.COMPLETED, str(text), None)
 
     @staticmethod

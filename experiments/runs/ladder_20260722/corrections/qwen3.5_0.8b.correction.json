@@ -50,5 +50,20 @@
     },
     "partial_observed_headline": null
   },
-  "note": "The original artifact is retained unmodified as evidence of the defect. This file supersedes its headline only."
+  "note": "The original artifact is retained unmodified as evidence of the defect. This file supersedes its headline only.",
+  "supersession_2": {
+    "at_commit": "8383caf",
+    "reason": "The first correction recorded these rows as TIMEOUTS. That is true but incomplete. Plain /api/generate shows qwen3.5:0.8b writing 16,214 chars into `thinking` and returning a 0-char `response` in 121s, and OllamaClient.extract_text never reads `thinking`. So even on return there was no final response to score.",
+    "quality_score": null,
+    "run_status": "no_final_response",
+    "operational_result": "thinking-only generation exceeded the edge budget",
+    "valid_telemetry": {
+      "elapsed_s": 121.0,
+      "eval_count": 4090,
+      "thinking_chars": 16214,
+      "final_response_chars": 0
+    },
+    "interpretation": "Earlier zero-valued ladder results are superseded by NULL measurements. Latency and token use remain valid operational telemetry; quality is not measured. No capability conclusion may be drawn from these rows.",
+    "note": "Under the tested Ollama request path, with thinking not explicitly disabled, Qwen3.5 generated a substantial thinking payload but no final response content. Because the extractor and scorer operate only on final response content, the run yielded no admissible quality observation."
+  }
 }

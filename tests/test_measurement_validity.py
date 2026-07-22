@@ -177,3 +177,67 @@ def test_the_two_estimands_disagree_and_that_is_the_point():
     bg = budget_conditional_gain(ck, ctl)
     assert bg["headline"] == -0.5
     assert bg["ck_budget_failures"] == 4
+
+
+# --- reasoning channel is not the answer channel -----------------------------
+
+from conditioned_kernel.generate import OllamaClient  # noqa: E402
+
+
+class _FakeClient(OllamaClient):
+    def __init__(self, response):
+        super().__init__(timeout=5.0)
+        self._response = response
+
+    def generate(self, model_input):
+        return self._response
+
+
+def test_thinking_without_a_final_response_is_not_a_score():
+    """Observed live: qwen3.5:0.8b, 16,214 chars thinking, 0 chars response.
+
+    Scoring that as an empty answer reports 'no admitted measurement' as
+    'quality zero'.
+    """
+    c = _FakeClient({"message": {"content": "", "thinking": "x" * 16214}})
+    r = c.run({"mode": "chat_json", "payload": {}})
+    d = r.to_dict()
+    assert r.status is RunStatus.NO_FINAL_RESPONSE
+    assert r.observed is False
+    assert d["output"] is None, "no answer was observed; must be null not ''"
+    assert d["thinking_observed"] is True and d["thinking_chars"] == 16214
+    assert d["final_response_observed"] is False
+    assert d["quality_admitted"] is False
+    assert row_is_valid_measurement({"inference": d}) is False
+
+
+def test_empty_answer_with_no_thinking_is_still_a_real_observation():
+    """A model that genuinely answered with nothing legitimately scores zero."""
+    c = _FakeClient({"message": {"content": ""}})
+    r = c.run({"mode": "chat_json", "payload": {}})
+    assert r.status is RunStatus.COMPLETED
+    assert r.output == ""
+    assert r.to_dict()["quality_admitted"] is True
+
+
+def test_normal_response_records_both_channels_separately():
+    c = _FakeClient({"message": {"content": "the answer", "thinking": "some reasoning"}})
+    r = c.run({"mode": "chat_json", "payload": {}})
+    d = r.to_dict()
+    assert r.status is RunStatus.COMPLETED
+    assert d["output"] == "the answer"
+    assert d["thinking_chars"] == len("some reasoning")
+    assert d["final_response_chars"] == len("the answer")
+
+
+def test_extract_text_never_returns_the_thinking_field():
+    """Architectural rule: the reasoning channel must not become the answer.
+
+    A trace that never reaches the substrate return path is not a successful
+    transformation, so it must never be substituted for output.
+    """
+    out = OllamaClient.extract_text(
+        {"message": {"content": "", "thinking": "REASONING PAYLOAD"}}, "chat_json"
+    )
+    assert out == "", "thinking must not leak into the answer channel"
+    assert "REASONING" not in out
