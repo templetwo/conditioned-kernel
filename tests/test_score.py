@@ -147,3 +147,47 @@ def test_aggregate_distinct_answers():
     assert a["n"] == 3
     assert a["distinct_answers"] == 2
     assert a["structural_score"] == 0.5
+
+
+# --- fail closed on invalid measurements ------------------------------------
+# A timeout is not a score of zero. Zero means the model completed and earned
+# nothing; a timeout means no measurement exists. Qwen3.5 timed out on every
+# row and still produced a headline of +0.125 before these guards existed.
+
+TIMEOUT_ROW = {"condition": "bare", "error": "Ollama request failed: timed out", "scores": {}}
+ERROR_ROW = {"condition": "ck_strict", "decision": "error", "scores": {"structural_score": 0.0, "semantic_score": 0.25}}
+GOOD_ROW = {"condition": "ck_strict", "decision": "accept", "scores": {"structural_score": 1.0, "semantic_score": 1.0, "answer": "a real answer"}}
+
+
+def test_aggregate_marks_all_timeouts_invalid():
+    a = aggregate_condition([TIMEOUT_ROW, TIMEOUT_ROW])
+    assert a["valid"] is False
+    assert a["valid_n"] == 0
+    assert a["invalid_n"] == 2
+    assert "structural_score" not in a
+
+
+def test_aggregate_excludes_error_rows_from_averages():
+    a = aggregate_condition([GOOD_ROW, ERROR_ROW])
+    assert a["valid"] is True
+    assert a["n"] == 2 and a["valid_n"] == 1 and a["invalid_n"] == 1
+    # The 0.25 from the errored row must not drag the average down.
+    assert a["structural_score"] == 1.0
+    assert a["semantic_score"] == 1.0
+
+
+def test_substrate_gain_refuses_to_score_invalid_conditions():
+    dead = aggregate_condition([TIMEOUT_ROW])
+    live = aggregate_condition([GOOD_ROW])
+    for ck, ctl in ((dead, live), (live, dead)):
+        g = substrate_gain(ck, ctl)
+        assert g["valid"] is False
+        assert g["composite"] is None, "a timeout must never report as a gain"
+        assert g["failure_reason"]
+
+
+def test_substrate_gain_still_scores_when_both_valid():
+    live = aggregate_condition([GOOD_ROW])
+    g = substrate_gain(live, live)
+    assert g["valid"] is True
+    assert g["composite"] == pytest.approx(0.0)

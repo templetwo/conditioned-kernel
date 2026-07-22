@@ -83,6 +83,23 @@ Their initial aggregate scores of `0.000` are **harness timeouts, not model qual
 be read as results. `run_matrix.py` now takes `--timeout` to override the profile, and a rerun at
 900s is in progress.
 
+**The aggregator now fails closed on this.** Before the guard, the timed-out Qwen3.5 artifact
+reported `headline: +0.125` — computed from twelve rows that never observed a model output. The
+errored CK rows even scored `semantic_score: 0.25` and `goal_referenced: true` on an *empty*
+answer, because validation short-circuited before reaching the goal check and absence-of-violation
+was read as success. Replaying that same artifact through the current code returns:
+
+```json
+{"composite": null, "valid": false, "failure_reason": "ck has no valid measurements",
+ "ck_valid_n": 0, "control_valid_n": 0}
+```
+
+`aggregate_condition` now partitions rows into valid and invalid (`error` set, or
+`decision == "error"`), averages only over valid ones, and reports `valid_n` / `invalid_n` /
+`failure_reasons`. `substrate_gain` refuses to emit a composite when either side has zero valid
+measurements. A zero means the model completed and earned nothing; a timeout means the experiment
+never observed the model. Merging them destroys the estimand.
+
 The latency itself is a product finding regardless of what the rerun shows:
 
 | model class | full matrix (12 inferences) |
@@ -93,6 +110,65 @@ The latency itself is a product finding regardless of what the rerun shows:
 That is a 16x wall-clock difference. For an edge node with an interactive budget, thinking mode at
 this size is disqualifying on latency alone, whatever it does for quality. If Qwen3.5 is to be used
 here it should be evaluated in non-thinking mode.
+
+## Two thresholds, deliberately not merged
+
+External review (2026-07-22) sharpened the framing, and the distinction is worth stating plainly:
+
+1. **Functional threshold — found, ~1B.** Where the machinery becomes behaviorally live.
+2. **Advantage threshold — not found.** Where CK beats the budget-matched control.
+
+Keeping these separate is what stops this result inflating. The substrate begins operating at 1B;
+it does not yet outperform bare generation given the same information.
+
+The defensible claim is bounded to this configuration:
+
+> Under this harness, packet, acceptance rule, quantization, runtime and device, functional
+> conditioned-kernel behavior first appears between 0.5B and 1B parameters.
+
+Not "1B is the universal minimum."
+
+## Qualification on the −0.125 reproduction
+
+Both runs used the same seed, temperature, prompts and model build, and the pipeline had already
+been proven deterministic. So this is a **pipeline reproducibility receipt, not an independent
+statistical replication.** It proves the same experiment now yields the same result instead of
+drifting through ordering, parsing or aggregation. It says nothing yet about variance.
+
+The next stronger receipt is to vary the generation seed while freezing everything else. Not done.
+
+## The gap has a name
+
+```
+must_not_contradict_facts   ≠   must_be_supported_by_facts
+```
+
+The gate rejects statements that conflict with supplied evidence. It cannot reject a confident
+statement about something the packet never established. The phrase-based answer key then *rewarded*
+the fabrication because the string "minimum viable" appeared in it — the evaluator is vulnerable to
+keyword laundering, where an answer satisfies the expected concept while asserting an unsupported
+value.
+
+The fix is evidence-bound acceptance, not a bigger blacklist. A candidate factual claim should
+carry one of three statuses, with unmarked assertive claims rejected:
+
+```
+SUPPORTED   — cites packet evidence
+DERIVED     — reproducibly computed from cited evidence
+UNCERTAIN   — explicitly presented as hypothesis or unknown
+```
+
+**Open design tension, unresolved.** The natural implementation is proof-carrying output, where the
+model emits per-claim `support_ids` the validator checks against the packet. That is much harder to
+game than phrase matching. But this ladder just established that models below ~1B cannot produce
+distinct answers at all, and asking a 1B model to additionally emit correct claim-level citations
+may push the requirement *above* the linguistic threshold we are trying to operate under — which
+would move work into the model and away from the substrate, against the project thesis.
+
+The thesis-aligned alternative is substrate-side verification: mechanically extract factual and
+numeric claims from the answer and check each against the packet, keeping the bookkeeping burden on
+the substrate rather than the kernel. Which of the two survives contact with a 1B model is an
+empirical question, and should be tested rather than assumed.
 
 ## What this does not show
 

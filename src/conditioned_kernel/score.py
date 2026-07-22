@@ -243,9 +243,38 @@ def score_ck_raw_against_packet(
     return score_output(raw, packet=packet, probe=probe)
 
 
+def row_is_valid_measurement(row: dict[str, Any]) -> bool:
+    """A row counts only if the model's answer was actually observed.
+
+    A timeout is not a score of zero. Zero means the model completed and
+    earned nothing; a timeout means no measurement exists. Averaging them
+    together destroys the estimand -- Qwen3.5 timed out on every row and still
+    produced a headline of +0.125, built from rows that never saw an output.
+    """
+    if row.get("error"):
+        return False
+    if row.get("decision") == "error":
+        return False
+    return True
+
+
 def aggregate_condition(rows: list[dict[str, Any]]) -> dict[str, Any]:
     if not rows:
-        return {"n": 0}
+        return {"n": 0, "valid_n": 0, "invalid_n": 0, "valid": False}
+
+    invalid = [r for r in rows if not row_is_valid_measurement(r)]
+    rows_all, rows = rows, [r for r in rows if row_is_valid_measurement(r)]
+    if not rows:
+        reasons = sorted(
+            {str(r.get("error") or r.get("decision") or "unknown")[:80] for r in invalid}
+        )
+        return {
+            "n": len(rows_all),
+            "valid_n": 0,
+            "invalid_n": len(invalid),
+            "valid": False,
+            "failure_reasons": reasons,
+        }
     keys = (
         "structural_score",
         "semantic_score",
@@ -259,7 +288,16 @@ def aggregate_condition(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "repaired",
         "rescue",
     )
-    out: dict[str, Any] = {"n": len(rows)}
+    out: dict[str, Any] = {
+        "n": len(rows_all),
+        "valid_n": len(rows),
+        "invalid_n": len(invalid),
+        "valid": True,
+    }
+    if invalid:
+        out["failure_reasons"] = sorted(
+            {str(r.get("error") or r.get("decision") or "unknown")[:80] for r in invalid}
+        )
     for k in keys:
         vals = [r["scores"].get(k) for r in rows if "scores" in r and k in r["scores"]]
         if not vals:
@@ -275,13 +313,30 @@ def aggregate_condition(rows: list[dict[str, Any]]) -> dict[str, Any]:
     return out
 
 
-def substrate_gain(ck_agg: dict[str, Any], control_agg: dict[str, Any]) -> dict[str, float]:
-    """Delta CK − control. Prefer budget_matched as headline control."""
+def substrate_gain(ck_agg: dict[str, Any], control_agg: dict[str, Any]) -> dict[str, Any]:
+    """Delta CK − control. Prefer budget_matched as headline control.
+
+    Fails closed. If either side has no valid measurements, no composite is
+    emitted: `composite` is None and `valid` is False. A missing measurement
+    must never be reported as a gain of zero -- Qwen3.5 timed out on every row
+    and still produced +0.125 before this guard existed.
+    """
+    for name, agg in (("ck", ck_agg), ("control", control_agg)):
+        if agg.get("valid") is False or agg.get("valid_n") == 0:
+            return {
+                "composite": None,
+                "valid": False,
+                "failure_reason": f"{name} has no valid measurements",
+                "failure_detail": agg.get("failure_reasons"),
+                "ck_valid_n": ck_agg.get("valid_n"),
+                "control_valid_n": control_agg.get("valid_n"),
+            }
 
     def g(key: str) -> float:
         return float(ck_agg.get(key) or 0.0) - float(control_agg.get(key) or 0.0)
 
     return {
+        "valid": True,
         "delta_structural": g("structural_score"),
         "delta_semantic": g("semantic_score"),
         "delta_parse_ok": g("parse_ok"),
