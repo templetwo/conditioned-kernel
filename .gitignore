@@ -41,3 +41,4 @@ logs/*.jsonl
 # reached the public repo while the claim they corrected did. Exclude the
 # CONTENTS (runs/*) so re-inclusion of ladder_*/ actually works.
 !experiments/runs/ladder_*/
+!experiments/runs/continuity_*/
