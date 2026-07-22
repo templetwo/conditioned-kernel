@@ -12,18 +12,26 @@ from __future__ import annotations
 
 import argparse
 import json
+import platform
 import shutil
 import sys
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
+
+import httpx
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from conditioned_kernel.compile import CANDIDATE_FORMAT, build_arrival_packet  # noqa: E402
 from conditioned_kernel.edge import DEFAULT_PROFILE_ID, load_profile  # noqa: E402
-from conditioned_kernel.generate import OllamaClient, OllamaError  # noqa: E402
+from conditioned_kernel.generate import (  # noqa: E402
+    DEFAULT_BASE_URL,
+    OllamaClient,
+    OllamaError,
+)
 from conditioned_kernel.pipeline import run_turn  # noqa: E402
 from conditioned_kernel.score import (  # noqa: E402
     aggregate_condition,
@@ -31,6 +39,46 @@ from conditioned_kernel.score import (  # noqa: E402
     substrate_gain,
 )
 from conditioned_kernel.state import SubstrateState  # noqa: E402
+
+
+def collect_environment(model: str) -> dict[str, Any]:
+    """Record what the run actually executed on.
+
+    Two runs labelled with the same profile are NOT comparable unless the
+    device, runtime and model build match. A Mac and a Jetson produced
+    materially different results from an identical model digest under
+    identical profile/seed, with the Ollama version as an uncontrolled
+    confound. Without this block that difference is invisible in the artifact.
+    """
+    env: dict[str, Any] = {
+        "host_machine": platform.machine(),
+        "host_system": platform.system(),
+        "host_release": platform.release(),
+        "python": platform.python_version(),
+        "ollama_version": None,
+        "model_digest": None,
+        "model_bytes": None,
+        "model_quantization": None,
+    }
+    base = DEFAULT_BASE_URL.rstrip("/")
+    try:
+        with httpx.Client(timeout=10.0) as c:
+            v = c.get(f"{base}/api/version")
+            if v.status_code == 200:
+                env["ollama_version"] = v.json().get("version")
+            t = c.get(f"{base}/api/tags")
+            if t.status_code == 200:
+                for m in t.json().get("models") or []:
+                    if m.get("name") == model:
+                        env["model_digest"] = m.get("digest")
+                        env["model_bytes"] = m.get("size")
+                        env["model_quantization"] = (m.get("details") or {}).get(
+                            "quantization_level"
+                        )
+                        break
+    except Exception as e:  # environment metadata must never fail a run
+        env["probe_error"] = f"{type(e).__name__}: {e}"
+    return env
 
 
 def fair_generate(
@@ -285,6 +333,7 @@ def main() -> int:
         "fair_format": args.fair_format,
         "frozen_state": not args.mutate_live_state,
         "headline_control": "budget_matched_bare",
+        "environment": collect_environment(model),
         "audit_note": "Post M1_AUDIT.md corrections. Do not cite pre-audit +0.60.",
         "aggregates": aggregates,
         "substrate_gain": gains,
