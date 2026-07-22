@@ -1,0 +1,8 @@
+[
+  {
+    "id": "method_ck_v0_strict",
+    "name": "ck_v0_strict",
+    "description": "Compiled arrival packet, chat_json schema, one repair pass, closed-set validation.",
+    "promoted_at": "2026-07-22T00:00:00Z"
+  }
+]

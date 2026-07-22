@@ -1,0 +1,15 @@
+{
+  "goal": "Demonstrate conditioned-kernel substrate gain over bare generation on a small local model.",
+  "active_profile": "ck_v0",
+  "session_id": "sess_local_bootstrap",
+  "open_thread_count": 2,
+  "receipt_count_24h": 2,
+  "flags": {
+    "sensors": false,
+    "tools": false,
+    "cloud": false,
+    "max_repair_passes": 1
+  },
+  "updated_at": "2026-07-22T04:38:50Z",
+  "last_proposed_note": "Smoke dry-run accepted."
+}

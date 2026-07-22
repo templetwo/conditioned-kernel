@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+.env
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg
+
+# Local runtime state (keep templates, ignore live writes under data/)
+data/
+*.local.json
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Experiment outputs (keep fixtures; ignore runs)
+experiments/runs/
+logs/*.jsonl
+!logs/.gitkeep
+
+# Secrets
+*.pem
+*.key
+.env.*

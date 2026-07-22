@@ -1,0 +1,16 @@
+[
+  {
+    "id": "thread_min_model",
+    "status": "open",
+    "title": "What is the minimum viable model size on Jetson Orin Nano 8GB?",
+    "opened_at": "2026-07-22T00:00:00Z",
+    "last_touched_at": "2026-07-22T04:38:50Z"
+  },
+  {
+    "id": "thread_compile_order",
+    "status": "open",
+    "title": "Which compile ordering maximizes state-faithfulness?",
+    "opened_at": "2026-07-22T00:00:00Z",
+    "last_touched_at": "2026-07-22T04:38:50Z"
+  }
+]
