@@ -124,3 +124,23 @@ def test_failure_avoidance_includes_2gb_fabrication_task(tasks: list[dict]):
     texts = json.dumps(tasks)
     assert "2GB" in texts or "2gb" in texts.lower()
     assert "DEADEND-2GB-CLAIM" in texts or "NO-FABRICATE" in texts
+
+
+def test_progress_trace_has_accept_any_of(tasks: list[dict]):
+    """G1: dimension 7 must have concrete identifiers (scorer prefers accept_any_of)."""
+    for t in tasks:
+        pt = t["episode_b"]["progress_trace"]
+        opts = pt.get("accept_any_of") or []
+        assert opts, f"{t['id']} missing progress_trace.accept_any_of"
+        assert all(isinstance(x, str) and x.strip() for x in opts)
+
+
+def test_goal_echo_cannot_fire_progress_trace(tasks: list[dict]):
+    """G2: goal string must not contain any progress_trace accept_any_of token."""
+    for t in tasks:
+        goal = t["episode_a"]["seed_state"]["goal"].lower()
+        for tok in t["episode_b"]["progress_trace"]["accept_any_of"]:
+            assert tok.lower() not in goal, (
+                f"{t['id']}: progress token {tok!r} is embedded in goal {goal!r} "
+                "(goal-echo would credit dimension 7)"
+            )

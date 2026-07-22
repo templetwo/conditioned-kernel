@@ -170,3 +170,14 @@ Hard rules applied (from the work order):
 
 Rejections pushed the corpus toward opaque sprint/goal codes, named dead ends, and
 numeric locks that only exist in seed facts — so bare general knowledge cannot pass Episode B.
+
+### Cross-seat feedback (scorer seat → corpus, 2026-07-22)
+
+After Episode B scoring landed (`3bed7c3`), two corpus issues were handed back:
+
+| ID | Issue | Fix |
+|---|---|---|
+| **G1** | Three tasks had `progress_trace.check` prose with **no extractable identifier**, so dimension 7 could never fire. | Every task now sets `progress_trace.accept_any_of` to concrete ids (thread ids / codes). Scorer honours `accept_any_of` first. |
+| **G2** | `cont_goal_recovery_01/02/03` (and similar) embedded opaque codes **inside the goal string**, so a bare goal echo fired `progress_trace` (~0.714) without resuming threads — a rule-3 violation. | Goal prose is free of progress identifiers; codes live in **facts** only; `accept_any_of` prefers **thread ids** (and codes only when not substrings of the goal). Goal-echo now scores **0.143** with `progress_trace=false` across all 16 tasks. |
+
+Neither fix touched the frozen measurement layer (`score.py` / `return_path/` / `generate.py`).

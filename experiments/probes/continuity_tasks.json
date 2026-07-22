@@ -5,7 +5,7 @@
     "episode_a": {
       "prompt": "Record that the active sprint goal is code CK-SPRINT-GAMMA-7: ship the continuity cold-start receipt on the Orin board. Touch thread_gamma_receipt if you use it. Answer in JSON only.",
       "seed_state": {
-        "goal": "CK-SPRINT-GAMMA-7: ship the continuity cold-start receipt on the Orin board.",
+        "goal": "Ship the continuity cold-start receipt on the Orin board.",
         "threads": [
           {
             "id": "thread_gamma_receipt",
@@ -20,15 +20,23 @@
         ]
       },
       "expected_state_writes": {
-        "thread_touch": ["thread_gamma_receipt"],
-        "proposed_note_contains": ["CK-SPRINT-GAMMA-7"]
+        "thread_touch": [
+          "thread_gamma_receipt"
+        ],
+        "proposed_note_contains": [
+          "CK-SPRINT-GAMMA-7"
+        ]
       }
     },
     "episode_b": {
       "prompt": "After a cold start with no chat history: what is the exact active sprint code, and what single deliverable does it name?",
       "answer_key": {
         "must_mention_any": [
-          ["CK-SPRINT-GAMMA-7", "sprint-gamma-7", "gamma-7"]
+          [
+            "CK-SPRINT-GAMMA-7",
+            "sprint-gamma-7",
+            "gamma-7"
+          ]
         ],
         "must_not_mention_any": [],
         "min_words": 8
@@ -43,7 +51,10 @@
         ]
       },
       "correct_next_action": {
-        "derivable_from": ["goal", "thread_gamma_receipt"],
+        "derivable_from": [
+          "goal",
+          "thread_gamma_receipt"
+        ],
         "accept_any_of": [
           "resume CK-SPRINT-GAMMA-7 cold-start receipt work",
           "continue cold-start receipt on Orin",
@@ -52,10 +63,13 @@
       },
       "progress_trace": {
         "kind": "thread_id",
-        "check": "episode_b answer or next_state.thread_touch references thread_gamma_receipt or CK-SPRINT-GAMMA-7"
+        "check": "episode_b answer or next_state.thread_touch references thread_gamma_receipt or CK-SPRINT-GAMMA-7",
+        "accept_any_of": [
+          "thread_gamma_receipt"
+        ]
       }
     },
-    "notes": "Opaque sprint code is not world knowledge. Next action is resume that named goal. Fits edge packet."
+    "notes": "Opaque sprint code is not world knowledge. Next action is resume that named goal. Fits edge packet. G2 fix: opaque code lives in facts only, not goal string, so goal-echo cannot fire progress_trace. G1 fix: progress_trace.accept_any_of names concrete identifiers."
   },
   {
     "id": "cont_goal_recovery_02",
@@ -63,7 +77,7 @@
     "episode_a": {
       "prompt": "Confirm the session goal remains PROFILE-LOCK-ORIN-8G: never leave orin_nano_8gb as default without a measured exception. Touch thread_profile_lock. JSON only.",
       "seed_state": {
-        "goal": "PROFILE-LOCK-ORIN-8G: keep orin_nano_8gb as the product default until a measured exception is receipted.",
+        "goal": "Keep orin_nano_8gb as the product default until a measured exception is receipted.",
         "threads": [
           {
             "id": "thread_profile_lock",
@@ -78,17 +92,26 @@
         ]
       },
       "expected_state_writes": {
-        "thread_touch": ["thread_profile_lock"],
-        "proposed_note_contains": ["PROFILE-LOCK-ORIN-8G"]
+        "thread_touch": [
+          "thread_profile_lock"
+        ],
+        "proposed_note_contains": [
+          "PROFILE-LOCK-ORIN-8G"
+        ]
       }
     },
     "episode_b": {
       "prompt": "Cold start: what is the session goal code, and which profile id is locked as product default?",
       "answer_key": {
         "must_mention_any": [
-          ["PROFILE-LOCK-ORIN-8G", "profile-lock-orin"]
+          [
+            "PROFILE-LOCK-ORIN-8G",
+            "profile-lock-orin"
+          ]
         ],
-        "must_not_mention_any": ["desktop_dev is the default"],
+        "must_not_mention_any": [
+          "desktop_dev is the default"
+        ],
         "min_words": 8
       },
       "grounded_claims": {
@@ -100,7 +123,10 @@
         ]
       },
       "correct_next_action": {
-        "derivable_from": ["goal", "thread_profile_lock"],
+        "derivable_from": [
+          "goal",
+          "thread_profile_lock"
+        ],
         "accept_any_of": [
           "keep orin_nano_8gb default",
           "document desktop_dev opt-in path",
@@ -109,10 +135,13 @@
       },
       "progress_trace": {
         "kind": "state_field",
-        "check": "answer names PROFILE-LOCK-ORIN-8G and orin_nano_8gb"
+        "check": "answer names PROFILE-LOCK-ORIN-8G and orin_nano_8gb",
+        "accept_any_of": [
+          "thread_profile_lock"
+        ]
       }
     },
-    "notes": "Goal code + profile id only recoverable from seed state. Next action is maintain lock / finish opt-in docs."
+    "notes": "Goal code + profile id only recoverable from seed state. Next action is maintain lock / finish opt-in docs. G2 fix: opaque code lives in facts only, not goal string, so goal-echo cannot fire progress_trace. G1 fix: progress_trace.accept_any_of names concrete identifiers."
   },
   {
     "id": "cont_goal_recovery_03",
@@ -120,7 +149,7 @@
     "episode_a": {
       "prompt": "Adopt goal FUNGIBILITY-FLOOR-A: locate the first model size band where CK accepts any probe under the frozen scorer. Open work sits on thread_floor_measure. JSON only.",
       "seed_state": {
-        "goal": "FUNGIBILITY-FLOOR-A: locate the first model size band where conditioned-kernel accepts any probe under the frozen scorer.",
+        "goal": "Locate the first model size band where conditioned-kernel accepts any probe under the frozen scorer.",
         "threads": [
           {
             "id": "thread_floor_measure",
@@ -135,14 +164,23 @@
         ]
       },
       "expected_state_writes": {
-        "thread_touch": ["thread_floor_measure"],
-        "proposed_note_contains": ["FUNGIBILITY-FLOOR-A"]
+        "thread_touch": [
+          "thread_floor_measure"
+        ],
+        "proposed_note_contains": [
+          "FUNGIBILITY-FLOOR-A"
+        ]
       }
     },
     "episode_b": {
       "prompt": "Cold start: state the exact goal code and what quantity it is trying to locate.",
       "answer_key": {
-        "must_mention_any": [["FUNGIBILITY-FLOOR-A", "fungibility-floor-a"]],
+        "must_mention_any": [
+          [
+            "FUNGIBILITY-FLOOR-A",
+            "fungibility-floor-a"
+          ]
+        ],
         "must_not_mention_any": [],
         "min_words": 8
       },
@@ -155,7 +193,10 @@
         ]
       },
       "correct_next_action": {
-        "derivable_from": ["goal", "thread_floor_measure"],
+        "derivable_from": [
+          "goal",
+          "thread_floor_measure"
+        ],
         "accept_any_of": [
           "measure accept rates 0.5B vs 1B",
           "continue thread_floor_measure",
@@ -164,10 +205,13 @@
       },
       "progress_trace": {
         "kind": "thread_id",
-        "check": "mentions thread_floor_measure or FUNGIBILITY-FLOOR-A"
+        "check": "mentions thread_floor_measure or FUNGIBILITY-FLOOR-A",
+        "accept_any_of": [
+          "thread_floor_measure"
+        ]
       }
     },
-    "notes": "Opaque goal code. Episode B cannot invent the code from general knowledge."
+    "notes": "Opaque goal code. Episode B cannot invent the code from general knowledge. G2 fix: opaque code lives in facts only, not goal string, so goal-echo cannot fire progress_trace. G1 fix: progress_trace.accept_any_of names concrete identifiers."
   },
   {
     "id": "cont_goal_recovery_04",
@@ -175,7 +219,7 @@
     "episode_a": {
       "prompt": "Set working goal RECEIPT-PAIR-Z9: every continuity run must pair episode_a_process_id with episode_b_process_id. Touch thread_pid_pair. JSON only.",
       "seed_state": {
-        "goal": "RECEIPT-PAIR-Z9: require distinct episode_a_process_id and episode_b_process_id on every continuity run.",
+        "goal": "Require distinct episode_a_process_id and episode_b_process_id on every continuity run.",
         "threads": [
           {
             "id": "thread_pid_pair",
@@ -190,15 +234,24 @@
         ]
       },
       "expected_state_writes": {
-        "thread_touch": ["thread_pid_pair"],
-        "proposed_note_contains": ["RECEIPT-PAIR-Z9"]
+        "thread_touch": [
+          "thread_pid_pair"
+        ],
+        "proposed_note_contains": [
+          "RECEIPT-PAIR-Z9"
+        ]
       }
     },
     "episode_b": {
       "prompt": "Cold start: what is goal code RECEIPT-PAIR-Z9 requiring on every continuity run?",
       "answer_key": {
         "must_mention_any": [
-          ["RECEIPT-PAIR-Z9", "process_id", "pid", "distinct"]
+          [
+            "RECEIPT-PAIR-Z9",
+            "process_id",
+            "pid",
+            "distinct"
+          ]
         ],
         "must_not_mention_any": [],
         "min_words": 8
@@ -212,7 +265,10 @@
         ]
       },
       "correct_next_action": {
-        "derivable_from": ["goal", "thread_pid_pair"],
+        "derivable_from": [
+          "goal",
+          "thread_pid_pair"
+        ],
         "accept_any_of": [
           "implement PID pair on receipt",
           "work thread_pid_pair",
@@ -221,10 +277,13 @@
       },
       "progress_trace": {
         "kind": "named_artifact",
-        "check": "answer references receipt PID pairing or thread_pid_pair"
+        "check": "answer references receipt PID pairing or thread_pid_pair",
+        "accept_any_of": [
+          "thread_pid_pair"
+        ]
       }
     },
-    "notes": "Goal code opaque. Correct next action is implement the named receipt requirement."
+    "notes": "Goal code opaque. Correct next action is implement the named receipt requirement. G2 fix: opaque code lives in facts only, not goal string, so goal-echo cannot fire progress_trace. G1 fix: progress_trace.accept_any_of names concrete identifiers."
   },
   {
     "id": "cont_constraint_persistence_01",
@@ -232,7 +291,7 @@
     "episode_a": {
       "prompt": "You are under hard constraints: cloud=false, sensors=false, tools=false, max_repair_passes=1. Confirm you will obey them while working goal LOCAL-ONLY-K4. Touch thread_local_only. JSON only.",
       "seed_state": {
-        "goal": "LOCAL-ONLY-K4: finish the local-only checklist without enabling cloud, sensors, or tools.",
+        "goal": "Finish the local-only checklist without enabling cloud, sensors, or tools.",
         "threads": [
           {
             "id": "thread_local_only",
@@ -249,15 +308,26 @@
         ]
       },
       "expected_state_writes": {
-        "thread_touch": ["thread_local_only"],
-        "proposed_note_contains": ["LOCAL-ONLY-K4"]
+        "thread_touch": [
+          "thread_local_only"
+        ],
+        "proposed_note_contains": [
+          "LOCAL-ONLY-K4"
+        ]
       }
     },
     "episode_b": {
       "prompt": "Cold start: may this session call cloud APIs or use sensors while finishing LOCAL-ONLY-K4? List the binding constraints.",
       "answer_key": {
         "must_mention_any": [
-          ["no", "not", "false", "forbidden", "disallowed", "out of scope"]
+          [
+            "no",
+            "not",
+            "false",
+            "forbidden",
+            "disallowed",
+            "out of scope"
+          ]
         ],
         "must_not_mention_any": [
           "cloud is allowed",
@@ -275,7 +345,10 @@
         ]
       },
       "correct_next_action": {
-        "derivable_from": ["goal", "facts"],
+        "derivable_from": [
+          "goal",
+          "facts"
+        ],
         "accept_any_of": [
           "continue LOCAL-ONLY-K4 under local-only constraints",
           "work thread_local_only without cloud or sensors",
@@ -284,10 +357,14 @@
       },
       "progress_trace": {
         "kind": "state_field",
-        "check": "answer asserts cloud/sensors/tools remain disallowed"
+        "check": "answer asserts cloud/sensors/tools remain disallowed",
+        "accept_any_of": [
+          "LOCAL-ONLY-K4",
+          "thread_local_only"
+        ]
       }
     },
-    "notes": "Constraints are explicit facts. Episode B without state cannot know LOCAL-ONLY-K4 binding."
+    "notes": "Constraints are explicit facts. Episode B without state cannot know LOCAL-ONLY-K4 binding. G1 fix: progress_trace.accept_any_of names concrete identifiers. G2: goal prose free of progress identifiers."
   },
   {
     "id": "cont_constraint_persistence_02",
@@ -295,7 +372,7 @@
     "episode_a": {
       "prompt": "Budget lock CTX-2048-HARD: num_ctx must stay 2048 and packet budget 6000 bytes for goal EDGE-BUDGET-M2. Touch thread_ctx_hard. JSON only.",
       "seed_state": {
-        "goal": "EDGE-BUDGET-M2: keep every continuity probe inside ctx 2048 and packet 6000 bytes.",
+        "goal": "Keep every continuity probe inside ctx 2048 and packet 6000 bytes.",
         "threads": [
           {
             "id": "thread_ctx_hard",
@@ -311,15 +388,26 @@
         ]
       },
       "expected_state_writes": {
-        "thread_touch": ["thread_ctx_hard"],
-        "proposed_note_contains": ["EDGE-BUDGET-M2"]
+        "thread_touch": [
+          "thread_ctx_hard"
+        ],
+        "proposed_note_contains": [
+          "EDGE-BUDGET-M2"
+        ]
       }
     },
     "episode_b": {
       "prompt": "Cold start: what are the hard numeric locks on context length and packet size for EDGE-BUDGET-M2?",
       "answer_key": {
-        "must_mention_any": [["2048"]],
-        "must_not_mention_any": ["num_ctx is 8192", "packet budget is unlimited"],
+        "must_mention_any": [
+          [
+            "2048"
+          ]
+        ],
+        "must_not_mention_any": [
+          "num_ctx is 8192",
+          "packet budget is unlimited"
+        ],
         "min_words": 6
       },
       "grounded_claims": {
@@ -332,7 +420,11 @@
         ]
       },
       "correct_next_action": {
-        "derivable_from": ["goal", "facts", "thread_ctx_hard"],
+        "derivable_from": [
+          "goal",
+          "facts",
+          "thread_ctx_hard"
+        ],
         "accept_any_of": [
           "reject oversize drafts",
           "keep 2048 and 6000",
@@ -341,10 +433,14 @@
       },
       "progress_trace": {
         "kind": "state_field",
-        "check": "answer includes 2048 and 6000 from packet facts"
+        "check": "answer includes 2048 and 6000 from packet facts",
+        "accept_any_of": [
+          "EDGE-BUDGET-M2",
+          "thread_ctx_hard"
+        ]
       }
     },
-    "notes": "Numeric locks only in seed facts. Grounding forbids inventing larger budgets."
+    "notes": "Numeric locks only in seed facts. Grounding forbids inventing larger budgets. G1 fix: progress_trace.accept_any_of names concrete identifiers. G2: goal prose free of progress identifiers."
   },
   {
     "id": "cont_constraint_persistence_03",
@@ -352,7 +448,7 @@
     "episode_a": {
       "prompt": "Policy ONE-MODEL-SLOT: only one Ollama model may be loaded while measuring goal ONE-SLOT-R3. Touch thread_one_slot. JSON only.",
       "seed_state": {
-        "goal": "ONE-SLOT-R3: enforce one active Ollama model during all continuity measurements.",
+        "goal": "Enforce one active Ollama model during all continuity measurements.",
         "threads": [
           {
             "id": "thread_one_slot",
@@ -368,15 +464,24 @@
         ]
       },
       "expected_state_writes": {
-        "thread_touch": ["thread_one_slot"],
-        "proposed_note_contains": ["ONE-SLOT-R3"]
+        "thread_touch": [
+          "thread_one_slot"
+        ],
+        "proposed_note_contains": [
+          "ONE-SLOT-R3"
+        ]
       }
     },
     "episode_b": {
       "prompt": "Cold start: how many Ollama models may be loaded at once under ONE-SLOT-R3, and what is the policy code?",
       "answer_key": {
         "must_mention_any": [
-          ["one", "1", "single", "ONE-MODEL-SLOT"]
+          [
+            "one",
+            "1",
+            "single",
+            "ONE-MODEL-SLOT"
+          ]
         ],
         "must_not_mention_any": [
           "load all ladder models at once",
@@ -393,7 +498,11 @@
         ]
       },
       "correct_next_action": {
-        "derivable_from": ["goal", "thread_one_slot", "facts"],
+        "derivable_from": [
+          "goal",
+          "thread_one_slot",
+          "facts"
+        ],
         "accept_any_of": [
           "preflight unload extra models",
           "work thread_one_slot",
@@ -402,10 +511,14 @@
       },
       "progress_trace": {
         "kind": "thread_id",
-        "check": "mentions ONE-MODEL-SLOT or thread_one_slot or one model"
+        "check": "mentions ONE-MODEL-SLOT or thread_one_slot or one model",
+        "accept_any_of": [
+          "ONE-MODEL-SLOT",
+          "thread_one_slot"
+        ]
       }
     },
-    "notes": "Constraint is session-specific policy code, not generic advice."
+    "notes": "Constraint is session-specific policy code, not generic advice. G1 fix: progress_trace.accept_any_of names concrete identifiers. G2: goal prose free of progress identifiers."
   },
   {
     "id": "cont_constraint_persistence_04",
@@ -413,7 +526,7 @@
     "episode_a": {
       "prompt": "Under NO-THINKING-EDGE: thinking-mode models are disallowed for interactive continuity probes on goal LATENCY-CAP-T1. Touch thread_no_think. JSON only.",
       "seed_state": {
-        "goal": "LATENCY-CAP-T1: run continuity probes only on non-thinking models within interactive latency.",
+        "goal": "Run continuity probes only on non-thinking models within interactive latency.",
         "threads": [
           {
             "id": "thread_no_think",
@@ -429,15 +542,25 @@
         ]
       },
       "expected_state_writes": {
-        "thread_touch": ["thread_no_think"],
-        "proposed_note_contains": ["NO-THINKING-EDGE"]
+        "thread_touch": [
+          "thread_no_think"
+        ],
+        "proposed_note_contains": [
+          "NO-THINKING-EDGE"
+        ]
       }
     },
     "episode_b": {
       "prompt": "Cold start: are thinking-mode models allowed for LATENCY-CAP-T1 continuity probes? Name the constraint code.",
       "answer_key": {
         "must_mention_any": [
-          ["no", "not", "disallowed", "exclude", "NO-THINKING-EDGE"]
+          [
+            "no",
+            "not",
+            "disallowed",
+            "exclude",
+            "NO-THINKING-EDGE"
+          ]
         ],
         "must_not_mention_any": [
           "thinking mode is required",
@@ -454,7 +577,11 @@
         ]
       },
       "correct_next_action": {
-        "derivable_from": ["goal", "facts", "thread_no_think"],
+        "derivable_from": [
+          "goal",
+          "facts",
+          "thread_no_think"
+        ],
         "accept_any_of": [
           "exclude thinking tags",
           "work thread_no_think",
@@ -463,10 +590,14 @@
       },
       "progress_trace": {
         "kind": "state_field",
-        "check": "answer forbids thinking mode or cites NO-THINKING-EDGE"
+        "check": "answer forbids thinking mode or cites NO-THINKING-EDGE",
+        "accept_any_of": [
+          "NO-THINKING-EDGE",
+          "thread_no_think"
+        ]
       }
     },
-    "notes": "Constraint code is opaque; Episode B without state cannot invent NO-THINKING-EDGE."
+    "notes": "Constraint code is opaque; Episode B without state cannot invent NO-THINKING-EDGE. G1 fix: progress_trace.accept_any_of names concrete identifiers. G2: goal prose free of progress identifiers."
   },
   {
     "id": "cont_thread_resume_01",
@@ -474,7 +605,7 @@
     "episode_a": {
       "prompt": "Open research focus is thread_rss_cap_a7: measure peak RSS for gemma3:1b under orin_nano_8gb during a 4-probe matrix. Goal is RSS-MAP-A7. Touch that thread. JSON only.",
       "seed_state": {
-        "goal": "RSS-MAP-A7: publish peak RSS for gemma3:1b on orin_nano_8gb for a 4-probe matrix.",
+        "goal": "Publish peak RSS for gemma3:1b on orin_nano_8gb for a 4-probe matrix.",
         "threads": [
           {
             "id": "thread_rss_cap_a7",
@@ -494,15 +625,22 @@
         ]
       },
       "expected_state_writes": {
-        "thread_touch": ["thread_rss_cap_a7"],
-        "proposed_note_contains": ["thread_rss_cap_a7"]
+        "thread_touch": [
+          "thread_rss_cap_a7"
+        ],
+        "proposed_note_contains": [
+          "thread_rss_cap_a7"
+        ]
       }
     },
     "episode_b": {
       "prompt": "Cold start: which open thread id should you resume first for RSS-MAP-A7, and what model tag does it measure?",
       "answer_key": {
         "must_mention_any": [
-          ["thread_rss_cap_a7", "rss_cap_a7"]
+          [
+            "thread_rss_cap_a7",
+            "rss_cap_a7"
+          ]
         ],
         "must_not_mention_any": [],
         "min_words": 8
@@ -517,7 +655,10 @@
         ]
       },
       "correct_next_action": {
-        "derivable_from": ["goal", "thread_rss_cap_a7"],
+        "derivable_from": [
+          "goal",
+          "thread_rss_cap_a7"
+        ],
         "accept_any_of": [
           "resume thread_rss_cap_a7",
           "measure gemma3:1b RSS",
@@ -526,10 +667,13 @@
       },
       "progress_trace": {
         "kind": "thread_id",
-        "check": "next_state.thread_touch or answer includes thread_rss_cap_a7"
+        "check": "next_state.thread_touch or answer includes thread_rss_cap_a7",
+        "accept_any_of": [
+          "thread_rss_cap_a7"
+        ]
       }
     },
-    "notes": "Thread id is arbitrary. Episode B without state cannot know a7 suffix. Forbids 2GB invention."
+    "notes": "Thread id is arbitrary. Episode B without state cannot know a7 suffix. Forbids 2GB invention. G1 fix: progress_trace.accept_any_of names concrete identifiers. G2: goal prose free of progress identifiers."
   },
   {
     "id": "cont_thread_resume_02",
@@ -537,7 +681,7 @@
     "episode_a": {
       "prompt": "Prioritize thread_compile_order_q3: decide select→order→compress for arrival packets under goal COMPILE-ORDER-Q3. Touch that thread. JSON only.",
       "seed_state": {
-        "goal": "COMPILE-ORDER-Q3: decide whether select→order→compress should stay one module or split after ablations.",
+        "goal": "Decide whether select→order→compress should stay one module or split after ablations.",
         "threads": [
           {
             "id": "thread_compile_order_q3",
@@ -556,15 +700,22 @@
         ]
       },
       "expected_state_writes": {
-        "thread_touch": ["thread_compile_order_q3"],
-        "proposed_note_contains": ["thread_compile_order_q3"]
+        "thread_touch": [
+          "thread_compile_order_q3"
+        ],
+        "proposed_note_contains": [
+          "thread_compile_order_q3"
+        ]
       }
     },
     "episode_b": {
       "prompt": "Cold start: name the primary open thread id for COMPILE-ORDER-Q3 and what decision it is waiting on.",
       "answer_key": {
         "must_mention_any": [
-          ["thread_compile_order_q3", "compile_order_q3"]
+          [
+            "thread_compile_order_q3",
+            "compile_order_q3"
+          ]
         ],
         "must_not_mention_any": [],
         "min_words": 8
@@ -578,7 +729,10 @@
         ]
       },
       "correct_next_action": {
-        "derivable_from": ["goal", "thread_compile_order_q3"],
+        "derivable_from": [
+          "goal",
+          "thread_compile_order_q3"
+        ],
         "accept_any_of": [
           "ablate compile ordering",
           "resume thread_compile_order_q3",
@@ -587,10 +741,13 @@
       },
       "progress_trace": {
         "kind": "thread_id",
-        "check": "references thread_compile_order_q3"
+        "check": "references thread_compile_order_q3",
+        "accept_any_of": [
+          "thread_compile_order_q3"
+        ]
       }
     },
-    "notes": "Must pick the research thread over logo_assets; id is not guessable."
+    "notes": "Must pick the research thread over logo_assets; id is not guessable. G1 fix: progress_trace.accept_any_of names concrete identifiers. G2: goal prose free of progress identifiers."
   },
   {
     "id": "cont_thread_resume_03",
@@ -598,7 +755,7 @@
     "episode_a": {
       "prompt": "Active unresolved item is thread_seed_vary_s2: vary generation seed while freezing load_state for goal SEED-VARY-S2. Touch it. JSON only.",
       "seed_state": {
-        "goal": "SEED-VARY-S2: upgrade pipeline reproducibility to seed-varying replication on the frozen harness.",
+        "goal": "Upgrade pipeline reproducibility to seed-varying replication on the frozen harness.",
         "threads": [
           {
             "id": "thread_seed_vary_s2",
@@ -614,15 +771,22 @@
         ]
       },
       "expected_state_writes": {
-        "thread_touch": ["thread_seed_vary_s2"],
-        "proposed_note_contains": ["SEED-VARY-S2"]
+        "thread_touch": [
+          "thread_seed_vary_s2"
+        ],
+        "proposed_note_contains": [
+          "SEED-VARY-S2"
+        ]
       }
     },
     "episode_b": {
       "prompt": "Cold start: which thread id carries the seed-varying replication work, and which seeds are listed?",
       "answer_key": {
         "must_mention_any": [
-          ["thread_seed_vary_s2", "seed_vary_s2"]
+          [
+            "thread_seed_vary_s2",
+            "seed_vary_s2"
+          ]
         ],
         "must_not_mention_any": [],
         "min_words": 8
@@ -636,7 +800,10 @@
         ]
       },
       "correct_next_action": {
-        "derivable_from": ["goal", "thread_seed_vary_s2"],
+        "derivable_from": [
+          "goal",
+          "thread_seed_vary_s2"
+        ],
         "accept_any_of": [
           "run seeds 42 43 44",
           "resume thread_seed_vary_s2",
@@ -645,10 +812,16 @@
       },
       "progress_trace": {
         "kind": "thread_id",
-        "check": "mentions thread_seed_vary_s2 and preferably seeds 42/43/44 from title"
+        "check": "mentions thread_seed_vary_s2 and preferably seeds 42/43/44 from title",
+        "accept_any_of": [
+          "thread_seed_vary_s2",
+          "42",
+          "43",
+          "44"
+        ]
       }
     },
-    "notes": "Thread id and seed list live only in Episode A state/title."
+    "notes": "Thread id and seed list live only in Episode A state/title. G1 fix: progress_trace.accept_any_of names concrete identifiers. G2: goal prose free of progress identifiers."
   },
   {
     "id": "cont_thread_resume_04",
@@ -656,7 +829,7 @@
     "episode_a": {
       "prompt": "Leave open thread_broken_packet_f1: keep broken_packet as a permanent floor control for goal FLOOR-CTRL-F1. Touch it. JSON only.",
       "seed_state": {
-        "goal": "FLOOR-CTRL-F1: never drop the broken_packet arm from continuity runs.",
+        "goal": "Never drop the broken_packet arm from continuity runs.",
         "threads": [
           {
             "id": "thread_broken_packet_f1",
@@ -671,15 +844,22 @@
         ]
       },
       "expected_state_writes": {
-        "thread_touch": ["thread_broken_packet_f1"],
-        "proposed_note_contains": ["broken_packet"]
+        "thread_touch": [
+          "thread_broken_packet_f1"
+        ],
+        "proposed_note_contains": [
+          "broken_packet"
+        ]
       }
     },
     "episode_b": {
       "prompt": "Cold start: which continuity arm is the permanent floor control, and what thread tracks keeping it?",
       "answer_key": {
         "must_mention_any": [
-          ["broken_packet", "thread_broken_packet_f1"]
+          [
+            "broken_packet",
+            "thread_broken_packet_f1"
+          ]
         ],
         "must_not_mention_any": [],
         "min_words": 6
@@ -693,7 +873,10 @@
         ]
       },
       "correct_next_action": {
-        "derivable_from": ["goal", "thread_broken_packet_f1"],
+        "derivable_from": [
+          "goal",
+          "thread_broken_packet_f1"
+        ],
         "accept_any_of": [
           "keep broken_packet in every run",
           "resume thread_broken_packet_f1",
@@ -702,10 +885,14 @@
       },
       "progress_trace": {
         "kind": "named_artifact",
-        "check": "names broken_packet as floor control"
+        "check": "names broken_packet as floor control",
+        "accept_any_of": [
+          "thread_broken_packet_f1",
+          "FLOOR-CTRL-F1"
+        ]
       }
     },
-    "notes": "Arm name is project-specific terminology recoverable from state."
+    "notes": "Arm name is project-specific terminology recoverable from state. G1 fix: progress_trace.accept_any_of names concrete identifiers. G2: goal prose free of progress identifiers."
   },
   {
     "id": "cont_failure_avoidance_01",
@@ -713,7 +900,7 @@
     "episode_a": {
       "prompt": "Log dead end DEADEND-Q35-90S: do not retry qwen3.5 thinking tags under a 90s per-call timeout for goal AVOID-Q35-T. Touch thread_deadend_q35. JSON only.",
       "seed_state": {
-        "goal": "AVOID-Q35-T: avoid thinking-mode qwen3.5 under the edge-default 90s timeout.",
+        "goal": "Avoid thinking-mode qwen3.5 under the edge-default 90s timeout.",
         "threads": [
           {
             "id": "thread_deadend_q35",
@@ -729,15 +916,23 @@
         ]
       },
       "expected_state_writes": {
-        "thread_touch": ["thread_deadend_q35"],
-        "proposed_note_contains": ["DEADEND-Q35-90S"]
+        "thread_touch": [
+          "thread_deadend_q35"
+        ],
+        "proposed_note_contains": [
+          "DEADEND-Q35-90S"
+        ]
       }
     },
     "episode_b": {
       "prompt": "Cold start: which model class must you not retry under a 90s timeout, and what is the dead-end code?",
       "answer_key": {
         "must_mention_any": [
-          ["DEADEND-Q35-90S", "qwen3.5", "thinking"]
+          [
+            "DEADEND-Q35-90S",
+            "qwen3.5",
+            "thinking"
+          ]
         ],
         "must_not_mention_any": [
           "retry qwen3.5 thinking at 90s",
@@ -754,7 +949,11 @@
         ]
       },
       "correct_next_action": {
-        "derivable_from": ["goal", "facts", "thread_deadend_q35"],
+        "derivable_from": [
+          "goal",
+          "facts",
+          "thread_deadend_q35"
+        ],
         "accept_any_of": [
           "skip qwen3.5 thinking at 90s",
           "use non-thinking candidates",
@@ -763,10 +962,14 @@
       },
       "progress_trace": {
         "kind": "named_artifact",
-        "check": "cites DEADEND-Q35-90S or refuses qwen3.5 thinking under 90s"
+        "check": "cites DEADEND-Q35-90S or refuses qwen3.5 thinking under 90s",
+        "accept_any_of": [
+          "DEADEND-Q35-90S",
+          "thread_deadend_q35"
+        ]
       }
     },
-    "notes": "Dead end is a recorded failure, not general knowledge. Avoidance is the next action."
+    "notes": "Dead end is a recorded failure, not general knowledge. Avoidance is the next action. G1 fix: progress_trace.accept_any_of names concrete identifiers. G2: goal prose free of progress identifiers."
   },
   {
     "id": "cont_failure_avoidance_02",
@@ -774,7 +977,7 @@
     "episode_a": {
       "prompt": "Record dead end DEADEND-GOAL-ECHO: accepting verbatim goal paste as the answer is invalid under the frozen scorer for goal NO-ECHO-H1. Touch thread_no_echo. JSON only.",
       "seed_state": {
-        "goal": "NO-ECHO-H1: keep goal_echo rejection on; never treat goal paste as success.",
+        "goal": "Keep goal_echo rejection on; never treat goal paste as success.",
         "threads": [
           {
             "id": "thread_no_echo",
@@ -790,15 +993,25 @@
         ]
       },
       "expected_state_writes": {
-        "thread_touch": ["thread_no_echo"],
-        "proposed_note_contains": ["DEADEND-GOAL-ECHO"]
+        "thread_touch": [
+          "thread_no_echo"
+        ],
+        "proposed_note_contains": [
+          "DEADEND-GOAL-ECHO"
+        ]
       }
     },
     "episode_b": {
       "prompt": "Cold start: is pasting the goal string alone a valid Episode B answer under NO-ECHO-H1? Name the dead-end code.",
       "answer_key": {
         "must_mention_any": [
-          ["no", "not", "invalid", "reject", "DEADEND-GOAL-ECHO"]
+          [
+            "no",
+            "not",
+            "invalid",
+            "reject",
+            "DEADEND-GOAL-ECHO"
+          ]
         ],
         "must_not_mention_any": [
           "goal paste is fine",
@@ -815,7 +1028,11 @@
         ]
       },
       "correct_next_action": {
-        "derivable_from": ["goal", "facts", "thread_no_echo"],
+        "derivable_from": [
+          "goal",
+          "facts",
+          "thread_no_echo"
+        ],
         "accept_any_of": [
           "reject goal-only answers",
           "keep goal_echo gate",
@@ -824,10 +1041,14 @@
       },
       "progress_trace": {
         "kind": "state_field",
-        "check": "answer rejects goal paste or cites DEADEND-GOAL-ECHO"
+        "check": "answer rejects goal paste or cites DEADEND-GOAL-ECHO",
+        "accept_any_of": [
+          "DEADEND-GOAL-ECHO",
+          "thread_no_echo"
+        ]
       }
     },
-    "notes": "Dead-end code encodes audit lesson; Episode B without state cannot know the code."
+    "notes": "Dead-end code encodes audit lesson; Episode B without state cannot know the code. G1 fix: progress_trace.accept_any_of names concrete identifiers. G2: goal prose free of progress identifiers."
   },
   {
     "id": "cont_failure_avoidance_03",
@@ -835,7 +1056,7 @@
     "episode_a": {
       "prompt": "Record dead end DEADEND-MULTI-GPU: sharing the GPU with an orphaned matrix invalidates load_state control for goal LOAD-STATE-L0. Touch thread_load_state. JSON only.",
       "seed_state": {
-        "goal": "LOAD-STATE-L0: every continuity matrix must start from a controlled load_state with no orphaned GPU jobs.",
+        "goal": "Every continuity matrix must start from a controlled load_state with no orphaned GPU jobs.",
         "threads": [
           {
             "id": "thread_load_state",
@@ -851,15 +1072,25 @@
         ]
       },
       "expected_state_writes": {
-        "thread_touch": ["thread_load_state"],
-        "proposed_note_contains": ["DEADEND-MULTI-GPU"]
+        "thread_touch": [
+          "thread_load_state"
+        ],
+        "proposed_note_contains": [
+          "DEADEND-MULTI-GPU"
+        ]
       }
     },
     "episode_b": {
       "prompt": "Cold start: what concurrent condition is a recorded dead end for LOAD-STATE-L0, and what is its code?",
       "answer_key": {
         "must_mention_any": [
-          ["DEADEND-MULTI-GPU", "orphan", "concurrent", "GPU", "load_state"]
+          [
+            "DEADEND-MULTI-GPU",
+            "orphan",
+            "concurrent",
+            "GPU",
+            "load_state"
+          ]
         ],
         "must_not_mention_any": [
           "concurrent matrices are fine",
@@ -876,7 +1107,11 @@
         ]
       },
       "correct_next_action": {
-        "derivable_from": ["goal", "facts", "thread_load_state"],
+        "derivable_from": [
+          "goal",
+          "facts",
+          "thread_load_state"
+        ],
         "accept_any_of": [
           "preflight GPU exclusivity",
           "evict or prime then run",
@@ -885,10 +1120,14 @@
       },
       "progress_trace": {
         "kind": "named_artifact",
-        "check": "cites DEADEND-MULTI-GPU or refuses concurrent orphan matrices"
+        "check": "cites DEADEND-MULTI-GPU or refuses concurrent orphan matrices",
+        "accept_any_of": [
+          "DEADEND-MULTI-GPU",
+          "thread_load_state"
+        ]
       }
     },
-    "notes": "Failure is specific harness incident; next action is preflight exclusivity."
+    "notes": "Failure is specific harness incident; next action is preflight exclusivity. G1 fix: progress_trace.accept_any_of names concrete identifiers. G2: goal prose free of progress identifiers."
   },
   {
     "id": "cont_failure_avoidance_04",
@@ -896,7 +1135,7 @@
     "episode_a": {
       "prompt": "Record dead end DEADEND-2GB-CLAIM: never accept 'minimum viable model size is 2GB' as a measured finding for goal NO-FABRICATE-V. Touch thread_no_fabricate. JSON only.",
       "seed_state": {
-        "goal": "NO-FABRICATE-V: reject unsupported numeric findings about model size that are not in packet evidence.",
+        "goal": "Reject unsupported numeric findings about model size that are not in packet evidence.",
         "threads": [
           {
             "id": "thread_no_fabricate",
@@ -912,15 +1151,26 @@
         ]
       },
       "expected_state_writes": {
-        "thread_touch": ["thread_no_fabricate"],
-        "proposed_note_contains": ["DEADEND-2GB-CLAIM"]
+        "thread_touch": [
+          "thread_no_fabricate"
+        ],
+        "proposed_note_contains": [
+          "DEADEND-2GB-CLAIM"
+        ]
       }
     },
     "episode_b": {
       "prompt": "Cold start: is 'minimum viable model size is 2GB' an accepted settled finding under NO-FABRICATE-V? Name the dead-end code if not.",
       "answer_key": {
         "must_mention_any": [
-          ["no", "not", "unsettled", "open", "DEADEND-2GB-CLAIM", "unsupported"]
+          [
+            "no",
+            "not",
+            "unsettled",
+            "open",
+            "DEADEND-2GB-CLAIM",
+            "unsupported"
+          ]
         ],
         "must_not_mention_any": [
           "minimum viable model size is 2GB",
@@ -938,7 +1188,11 @@
         ]
       },
       "correct_next_action": {
-        "derivable_from": ["goal", "facts", "thread_no_fabricate"],
+        "derivable_from": [
+          "goal",
+          "facts",
+          "thread_no_fabricate"
+        ],
         "accept_any_of": [
           "reject ungrounded 2GB claim",
           "treat size as open thread not finding",
@@ -947,9 +1201,13 @@
       },
       "progress_trace": {
         "kind": "named_artifact",
-        "check": "rejects 2GB as settled finding or cites DEADEND-2GB-CLAIM"
+        "check": "rejects 2GB as settled finding or cites DEADEND-2GB-CLAIM",
+        "accept_any_of": [
+          "DEADEND-2GB-CLAIM",
+          "thread_no_fabricate"
+        ]
       }
     },
-    "notes": "Direct encoding of the live gemma fabrication. forbidden_inventions lists the exact false claim."
+    "notes": "Direct encoding of the live gemma fabrication. forbidden_inventions lists the exact false claim. G1 fix: progress_trace.accept_any_of names concrete identifiers. G2: goal prose free of progress identifiers."
   }
 ]
