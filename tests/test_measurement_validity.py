@@ -100,3 +100,80 @@ def test_one_sided_timeout_also_invalidates():
     assert g["status"] == "incomplete"
     assert g["headline"] is None
     assert "ck:timeout" in g["invalid_reasons"]
+
+
+# --- missingness is not just a percentage -----------------------------------
+# Coverage alone cannot separate random dropout from systematic one-sided
+# failure. CK carries larger packets, so under a fixed wall clock it plausibly
+# times out MORE than the control -- which biases surviving pairs in a
+# direction that cannot be signed in advance.
+
+from conditioned_kernel.score import (  # noqa: E402
+    budget_conditional_gain,
+    dropout_symmetry,
+    missingness_bounds,
+)
+
+
+def test_missingness_bounds_widen_with_missing_data():
+    # 4 expected, 3 observed at 0.0 -> the 4th is confined to [-1, 1]
+    lo, hi = missingness_bounds([0.0, 0.0, 0.0], 4)
+    assert lo == -0.25 and hi == 0.25
+    # complete coverage collapses the interval onto the point estimate
+    lo, hi = missingness_bounds([0.0, 0.0, 0.0, 0.0], 4)
+    assert lo == hi == 0.0
+    # nothing observed => the full range, i.e. we know nothing
+    lo, hi = missingness_bounds([], 4)
+    assert lo == -1.0 and hi == 1.0
+
+
+def test_missingness_bounds_shrink_as_n_grows():
+    """One dropout at n=4 is crippling; at n=30 it is bounded and visible."""
+    _, hi_small = missingness_bounds([0.0] * 3, 4)
+    _, hi_large = missingness_bounds([0.0] * 29, 30)
+    assert hi_small > hi_large
+
+
+def test_dropout_symmetry_flags_one_sided_failure():
+    one_sided = dropout_symmetry({"ck:timeout": 5})
+    assert one_sided["one_sided"] is True
+    assert one_sided["symmetric"] is False
+    assert one_sided["imbalance"] == 5
+
+    balanced = dropout_symmetry({"ck:timeout": 3, "control:timeout": 3})
+    assert balanced["symmetric"] is True
+    assert balanced["one_sided"] is False
+    assert balanced["imbalance"] == 0
+
+
+def test_two_sided_failure_is_not_reported_as_one_sided():
+    """Regression: paired_gain short-circuited on ck and hid control failures."""
+    ck = [_row("p1", RunStatus.TIMEOUT)]
+    ctl = [_row("p1", RunStatus.TIMEOUT)]
+    sym = paired_gain(ck, ctl)["dropout_symmetry"]
+    assert sym["ck_dropouts"] == 1
+    assert sym["control_dropouts"] == 1, "both sides must be counted"
+    assert sym["symmetric"] is True
+
+
+def test_budget_conditional_scores_timeout_as_failure_not_missing():
+    """Under the edge budget, exceeding it is a definitive result."""
+    ck = [_row("p1", RunStatus.TIMEOUT), _row("p2", RunStatus.COMPLETED, 1.0, 1.0, output="x")]
+    ctl = [_row("p1", RunStatus.COMPLETED, 0.5, 0.5, output="y"),
+           _row("p2", RunStatus.COMPLETED, 0.5, 0.5, output="y")]
+    g = budget_conditional_gain(ck, ctl)
+    assert g["status"] == "complete", "complete by construction, no missingness"
+    assert g["n_probes"] == 2
+    assert g["ck_budget_failures"] == 1
+    # p1: 0.0 - 0.5 = -0.5 ; p2: 1.0 - 0.5 = +0.5 -> mean 0.0
+    assert g["headline"] == 0.0
+
+
+def test_the_two_estimands_disagree_and_that_is_the_point():
+    """Quality-conditional says 'no data'; budget-conditional says 'does not fit'."""
+    ck = [_row(f"p{i}", RunStatus.TIMEOUT) for i in range(4)]
+    ctl = [_row(f"p{i}", RunStatus.COMPLETED, 0.5, 0.5, output="y") for i in range(4)]
+    assert paired_gain(ck, ctl)["headline"] is None
+    bg = budget_conditional_gain(ck, ctl)
+    assert bg["headline"] == -0.5
+    assert bg["ck_budget_failures"] == 4

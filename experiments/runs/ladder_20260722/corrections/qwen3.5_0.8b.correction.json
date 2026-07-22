@@ -1,0 +1,54 @@
+{
+  "correction_of": "experiments/runs/ladder_20260722/qwen3.5_0.8b.json",
+  "source_commit": "880f83a",
+  "original_artifact_sha256": "497b9c54f4c9c0c36143f91cdf16a5f917d71e09fcd4c619a6f9da82f2d60380",
+  "harness_fix_commits": [
+    "fc894d0",
+    "d7f7c52"
+  ],
+  "correction_reason": "Every row timed out; no model output was ever observed. The original artifact admitted these as measurements and emitted a numeric headline computed from rows that saw nothing. A timeout has no score.",
+  "original_headline_invalid": 0.125,
+  "corrected_headline": null,
+  "timeout_rows": 12,
+  "total_rows": 12,
+  "recomputed_aggregates_validity": {
+    "bare": {
+      "valid": false,
+      "valid_n": 0,
+      "invalid_n": 4
+    },
+    "budget_matched_bare": {
+      "valid": false,
+      "valid_n": 0,
+      "invalid_n": 4
+    },
+    "ck_strict": {
+      "valid": false,
+      "valid_n": 0,
+      "invalid_n": 4
+    }
+  },
+  "recomputed_substrate_gain": {
+    "composite": null,
+    "valid": false,
+    "failure_reason": "ck has no valid measurements",
+    "failure_detail": [
+      "error"
+    ],
+    "ck_valid_n": 0,
+    "control_valid_n": 0
+  },
+  "recomputed_paired_gain": {
+    "valid_pairs": 0,
+    "expected_pairs": 4,
+    "invalid_pairs": 4,
+    "coverage": 0.0,
+    "status": "incomplete",
+    "headline": null,
+    "invalid_reasons": {
+      "ck:transport_error": 4
+    },
+    "partial_observed_headline": null
+  },
+  "note": "The original artifact is retained unmodified as evidence of the defect. This file supersedes its headline only."
+}

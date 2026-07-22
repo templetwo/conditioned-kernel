@@ -25,7 +25,7 @@ data/
 *.swp
 
 # Experiment outputs (keep fixtures; ignore runs)
-experiments/runs/
+experiments/runs/*
 logs/*.jsonl
 !logs/.gitkeep
 
@@ -34,6 +34,10 @@ logs/*.jsonl
 *.key
 .env.*
 
-# Ladder artifacts are evidence for MODEL_LADDER.md — keep these
+# Ladder artifacts + their corrections are evidence for MODEL_LADDER.md.
+# NOTE: `experiments/runs/` (directory form) cannot be un-ignored from within —
+# git will not descend into an excluded directory, so a nested corrections/
+# subdir stayed invisible to `git add -A` and the supersession records never
+# reached the public repo while the claim they corrected did. Exclude the
+# CONTENTS (runs/*) so re-inclusion of ladder_*/ actually works.
 !experiments/runs/ladder_*/
-!experiments/runs/ladder_*/*.json

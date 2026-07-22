@@ -35,6 +35,7 @@ from conditioned_kernel.generate import (  # noqa: E402
 from conditioned_kernel.pipeline import run_turn  # noqa: E402
 from conditioned_kernel.score import (  # noqa: E402
     aggregate_condition,
+    budget_conditional_gain,
     paired_gain,
     score_output,
     substrate_gain,
@@ -391,6 +392,14 @@ def main() -> int:
     # observed; partial coverage yields no headline at all.
     if "ck_strict" in by_cond and "budget_matched_bare" in by_cond:
         gains["headline_paired_vs_budget_matched_bare"] = paired_gain(
+            by_cond["ck_strict"], by_cond["budget_matched_bare"]
+        )
+        # SECOND ESTIMAND, published alongside and never merged with the first.
+        # Here a timeout is a scored failure rather than a missing observation,
+        # because the project rule is "if it does not fit the edge budget, it is
+        # not done". Reporting only quality-conditional-on-completion would let
+        # the system look better by failing to answer its hardest cases.
+        gains["budget_conditional_vs_budget_matched_bare"] = budget_conditional_gain(
             by_cond["ck_strict"], by_cond["budget_matched_bare"]
         )
     if "ck_strict" in aggregates and "bare" in aggregates:

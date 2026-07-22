@@ -100,3 +100,85 @@ If this fails, the system is a single-shot wrapper.
 Conditioned Kernel succeeds if the same small local model, when run through the substrate, becomes more coherent, more state-faithful, more continuous, and more repairable than when run against a **budget-matched** control—and if those gains survive a model swap within the tested size band.
 
 No gain number is citable until `experiments/M1_AUDIT.md` criteria 1–9 hold and the run is free of goal-echo degeneracy (`distinct_answers` ≈ probe count for accepted rows).
+
+---
+
+# Preregistration: missing data and the two estimands
+
+Added 2026-07-22 after two independent external reviews converged on the same objection.
+
+**The numeric thresholds below are PROPOSED and require Anthony's sign-off before they bind.**
+The structure is the point; the values are his call. They must be fixed *before* a run, never
+chosen after seeing the result.
+
+## Why coverage alone is not enough
+
+The obvious rule — "require N% coverage" — fails because these dropouts are not random. Pairing
+discards a probe when *either* side fails, and CK carries the packet's extra tokens, so under a
+fixed wall clock it plausibly times out **more** than bare. That biases the surviving pairs in a
+direction that cannot be signed in advance.
+
+90% coverage can mean any of:
+
+- random transport failures spread across conditions,
+- every difficult CK case timing out while the control completes,
+- all missingness concentrated in one probe class.
+
+The last two *are themselves condition effects*. A bare coverage threshold would hide them.
+
+> A symmetric 75% is more trustworthy than an 85% where every drop came from one side.
+
+## Two estimands, both published, both chosen before the run
+
+Neither is "the real one". They answer different questions, and reporting only the first lets a
+system improve its apparent quality by failing to answer its hardest cases.
+
+**1. Quality conditional on completion** — `headline_paired_vs_budget_matched_bare`.
+Timeouts are *missing data*. A probe counts only if both sides were observed. This is the quality
+claim, and it is the one exposed to missingness bias.
+
+**2. Gain under the edge budget** — `budget_conditional_vs_budget_matched_bare`.
+Timeouts are a *scored failure*, not a missing observation, because the project rule is "if it does
+not fit the edge budget, it is not done." Complete by construction, so no missingness problem.
+Under this measure a fully timed-out run is not null — it is the definitive result that the model
+does not fit the budget.
+
+This also dissolves most of the waste concern at 20-30 probes: timed-out probes are still data
+under estimand 2.
+
+## Primary validity gate (estimand 1)
+
+A primary headline is reportable only when all four hold:
+
+1. Coverage meets the preregistered minimum. *(proposed: 0.90)*
+2. Every included value is a complete CK/control pair matched by `probe_id`.
+3. Dropout imbalance does not exceed the preregistered condition-imbalance limit.
+   *(proposed: `imbalance <= 1` and never `one_sided` when total dropouts >= 2)*
+4. The worst-case missingness interval does not cross the decision boundary for the claim.
+
+Below the gate: `headline` is `null`. Above the gate it may be reported — but coverage, omitted
+probe IDs, per-condition failures and missingness bounds are published **either way**, so
+"reportable" never quietly becomes "complete data."
+
+## Missingness bounds
+
+With `N` expected pairs, `k` observed summing to `S`, `m = N - k` missing, and each delta bounded
+by `[L, U] = [-1, 1]`, the true full-run mean is confined to:
+
+```
+[ (S + m*L) / N ,  (S + m*U) / N ]
+```
+
+No imputation, no pretending. At N=4 a single dropout leaves 25% of the estimand unobserved and the
+interval is very wide; at N=30 one dropout has bounded, visible influence. Implemented as
+`score.missingness_bounds`.
+
+## Required fields in every run artifact
+
+```
+expected_pairs        valid_pairs           coverage
+ck_dropouts           control_dropouts      imbalance / symmetric / one_sided
+omitted_probes        missingness_bounds    partial_observed_headline
+```
+
+`partial_observed_headline` is descriptive only and must never be promoted to `headline`.

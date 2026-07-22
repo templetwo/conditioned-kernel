@@ -393,11 +393,15 @@ def paired_gain(
         if a is None or b is None:
             note("missing_row")
             continue
-        if not row_is_valid_measurement(a):
+        # Record BOTH sides. Short-circuiting on ck would report a
+        # two-sided failure as one-sided, defeating the symmetry check.
+        ck_bad = not row_is_valid_measurement(a)
+        ctl_bad = not row_is_valid_measurement(b)
+        if ck_bad:
             note(f"ck:{row_status(a)}")
-            continue
-        if not row_is_valid_measurement(b):
+        if ctl_bad:
             note(f"control:{row_status(b)}")
+        if ck_bad or ctl_bad:
             continue
         pairs.append((a, b))
 
@@ -417,6 +421,14 @@ def paired_gain(
         "expected_pairs": expected,
         "invalid_pairs": expected - len(pairs),
         "coverage": (len(pairs) / expected) if expected else 0.0,
+        # Coverage alone cannot tell random dropout from systematic one-sided
+        # failure, so publish the shape of the missingness too.
+        "dropout_symmetry": dropout_symmetry(reasons),
+        "missingness_bounds": missingness_bounds(deltas, expected),
+        "omitted_probes": [
+            p for p in probes
+            if p not in {a.get(key) for a, _ in pairs}
+        ],
     }
     if expected == 0 or len(pairs) != expected:
         out.update(
@@ -430,3 +442,106 @@ def paired_gain(
         return out
     out.update({"status": "complete", "headline": partial, "invalid_reasons": {}})
     return out
+
+
+DELTA_LOWER, DELTA_UPPER = -1.0, 1.0
+
+
+def missingness_bounds(
+    observed_deltas: list[float],
+    expected_pairs: int,
+    *,
+    lower: float = DELTA_LOWER,
+    upper: float = DELTA_UPPER,
+) -> tuple[float, float] | None:
+    """Worst-case interval the full-run headline must lie within.
+
+    Honest about what was not observed instead of imputing it. With N expected
+    pairs, k observed summing to S, and m = N - k missing, each missing delta is
+    bounded by [lower, upper], so the true full-run mean is confined to
+    [(S + m*lower)/N, (S + m*upper)/N].
+
+    At N=4 one dropout leaves 25% of the estimand unobserved and the interval is
+    very wide; at N=30 a single dropout has bounded, visible influence. That is
+    the point -- it makes the cost of missingness explicit rather than letting a
+    coverage percentage imply the data were complete.
+    """
+    if expected_pairs <= 0:
+        return None
+    m = expected_pairs - len(observed_deltas)
+    s = sum(observed_deltas)
+    return ((s + m * lower) / expected_pairs, (s + m * upper) / expected_pairs)
+
+
+def dropout_symmetry(invalid_reasons: dict[str, int]) -> dict[str, Any]:
+    """Per-condition dropout counts and whether they are balanced.
+
+    Coverage alone cannot distinguish random transport failures from a
+    systematic pattern where CK times out on exactly the hard cases while the
+    control completes. CK carries the packet's extra tokens, so under a fixed
+    wall clock it plausibly fails MORE than bare -- which would bias surviving
+    pairs in a direction that cannot be signed in advance. A symmetric 75%
+    coverage is more trustworthy than an 85% where every drop came from one side.
+    """
+    ck = sum(v for k, v in invalid_reasons.items() if k.startswith("ck:"))
+    ctl = sum(v for k, v in invalid_reasons.items() if k.startswith("control:"))
+    other = sum(v for k, v in invalid_reasons.items() if not k.startswith(("ck:", "control:")))
+    total = ck + ctl + other
+    return {
+        "ck_dropouts": ck,
+        "control_dropouts": ctl,
+        "other_dropouts": other,
+        "imbalance": abs(ck - ctl),
+        "symmetric": ck == ctl,
+        "one_sided": bool(total) and (ck == 0 or ctl == 0) and total > 0 and ck != ctl,
+    }
+
+
+def budget_conditional_gain(
+    ck_rows: list[dict[str, Any]],
+    control_rows: list[dict[str, Any]],
+    *,
+    key: str = "probe_id",
+) -> dict[str, Any]:
+    """Second estimand: gain UNDER THE EDGE BUDGET, where a timeout is a failure.
+
+    The default measure (paired_gain) treats an unobserved answer as missing
+    data, which is right for a quality claim. But this project's stated rule is
+    "if it does not fit the edge budget, it is not done" -- so there is a second
+    legitimate measure in which exceeding the budget is a scored failure rather
+    than a missing observation.
+
+    Under this measure a fully timed-out run is not null, it is a definitive
+    result: that model does not fit the budget. Complete by construction, so it
+    has no missingness problem.
+
+    Both figures must be published, labelled, and chosen BEFORE the run. Neither
+    is the "real" one; they answer different questions. Reporting only the
+    conditional-on-completion figure would let a system improve its apparent
+    quality by failing to answer its hardest cases.
+    """
+    ck = {r.get(key): r for r in ck_rows}
+    ctl = {r.get(key): r for r in control_rows}
+    probes = sorted({p for p in (set(ck) | set(ctl)) if p is not None})
+    if not probes:
+        return {"status": "empty", "headline": None, "n_probes": 0}
+
+    def score_of(row: dict[str, Any] | None) -> float:
+        if row is None or not row_is_valid_measurement(row):
+            return 0.0  # exceeded the budget => scored failure, not missing
+        sc = row.get("scores") or {}
+        return (
+            float(sc.get("structural_score") or 0.0) + float(sc.get("semantic_score") or 0.0)
+        ) / 2.0
+
+    deltas = [score_of(ck.get(p)) - score_of(ctl.get(p)) for p in probes]
+    ck_fail = sum(1 for p in probes if not row_is_valid_measurement(ck.get(p) or {}))
+    ctl_fail = sum(1 for p in probes if not row_is_valid_measurement(ctl.get(p) or {}))
+    return {
+        "status": "complete",
+        "headline": sum(deltas) / len(deltas),
+        "n_probes": len(probes),
+        "ck_budget_failures": ck_fail,
+        "control_budget_failures": ctl_fail,
+        "note": "Timeouts scored as failure, not missing. Complete by construction.",
+    }
