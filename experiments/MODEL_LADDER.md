@@ -94,6 +94,37 @@ was read as success. Replaying that same artifact through the current code retur
  "ck_valid_n": 0, "control_valid_n": 0}
 ```
 
+### The bug was one layer earlier than the aggregator
+
+External review sharpened this correctly. Filtering invalid rows inside
+`aggregate_condition` patched the symptom but preserved the ambiguity: a timed-out row still
+looked like a completed inference (`output=""`, `error=None`), so nothing downstream could
+distinguish a model that answered with nothing, a request that timed out before any response
+existed, and a transport failure normalized to empty text.
+
+> The Qwen3.5 result was not incorrectly scored. It was incorrectly **admitted** as a measurement.
+
+The outcome is now classified where the Ollama call returns:
+
+```
+RunStatus = completed | timeout | transport_error | invalid_response
+```
+
+with `output=None` when nothing was observed and `""` **only** when the model genuinely answered
+with nothing. An observed empty answer legitimately scores zero; a timeout has no score.
+
+The primary figure is now `headline_paired_vs_budget_matched_bare`, which pairs CK against the
+control per probe and requires **both sides observed**. Partial coverage yields no headline at
+all — on a 4-probe experiment, silently averaging whatever survived changes the estimand. A
+descriptive figure over surviving pairs is reported as `partial_observed_headline` alongside
+`coverage`, and is never promoted.
+
+The six raw artifacts are retained unmodified as evidence of the defect. Corrected derived
+artifacts under `experiments/runs/ladder_20260722/corrections/` record the source commit, the
+original artifact SHA-256, the correction reason, the original invalid headline, the corrected
+`null`, the timeout count, and the harness-fix commits — superseding the number without erasing
+the history.
+
 `aggregate_condition` now partitions rows into valid and invalid (`error` set, or
 `decision == "error"`), averages only over valid ones, and reports `valid_n` / `invalid_n` /
 `failure_reasons`. `substrate_gain` refuses to emit a composite when either side has zero valid
