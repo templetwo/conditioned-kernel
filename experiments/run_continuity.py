@@ -379,10 +379,34 @@ def main() -> int:
     out = a.out or (ROOT / "experiments" / "runs" / f"continuity_{int(time.time())}.json")
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, indent=2) + "\n")
+    # Structured lifecycle event. Monitors should follow event type, not prose:
+    # grepping human sentences is fragile and breaks silently when wording
+    # changes. This line is the contract.
+    valid = sum(1 for r in rows if r.get("status") == "completed")
+    event = {
+        "event": "continuity.run.completed",
+        "commit": subprocess.run(["git", "log", "-1", "--format=%h"], cwd=ROOT,
+                                 capture_output=True, text=True).stdout.strip() or None,
+        "corpus_sha256_16": corpus_sha,
+        "corpus_commit": corpus_commit,
+        "mode": a.bare_mode,
+        "model": model,
+        "profile": prof.profile_id,
+        "m1_ck_vs_broken": report["M1_ck_beats_broken"],
+        "m2_ck_vs_bare": report["M2_ck_beats_bare"],
+        "arms": report["mean_continuity_by_arm"],
+        "rows_valid": valid,
+        "rows_expected": len(rows),
+        "all_boundaries_distinct": report["all_boundaries_distinct"],
+        "artifact": str(out),
+    }
+    report["event"] = event
+    out.write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps({k: report[k] for k in
                       ("mean_continuity_by_arm", "M1_ck_beats_broken", "M2_ck_beats_bare",
-                       "all_boundaries_distinct")}, indent=2))
-    print(f"wrote {out}")
+                       "all_boundaries_distinct")}, indent=2), flush=True)
+    print("CK_EVENT " + json.dumps(event, separators=(",", ":")), flush=True)
+    print(f"wrote {out}", flush=True)
     return 0
 
 
