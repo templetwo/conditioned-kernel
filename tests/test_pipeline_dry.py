@@ -12,11 +12,18 @@ def test_dry_accept_writes_receipt(tmp_path: Path):
     (state_dir / "current.json").write_text(
         json.dumps(
             {
-                "goal": "Demonstrate conditioned-kernel substrate gain over bare generation on a small local model.",
-                "active_profile": "ck_v0",
+                "goal": "Demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.",
+                "active_profile": "orin_nano_8gb",
                 "session_id": "sess_test",
                 "receipt_count_24h": 0,
-                "flags": {"sensors": False, "tools": False, "cloud": False, "max_repair_passes": 1},
+                "flags": {
+                    "sensors": False,
+                    "tools": False,
+                    "cloud": False,
+                    "max_repair_passes": 1,
+                    "edge_target": "jetson_orin_nano_8gb",
+                    "one_model_only": True,
+                },
             }
         ),
         encoding="utf-8",
@@ -39,11 +46,12 @@ def test_dry_accept_writes_receipt(tmp_path: Path):
         {
             "answer": (
                 "Design intent: demonstrate conditioned-kernel substrate gain "
-                "over bare generation on a small local model."
+                "over bare generation on a small local model under Jetson Orin "
+                "Nano 8GB edge budgets."
             ),
             "evidence_used": [
                 "This system is fully local.",
-                "Demonstrate conditioned-kernel substrate gain over bare generation on a small local model.",
+                "Edge target: jetson_orin_nano_8gb (one model at a time).",
             ],
             "next_state": {"thread_touch": ["thread_min_model"], "proposed_note": "test"},
         }

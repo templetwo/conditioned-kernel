@@ -4,6 +4,18 @@
 
 The model supplies linguistic possibility; the substrate determines what becomes an answer.
 
+## Edge-first product constraint
+
+Default profile is **`orin_nano_8gb`**. Architecture and defaults assume:
+
+- 8 GB unified memory class
+- one active quantized model
+- bounded arrival packets
+- short context (2048 default)
+- CPU substrate, model owns scarce memory bandwidth
+
+See `docs/EDGE_SPEC.md` and `configs/edge/`.
+
 ## Circuit
 
 ```

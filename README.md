@@ -7,14 +7,19 @@ The language model is treated as a **replaceable text-transduction kernel**.
 Effective system behavior is relocated into the substrate that surrounds inference:
 persistent state, context compilation, validation, repair, acceptance, and rendering.
 
+**Built as an edge product**, not a desktop prototype that might fit later.
+Default runtime profile: **`orin_nano_8gb`** (Jetson Orin Nano 8 GB class).
+
 **Temple of Two** research project. Fully local. No cloud dependency. No sensors. No autonomous tools in v0.
 
 | | |
 |---|---|
 | **Research name** | Substrate-Conditioned Generation (working synonym) |
 | **Project / package** | Conditioned Kernel (`conditioned-kernel` / `ck`) |
+| **Edge target** | Jetson Orin Nano 8 GB · ARM64 · one model · short ctx |
 | **Runtime** | Ollama at `localhost:11434` |
-| **v0 target** | Measurable *substrate gain* over bare generation on the same small model |
+| **Default profile** | `orin_nano_8gb` (`configs/edge/`) |
+| **v0 target** | Measurable *substrate gain* under edge budgets |
 
 ## Thesis
 
@@ -39,8 +44,19 @@ pip install -e ".[dev]"
 ollama serve   # if not already running
 
 ck status
+ck edge
+ck edge --list
 ck smoke
 ck ask "Summarize the current design intent in one short paragraph."
+
+# Opt-in desktop headroom only (product decisions still use orin_nano_8gb):
+ck --profile desktop_dev status
+```
+
+On Jetson:
+
+```bash
+bash scripts/jetson_bootstrap.sh
 ```
 
 Offline tests (no Ollama required):
@@ -48,6 +64,8 @@ Offline tests (no Ollama required):
 ```bash
 pytest -q
 ```
+
+See [docs/EDGE_SPEC.md](docs/EDGE_SPEC.md).
 
 ## Architecture
 

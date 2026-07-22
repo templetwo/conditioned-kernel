@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "conditioned-kernel"
-version = "0.1.0"
-description = "Local substrate-conditioned generation: model as replaceable kernel, intelligence in the surrounding circuit."
+version = "0.1.1"
+description = "Edge-first substrate-conditioned generation for Jetson-class nodes: model as replaceable kernel, intelligence in the surrounding circuit."
 readme = "README.md"
 license = {text = "Apache-2.0"}
 authors = [

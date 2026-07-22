@@ -6,6 +6,7 @@ import hashlib
 import json
 from typing import Any, Literal
 
+from conditioned_kernel.edge import EdgeProfile, enforce_packet_budget, load_profile
 from conditioned_kernel.ids import packet_id, utc_now_iso
 from conditioned_kernel.state import SubstrateState
 
@@ -50,9 +51,13 @@ def build_arrival_packet(
     state: SubstrateState,
     user_input: str,
     *,
-    max_words: int = 180,
+    max_words: int | None = None,
     repair_annotations: list[str] | None = None,
+    profile: EdgeProfile | None = None,
+    enforce_budget: bool = True,
 ) -> dict[str, Any]:
+    prof = profile or load_profile()
+    words = max_words if max_words is not None else prof.max_answer_words
     open_threads = state.open_threads()
     packet: dict[str, Any] = {
         "packet_id": packet_id(),
@@ -65,7 +70,7 @@ def build_arrival_packet(
             {"id": t.get("id"), "title": t.get("title")} for t in open_threads
         ],
         "constraints": {
-            "max_words": max_words,
+            "max_words": words,
             "must_return_json": True,
             "must_cite_state_fields": True,
             "forbidden": [
@@ -84,15 +89,18 @@ def build_arrival_packet(
         },
     }
     if repair_annotations:
+        # Keep repair payload short — edge tokens are scarce
+        clipped = [str(v)[:100] for v in repair_annotations[:6]]
         packet["repair"] = {
             "pass_index": 1,
-            "violations": repair_annotations,
+            "violations": clipped,
             "instruction": (
-                "Previous output failed validation. Return corrected JSON only. "
-                "Use only evidence strings that appear in facts or open_threads. "
-                "Reference the current goal in the answer."
+                "Prior JSON failed validation. Return corrected JSON only. "
+                "Copy evidence from facts/open_threads. Cite the goal in answer."
             ),
         }
+    if enforce_budget:
+        packet = enforce_packet_budget(packet, prof, strict=True)
     return packet
 
 
@@ -108,17 +116,23 @@ def build_model_input(
     mode: Mode = "chat_json",
     temperature: float = 0.3,
     seed: int = 42,
-    num_ctx: int = 4096,
-    keep_alive: str = "5m",
+    num_ctx: int = 2048,
+    keep_alive: str = "2m",
+    compact: bool = True,
 ) -> dict[str, Any]:
-    serialized = json.dumps(packet, ensure_ascii=False, indent=2)
+    # Compact JSON saves context tokens on edge devices
+    if compact:
+        model_packet = {k: v for k, v in packet.items() if not str(k).startswith("_")}
+        serialized = json.dumps(model_packet, ensure_ascii=False, separators=(",", ":"))
+    else:
+        serialized = json.dumps(packet, ensure_ascii=False, indent=2)
     system = (
-        "You are a local conditioned-kernel transducer. "
-        "Return ONLY valid JSON matching the schema. "
-        "answer: short natural language reply. "
-        "evidence_used: strings copied from packet facts or open_threads titles/ids. "
-        "next_state.thread_touch: open thread ids you used (or []). "
-        "Do not invent files, URLs, tools, or cloud services."
+        "Local conditioned-kernel transducer. "
+        "Return ONLY valid JSON with keys answer, evidence_used, next_state. "
+        "answer: short reply that mentions the goal. "
+        "evidence_used: copy exact strings from facts or open_threads. "
+        "next_state.thread_touch: array of real open_threads id values, or []. "
+        "Never invent thread ids. No files, URLs, tools, or cloud."
     )
 
     if mode == "chat_json":
@@ -128,10 +142,7 @@ def build_model_input(
                 {"role": "system", "content": system},
                 {
                     "role": "user",
-                    "content": (
-                        "Arrival packet follows. Answer the user_input under all constraints.\n\n"
-                        + serialized
-                    ),
+                    "content": "Packet:\n" + serialized,
                 },
             ],
             "format": CANDIDATE_FORMAT,
@@ -173,6 +184,8 @@ def build_model_input(
         "payload": payload,
         "packet_id": packet["packet_id"],
         "packet_hash": packet_hash(packet),
+        "edge_profile": (packet.get("_edge") or {}).get("profile_id"),
+        "packet_bytes": (packet.get("_edge") or {}).get("packet_bytes"),
     }
 
 
@@ -180,24 +193,32 @@ def compile_turn(
     state: SubstrateState,
     user_input: str,
     *,
-    model: str,
-    mode: Mode = "chat_json",
+    model: str | None = None,
+    mode: Mode | None = None,
     repair_annotations: list[str] | None = None,
-    temperature: float = 0.3,
-    seed: int = 42,
-    num_ctx: int = 4096,
+    temperature: float | None = None,
+    seed: int | None = None,
+    num_ctx: int | None = None,
+    keep_alive: str | None = None,
+    profile: EdgeProfile | None = None,
+    profile_id: str | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
+    prof = profile or load_profile(profile_id)
     packet = build_arrival_packet(
         state,
         user_input,
         repair_annotations=repair_annotations,
+        profile=prof,
+        enforce_budget=True,
     )
     model_input = build_model_input(
         packet,
-        model=model,
-        mode=mode,
-        temperature=temperature,
-        seed=seed,
-        num_ctx=num_ctx,
+        model=model or prof.model,
+        mode=mode or prof.mode,  # type: ignore[arg-type]
+        temperature=prof.temperature if temperature is None else temperature,
+        seed=prof.seed if seed is None else seed,
+        num_ctx=prof.num_ctx if num_ctx is None else num_ctx,
+        keep_alive=prof.keep_alive if keep_alive is None else keep_alive,
+        compact=True,
     )
     return packet, model_input

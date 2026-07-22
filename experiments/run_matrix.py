@@ -16,17 +16,18 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from conditioned_kernel.edge import DEFAULT_PROFILE_ID  # noqa: E402
 from conditioned_kernel.generate import OllamaClient, OllamaError  # noqa: E402
 from conditioned_kernel.pipeline import run_turn  # noqa: E402
 from conditioned_kernel.state import SubstrateState  # noqa: E402
 
 
-def bare_generate(client: OllamaClient, model: str, prompt: str) -> str:
+def bare_generate(client: OllamaClient, model: str, prompt: str, *, num_ctx: int = 2048) -> str:
     payload = {
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
         "stream": False,
-        "options": {"temperature": 0.3, "seed": 42, "num_ctx": 2048},
+        "options": {"temperature": 0.3, "seed": 42, "num_ctx": num_ctx},
     }
     r = client.generate({"mode": "chat_json", "payload": payload})
     return OllamaClient.extract_text(r, "chat_json")
@@ -45,7 +46,8 @@ def budget_matched_prompt(state: SubstrateState, user_input: str) -> str:
 
 def main() -> int:
     p = argparse.ArgumentParser(description="Conditioned Kernel experiment matrix scaffold")
-    p.add_argument("--model", default="qwen2.5:0.5b")
+    p.add_argument("--model", default=None, help="Override profile model")
+    p.add_argument("--profile", default=DEFAULT_PROFILE_ID)
     p.add_argument("--probe", default="State the current design intent briefly.")
     p.add_argument(
         "--conditions",
@@ -55,7 +57,12 @@ def main() -> int:
     p.add_argument("--out", type=Path, default=ROOT / "experiments" / "runs" / "last_matrix.json")
     args = p.parse_args()
 
-    client = OllamaClient()
+    from conditioned_kernel.edge import load_profile
+
+    prof = load_profile(args.profile)
+    model = args.model or prof.model
+
+    client = OllamaClient(timeout=prof.timeout_s)
     try:
         client.heartbeat()
     except OllamaError as e:
@@ -65,21 +72,33 @@ def main() -> int:
     state = SubstrateState.load()
     results = []
     for cond in [c.strip() for c in args.conditions.split(",") if c.strip()]:
-        row = {"condition": cond, "model": args.model, "probe": args.probe}
+        row = {
+            "condition": cond,
+            "model": model,
+            "profile": prof.profile_id,
+            "num_ctx": prof.num_ctx,
+            "probe": args.probe,
+        }
         if cond == "bare":
-            text = bare_generate(client, args.model, args.probe)
+            text = bare_generate(client, model, args.probe, num_ctx=prof.num_ctx)
             row["raw"] = text
             row["decision"] = "n/a_bare"
         elif cond == "budget_matched_bare":
-            text = bare_generate(client, args.model, budget_matched_prompt(state, args.probe))
+            text = bare_generate(
+                client,
+                model,
+                budget_matched_prompt(state, args.probe),
+                num_ctx=prof.num_ctx,
+            )
             row["raw"] = text
             row["decision"] = "n/a_budget_matched"
         elif cond == "ck_strict":
-            tr = run_turn(args.probe, model=args.model, client=client)
+            tr = run_turn(args.probe, model=model, client=client, profile=prof)
             row["raw"] = tr.answer
             row["decision"] = tr.decision
             row["violations"] = (tr.receipt or {}).get("violations")
             row["ok"] = tr.ok
+            row["packet_bytes"] = (tr.packet.get("_edge") or {}).get("packet_bytes")
         else:
             row["error"] = f"unknown_condition:{cond}"
         results.append(row)

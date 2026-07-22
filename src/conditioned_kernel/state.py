@@ -78,12 +78,16 @@ class SubstrateState:
 
     def fact_list(self) -> list[str]:
         flags = self.current.get("flags") or {}
+        edge = flags.get("edge_target") or "jetson_orin_nano_8gb"
         facts = [
             "This system is fully local.",
             "Sensors are out of scope for v0." if not flags.get("sensors", False) else "Sensors enabled.",
             "The model is a replaceable linguistic transducer.",
+            f"Edge target: {edge} (one model at a time)."
+            if flags.get("one_model_only", True)
+            else f"Edge target: {edge}.",
             f"One repair pass is allowed (max={flags.get('max_repair_passes', 1)}).",
-            f"Active profile: {self.current.get('active_profile', 'unknown')}.",
+            f"Active profile: {self.current.get('active_profile', 'orin_nano_8gb')}.",
             f"Current goal: {self.current.get('goal', '')}".strip(),
         ]
         return [f for f in facts if f]

@@ -40,6 +40,8 @@ Helix data dir (shared with Claude seats):
 
 ## Hard rules for v0
 
+- **Edge-first.** Default profile `orin_nano_8gb`. Desktop is opt-in only.
+- One model at a time on the product path. Short context. Bound packets.
 - Fully local. No cloud providers.
 - No sensors. No autonomous tools.
 - Do not stream Ollama to terminal before acceptance.
@@ -47,6 +49,7 @@ Helix data dir (shared with Claude seats):
 - Faithfulness checks are closed-set / mechanical, not NLI.
 - Do not import full Sovereign Stack. Bridge is P3.
 - Prefer one compile module until ablations demand select/order/compress split.
+- If it does not fit the edge budget, it is not done.
 
 ## Success sentence
 
