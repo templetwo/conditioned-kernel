@@ -95,6 +95,25 @@ one probe flipping is exactly the observed magnitude between +0.031 and −0.125
 No substrate-gain number in this table should be cited. They are recorded to show the spread,
 not to support a claim.
 
+## F-D5 — The fix, and what it changed
+
+`run_matrix.py` now primes by default (`--prime` / `--no-prime`) and records a `load_state`
+receipt in every artifact. Verification on the Jetson, Q4_K_M, same command run from both
+load states:
+
+| Run | Start condition | headline vs budget_matched |
+|---|---|---:|
+| `p_cold` | model evicted immediately before | **−0.125** |
+| `p_warm` | model already resident | **−0.125** |
+
+Identical composite, and all 12 raw outputs byte-identical. Before priming, the same pair of
+conditions produced +0.031 and −0.125.
+
+**The load-state-controlled Jetson result is −0.125.** That is negative: on the product target,
+under controlled conditions, `ck_strict` scores *below* `budget_matched_bare`. This number is
+recorded because it is now trustworthy, not because it is wanted. It is a single 4-probe run on
+one 0.5B model and is not a substrate-gain claim in either direction.
+
 ## Environment
 
 | | Mac | Jetson |

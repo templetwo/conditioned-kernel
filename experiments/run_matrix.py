@@ -81,6 +81,29 @@ def collect_environment(model: str) -> dict[str, Any]:
     return env
 
 
+def prime_model(client: OllamaClient, model: str, prof: Any) -> dict[str, Any]:
+    """Burn and discard one generation so all measured inferences are warm.
+
+    See experiments/DETERMINISM.md (F-D1..F-D4). Returns a receipt describing
+    what was done, recorded in the artifact so a reader knows the load state
+    the numbers were produced under.
+    """
+    receipt: dict[str, Any] = {"primed": False, "error": None}
+    try:
+        fair_generate(
+            client,
+            model,
+            "warmup",
+            num_ctx=prof.num_ctx,
+            system="Reply with the single word: ok",
+            use_format=False,
+        )
+        receipt["primed"] = True
+    except Exception as e:  # priming must never abort a run
+        receipt["error"] = f"{type(e).__name__}: {e}"
+    return receipt
+
+
 def fair_generate(
     client: OllamaClient,
     model: str,
@@ -149,6 +172,13 @@ def main() -> int:
         help="Give format= JSON schema to ALL conditions (default: true)",
     )
     p.add_argument(
+        "--prime",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Discard one warmup generation so all scored inferences are warm "
+             "(default: true; see experiments/DETERMINISM.md)",
+    )
+    p.add_argument(
         "--write-last",
         action="store_true",
         help="Also write experiments/runs/last_matrix.json (off by default)",
@@ -202,8 +232,16 @@ def main() -> int:
     print(
         f"matrix profile={prof.profile_id} model={model} ctx={prof.num_ctx} "
         f"probes={len(probes)} fair_format={args.fair_format} "
-        f"frozen_state={not args.mutate_live_state}"
+        f"frozen_state={not args.mutate_live_state} prime={args.prime}"
     )
+
+    # Pin load state before measuring. On CUDA + Q4_K_M the first inference
+    # after a model load can return a different (but individually stable)
+    # answer than every later one -- see experiments/DETERMINISM.md. Measuring
+    # with the model in an unknown residency state made the same command
+    # return +0.031 and -0.125. Priming discards one generation so every
+    # scored inference runs in the same (warm) state.
+    primed = prime_model(client, model, prof) if args.prime else None
 
     try:
         for probe in probes:
@@ -334,6 +372,7 @@ def main() -> int:
         "frozen_state": not args.mutate_live_state,
         "headline_control": "budget_matched_bare",
         "environment": collect_environment(model),
+        "load_state": {"prime": args.prime, "receipt": primed},
         "audit_note": "Post M1_AUDIT.md corrections. Do not cite pre-audit +0.60.",
         "aggregates": aggregates,
         "substrate_gain": gains,
