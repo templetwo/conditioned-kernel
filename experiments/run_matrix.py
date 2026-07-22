@@ -35,6 +35,7 @@ from conditioned_kernel.generate import (  # noqa: E402
 from conditioned_kernel.pipeline import run_turn  # noqa: E402
 from conditioned_kernel.score import (  # noqa: E402
     aggregate_condition,
+    paired_gain,
     score_output,
     substrate_gain,
 )
@@ -338,6 +339,32 @@ def main() -> int:
                     row["error"] = str(e)
                     row["scores"] = {}
 
+                # Explicit outcome on every row. A timeout is not a zero: output
+                # is null when nothing was observed, "" only when the model
+                # genuinely answered with nothing.
+                if row.get("error") or row.get("decision") == "error":
+                    err = str(row.get("error") or "decision=error")
+                    status = (
+                        "timeout"
+                        if ("timeout" in err.lower() or "timed out" in err.lower())
+                        else "transport_error"
+                    )
+                    row["inference"] = {
+                        "status": status,
+                        "output": None,
+                        "error": err,
+                        "timeout_seconds": timeout_s,
+                        "valid_measurement": False,
+                    }
+                else:
+                    row["inference"] = {
+                        "status": "completed",
+                        "output": row.get("raw"),
+                        "error": None,
+                        "timeout_seconds": timeout_s,
+                        "valid_measurement": True,
+                    }
+
                 rows.append(row)
                 by_cond.setdefault(cond, []).append(row)
                 sc = row.get("scores") or {}
@@ -359,6 +386,12 @@ def main() -> int:
     if "ck_strict" in aggregates and "budget_matched_bare" in aggregates:
         gains["headline_vs_budget_matched_bare"] = substrate_gain(
             aggregates["ck_strict"], aggregates["budget_matched_bare"]
+        )
+    # PRIMARY: paired and fail-closed. A probe counts only if both sides were
+    # observed; partial coverage yields no headline at all.
+    if "ck_strict" in by_cond and "budget_matched_bare" in by_cond:
+        gains["headline_paired_vs_budget_matched_bare"] = paired_gain(
+            by_cond["ck_strict"], by_cond["budget_matched_bare"]
         )
     if "ck_strict" in aggregates and "bare" in aggregates:
         gains["context_vs_bare_information_access"] = {

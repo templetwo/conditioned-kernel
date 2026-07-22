@@ -243,6 +243,23 @@ def score_ck_raw_against_packet(
     return score_output(raw, packet=packet, probe=probe)
 
 
+def row_status(row: dict[str, Any]) -> str:
+    """Outcome of the inference behind this row.
+
+    Prefers the explicit status recorded at the call boundary; falls back to
+    legacy row shapes for artifacts written before that existed.
+    """
+    inf = row.get("inference") or {}
+    if inf.get("status"):
+        return str(inf["status"])
+    if row.get("error"):
+        err = str(row["error"]).lower()
+        return "timeout" if ("timeout" in err or "timed out" in err) else "transport_error"
+    if row.get("decision") == "error":
+        return "transport_error"
+    return "completed"
+
+
 def row_is_valid_measurement(row: dict[str, Any]) -> bool:
     """A row counts only if the model's answer was actually observed.
 
@@ -251,11 +268,7 @@ def row_is_valid_measurement(row: dict[str, Any]) -> bool:
     together destroys the estimand -- Qwen3.5 timed out on every row and still
     produced a headline of +0.125, built from rows that never saw an output.
     """
-    if row.get("error"):
-        return False
-    if row.get("decision") == "error":
-        return False
-    return True
+    return row_status(row) == "completed"
 
 
 def aggregate_condition(rows: list[dict[str, Any]]) -> dict[str, Any]:
@@ -346,3 +359,74 @@ def substrate_gain(ck_agg: dict[str, Any], control_agg: dict[str, Any]) -> dict[
         "delta_goal_referenced": g("goal_referenced"),
         "composite": (g("structural_score") + g("semantic_score")) / 2.0,
     }
+
+
+def paired_gain(
+    ck_rows: list[dict[str, Any]],
+    control_rows: list[dict[str, Any]],
+    *,
+    key: str = "probe_id",
+) -> dict[str, Any]:
+    """Headline gain over probes where BOTH sides were observed. Fails closed.
+
+    A probe contributes only if the CK row and the control row were both
+    actually measured. If any probe is missing from either side, no headline is
+    emitted at all: partial coverage silently changes the estimand, which on a
+    4-probe experiment can move the number arbitrarily.
+
+    A descriptive figure over the surviving pairs is still returned, but under
+    `partial_observed_headline`, never as `headline`. Do not promote it.
+    """
+    ck = {r.get(key): r for r in ck_rows}
+    ctl = {r.get(key): r for r in control_rows}
+    probes = sorted({p for p in (set(ck) | set(ctl)) if p is not None})
+    expected = len(probes)
+
+    pairs: list[tuple[dict[str, Any], dict[str, Any]]] = []
+    reasons: dict[str, int] = {}
+
+    def note(reason: str) -> None:
+        reasons[reason] = reasons.get(reason, 0) + 1
+
+    for p in probes:
+        a, b = ck.get(p), ctl.get(p)
+        if a is None or b is None:
+            note("missing_row")
+            continue
+        if not row_is_valid_measurement(a):
+            note(f"ck:{row_status(a)}")
+            continue
+        if not row_is_valid_measurement(b):
+            note(f"control:{row_status(b)}")
+            continue
+        pairs.append((a, b))
+
+    def delta(a: dict[str, Any], b: dict[str, Any]) -> float:
+        sa, sb = a.get("scores") or {}, b.get("scores") or {}
+        d_struct = float(sa.get("structural_score") or 0.0) - float(
+            sb.get("structural_score") or 0.0
+        )
+        d_sem = float(sa.get("semantic_score") or 0.0) - float(sb.get("semantic_score") or 0.0)
+        return (d_struct + d_sem) / 2.0
+
+    deltas = [delta(a, b) for a, b in pairs]
+    partial = (sum(deltas) / len(deltas)) if deltas else None
+
+    out: dict[str, Any] = {
+        "valid_pairs": len(pairs),
+        "expected_pairs": expected,
+        "invalid_pairs": expected - len(pairs),
+        "coverage": (len(pairs) / expected) if expected else 0.0,
+    }
+    if expected == 0 or len(pairs) != expected:
+        out.update(
+            {
+                "status": "incomplete",
+                "headline": None,
+                "invalid_reasons": reasons,
+                "partial_observed_headline": partial,
+            }
+        )
+        return out
+    out.update({"status": "complete", "headline": partial, "invalid_reasons": {}})
+    return out
