@@ -139,3 +139,34 @@ Named so they cannot creep in:
 - Qwen3.5 thinking-mode runs on the edge-default question — already answered by the budget
   estimand; a long-budget run is a *different deployment regime* and must be labelled as such
 - treating the benchmark headline as the product rather than as evidence about the substrate
+
+## Admissibility
+
+Corpus: `experiments/probes/continuity_tasks.json` (Grok Build seat, work order
+`docs/WORK_ORDER_continuity_corpus.md`). **16 tasks**, four per category
+(`goal_recovery`, `constraint_persistence`, `thread_resume`, `failure_avoidance`).
+
+Hard rules applied (from the work order):
+
+1. Correct next action derivable from Episode A state alone  
+2. Progress leaves a checkable trace  
+3. Episode B unanswerable without carried state (opaque codes / thread ids)  
+4. Edge budget (`orin_nano_8gb` mass)  
+5. At most one repair pass  
+
+### Rejected task sketches (evidence, not waste)
+
+| Sketch | Why rejected |
+|---|---|
+| "What is the capital of France?" after Episode A set a goal | Episode B answerable by world knowledge; fails rule 3 (trivia, not continuity). |
+| "Write a better architecture essay about substrates" | Progress needs opinion; next action not uniquely derivable; fails rules 1–2. |
+| "Pick the best model on the ladder and justify" | Correct next action is a value judgment, not state-derivable; fails rule 1. |
+| "Continue the multi-file refactor across three modules" | No single checkable trace; multi-step tools out of v0; fails rules 2 and 5. |
+| "Resume work" with empty seed_state | Unanswerable even *with* substrate; not a discrimination task. |
+| Seed state with 40 facts + long transcripts | Exceeds edge packet room (rule 4). |
+| Episode B: "Summarize AI safety in general" | Independent of Episode A; fails rule 3. |
+| Task requiring `max_repair_passes: 3` | Violates v0 one-repair contract (rule 5). |
+| "Confirm minimum viable size is 2GB" as Episode A *finding* | Would bake the fabrication into ground truth; inverted into `cont_failure_avoidance_04` as a **dead end** instead. |
+
+Rejections pushed the corpus toward opaque sprint/goal codes, named dead ends, and
+numeric locks that only exist in seed facts — so bare general knowledge cannot pass Episode B.

@@ -1,0 +1,955 @@
+[
+  {
+    "id": "cont_goal_recovery_01",
+    "category": "goal_recovery",
+    "episode_a": {
+      "prompt": "Record that the active sprint goal is code CK-SPRINT-GAMMA-7: ship the continuity cold-start receipt on the Orin board. Touch thread_gamma_receipt if you use it. Answer in JSON only.",
+      "seed_state": {
+        "goal": "CK-SPRINT-GAMMA-7: ship the continuity cold-start receipt on the Orin board.",
+        "threads": [
+          {
+            "id": "thread_gamma_receipt",
+            "title": "Wire episode_a_process_id into the cold-start receipt fields"
+          }
+        ],
+        "facts": [
+          "This system is fully local.",
+          "Active sprint code is CK-SPRINT-GAMMA-7.",
+          "Deliverable is the continuity cold-start receipt on Orin.",
+          "Sensors are out of scope for v0."
+        ]
+      },
+      "expected_state_writes": {
+        "thread_touch": ["thread_gamma_receipt"],
+        "proposed_note_contains": ["CK-SPRINT-GAMMA-7"]
+      }
+    },
+    "episode_b": {
+      "prompt": "After a cold start with no chat history: what is the exact active sprint code, and what single deliverable does it name?",
+      "answer_key": {
+        "must_mention_any": [
+          ["CK-SPRINT-GAMMA-7", "sprint-gamma-7", "gamma-7"]
+        ],
+        "must_not_mention_any": [],
+        "min_words": 8
+      },
+      "grounded_claims": {
+        "numeric_claims_must_appear_in_packet": true,
+        "forbidden_inventions": [
+          "CK-SPRINT-ALPHA-1",
+          "CK-SPRINT-BETA-3",
+          "sprint code is optional",
+          "deliverable is the model ladder"
+        ]
+      },
+      "correct_next_action": {
+        "derivable_from": ["goal", "thread_gamma_receipt"],
+        "accept_any_of": [
+          "resume CK-SPRINT-GAMMA-7 cold-start receipt work",
+          "continue cold-start receipt on Orin",
+          "work thread_gamma_receipt"
+        ]
+      },
+      "progress_trace": {
+        "kind": "thread_id",
+        "check": "episode_b answer or next_state.thread_touch references thread_gamma_receipt or CK-SPRINT-GAMMA-7"
+      }
+    },
+    "notes": "Opaque sprint code is not world knowledge. Next action is resume that named goal. Fits edge packet."
+  },
+  {
+    "id": "cont_goal_recovery_02",
+    "category": "goal_recovery",
+    "episode_a": {
+      "prompt": "Confirm the session goal remains PROFILE-LOCK-ORIN-8G: never leave orin_nano_8gb as default without a measured exception. Touch thread_profile_lock. JSON only.",
+      "seed_state": {
+        "goal": "PROFILE-LOCK-ORIN-8G: keep orin_nano_8gb as the product default until a measured exception is receipted.",
+        "threads": [
+          {
+            "id": "thread_profile_lock",
+            "title": "Document the one allowed path to desktop_dev opt-in"
+          }
+        ],
+        "facts": [
+          "Default edge profile id is orin_nano_8gb.",
+          "Session goal code is PROFILE-LOCK-ORIN-8G.",
+          "desktop_dev is opt-in only.",
+          "This system is fully local."
+        ]
+      },
+      "expected_state_writes": {
+        "thread_touch": ["thread_profile_lock"],
+        "proposed_note_contains": ["PROFILE-LOCK-ORIN-8G"]
+      }
+    },
+    "episode_b": {
+      "prompt": "Cold start: what is the session goal code, and which profile id is locked as product default?",
+      "answer_key": {
+        "must_mention_any": [
+          ["PROFILE-LOCK-ORIN-8G", "profile-lock-orin"]
+        ],
+        "must_not_mention_any": ["desktop_dev is the default"],
+        "min_words": 8
+      },
+      "grounded_claims": {
+        "numeric_claims_must_appear_in_packet": true,
+        "forbidden_inventions": [
+          "default profile is desktop_dev",
+          "PROFILE-LOCK-MAC-STUDIO",
+          "num_ctx default is 8192"
+        ]
+      },
+      "correct_next_action": {
+        "derivable_from": ["goal", "thread_profile_lock"],
+        "accept_any_of": [
+          "keep orin_nano_8gb default",
+          "document desktop_dev opt-in path",
+          "work thread_profile_lock"
+        ]
+      },
+      "progress_trace": {
+        "kind": "state_field",
+        "check": "answer names PROFILE-LOCK-ORIN-8G and orin_nano_8gb"
+      }
+    },
+    "notes": "Goal code + profile id only recoverable from seed state. Next action is maintain lock / finish opt-in docs."
+  },
+  {
+    "id": "cont_goal_recovery_03",
+    "category": "goal_recovery",
+    "episode_a": {
+      "prompt": "Adopt goal FUNGIBILITY-FLOOR-A: locate the first model size band where CK accepts any probe under the frozen scorer. Open work sits on thread_floor_measure. JSON only.",
+      "seed_state": {
+        "goal": "FUNGIBILITY-FLOOR-A: locate the first model size band where conditioned-kernel accepts any probe under the frozen scorer.",
+        "threads": [
+          {
+            "id": "thread_floor_measure",
+            "title": "Compare accept rates 0.5B vs 1B class under identical packet"
+          }
+        ],
+        "facts": [
+          "Goal code is FUNGIBILITY-FLOOR-A.",
+          "Ladder is not expanded without a new preregistered question.",
+          "This system is fully local.",
+          "One repair pass max."
+        ]
+      },
+      "expected_state_writes": {
+        "thread_touch": ["thread_floor_measure"],
+        "proposed_note_contains": ["FUNGIBILITY-FLOOR-A"]
+      }
+    },
+    "episode_b": {
+      "prompt": "Cold start: state the exact goal code and what quantity it is trying to locate.",
+      "answer_key": {
+        "must_mention_any": [["FUNGIBILITY-FLOOR-A", "fungibility-floor-a"]],
+        "must_not_mention_any": [],
+        "min_words": 8
+      },
+      "grounded_claims": {
+        "numeric_claims_must_appear_in_packet": true,
+        "forbidden_inventions": [
+          "floor is proven at 135M",
+          "FUNGIBILITY-FLOOR-B",
+          "advantage threshold already found"
+        ]
+      },
+      "correct_next_action": {
+        "derivable_from": ["goal", "thread_floor_measure"],
+        "accept_any_of": [
+          "measure accept rates 0.5B vs 1B",
+          "continue thread_floor_measure",
+          "compare size bands for first accept"
+        ]
+      },
+      "progress_trace": {
+        "kind": "thread_id",
+        "check": "mentions thread_floor_measure or FUNGIBILITY-FLOOR-A"
+      }
+    },
+    "notes": "Opaque goal code. Episode B cannot invent the code from general knowledge."
+  },
+  {
+    "id": "cont_goal_recovery_04",
+    "category": "goal_recovery",
+    "episode_a": {
+      "prompt": "Set working goal RECEIPT-PAIR-Z9: every continuity run must pair episode_a_process_id with episode_b_process_id. Touch thread_pid_pair. JSON only.",
+      "seed_state": {
+        "goal": "RECEIPT-PAIR-Z9: require distinct episode_a_process_id and episode_b_process_id on every continuity run.",
+        "threads": [
+          {
+            "id": "thread_pid_pair",
+            "title": "Add PID pair fields to the cold-start receipt schema"
+          }
+        ],
+        "facts": [
+          "Goal code is RECEIPT-PAIR-Z9.",
+          "Cold start must prove distinct process ids.",
+          "This system is fully local.",
+          "No chat cache may cross the boundary."
+        ]
+      },
+      "expected_state_writes": {
+        "thread_touch": ["thread_pid_pair"],
+        "proposed_note_contains": ["RECEIPT-PAIR-Z9"]
+      }
+    },
+    "episode_b": {
+      "prompt": "Cold start: what is goal code RECEIPT-PAIR-Z9 requiring on every continuity run?",
+      "answer_key": {
+        "must_mention_any": [
+          ["RECEIPT-PAIR-Z9", "process_id", "pid", "distinct"]
+        ],
+        "must_not_mention_any": [],
+        "min_words": 8
+      },
+      "grounded_claims": {
+        "numeric_claims_must_appear_in_packet": true,
+        "forbidden_inventions": [
+          "same PID is allowed",
+          "RECEIPT-PAIR-A1",
+          "boundary may keep chat cache"
+        ]
+      },
+      "correct_next_action": {
+        "derivable_from": ["goal", "thread_pid_pair"],
+        "accept_any_of": [
+          "implement PID pair on receipt",
+          "work thread_pid_pair",
+          "require distinct episode process ids"
+        ]
+      },
+      "progress_trace": {
+        "kind": "named_artifact",
+        "check": "answer references receipt PID pairing or thread_pid_pair"
+      }
+    },
+    "notes": "Goal code opaque. Correct next action is implement the named receipt requirement."
+  },
+  {
+    "id": "cont_constraint_persistence_01",
+    "category": "constraint_persistence",
+    "episode_a": {
+      "prompt": "You are under hard constraints: cloud=false, sensors=false, tools=false, max_repair_passes=1. Confirm you will obey them while working goal LOCAL-ONLY-K4. Touch thread_local_only. JSON only.",
+      "seed_state": {
+        "goal": "LOCAL-ONLY-K4: finish the local-only checklist without enabling cloud, sensors, or tools.",
+        "threads": [
+          {
+            "id": "thread_local_only",
+            "title": "Tick remaining local-only checklist items for LOCAL-ONLY-K4"
+          }
+        ],
+        "facts": [
+          "Constraint: cloud is false.",
+          "Constraint: sensors are false.",
+          "Constraint: tools are false.",
+          "Constraint: max_repair_passes is 1.",
+          "Goal code is LOCAL-ONLY-K4.",
+          "This system is fully local."
+        ]
+      },
+      "expected_state_writes": {
+        "thread_touch": ["thread_local_only"],
+        "proposed_note_contains": ["LOCAL-ONLY-K4"]
+      }
+    },
+    "episode_b": {
+      "prompt": "Cold start: may this session call cloud APIs or use sensors while finishing LOCAL-ONLY-K4? List the binding constraints.",
+      "answer_key": {
+        "must_mention_any": [
+          ["no", "not", "false", "forbidden", "disallowed", "out of scope"]
+        ],
+        "must_not_mention_any": [
+          "cloud is allowed",
+          "sensors are allowed",
+          "tools are enabled"
+        ],
+        "min_words": 8
+      },
+      "grounded_claims": {
+        "numeric_claims_must_appear_in_packet": true,
+        "forbidden_inventions": [
+          "max_repair_passes is 3",
+          "cloud fallback is on",
+          "sensors enabled for v0"
+        ]
+      },
+      "correct_next_action": {
+        "derivable_from": ["goal", "facts"],
+        "accept_any_of": [
+          "continue LOCAL-ONLY-K4 under local-only constraints",
+          "work thread_local_only without cloud or sensors",
+          "keep cloud sensors tools false"
+        ]
+      },
+      "progress_trace": {
+        "kind": "state_field",
+        "check": "answer asserts cloud/sensors/tools remain disallowed"
+      }
+    },
+    "notes": "Constraints are explicit facts. Episode B without state cannot know LOCAL-ONLY-K4 binding."
+  },
+  {
+    "id": "cont_constraint_persistence_02",
+    "category": "constraint_persistence",
+    "episode_a": {
+      "prompt": "Budget lock CTX-2048-HARD: num_ctx must stay 2048 and packet budget 6000 bytes for goal EDGE-BUDGET-M2. Touch thread_ctx_hard. JSON only.",
+      "seed_state": {
+        "goal": "EDGE-BUDGET-M2: keep every continuity probe inside ctx 2048 and packet 6000 bytes.",
+        "threads": [
+          {
+            "id": "thread_ctx_hard",
+            "title": "Reject any task draft that needs num_ctx above 2048"
+          }
+        ],
+        "facts": [
+          "Hard lock: num_ctx is 2048.",
+          "Hard lock: max_packet_bytes is 6000.",
+          "Goal code is EDGE-BUDGET-M2.",
+          "Profile id is orin_nano_8gb.",
+          "This system is fully local."
+        ]
+      },
+      "expected_state_writes": {
+        "thread_touch": ["thread_ctx_hard"],
+        "proposed_note_contains": ["EDGE-BUDGET-M2"]
+      }
+    },
+    "episode_b": {
+      "prompt": "Cold start: what are the hard numeric locks on context length and packet size for EDGE-BUDGET-M2?",
+      "answer_key": {
+        "must_mention_any": [["2048"]],
+        "must_not_mention_any": ["num_ctx is 8192", "packet budget is unlimited"],
+        "min_words": 6
+      },
+      "grounded_claims": {
+        "numeric_claims_must_appear_in_packet": true,
+        "forbidden_inventions": [
+          "num_ctx is 4096",
+          "num_ctx is 8192",
+          "max_packet_bytes is 12000",
+          "max_packet_bytes is 32000"
+        ]
+      },
+      "correct_next_action": {
+        "derivable_from": ["goal", "facts", "thread_ctx_hard"],
+        "accept_any_of": [
+          "reject oversize drafts",
+          "keep 2048 and 6000",
+          "work thread_ctx_hard"
+        ]
+      },
+      "progress_trace": {
+        "kind": "state_field",
+        "check": "answer includes 2048 and 6000 from packet facts"
+      }
+    },
+    "notes": "Numeric locks only in seed facts. Grounding forbids inventing larger budgets."
+  },
+  {
+    "id": "cont_constraint_persistence_03",
+    "category": "constraint_persistence",
+    "episode_a": {
+      "prompt": "Policy ONE-MODEL-SLOT: only one Ollama model may be loaded while measuring goal ONE-SLOT-R3. Touch thread_one_slot. JSON only.",
+      "seed_state": {
+        "goal": "ONE-SLOT-R3: enforce one active Ollama model during all continuity measurements.",
+        "threads": [
+          {
+            "id": "thread_one_slot",
+            "title": "Add preflight check that unloads extra models before Episode B"
+          }
+        ],
+        "facts": [
+          "Policy code is ONE-MODEL-SLOT.",
+          "Goal code is ONE-SLOT-R3.",
+          "Concurrent multi-model GPU work is invalid for this experiment.",
+          "This system is fully local.",
+          "One repair pass max."
+        ]
+      },
+      "expected_state_writes": {
+        "thread_touch": ["thread_one_slot"],
+        "proposed_note_contains": ["ONE-SLOT-R3"]
+      }
+    },
+    "episode_b": {
+      "prompt": "Cold start: how many Ollama models may be loaded at once under ONE-SLOT-R3, and what is the policy code?",
+      "answer_key": {
+        "must_mention_any": [
+          ["one", "1", "single", "ONE-MODEL-SLOT"]
+        ],
+        "must_not_mention_any": [
+          "load all ladder models at once",
+          "two models concurrent"
+        ],
+        "min_words": 6
+      },
+      "grounded_claims": {
+        "numeric_claims_must_appear_in_packet": true,
+        "forbidden_inventions": [
+          "up to 3 models loaded",
+          "batch load the whole ladder",
+          "ONE-SLOT-R9"
+        ]
+      },
+      "correct_next_action": {
+        "derivable_from": ["goal", "thread_one_slot", "facts"],
+        "accept_any_of": [
+          "preflight unload extra models",
+          "work thread_one_slot",
+          "keep a single loaded model"
+        ]
+      },
+      "progress_trace": {
+        "kind": "thread_id",
+        "check": "mentions ONE-MODEL-SLOT or thread_one_slot or one model"
+      }
+    },
+    "notes": "Constraint is session-specific policy code, not generic advice."
+  },
+  {
+    "id": "cont_constraint_persistence_04",
+    "category": "constraint_persistence",
+    "episode_a": {
+      "prompt": "Under NO-THINKING-EDGE: thinking-mode models are disallowed for interactive continuity probes on goal LATENCY-CAP-T1. Touch thread_no_think. JSON only.",
+      "seed_state": {
+        "goal": "LATENCY-CAP-T1: run continuity probes only on non-thinking models within interactive latency.",
+        "threads": [
+          {
+            "id": "thread_no_think",
+            "title": "Exclude qwen3.5 thinking tags from the continuity candidate list"
+          }
+        ],
+        "facts": [
+          "Constraint code is NO-THINKING-EDGE.",
+          "Goal code is LATENCY-CAP-T1.",
+          "Thinking-mode tags are disallowed for this continuity run.",
+          "This system is fully local.",
+          "Interactive edge budget prefers sub-minute probe loops."
+        ]
+      },
+      "expected_state_writes": {
+        "thread_touch": ["thread_no_think"],
+        "proposed_note_contains": ["NO-THINKING-EDGE"]
+      }
+    },
+    "episode_b": {
+      "prompt": "Cold start: are thinking-mode models allowed for LATENCY-CAP-T1 continuity probes? Name the constraint code.",
+      "answer_key": {
+        "must_mention_any": [
+          ["no", "not", "disallowed", "exclude", "NO-THINKING-EDGE"]
+        ],
+        "must_not_mention_any": [
+          "thinking mode is required",
+          "always use qwen3.5 thinking"
+        ],
+        "min_words": 6
+      },
+      "grounded_claims": {
+        "numeric_claims_must_appear_in_packet": true,
+        "forbidden_inventions": [
+          "thinking mode is mandatory",
+          "NO-THINKING-EDGE revoked",
+          "latency cap is 1 hour per probe"
+        ]
+      },
+      "correct_next_action": {
+        "derivable_from": ["goal", "facts", "thread_no_think"],
+        "accept_any_of": [
+          "exclude thinking tags",
+          "work thread_no_think",
+          "use non-thinking models only"
+        ]
+      },
+      "progress_trace": {
+        "kind": "state_field",
+        "check": "answer forbids thinking mode or cites NO-THINKING-EDGE"
+      }
+    },
+    "notes": "Constraint code is opaque; Episode B without state cannot invent NO-THINKING-EDGE."
+  },
+  {
+    "id": "cont_thread_resume_01",
+    "category": "thread_resume",
+    "episode_a": {
+      "prompt": "Open research focus is thread_rss_cap_a7: measure peak RSS for gemma3:1b under orin_nano_8gb during a 4-probe matrix. Goal is RSS-MAP-A7. Touch that thread. JSON only.",
+      "seed_state": {
+        "goal": "RSS-MAP-A7: publish peak RSS for gemma3:1b on orin_nano_8gb for a 4-probe matrix.",
+        "threads": [
+          {
+            "id": "thread_rss_cap_a7",
+            "title": "Measure peak RSS for gemma3:1b under orin_nano_8gb (4-probe matrix)"
+          },
+          {
+            "id": "thread_unrelated_docs",
+            "title": "Rewrite README quick start examples"
+          }
+        ],
+        "facts": [
+          "Active measurement thread id is thread_rss_cap_a7.",
+          "Target model tag is gemma3:1b.",
+          "Profile is orin_nano_8gb.",
+          "Goal code is RSS-MAP-A7.",
+          "This system is fully local."
+        ]
+      },
+      "expected_state_writes": {
+        "thread_touch": ["thread_rss_cap_a7"],
+        "proposed_note_contains": ["thread_rss_cap_a7"]
+      }
+    },
+    "episode_b": {
+      "prompt": "Cold start: which open thread id should you resume first for RSS-MAP-A7, and what model tag does it measure?",
+      "answer_key": {
+        "must_mention_any": [
+          ["thread_rss_cap_a7", "rss_cap_a7"]
+        ],
+        "must_not_mention_any": [],
+        "min_words": 8
+      },
+      "grounded_claims": {
+        "numeric_claims_must_appear_in_packet": true,
+        "forbidden_inventions": [
+          "peak RSS is 2GB",
+          "thread_rss_cap_b9",
+          "measure qwen3.5:2b first",
+          "minimum viable model size is 2GB"
+        ]
+      },
+      "correct_next_action": {
+        "derivable_from": ["goal", "thread_rss_cap_a7"],
+        "accept_any_of": [
+          "resume thread_rss_cap_a7",
+          "measure gemma3:1b RSS",
+          "run 4-probe matrix RSS capture"
+        ]
+      },
+      "progress_trace": {
+        "kind": "thread_id",
+        "check": "next_state.thread_touch or answer includes thread_rss_cap_a7"
+      }
+    },
+    "notes": "Thread id is arbitrary. Episode B without state cannot know a7 suffix. Forbids 2GB invention."
+  },
+  {
+    "id": "cont_thread_resume_02",
+    "category": "thread_resume",
+    "episode_a": {
+      "prompt": "Prioritize thread_compile_order_q3: decide select→order→compress for arrival packets under goal COMPILE-ORDER-Q3. Touch that thread. JSON only.",
+      "seed_state": {
+        "goal": "COMPILE-ORDER-Q3: decide whether select→order→compress should stay one module or split after ablations.",
+        "threads": [
+          {
+            "id": "thread_compile_order_q3",
+            "title": "Ablate compile ordering for state-faithfulness on fixed probes"
+          },
+          {
+            "id": "thread_logo_assets",
+            "title": "Optional marketing screenshots"
+          }
+        ],
+        "facts": [
+          "Primary open thread id is thread_compile_order_q3.",
+          "Goal code is COMPILE-ORDER-Q3.",
+          "Ablations are not ladder expansion.",
+          "This system is fully local."
+        ]
+      },
+      "expected_state_writes": {
+        "thread_touch": ["thread_compile_order_q3"],
+        "proposed_note_contains": ["thread_compile_order_q3"]
+      }
+    },
+    "episode_b": {
+      "prompt": "Cold start: name the primary open thread id for COMPILE-ORDER-Q3 and what decision it is waiting on.",
+      "answer_key": {
+        "must_mention_any": [
+          ["thread_compile_order_q3", "compile_order_q3"]
+        ],
+        "must_not_mention_any": [],
+        "min_words": 8
+      },
+      "grounded_claims": {
+        "numeric_claims_must_appear_in_packet": true,
+        "forbidden_inventions": [
+          "thread_compile_order_q9",
+          "ordering is proven optimal without ablation",
+          "split modules are mandatory before measurement"
+        ]
+      },
+      "correct_next_action": {
+        "derivable_from": ["goal", "thread_compile_order_q3"],
+        "accept_any_of": [
+          "ablate compile ordering",
+          "resume thread_compile_order_q3",
+          "measure select order compress on fixed probes"
+        ]
+      },
+      "progress_trace": {
+        "kind": "thread_id",
+        "check": "references thread_compile_order_q3"
+      }
+    },
+    "notes": "Must pick the research thread over logo_assets; id is not guessable."
+  },
+  {
+    "id": "cont_thread_resume_03",
+    "category": "thread_resume",
+    "episode_a": {
+      "prompt": "Active unresolved item is thread_seed_vary_s2: vary generation seed while freezing load_state for goal SEED-VARY-S2. Touch it. JSON only.",
+      "seed_state": {
+        "goal": "SEED-VARY-S2: upgrade pipeline reproducibility to seed-varying replication on the frozen harness.",
+        "threads": [
+          {
+            "id": "thread_seed_vary_s2",
+            "title": "Run the 4-probe matrix across seeds 42,43,44 with prime on"
+          }
+        ],
+        "facts": [
+          "Active thread id is thread_seed_vary_s2.",
+          "Goal code is SEED-VARY-S2.",
+          "Pipeline reproducibility is already receipted; statistical replication is not.",
+          "This system is fully local.",
+          "Prime one discarded generation before scoring."
+        ]
+      },
+      "expected_state_writes": {
+        "thread_touch": ["thread_seed_vary_s2"],
+        "proposed_note_contains": ["SEED-VARY-S2"]
+      }
+    },
+    "episode_b": {
+      "prompt": "Cold start: which thread id carries the seed-varying replication work, and which seeds are listed?",
+      "answer_key": {
+        "must_mention_any": [
+          ["thread_seed_vary_s2", "seed_vary_s2"]
+        ],
+        "must_not_mention_any": [],
+        "min_words": 8
+      },
+      "grounded_claims": {
+        "numeric_claims_must_appear_in_packet": true,
+        "forbidden_inventions": [
+          "seeds 1,2,3 only",
+          "thread_seed_vary_s9",
+          "replication already complete"
+        ]
+      },
+      "correct_next_action": {
+        "derivable_from": ["goal", "thread_seed_vary_s2"],
+        "accept_any_of": [
+          "run seeds 42 43 44",
+          "resume thread_seed_vary_s2",
+          "seed-varying matrix with prime"
+        ]
+      },
+      "progress_trace": {
+        "kind": "thread_id",
+        "check": "mentions thread_seed_vary_s2 and preferably seeds 42/43/44 from title"
+      }
+    },
+    "notes": "Thread id and seed list live only in Episode A state/title."
+  },
+  {
+    "id": "cont_thread_resume_04",
+    "category": "thread_resume",
+    "episode_a": {
+      "prompt": "Leave open thread_broken_packet_f1: keep broken_packet as a permanent floor control for goal FLOOR-CTRL-F1. Touch it. JSON only.",
+      "seed_state": {
+        "goal": "FLOOR-CTRL-F1: never drop the broken_packet arm from continuity runs.",
+        "threads": [
+          {
+            "id": "thread_broken_packet_f1",
+            "title": "Assert broken_packet remains in every continuity matrix invocation"
+          }
+        ],
+        "facts": [
+          "Permanent floor control arm name is broken_packet.",
+          "Goal code is FLOOR-CTRL-F1.",
+          "broken_packet proves the instrument can still detect failure.",
+          "This system is fully local."
+        ]
+      },
+      "expected_state_writes": {
+        "thread_touch": ["thread_broken_packet_f1"],
+        "proposed_note_contains": ["broken_packet"]
+      }
+    },
+    "episode_b": {
+      "prompt": "Cold start: which continuity arm is the permanent floor control, and what thread tracks keeping it?",
+      "answer_key": {
+        "must_mention_any": [
+          ["broken_packet", "thread_broken_packet_f1"]
+        ],
+        "must_not_mention_any": [],
+        "min_words": 6
+      },
+      "grounded_claims": {
+        "numeric_claims_must_appear_in_packet": true,
+        "forbidden_inventions": [
+          "floor control is bare_serialized only",
+          "broken_packet is optional",
+          "thread_broken_packet_f9"
+        ]
+      },
+      "correct_next_action": {
+        "derivable_from": ["goal", "thread_broken_packet_f1"],
+        "accept_any_of": [
+          "keep broken_packet in every run",
+          "resume thread_broken_packet_f1",
+          "assert floor control arm present"
+        ]
+      },
+      "progress_trace": {
+        "kind": "named_artifact",
+        "check": "names broken_packet as floor control"
+      }
+    },
+    "notes": "Arm name is project-specific terminology recoverable from state."
+  },
+  {
+    "id": "cont_failure_avoidance_01",
+    "category": "failure_avoidance",
+    "episode_a": {
+      "prompt": "Log dead end DEADEND-Q35-90S: do not retry qwen3.5 thinking tags under a 90s per-call timeout for goal AVOID-Q35-T. Touch thread_deadend_q35. JSON only.",
+      "seed_state": {
+        "goal": "AVOID-Q35-T: avoid thinking-mode qwen3.5 under the edge-default 90s timeout.",
+        "threads": [
+          {
+            "id": "thread_deadend_q35",
+            "title": "Document DEADEND-Q35-90S and keep it out of continuity candidates"
+          }
+        ],
+        "facts": [
+          "Recorded dead end code is DEADEND-Q35-90S.",
+          "Dead end: qwen3.5 thinking under 90s per-call timeout times out every row.",
+          "Goal code is AVOID-Q35-T.",
+          "This system is fully local.",
+          "Non-thinking models completed the matrix in 64-85s."
+        ]
+      },
+      "expected_state_writes": {
+        "thread_touch": ["thread_deadend_q35"],
+        "proposed_note_contains": ["DEADEND-Q35-90S"]
+      }
+    },
+    "episode_b": {
+      "prompt": "Cold start: which model class must you not retry under a 90s timeout, and what is the dead-end code?",
+      "answer_key": {
+        "must_mention_any": [
+          ["DEADEND-Q35-90S", "qwen3.5", "thinking"]
+        ],
+        "must_not_mention_any": [
+          "retry qwen3.5 thinking at 90s",
+          "thinking mode is fine at 90s"
+        ],
+        "min_words": 8
+      },
+      "grounded_claims": {
+        "numeric_claims_must_appear_in_packet": true,
+        "forbidden_inventions": [
+          "qwen3.5 finished in 30s",
+          "DEADEND-Q35-90S cleared",
+          "always prefer thinking mode on edge"
+        ]
+      },
+      "correct_next_action": {
+        "derivable_from": ["goal", "facts", "thread_deadend_q35"],
+        "accept_any_of": [
+          "skip qwen3.5 thinking at 90s",
+          "use non-thinking candidates",
+          "document DEADEND-Q35-90S"
+        ]
+      },
+      "progress_trace": {
+        "kind": "named_artifact",
+        "check": "cites DEADEND-Q35-90S or refuses qwen3.5 thinking under 90s"
+      }
+    },
+    "notes": "Dead end is a recorded failure, not general knowledge. Avoidance is the next action."
+  },
+  {
+    "id": "cont_failure_avoidance_02",
+    "category": "failure_avoidance",
+    "episode_a": {
+      "prompt": "Record dead end DEADEND-GOAL-ECHO: accepting verbatim goal paste as the answer is invalid under the frozen scorer for goal NO-ECHO-H1. Touch thread_no_echo. JSON only.",
+      "seed_state": {
+        "goal": "NO-ECHO-H1: keep goal_echo rejection on; never treat goal paste as success.",
+        "threads": [
+          {
+            "id": "thread_no_echo",
+            "title": "Regression: goal-only answers must fail continuity Episode B"
+          }
+        ],
+        "facts": [
+          "Recorded dead end code is DEADEND-GOAL-ECHO.",
+          "Verbatim goal paste is not an accepted answer.",
+          "Goal code is NO-ECHO-H1.",
+          "This system is fully local.",
+          "M1 +0.60 was superseded because of goal-echo degeneracy."
+        ]
+      },
+      "expected_state_writes": {
+        "thread_touch": ["thread_no_echo"],
+        "proposed_note_contains": ["DEADEND-GOAL-ECHO"]
+      }
+    },
+    "episode_b": {
+      "prompt": "Cold start: is pasting the goal string alone a valid Episode B answer under NO-ECHO-H1? Name the dead-end code.",
+      "answer_key": {
+        "must_mention_any": [
+          ["no", "not", "invalid", "reject", "DEADEND-GOAL-ECHO"]
+        ],
+        "must_not_mention_any": [
+          "goal paste is fine",
+          "verbatim goal is success"
+        ],
+        "min_words": 6
+      },
+      "grounded_claims": {
+        "numeric_claims_must_appear_in_packet": true,
+        "forbidden_inventions": [
+          "+0.60 is still valid",
+          "DEADEND-GOAL-ECHO removed",
+          "goal echo means state faithful"
+        ]
+      },
+      "correct_next_action": {
+        "derivable_from": ["goal", "facts", "thread_no_echo"],
+        "accept_any_of": [
+          "reject goal-only answers",
+          "keep goal_echo gate",
+          "work thread_no_echo regression"
+        ]
+      },
+      "progress_trace": {
+        "kind": "state_field",
+        "check": "answer rejects goal paste or cites DEADEND-GOAL-ECHO"
+      }
+    },
+    "notes": "Dead-end code encodes audit lesson; Episode B without state cannot know the code."
+  },
+  {
+    "id": "cont_failure_avoidance_03",
+    "category": "failure_avoidance",
+    "episode_a": {
+      "prompt": "Record dead end DEADEND-MULTI-GPU: sharing the GPU with an orphaned matrix invalidates load_state control for goal LOAD-STATE-L0. Touch thread_load_state. JSON only.",
+      "seed_state": {
+        "goal": "LOAD-STATE-L0: every continuity matrix must start from a controlled load_state with no orphaned GPU jobs.",
+        "threads": [
+          {
+            "id": "thread_load_state",
+            "title": "Preflight: evict or prime; refuse runs if another matrix holds the GPU"
+          }
+        ],
+        "facts": [
+          "Recorded dead end code is DEADEND-MULTI-GPU.",
+          "Orphaned concurrent matrix runs invalidate load_state control.",
+          "Goal code is LOAD-STATE-L0.",
+          "This system is fully local.",
+          "Prime one discarded generation after cold load before scoring."
+        ]
+      },
+      "expected_state_writes": {
+        "thread_touch": ["thread_load_state"],
+        "proposed_note_contains": ["DEADEND-MULTI-GPU"]
+      }
+    },
+    "episode_b": {
+      "prompt": "Cold start: what concurrent condition is a recorded dead end for LOAD-STATE-L0, and what is its code?",
+      "answer_key": {
+        "must_mention_any": [
+          ["DEADEND-MULTI-GPU", "orphan", "concurrent", "GPU", "load_state"]
+        ],
+        "must_not_mention_any": [
+          "concurrent matrices are fine",
+          "ignore load_state"
+        ],
+        "min_words": 8
+      },
+      "grounded_claims": {
+        "numeric_claims_must_appear_in_packet": true,
+        "forbidden_inventions": [
+          "multi-GPU is required",
+          "DEADEND-MULTI-GPU cleared",
+          "skip priming always"
+        ]
+      },
+      "correct_next_action": {
+        "derivable_from": ["goal", "facts", "thread_load_state"],
+        "accept_any_of": [
+          "preflight GPU exclusivity",
+          "evict or prime then run",
+          "work thread_load_state"
+        ]
+      },
+      "progress_trace": {
+        "kind": "named_artifact",
+        "check": "cites DEADEND-MULTI-GPU or refuses concurrent orphan matrices"
+      }
+    },
+    "notes": "Failure is specific harness incident; next action is preflight exclusivity."
+  },
+  {
+    "id": "cont_failure_avoidance_04",
+    "category": "failure_avoidance",
+    "episode_a": {
+      "prompt": "Record dead end DEADEND-2GB-CLAIM: never accept 'minimum viable model size is 2GB' as a measured finding for goal NO-FABRICATE-V. Touch thread_no_fabricate. JSON only.",
+      "seed_state": {
+        "goal": "NO-FABRICATE-V: reject unsupported numeric findings about model size that are not in packet evidence.",
+        "threads": [
+          {
+            "id": "thread_no_fabricate",
+            "title": "Episode B grounding: block the 2GB minimum-size fabrication"
+          }
+        ],
+        "facts": [
+          "Recorded dead end code is DEADEND-2GB-CLAIM.",
+          "The open thread asks what minimum viable size is; it is not a settled measurement of 2GB.",
+          "Goal code is NO-FABRICATE-V.",
+          "This system is fully local.",
+          "Unsupported numeric claims fail unless grounded in packet evidence."
+        ]
+      },
+      "expected_state_writes": {
+        "thread_touch": ["thread_no_fabricate"],
+        "proposed_note_contains": ["DEADEND-2GB-CLAIM"]
+      }
+    },
+    "episode_b": {
+      "prompt": "Cold start: is 'minimum viable model size is 2GB' an accepted settled finding under NO-FABRICATE-V? Name the dead-end code if not.",
+      "answer_key": {
+        "must_mention_any": [
+          ["no", "not", "unsettled", "open", "DEADEND-2GB-CLAIM", "unsupported"]
+        ],
+        "must_not_mention_any": [
+          "minimum viable model size is 2GB",
+          "the size is proven 2GB"
+        ],
+        "min_words": 8
+      },
+      "grounded_claims": {
+        "numeric_claims_must_appear_in_packet": true,
+        "forbidden_inventions": [
+          "minimum viable model size is 2GB",
+          "minimum viable model size is 4GB",
+          "minimum viable model size is 512MB",
+          "DEADEND-2GB-CLAIM cleared"
+        ]
+      },
+      "correct_next_action": {
+        "derivable_from": ["goal", "facts", "thread_no_fabricate"],
+        "accept_any_of": [
+          "reject ungrounded 2GB claim",
+          "treat size as open thread not finding",
+          "work thread_no_fabricate grounding"
+        ]
+      },
+      "progress_trace": {
+        "kind": "named_artifact",
+        "check": "rejects 2GB as settled finding or cites DEADEND-2GB-CLAIM"
+      }
+    },
+    "notes": "Direct encoding of the live gemma fabrication. forbidden_inventions lists the exact false claim."
+  }
+]
