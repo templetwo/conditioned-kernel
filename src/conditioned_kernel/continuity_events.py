@@ -1,0 +1,150 @@
+"""Append-only continuity event schema and canonical state hashing.
+
+RUN 00.6B: events are authoritative; materialized state is derived.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from typing import Any, Mapping, Sequence
+
+EVENT_SCHEMA_VERSION = "ck.continuity_event.v1"
+GENESIS_SCHEMA_VERSION = "ck.genesis.v1"
+VALIDATOR_VERSION = "ck.continuity_validator.v1"
+RELATION_ATOM_KEYS = frozenset({"subject_id", "relation", "object_id"})
+
+# Global closed relation vocabulary (universe may subset further).
+ALLOWED_RELATIONS = frozenset(
+    {
+        "remains_open",
+        "is_answered",
+        "depends_on",
+        "blocked_by",
+        "references",
+    }
+)
+
+
+def canonical_json_bytes(obj: Any) -> bytes:
+    """Deterministic UTF-8 JSON bytes (sorted keys, no insignificant whitespace)."""
+    return json.dumps(
+        obj, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+    ).encode("utf-8")
+
+
+def sha256_hex(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def candidate_hash(raw: str | bytes) -> str:
+    if isinstance(raw, str):
+        raw_b = raw.encode("utf-8")
+    else:
+        raw_b = raw
+    return sha256_hex(raw_b)
+
+
+def relation_atom(
+    subject_id: str, relation: str, object_id: str
+) -> dict[str, str]:
+    return {
+        "subject_id": subject_id,
+        "relation": relation,
+        "object_id": object_id,
+    }
+
+
+def normalize_relations(
+    relations: Sequence[Mapping[str, Any]],
+) -> list[dict[str, str]]:
+    """Sort relation atoms for deterministic materialization."""
+    atoms: list[dict[str, str]] = []
+    for r in relations:
+        atoms.append(
+            relation_atom(
+                str(r["subject_id"]),
+                str(r["relation"]),
+                str(r["object_id"]),
+            )
+        )
+    atoms.sort(key=lambda a: (a["subject_id"], a["relation"], a["object_id"]))
+    return atoms
+
+
+def materialize_state(
+    genesis: Mapping[str, Any],
+    events: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Derive canonical state from genesis + ordered accepted events.
+
+    Free-form prose never enters accepted_relations.
+    """
+    rels: list[dict[str, str]] = []
+    for seed in genesis.get("seed_relations") or []:
+        if isinstance(seed, Mapping):
+            rels.append(
+                relation_atom(
+                    str(seed["subject_id"]),
+                    str(seed["relation"]),
+                    str(seed["object_id"]),
+                )
+            )
+    for ev in events:
+        rels.append(
+            relation_atom(
+                str(ev["subject_id"]),
+                str(ev["relation"]),
+                str(ev["object_id"]),
+            )
+        )
+    # Deduplicate while preserving deterministic order via sort
+    unique = { (a["subject_id"], a["relation"], a["object_id"]): a for a in rels }
+    ordered = normalize_relations(list(unique.values()))
+    return {
+        "schema_version": "ck.materialized_state.v1",
+        "genesis_hash": sha256_hex(canonical_json_bytes(dict(genesis))),
+        "accepted_relations": ordered,
+    }
+
+
+def canonical_state_hash(
+    genesis: Mapping[str, Any],
+    events: Sequence[Mapping[str, Any]],
+) -> str:
+    return sha256_hex(canonical_json_bytes(materialize_state(genesis, events)))
+
+
+def build_event(
+    *,
+    event_id: str,
+    sequence: int,
+    parent_state_hash: str,
+    resulting_state_hash: str,
+    episode_id: str,
+    subject_id: str,
+    relation: str,
+    object_id: str,
+    source_candidate_hash: str,
+    acceptance_reason_code: str,
+    timestamp: str,
+    repo_commit: str | None,
+    provenance: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    return {
+        "schema_version": EVENT_SCHEMA_VERSION,
+        "event_id": event_id,
+        "sequence": sequence,
+        "parent_state_hash": parent_state_hash,
+        "resulting_state_hash": resulting_state_hash,
+        "episode_id": episode_id,
+        "subject_id": subject_id,
+        "relation": relation,
+        "object_id": object_id,
+        "source_candidate_hash": source_candidate_hash,
+        "validator_version": VALIDATOR_VERSION,
+        "acceptance_reason_code": acceptance_reason_code,
+        "timestamp": timestamp,
+        "repo_commit": repo_commit,
+        "provenance": dict(provenance or {}),
+    }

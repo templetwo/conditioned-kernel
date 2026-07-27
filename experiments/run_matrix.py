@@ -29,8 +29,18 @@ from conditioned_kernel.compile import CANDIDATE_FORMAT, build_arrival_packet  #
 from conditioned_kernel.edge import DEFAULT_PROFILE_ID, load_profile  # noqa: E402
 from conditioned_kernel.generate import (  # noqa: E402
     DEFAULT_BASE_URL,
+    InferenceResult,
     OllamaClient,
     OllamaError,
+    RunStatus,
+)
+from conditioned_kernel.outcomes import (  # noqa: E402
+    EmptyManifestError,
+    ExecutionOutcome,
+    TerminalLedger,
+    TerminalStatus,
+    build_manifest,
+    outcome_from_inference,
 )
 from conditioned_kernel.pipeline import run_turn  # noqa: E402
 from conditioned_kernel.score import (  # noqa: E402
@@ -41,6 +51,21 @@ from conditioned_kernel.score import (  # noqa: E402
     substrate_gain,
 )
 from conditioned_kernel.state import SubstrateState  # noqa: E402
+
+
+def matrix_headline_policy() -> dict[str, Any]:
+    """Experiment-owned matrix headline policy (not ledger infrastructure).
+
+    docs/EXPERIMENT_PROTOCOL.md describes a paired-coverage headline gate, but
+    no machine-bound, versioned eligibility function is ratified for the current
+    runner (and 00.6A.2 does not invent numeric thresholds). Matrix events must
+    therefore mark headlines pending ratification — never with Episode-A language.
+    """
+    return {
+        "headline_eligible": False,
+        "scientific_status": "pending_ratified_headline_rule",
+        "headline_ineligible_reason": "matrix_headline_rule_not_ratified",
+    }
 
 
 def collect_environment(model: str) -> dict[str, Any]:
@@ -92,7 +117,7 @@ def prime_model(client: OllamaClient, model: str, prof: Any) -> dict[str, Any]:
     """
     receipt: dict[str, Any] = {"primed": False, "error": None}
     try:
-        fair_generate(
+        res = fair_generate(
             client,
             model,
             "warmup",
@@ -100,7 +125,9 @@ def prime_model(client: OllamaClient, model: str, prof: Any) -> dict[str, Any]:
             system="Reply with the single word: ok",
             use_format=False,
         )
-        receipt["primed"] = True
+        receipt["primed"] = res.status is RunStatus.COMPLETED
+        if res.status is not RunStatus.COMPLETED:
+            receipt["error"] = res.error or res.status.value
     except Exception as e:  # priming must never abort a run
         receipt["error"] = f"{type(e).__name__}: {e}"
     return receipt
@@ -114,7 +141,12 @@ def fair_generate(
     num_ctx: int,
     system: str,
     use_format: bool,
-) -> str:
+) -> InferenceResult:
+    """Control-path inference via the canonical typed OllamaClient.run boundary.
+
+    Returns InferenceResult so callers never reconstruct timeout/transport/
+    no-final status from exception strings or empty text.
+    """
     payload: dict = {
         "model": model,
         "messages": [
@@ -126,8 +158,7 @@ def fair_generate(
     }
     if use_format:
         payload["format"] = CANDIDATE_FORMAT
-    r = client.generate({"mode": "chat_json", "payload": payload})
-    return OllamaClient.extract_text(r, "chat_json")
+    return client.run({"mode": "chat_json", "payload": payload})
 
 
 def budget_matched_prompt(state: SubstrateState, user_input: str) -> str:
@@ -204,6 +235,36 @@ def main() -> int:
     probes = load_probes(args.probes)
     if args.limit and args.limit > 0:
         probes = probes[: args.limit]
+    conditions = [c.strip() for c in args.conditions.split(",") if c.strip()]
+
+    # Fail closed before any generation: empty planned manifest is not a run.
+    run_id = f"matrix_{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
+    probe_ids = [str(p.get("id") or f"probe_{i}") for i, p in enumerate(probes)]
+    try:
+        planned_cells = build_manifest(
+            run_id=run_id,
+            task_ids=probe_ids,
+            condition_ids=conditions,
+            episodes=[None],
+        )
+        ledger = TerminalLedger(planned_cells, run_id=run_id)
+    except EmptyManifestError as e:
+        print(f"EMPTY_MANIFEST: {e}", file=sys.stderr)
+        print(
+            "CK_EVENT "
+            + json.dumps(
+                {
+                    "event": "matrix.run.aborted",
+                    "reason_code": e.reason_code,
+                    "error": str(e),
+                    "headline_eligible": False,
+                    "scientific_completion_n": 0,
+                },
+                separators=(",", ":"),
+            ),
+            file=sys.stderr,
+        )
+        return 3
 
     timeout_s = args.timeout if args.timeout else prof.timeout_s
     client = OllamaClient(timeout=timeout_s)
@@ -226,7 +287,6 @@ def main() -> int:
         logs_dir.mkdir(parents=True, exist_ok=True)
 
     state = SubstrateState.load(state_dir=state_dir, logs_dir=logs_dir)
-    conditions = [c.strip() for c in args.conditions.split(",") if c.strip()]
 
     fair_system = (
         "Return ONLY valid JSON with keys answer, evidence_used, next_state. "
@@ -238,6 +298,9 @@ def main() -> int:
 
     rows: list[dict] = []
     by_cond: dict[str, list] = {c: [] for c in conditions}
+    cell_by_key = {
+        (c.task_id, c.condition_id): c for c in planned_cells
+    }
 
     print(
         f"matrix profile={prof.profile_id} model={model} ctx={prof.num_ctx} "
@@ -256,11 +319,12 @@ def main() -> int:
     try:
         for probe in probes:
             prompt = probe.get("prompt") or ""
-            pid = probe.get("id") or "probe"
+            pid = str(probe.get("id") or "probe")
             # Shared packet surface for scoring (same state for all conditions)
             packet = build_arrival_packet(state, prompt, profile=prof, enforce_budget=True)
 
             for cond in conditions:
+                cell = cell_by_key[(pid, cond)]
                 row: dict = {
                     "probe_id": pid,
                     "category": probe.get("category"),
@@ -270,10 +334,13 @@ def main() -> int:
                     "num_ctx": prof.num_ctx,
                     "prompt": prompt,
                     "fair_format": args.fair_format,
+                    "manifest_cell_id": cell.cell_id,
                 }
+                exec_outcome: ExecutionOutcome | None = None
+                inference_result: InferenceResult | None = None
                 try:
                     if cond == "bare":
-                        text = fair_generate(
+                        inference_result = fair_generate(
                             client,
                             model,
                             prompt,
@@ -281,11 +348,37 @@ def main() -> int:
                             system=fair_system,
                             use_format=args.fair_format,
                         )
-                        row["raw"] = text
-                        row["decision"] = "n/a_bare"
-                        row["scores"] = score_output(text, packet=packet, probe=probe)
+                        if inference_result.observed:
+                            text = (
+                                inference_result.output
+                                if inference_result.output is not None
+                                else ""
+                            )
+                            row["raw"] = text
+                            row["decision"] = "n/a_bare"
+                            row["scores"] = score_output(text, packet=packet, probe=probe)
+                            # Control path has no accept gate. Single outcome object.
+                            exec_outcome = ExecutionOutcome(
+                                status=TerminalStatus.COMPLETED_INVALID,
+                                output=text,
+                                scientific_completion=False,
+                                dry_run=False,
+                                quality_admitted=True,
+                                decision="n/a_bare",
+                                reason_codes=("control_observed",),
+                                inference=inference_result.to_dict(),
+                                **ExecutionOutcome._cell_fields(cell),
+                            )
+                        else:
+                            row["raw"] = None
+                            row["decision"] = "error"
+                            row["error"] = inference_result.error or inference_result.status.value
+                            row["scores"] = {}
+                            exec_outcome = outcome_from_inference(
+                                inference_result, cell=cell, decision="error"
+                            )
                     elif cond == "budget_matched_bare":
-                        text = fair_generate(
+                        inference_result = fair_generate(
                             client,
                             model,
                             budget_matched_prompt(state, prompt),
@@ -293,9 +386,34 @@ def main() -> int:
                             system=fair_system,
                             use_format=args.fair_format,
                         )
-                        row["raw"] = text
-                        row["decision"] = "n/a_budget_matched"
-                        row["scores"] = score_output(text, packet=packet, probe=probe)
+                        if inference_result.observed:
+                            text = (
+                                inference_result.output
+                                if inference_result.output is not None
+                                else ""
+                            )
+                            row["raw"] = text
+                            row["decision"] = "n/a_budget_matched"
+                            row["scores"] = score_output(text, packet=packet, probe=probe)
+                            exec_outcome = ExecutionOutcome(
+                                status=TerminalStatus.COMPLETED_INVALID,
+                                output=text,
+                                scientific_completion=False,
+                                dry_run=False,
+                                quality_admitted=True,
+                                decision="n/a_budget_matched",
+                                reason_codes=("control_observed",),
+                                inference=inference_result.to_dict(),
+                                **ExecutionOutcome._cell_fields(cell),
+                            )
+                        else:
+                            row["raw"] = None
+                            row["decision"] = "error"
+                            row["error"] = inference_result.error or inference_result.status.value
+                            row["scores"] = {}
+                            exec_outcome = outcome_from_inference(
+                                inference_result, cell=cell, decision="error"
+                            )
                     elif cond == "ck_strict":
                         tr = run_turn(
                             prompt,
@@ -312,48 +430,115 @@ def main() -> int:
                             packet = build_arrival_packet(
                                 state, prompt, profile=prof, enforce_budget=True
                             )
-                        row["raw"] = tr.answer
+                        exec_outcome = tr.execution_outcome
+                        if exec_outcome is not None and exec_outcome.manifest_cell_id is None:
+                            # Re-bind product outcome to this matrix cell.
+                            exec_outcome = ExecutionOutcome(
+                                status=exec_outcome.status,
+                                output=exec_outcome.output,
+                                scientific_completion=exec_outcome.scientific_completion,
+                                dry_run=exec_outcome.dry_run,
+                                quality_admitted=exec_outcome.quality_admitted,
+                                decision=exec_outcome.decision,
+                                reason_codes=exec_outcome.reason_codes,
+                                error=exec_outcome.error,
+                                manifest_cell_id=cell.cell_id,
+                                task_id=cell.task_id,
+                                condition_id=cell.condition_id,
+                                episode=cell.episode,
+                                run_id=cell.run_id,
+                                candidate_id=exec_outcome.candidate_id,
+                                blocked_by_manifest_cell_id=exec_outcome.blocked_by_manifest_cell_id,
+                                inference=exec_outcome.inference,
+                                phase_receipts=exec_outcome.phase_receipts,
+                                started_at=exec_outcome.started_at,
+                                ended_at=exec_outcome.ended_at,
+                                provenance=exec_outcome.provenance,
+                            )
                         row["decision"] = tr.decision
                         row["ok"] = tr.ok
                         row["passes"] = tr.passes
-                        # Prefer full candidate raw if present
-                        raw = tr.candidate.get("raw_text") or tr.answer
-                        if tr.candidate.get("parse_ok") and not tr.candidate.get("raw_text"):
-                            raw = json.dumps(
-                                {
-                                    "answer": tr.candidate.get("answer"),
-                                    "evidence_used": tr.candidate.get("evidence_used"),
-                                    "next_state": tr.candidate.get("next_state"),
-                                }
-                            )
-                        row["scores"] = score_output(
-                            str(raw),
-                            packet=tr.packet or packet,
-                            probe=probe,
-                            passes=tr.passes,
-                            decision=tr.decision,
+                        if tr.error:
+                            row["error"] = tr.error
+                        # Operational failures: null raw, no scores. Computed once.
+                        op_fail = exec_outcome is not None and exec_outcome.status in (
+                            TerminalStatus.TIMEOUT,
+                            TerminalStatus.TRANSPORT_ERROR,
+                            TerminalStatus.INVALID_RESPONSE,
+                            TerminalStatus.NO_FINAL_RESPONSE,
                         )
+                        if op_fail:
+                            row["raw"] = None
+                            row["scores"] = {}
+                        else:
+                            raw = tr.candidate.get("raw_text") or tr.answer
+                            if tr.candidate.get("parse_ok") and not tr.candidate.get("raw_text"):
+                                raw = json.dumps(
+                                    {
+                                        "answer": tr.candidate.get("answer"),
+                                        "evidence_used": tr.candidate.get("evidence_used"),
+                                        "next_state": tr.candidate.get("next_state"),
+                                    }
+                                )
+                            row["raw"] = raw
+                            row["scores"] = score_output(
+                                str(raw),
+                                packet=tr.packet or packet,
+                                probe=probe,
+                                passes=tr.passes,
+                                decision=tr.decision,
+                            )
                     else:
                         row["error"] = f"unknown_condition:{cond}"
                         row["scores"] = {}
+                        exec_outcome = ExecutionOutcome.from_lifecycle(
+                            cell=cell,
+                            status=TerminalStatus.NOT_RUN,
+                            output=None,
+                            decision=None,
+                            reason_codes=("unknown_condition",),
+                            error=row["error"],
+                        )
                 except Exception as e:  # noqa: BLE001
                     row["error"] = str(e)
                     row["scores"] = {}
-
-                # Explicit outcome on every row. A timeout is not a zero: output
-                # is null when nothing was observed, "" only when the model
-                # genuinely answered with nothing.
-                if row.get("error") or row.get("decision") == "error":
-                    err = str(row.get("error") or "decision=error")
-                    status = (
-                        "timeout"
-                        if ("timeout" in err.lower() or "timed out" in err.lower())
-                        else "transport_error"
+                    exec_outcome = ExecutionOutcome.from_lifecycle(
+                        cell=cell,
+                        status=TerminalStatus.TRANSPORT_ERROR,
+                        output=None,
+                        decision="error",
+                        reason_codes=("exception",),
+                        error=str(e),
                     )
+
+                # Typed inference field — never reconstruct from error strings.
+                if inference_result is not None:
+                    row["inference"] = inference_result.to_dict()
+                elif exec_outcome is not None and exec_outcome.inference is not None:
+                    row["inference"] = exec_outcome.inference
+                elif exec_outcome is not None and exec_outcome.status in (
+                    TerminalStatus.TIMEOUT,
+                    TerminalStatus.TRANSPORT_ERROR,
+                    TerminalStatus.INVALID_RESPONSE,
+                    TerminalStatus.NO_FINAL_RESPONSE,
+                ):
                     row["inference"] = {
-                        "status": status,
+                        "status": exec_outcome.status.value,
                         "output": None,
-                        "error": err,
+                        "error": exec_outcome.error,
+                        "timeout_seconds": timeout_s,
+                        "valid_measurement": False,
+                    }
+                elif row.get("error") or row.get("decision") == "error":
+                    # Fail closed: operational error without typed inference.
+                    row["inference"] = {
+                        "status": (
+                            exec_outcome.status.value
+                            if exec_outcome is not None
+                            else "transport_error"
+                        ),
+                        "output": None,
+                        "error": str(row.get("error") or "decision=error"),
                         "timeout_seconds": timeout_s,
                         "valid_measurement": False,
                     }
@@ -366,11 +551,24 @@ def main() -> int:
                         "valid_measurement": True,
                     }
 
+                if exec_outcome is None:
+                    exec_outcome = ExecutionOutcome.from_lifecycle(
+                        cell=cell,
+                        status=TerminalStatus.COMPLETED_INVALID,
+                        output=row.get("raw") if isinstance(row.get("raw"), str) else None,
+                        decision=row.get("decision"),
+                        reason_codes=("untyped_fallback",),
+                        error=row.get("error"),
+                    )
+                row["execution_outcome"] = exec_outcome.to_dict()
+                ledger.record(cell.cell_id, exec_outcome)
+
                 rows.append(row)
                 by_cond.setdefault(cond, []).append(row)
                 sc = row.get("scores") or {}
                 print(
                     f"  [{cond}] {pid} decision={row.get('decision')} "
+                    f"status={exec_outcome.status.value} "
                     f"struct={sc.get('structural_score', 0):.2f} "
                     f"sem={sc.get('semantic_score', 0):.2f} "
                     f"accept={sc.get('accept', False)} "
@@ -408,11 +606,15 @@ def main() -> int:
             "note": "Measures information access + condition effects; not the headline substrate claim.",
         }
 
+    ledger_dict = ledger.to_dict()
+    diag = ledger.diagnostic_counts()  # facts only
+    policy = matrix_headline_policy()  # matrix-owned; never Episode-A language
     report = {
         "created_at": datetime.now(timezone.utc)
         .replace(microsecond=0)
         .isoformat()
         .replace("+00:00", "Z"),
+        "run_id": run_id,
         "profile": prof.profile_id,
         "model": model,
         "num_ctx": prof.num_ctx,
@@ -425,14 +627,42 @@ def main() -> int:
         "timeout_s": timeout_s,
         "load_state": {"prime": args.prime, "receipt": primed},
         "audit_note": "Post M1_AUDIT.md corrections. Do not cite pre-audit +0.60.",
+        "terminal_ledger": {
+            "planned_n": diag["planned_n"],
+            "terminal_n": diag["terminal_n"],
+            "scientific_completion_n": diag["scientific_completion_n"],
+            "status_counts": ledger_dict["status_counts"],
+            "diagnostic_counts": diag,
+        },
+        **policy,
         "aggregates": aggregates,
         "substrate_gain": gains,
         "rows": rows,
     }
+    event = {
+        "event": "matrix.run.completed",
+        "run_id": run_id,
+        "model": model,
+        "profile": prof.profile_id,
+        "planned_n": diag["planned_n"],
+        "terminal_n": diag["terminal_n"],
+        "inference_completed_n": diag["inference_completed_n"],
+        "final_response_present_n": diag["final_response_present_n"],
+        "candidate_valid_n": diag["candidate_valid_n"],
+        "accepted_n": diag["accepted_n"],
+        "scientific_completion_n": diag["scientific_completion_n"],
+        "dry_run_n": diag["dry_run_n"],
+        "failed_n": diag["failed_n"],
+        **policy,
+        "artifact": None,  # filled after path known
+    }
+    report["event"] = event
 
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     out = args.out or (ROOT / "experiments" / "runs" / f"matrix_{ts}.json")
     out.parent.mkdir(parents=True, exist_ok=True)
+    event["artifact"] = str(out)
+    report["event"] = event
     out.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     if args.write_last:
         last = ROOT / "experiments" / "runs" / "last_matrix.json"
@@ -442,6 +672,7 @@ def main() -> int:
     print(json.dumps(aggregates, indent=2))
     print("=== substrate_gain (headline = vs budget_matched_bare) ===")
     print(json.dumps(gains, indent=2))
+    print("CK_EVENT " + json.dumps(event, separators=(",", ":")))
     print(f"wrote {out}")
     if not args.write_last:
         print("(last_matrix.json not updated; pass --write-last to overwrite pointer)")

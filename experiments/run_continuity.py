@@ -51,10 +51,33 @@ from conditioned_kernel.continuity import (  # noqa: E402
     score_episode_b,
 )
 from conditioned_kernel.edge import DEFAULT_PROFILE_ID, load_profile  # noqa: E402
-from conditioned_kernel.generate import DEFAULT_BASE_URL, OllamaClient  # noqa: E402
+from conditioned_kernel.generate import DEFAULT_BASE_URL, OllamaClient, RunStatus  # noqa: E402
+from conditioned_kernel.outcomes import (  # noqa: E402
+    EmptyManifestError,
+    ExecutionOutcome,
+    ManifestCell,
+    TerminalLedger,
+    TerminalStatus,
+    build_manifest,
+    outcome_from_inference,
+)
 from conditioned_kernel.state import SubstrateState  # noqa: E402
 
 ARMS = ("bare_serialized", "ck_packet", "broken_packet")
+
+
+def continuity_headline_policy() -> dict[str, Any]:
+    """Experiment-owned headline policy (not ledger infrastructure).
+
+    Continuity remains headline-ineligible until Episode A accept / persist /
+    reload is implemented. Ledger facts may show inference completion; that
+    alone never grants eligibility.
+    """
+    return {
+        "headline_eligible": False,
+        "scientific_status": "deferred_episode_a_lifecycle",
+        "headline_ineligible_reason": "episode_a_accept_persist_reload_not_implemented",
+    }
 
 # Same rules the CK system prompt states, minus the compiled structure. Fixed
 # here in code (and in the protocol) rather than chosen at run time, because
@@ -217,21 +240,63 @@ def episode_b(task: dict[str, Any], arm: str, artifacts: dict, model: str,
                 },
             }
 
-        status, text, err = "completed", "", None
-        if not dry:
-            res = client.run(mi)
-            status, text, err = res.status.value, (res.output or ""), res.error
+        # Dry plumbing is never a completed scientific observation.
+        if dry:
+            exec_outcome = ExecutionOutcome.dry_run_only(reason="continuity_dry")
+            return {
+                "arm": arm,
+                "pid": start_pid,
+                "start_time": start_time,
+                "status": TerminalStatus.DRY_RUN_ONLY.value,
+                "error": None,
+                "primed": primed,
+                "raw": None,
+                "scores": {},
+                "dry_run": True,
+                "scientific_completion": False,
+                "execution_outcome": exec_outcome.to_dict(),
+                **context_hashes(ck_packet, bare_text, broken),
+            }
 
-        scored = score_episode_b(text, task=task, packet=ck_packet, artifacts=artifacts)
+        res = client.run(mi)
+        # Never coerce a missing final response into "". Only observed output
+        # (including genuine empty string) is scorable text.
+        if res.observed:
+            text = res.output if res.output is not None else ""
+            scored = score_episode_b(text, task=task, packet=ck_packet, artifacts=artifacts)
+            # Inference-layer status remains "completed" for quality-conditional
+            # means. Scientific completion for continuity Episode B is deferred
+            # until Episode A accept/persist is repaired (out of 00.6A scope).
+            exec_outcome = ExecutionOutcome(
+                status=TerminalStatus.COMPLETED_INVALID,
+                output=text,
+                scientific_completion=False,
+                dry_run=False,
+                quality_admitted=True,
+                decision=None,
+                reason_codes=("episode_b_observed", "scientific_completion_deferred"),
+                error=None,
+                inference=res.to_dict(),
+            )
+            row_status = RunStatus.COMPLETED.value
+        else:
+            text = None
+            scored = {}
+            exec_outcome = outcome_from_inference(res)
+            row_status = exec_outcome.status.value
+
         return {
             "arm": arm,
             "pid": start_pid,
             "start_time": start_time,
-            "status": status,
-            "error": err,
+            "status": row_status,
+            "error": res.error,
             "primed": primed,
             "raw": text,
             "scores": scored,
+            "dry_run": False,
+            "scientific_completion": exec_outcome.scientific_completion,
+            "execution_outcome": exec_outcome.to_dict(),
             **context_hashes(ck_packet, bare_text, broken),
         }
 
@@ -296,48 +361,204 @@ def main() -> int:
     tasks = json.loads(a.tasks.read_text())
     if a.limit:
         tasks = tasks[: a.limit]
+    run_id = f"continuity_{int(time.time())}"
+    task_ids = [str(t.get("id") or f"task_{i}") for i, t in enumerate(tasks)]
+    # Fail closed before any generation: empty planned manifest is not a run.
+    try:
+        planned_cells = build_manifest(
+            run_id=run_id,
+            task_ids=task_ids,
+            condition_ids=list(ARMS),
+            episodes=["B"],
+        )
+        ledger = TerminalLedger(planned_cells, run_id=run_id)
+    except EmptyManifestError as e:
+        print(f"EMPTY_MANIFEST: {e}", file=sys.stderr, flush=True)
+        print(
+            "CK_EVENT "
+            + json.dumps(
+                {
+                    "event": "continuity.run.aborted",
+                    "reason_code": e.reason_code,
+                    "error": str(e),
+                    "headline_eligible": False,
+                    "scientific_completion_n": 0,
+                    "scientific_status": "deferred_episode_a_lifecycle",
+                },
+                separators=(",", ":"),
+            ),
+            flush=True,
+        )
+        return 3
+
     # flush=True throughout: a long run redirected to a file otherwise shows
     # NOTHING until the block buffer fills, which is indistinguishable from a
     # stall. Progress on a 15-minute experiment has to be observable.
     print(f"continuity: {len(tasks)} tasks x {len(ARMS)} arms, model={model}, dry={a.dry}",
           flush=True)
+    cell_by_key = {(c.task_id, c.condition_id): c for c in planned_cells}
+
+    def _outcome_from_episode_b(cell: ManifestCell, ep_b: dict, dry: bool) -> ExecutionOutcome:
+        if dry:
+            return ExecutionOutcome.dry_run_only(cell=cell, reason="continuity_dry")
+        eo_dict = ep_b.get("execution_outcome") or {}
+        status_token = str(eo_dict.get("status") or ep_b.get("status") or "")
+        # Dry worker
+        if status_token == TerminalStatus.DRY_RUN_ONLY.value or ep_b.get("dry_run"):
+            return ExecutionOutcome.dry_run_only(cell=cell, reason="continuity_dry")
+        # Observed answer (inference-layer completed)
+        if ep_b.get("status") == RunStatus.COMPLETED.value:
+            return ExecutionOutcome(
+                status=TerminalStatus.COMPLETED_INVALID,
+                output=ep_b.get("raw") if isinstance(ep_b.get("raw"), str) else None,
+                scientific_completion=False,
+                dry_run=False,
+                quality_admitted=True,
+                reason_codes=("episode_b_observed", "scientific_completion_deferred"),
+                error=ep_b.get("error"),
+                inference=eo_dict.get("inference"),
+                **ExecutionOutcome._cell_fields(cell),
+            )
+        # Operational / lifecycle failure from worker
+        known = {s.value: s for s in TerminalStatus}
+        if status_token in known:
+            st = known[status_token]
+            return ExecutionOutcome.from_lifecycle(
+                cell=cell,
+                status=st,
+                output=None if st is not TerminalStatus.COMPLETED_INVALID else ep_b.get("raw"),
+                error=ep_b.get("error") or eo_dict.get("error"),
+                reason_codes=tuple(eo_dict.get("reason_codes") or (status_token,)),
+            )
+        if ep_b.get("error"):
+            return ExecutionOutcome.from_lifecycle(
+                cell=cell,
+                status=TerminalStatus.TRANSPORT_ERROR,
+                output=None,
+                error=str(ep_b.get("error")),
+                reason_codes=("episode_b_error",),
+            )
+        return ExecutionOutcome.not_run(cell=cell, reason="untyped_episode_b")
 
     rows = []
     for t in tasks:
-        tid = t.get("id")
-        dry = ["--dry"] if a.dry else []
-        ep_a = _spawn(["--episode", "a", "--model", model, "--profile", a.profile, *dry], {"task": t})
+        tid = str(t.get("id"))
+        dry_flags = ["--dry"] if a.dry else []
+        ep_a = _spawn(
+            ["--episode", "a", "--model", model, "--profile", a.profile, *dry_flags],
+            {"task": t},
+        )
         if ep_a.get("error"):
             print(f"  {tid}: episode A failed — {ep_a['error'][:120]}", flush=True)
+            # Failed Episode A must not erase planned cells.
+            for arm in ARMS:
+                cell = cell_by_key[(tid, arm)]
+                if a.dry:
+                    oc = ExecutionOutcome.dry_run_only(cell=cell, reason="episode_a_failed_dry")
+                else:
+                    oc = ExecutionOutcome.not_run(
+                        cell=cell,
+                        reason="blocked_by_episode_a",
+                        blocked_by_manifest_cell_id=f"{run_id}:{tid}:episode_a:A:0",
+                    )
+                ledger.record(cell.cell_id, oc)
+                rows.append({
+                    "task_id": tid,
+                    "category": t.get("category"),
+                    "arm": arm,
+                    "status": oc.status.value,
+                    "error": ep_a.get("error"),
+                    "raw": None,
+                    "scores": {},
+                    "dry_run": oc.dry_run,
+                    "scientific_completion": False,
+                    "manifest_cell_id": cell.cell_id,
+                    "execution_outcome": oc.to_dict(),
+                    "cold_start_receipt": {
+                        "episode_a_process_id": ep_a.get("pid"),
+                        "episode_a_end_time": ep_a.get("end_time"),
+                        "episode_b_process_id": None,
+                        "episode_b_start_time": None,
+                        "distinct_pids": False,
+                        "model": model,
+                        "generation_seed": prof.seed,
+                        "token_budget": prof.num_ctx,
+                        "load_state": "not_run",
+                    },
+                })
             continue
         if not a.dry:
             evict(model)  # boundary: nothing resident survives
         for arm in ARMS:
-            ep_b = _spawn(["--episode", "b", "--arm", arm, "--model", model,
-                           "--profile", a.profile, "--bare-mode", a.bare_mode, *dry],
-                          {"task": t, "artifacts": ep_a["artifacts"]})
+            cell = cell_by_key[(tid, arm)]
+            ep_b = _spawn(
+                [
+                    "--episode", "b", "--arm", arm, "--model", model,
+                    "--profile", a.profile, "--bare-mode", a.bare_mode, *dry_flags,
+                ],
+                {"task": t, "artifacts": ep_a["artifacts"]},
+            )
             boundary_ok = bool(ep_a.get("pid")) and ep_b.get("pid") not in (None, ep_a.get("pid"))
-            rows.append({
-                "task_id": tid, "category": t.get("category"), "arm": arm,
+            oc = _outcome_from_episode_b(cell, ep_b, a.dry)
+            ledger.record(cell.cell_id, oc)
+            row = {
+                "task_id": tid,
+                "category": t.get("category"),
+                "arm": arm,
+                "manifest_cell_id": cell.cell_id,
                 "cold_start_receipt": {
                     "episode_a_process_id": ep_a.get("pid"),
                     "episode_a_end_time": ep_a.get("end_time"),
                     "episode_b_process_id": ep_b.get("pid"),
                     "episode_b_start_time": ep_b.get("start_time"),
                     "distinct_pids": boundary_ok,
-                    "model": model, "generation_seed": prof.seed,
-                    "token_budget": prof.num_ctx, "load_state": "primed" if ep_b.get("primed") else "unprimed",
+                    "model": model,
+                    "generation_seed": prof.seed,
+                    "token_budget": prof.num_ctx,
+                    "load_state": "primed" if ep_b.get("primed") else "unprimed",
                 },
                 **{k: v for k, v in ep_b.items() if k not in ("pid", "start_time", "primed")},
-            })
-            s = (ep_b.get("scores") or {}).get("continuity_score")
-            print(f"  {tid:34} {arm:16} score={s} pid_ok={boundary_ok}", flush=True)
+            }
+            # Authoritative terminal fields from the ledger outcome.
+            if a.dry or oc.status is TerminalStatus.DRY_RUN_ONLY:
+                row["status"] = TerminalStatus.DRY_RUN_ONLY.value
+                row["raw"] = None
+                row["scores"] = {}
+            elif oc.status in (
+                TerminalStatus.TIMEOUT,
+                TerminalStatus.TRANSPORT_ERROR,
+                TerminalStatus.INVALID_RESPONSE,
+                TerminalStatus.NO_FINAL_RESPONSE,
+                TerminalStatus.NOT_RUN,
+                TerminalStatus.PARSE_FAILED,
+                TerminalStatus.SCHEMA_FAILED,
+                TerminalStatus.SEMANTIC_FAILED,
+            ):
+                row["status"] = oc.status.value
+                row["raw"] = None
+            else:
+                # Observed answer: keep inference-layer "completed" for diagnostic means.
+                row["status"] = RunStatus.COMPLETED.value
+            row["dry_run"] = oc.dry_run
+            row["scientific_completion"] = bool(oc.scientific_completion)
+            row["execution_outcome"] = oc.to_dict()
+            rows.append(row)
+            s = (row.get("scores") or {}).get("continuity_score")
+            print(
+                f"  {tid:34} {arm:16} status={row.get('status')} "
+                f"score={s} pid_ok={boundary_ok}",
+                flush=True,
+            )
 
     by_arm: dict[str, list[float]] = {}
     for r in rows:
-        if r.get("status") == "completed":
+        # Dry runs never enter scientific or diagnostic means.
+        if r.get("dry_run") or r.get("status") == TerminalStatus.DRY_RUN_ONLY.value:
+            continue
+        if r.get("status") == RunStatus.COMPLETED.value:
             by_arm.setdefault(r["arm"], []).append(
-                float((r.get("scores") or {}).get("continuity_score") or 0.0))
+                float((r.get("scores") or {}).get("continuity_score") or 0.0)
+            )
     summary = {arm: (sum(v) / len(v) if v else None) for arm, v in by_arm.items()}
     # Pin corpus identity. Two seats work this repo in tandem, and the corpus
     # was edited mid-run once already: a result measured against a corpus that
@@ -366,10 +587,34 @@ def main() -> int:
     except Exception as e:  # provenance must never fail a run
         env = {"probe_error": f"{type(e).__name__}: {e}"}
 
+    ledger.validate()
+    ledger_dict = ledger.to_dict()
+    diag = ledger.diagnostic_counts()  # facts only — no headline policy
+    policy = continuity_headline_policy()  # experiment-owned
+    # Dry runs are plumbing only: suppress scientific M1/M2 headlines.
+    # Diagnostic means may still exist for non-dry observed rows, but they are
+    # never headline-eligible until Episode A lifecycle is repaired.
+    if a.dry:
+        summary = {arm: None for arm in ARMS}
+        m1 = None
+        m2 = None
+    else:
+        m1 = (
+            None if summary.get("ck_packet") is None or summary.get("broken_packet") is None
+            else summary["ck_packet"] - summary["broken_packet"]
+        )
+        m2 = (
+            None if summary.get("ck_packet") is None or summary.get("bare_serialized") is None
+            else summary["ck_packet"] - summary["bare_serialized"]
+        )
     report = {
-        "created_at": _now(), "model": model, "profile": prof.profile_id,
+        "created_at": _now(),
+        "run_id": run_id,
+        "model": model,
+        "profile": prof.profile_id,
         "environment": env,
         "bare_mode": a.bare_mode,
+        "dry_run": bool(a.dry),
         "corpus": {
             "path": str(a.tasks.relative_to(ROOT)),
             "sha256_16": corpus_sha,
@@ -377,27 +622,30 @@ def main() -> int:
             "uncommitted_edits": dirty,
             "n_tasks_in_file": len(json.loads(corpus_bytes)),
         },
-        "n_tasks": len(tasks), "arms": list(ARMS),
+        "n_tasks": len(tasks),
+        "arms": list(ARMS),
         "mean_continuity_by_arm": summary,
-        "M1_ck_beats_broken": (
-            None if summary.get("ck_packet") is None or summary.get("broken_packet") is None
-            else summary["ck_packet"] - summary["broken_packet"]),
-        "M2_ck_beats_bare": (
-            None if summary.get("ck_packet") is None or summary.get("bare_serialized") is None
-            else summary["ck_packet"] - summary["bare_serialized"]),
+        "M1_ck_beats_broken": m1,
+        "M2_ck_beats_bare": m2,
         "all_boundaries_distinct": all(
             r["cold_start_receipt"]["distinct_pids"] for r in rows) if rows else False,
+        "terminal_ledger": {
+            "planned_n": diag["planned_n"],
+            "terminal_n": diag["terminal_n"],
+            "scientific_completion_n": diag["scientific_completion_n"],
+            "status_counts": ledger_dict["status_counts"],
+            "diagnostic_counts": diag,
+        },
+        **policy,
         "rows": rows,
     }
     out = a.out or (ROOT / "experiments" / "runs" / f"continuity_{int(time.time())}.json")
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, indent=2) + "\n")
-    # Structured lifecycle event. Monitors should follow event type, not prose:
-    # grepping human sentences is fragile and breaks silently when wording
-    # changes. This line is the contract.
-    valid = sum(1 for r in rows if r.get("status") == "completed")
+    # Structured lifecycle event. Monitors should follow event type, not prose.
+    # Inference completion is NOT scientific success — counts are explicit.
     event = {
-        "event": "continuity.run.completed",
+        "event": "continuity.run.completed" if not a.dry else "continuity.run.dry",
         "commit": subprocess.run(["git", "log", "-1", "--format=%h"], cwd=ROOT,
                                  capture_output=True, text=True).stdout.strip() or None,
         "corpus_sha256_16": corpus_sha,
@@ -405,11 +653,26 @@ def main() -> int:
         "mode": a.bare_mode,
         "model": model,
         "profile": prof.profile_id,
+        "dry_run": bool(a.dry),
         "m1_ck_vs_broken": report["M1_ck_beats_broken"],
         "m2_ck_vs_bare": report["M2_ck_beats_bare"],
         "arms": report["mean_continuity_by_arm"],
-        "rows_valid": valid,
-        "rows_expected": len(rows),
+        # Explicit ledger facts (do not collapse into a single rows_valid).
+        "planned_n": diag["planned_n"],
+        "terminal_n": diag["terminal_n"],
+        "inference_completed_n": diag["inference_completed_n"],
+        "final_response_present_n": diag["final_response_present_n"],
+        "candidate_valid_n": diag["candidate_valid_n"],
+        "accepted_n": diag["accepted_n"],
+        "scientific_completion_n": diag["scientific_completion_n"],
+        "dry_run_n": diag["dry_run_n"],
+        "failed_n": diag["failed_n"],
+        # Experiment policy (continuity-owned; not from the ledger).
+        **policy,
+        # Legacy alias retained but never implies science: always == scientific_completion_n.
+        "rows_valid": diag["scientific_completion_n"],
+        "rows_expected": diag["planned_n"],
+        "rows_terminal": diag["terminal_n"],
         "all_boundaries_distinct": report["all_boundaries_distinct"],
         "artifact": str(out),
     }
