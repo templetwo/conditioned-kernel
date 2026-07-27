@@ -145,35 +145,46 @@ class ContinuityStore:
         receipt_path = self.receipts_dir / f"{event_id}.json"
         if event_path.exists():
             raise FileExistsError(f"event already exists: {event_path.name}")
+        rec = dict(receipt)
+        rec.setdefault("terminal", True)
         _atomic_write_json(event_path, dict(event))
-        _atomic_write_json(receipt_path, dict(receipt))
+        _atomic_write_json(receipt_path, rec)
         # Verify event is listable and hash chain end matches event claim
         events = self.list_events()
         if not events or events[-1].get("event_id") != event_id:
             raise OSError("event append not visible after commit")
         return event_path
 
-    def append_rejection_receipt(self, receipt: Mapping[str, Any]) -> Path:
-        rid = str(receipt.get("receipt_id") or receipt.get("source_candidate_hash") or "reject")
-        path = self.receipts_dir / f"reject_{rid}.json"
-        # Uniquify if needed
+    def append_terminal_receipt(self, receipt: Mapping[str, Any]) -> Path:
+        """Write exactly one terminal candidate receipt (accept or reject)."""
+        rid = str(receipt.get("receipt_id") or receipt.get("source_candidate_hash") or "term")
+        decision = str(receipt.get("decision") or "unknown")
+        prefix = "accept" if decision == "accepted" else "reject"
+        path = self.receipts_dir / f"{prefix}_{rid}.json"
         if path.exists():
-            path = self.receipts_dir / f"reject_{rid}_{utc_now_iso().replace(':', '')}.json"
-        _atomic_write_json(path, dict(receipt))
+            path = self.receipts_dir / f"{prefix}_{rid}_{utc_now_iso().replace(':', '')}.json"
+        payload = dict(receipt)
+        payload.setdefault("terminal", True)
+        _atomic_write_json(path, payload)
         return path
 
+    def append_rejection_receipt(self, receipt: Mapping[str, Any]) -> Path:
+        """Alias for append_terminal_receipt (rejection path)."""
+        return self.append_terminal_receipt(receipt)
+
     def rejection_receipts(self) -> list[dict[str, Any]]:
-        out: list[dict[str, Any]] = []
-        if not self.receipts_dir.exists():
-            return out
-        for path in sorted(self.receipts_dir.iterdir()):
-            if not path.name.startswith("reject_") or path.suffix != ".json":
-                continue
-            with path.open("r", encoding="utf-8") as f:
-                out.append(json.load(f))
-        return out
+        return [
+            r
+            for r in self.terminal_receipts()
+            if r.get("decision") == "rejected"
+        ]
 
     def all_receipts(self) -> list[dict[str, Any]]:
+        """All receipt JSON files (terminal only under current protocol)."""
+        return self.terminal_receipts()
+
+    def terminal_receipts(self) -> list[dict[str, Any]]:
+        """Candidate-terminal receipts only (one per processed candidate)."""
         out: list[dict[str, Any]] = []
         if not self.receipts_dir.exists():
             return out
@@ -181,7 +192,13 @@ class ContinuityStore:
             if path.suffix != ".json":
                 continue
             with path.open("r", encoding="utf-8") as f:
-                out.append(json.load(f))
+                data = json.load(f)
+            # Only count terminal candidate receipts
+            if data.get("terminal") is False:
+                continue
+            if data.get("decision") not in ("accepted", "rejected"):
+                continue
+            out.append(data)
         return out
 
     def quarantine_partials(self) -> list[str]:

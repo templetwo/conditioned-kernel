@@ -1,6 +1,8 @@
 """Parse → closed-set validate → accept/reject → persist continuity assertions.
 
-The model proposes; the substrate decides. Raw prose never becomes state.
+The candidate is the atomic acceptance and audit unit (RUN 00.6B.1).
+One accepted candidate → one event + one terminal receipt.
+One rejected candidate → zero events + one terminal receipt.
 """
 
 from __future__ import annotations
@@ -14,11 +16,13 @@ from typing import Any, Mapping, Sequence
 
 from conditioned_kernel.continuity_events import (
     ALLOWED_RELATIONS,
+    RECEIPT_SCHEMA_VERSION,
     VALIDATOR_VERSION,
     build_event,
     candidate_hash,
     canonical_state_hash,
     materialize_state,
+    normalize_relations,
     relation_atom,
 )
 from conditioned_kernel.continuity_replay import replay_store
@@ -39,6 +43,9 @@ class ContinuityAssertion:
 
     def as_atom(self) -> dict[str, str]:
         return relation_atom(self.subject_id, self.relation, self.object_id)
+
+    def as_triple(self) -> tuple[str, str, str]:
+        return (self.subject_id, self.relation, self.object_id)
 
 
 @dataclass
@@ -86,8 +93,6 @@ def parse_continuity_candidate(
     if not isinstance(obj, dict):
         return None, ["SCHEMA_FAILED:root_not_object"], ch
 
-    # Unknown top-level keys are ignored for authority (only continuity_assertions matter)
-    # but hidden authority fields inside assertions are rejected at validation.
     if "continuity_assertions" not in obj:
         return None, ["SCHEMA_FAILED:missing_continuity_assertions"], ch
 
@@ -119,19 +124,43 @@ def parse_continuity_candidate(
     return assertions, [], ch
 
 
+def detect_intra_candidate_duplicates(
+    assertions: Sequence[ContinuityAssertion],
+) -> tuple[list[str], dict[str, str] | None]:
+    """Detect duplicate canonical triples within one candidate.
+
+    Does not silently dedupe — returns DUPLICATE_ASSERTION reason codes and the
+    first duplicated triple for diagnostics.
+    """
+    seen: set[tuple[str, str, str]] = set()
+    for a in assertions:
+        t = a.as_triple()
+        if t in seen:
+            atom = a.as_atom()
+            return (
+                [f"DUPLICATE_ASSERTION:{a.subject_id}/{a.relation}/{a.object_id}"],
+                atom,
+            )
+        seen.add(t)
+    return [], None
+
+
 def validate_assertions(
     assertions: Sequence[ContinuityAssertion],
     universe: Mapping[str, Any],
     *,
     existing_atoms: Sequence[Mapping[str, str]] | None = None,
 ) -> list[str]:
-    """Return reason codes; empty list means valid."""
+    """Return reason codes; empty list means valid.
+
+    Collects all failures for the candidate (all-or-nothing). Does not check
+    intra-candidate duplicates — call detect_intra_candidate_duplicates first.
+    """
     codes: list[str] = []
     subjects = set(universe.get("subject_ids") or [])
     objects = set(universe.get("object_ids") or [])
     rels = set(universe.get("relations") or []) & ALLOWED_RELATIONS
     if not rels:
-        # Universe may list relations; if empty, fall back to global allowlist
         rels = set(ALLOWED_RELATIONS)
     combos = {
         (str(a), str(b), str(c))
@@ -161,7 +190,7 @@ def validate_assertions(
         if a.relation not in ALLOWED_RELATIONS or a.relation not in rels:
             codes.append(f"UNKNOWN_RELATION:{a.relation}")
             continue
-        triple = (a.subject_id, a.relation, a.object_id)
+        triple = a.as_triple()
         if combos and triple not in combos:
             codes.append(
                 f"INVALID_COMBINATION:{a.subject_id}/{a.relation}/{a.object_id}"
@@ -192,8 +221,10 @@ def process_episode_a_candidate(
 ) -> EpisodeAResult:
     """Full Episode A gate for one candidate string.
 
-    dry_run=True writes only to an isolated temporary store and never marks
-    scientific completion.
+    Candidate atomicity (00.6B.1):
+    - ACCEPTED → exactly one continuity event + one terminal receipt
+    - REJECTED → zero events + one terminal receipt
+    - multi-assertion is all-or-nothing
     """
     active = store
     if dry_run:
@@ -205,12 +236,18 @@ def process_episode_a_candidate(
             universe=store.load_universe(),
         )
 
+    state_hash_before = active.current_state_hash()
     assertions, parse_codes, ch = parse_continuity_candidate(raw)
     if assertions is None:
         receipt = _reject_receipt(
-            ch, parse_codes, episode_id, dry_run=dry_run, provenance=provenance
+            ch,
+            parse_codes,
+            episode_id,
+            dry_run=dry_run,
+            provenance=provenance,
+            state_hash=state_hash_before,
         )
-        active.append_rejection_receipt(receipt)
+        active.append_terminal_receipt(receipt)
         return EpisodeAResult(
             decision=Decision.REJECTED,
             reason_code=parse_codes[0],
@@ -221,7 +258,30 @@ def process_episode_a_candidate(
             scientific_completion=False,
         )
 
-    # Existing accepted atoms from durable store (or dry store after prior accepts)
+    # A — Intra-candidate duplicates (before durable-history validation)
+    dup_codes, dup_triple = detect_intra_candidate_duplicates(assertions)
+    if dup_codes:
+        receipt = _reject_receipt(
+            ch,
+            dup_codes,
+            episode_id,
+            dry_run=dry_run,
+            provenance=provenance,
+            state_hash=state_hash_before,
+            duplicate_triple=dup_triple,
+        )
+        active.append_terminal_receipt(receipt)
+        return EpisodeAResult(
+            decision=Decision.REJECTED,
+            reason_code=dup_codes[0],
+            reason_codes=tuple(dup_codes),
+            candidate_hash=ch,
+            receipt=receipt,
+            dry_run=dry_run,
+            scientific_completion=False,
+            assertions=list(assertions),
+        )
+
     existing_state = materialize_state(active.load_genesis(), active.list_events())
     existing_atoms = existing_state.get("accepted_relations") or []
     v_codes = validate_assertions(
@@ -230,10 +290,16 @@ def process_episode_a_candidate(
         existing_atoms=existing_atoms,
     )
     if v_codes:
+        # D — all-or-nothing: any failure rejects the complete candidate
         receipt = _reject_receipt(
-            ch, v_codes, episode_id, dry_run=dry_run, provenance=provenance
+            ch,
+            v_codes,
+            episode_id,
+            dry_run=dry_run,
+            provenance=provenance,
+            state_hash=state_hash_before,
         )
-        active.append_rejection_receipt(receipt)
+        active.append_terminal_receipt(receipt)
         return EpisodeAResult(
             decision=Decision.REJECTED,
             reason_code=v_codes[0],
@@ -245,77 +311,62 @@ def process_episode_a_candidate(
             assertions=list(assertions),
         )
 
-    # Accept: one event per assertion in candidate (typically one)
+    # B — One event per accepted candidate (canonical ordered batch)
     commit = repo_commit if repo_commit is not None else _repo_commit()
     ts = utc_now_iso()
-    events_out: list[dict[str, Any]] = []
-    parent = active.current_state_hash()
-    applied_so_far = list(active.list_events())
+    parent = state_hash_before
+    ordered_atoms = normalize_relations([a.as_atom() for a in assertions])
+    prospective_event = {"assertions": ordered_atoms}
+    applied = list(active.list_events()) + [prospective_event]
+    resulting = canonical_state_hash(active.load_genesis(), applied)
 
-    for a in assertions:
-        seq = active.next_sequence()
-        event_id = make_id("cevt")
-        prospective = applied_so_far + [
-            {
-                "subject_id": a.subject_id,
-                "relation": a.relation,
-                "object_id": a.object_id,
-            }
-        ]
-        resulting = canonical_state_hash(active.load_genesis(), prospective)
-        event = build_event(
-            event_id=event_id,
-            sequence=seq,
-            parent_state_hash=parent,
-            resulting_state_hash=resulting,
-            episode_id=episode_id,
-            subject_id=a.subject_id,
-            relation=a.relation,
-            object_id=a.object_id,
-            source_candidate_hash=ch,
-            acceptance_reason_code="ACCEPTED",
-            timestamp=ts,
-            repo_commit=commit,
-            provenance=provenance or {},
-        )
-        receipt = {
-            "receipt_id": make_id("crec"),
-            "decision": Decision.ACCEPTED.value,
-            "reason_code": "ACCEPTED",
-            "reason_codes": ["ACCEPTED"],
-            "source_candidate_hash": ch,
-            "event_id": event_id,
-            "episode_id": episode_id,
-            "validator_version": VALIDATOR_VERSION,
-            "timestamp": ts,
-            "dry_run": dry_run,
-            "scientific_completion": False if dry_run else True,
-            "provenance": dict(provenance or {}),
-        }
-        active.append_event_and_receipt(event, receipt)
-        events_out.append(event)
-        applied_so_far = prospective
-        parent = resulting
+    seq = active.next_sequence()
+    event_id = make_id("cevt")
+    event = build_event(
+        event_id=event_id,
+        sequence=seq,
+        parent_state_hash=parent,
+        resulting_state_hash=resulting,
+        episode_id=episode_id,
+        assertions=ordered_atoms,
+        source_candidate_hash=ch,
+        acceptance_reason_code="ACCEPTED",
+        timestamp=ts,
+        repo_commit=commit,
+        provenance=provenance or {},
+    )
+    receipt = {
+        "receipt_schema_version": RECEIPT_SCHEMA_VERSION,
+        "receipt_id": make_id("crec"),
+        "terminal": True,
+        "decision": Decision.ACCEPTED.value,
+        "reason_code": "ACCEPTED",
+        "reason_codes": ["ACCEPTED"],
+        "source_candidate_hash": ch,
+        "event_id": event_id,
+        "event_ids": [event_id],
+        "accepted_assertion_count": len(ordered_atoms),
+        "accepted_assertions": ordered_atoms,
+        "parent_state_hash": parent,
+        "resulting_state_hash": resulting,
+        "episode_id": episode_id,
+        "validator_version": VALIDATOR_VERSION,
+        "timestamp": ts,
+        "dry_run": dry_run,
+        "scientific_completion": False if dry_run else True,
+        "provenance": dict(provenance or {}),
+    }
+    active.append_event_and_receipt(event, receipt)
 
-    # Primary scientific_completion for Episode A persistence is true only when
-    # not dry and at least one event was committed. M0 headline remains NO-GO
-    # at the experiment layer (policy elsewhere).
     return EpisodeAResult(
         decision=Decision.ACCEPTED,
         reason_code="ACCEPTED",
         reason_codes=("ACCEPTED",),
         candidate_hash=ch,
-        events=events_out,
-        receipt={
-            "decision": Decision.ACCEPTED.value,
-            "reason_code": "ACCEPTED",
-            "source_candidate_hash": ch,
-            "event_ids": [e["event_id"] for e in events_out],
-            "dry_run": dry_run,
-            "scientific_completion": (not dry_run) and bool(events_out),
-        },
+        events=[event],
+        receipt=receipt,
         dry_run=dry_run,
-        scientific_completion=(not dry_run) and bool(events_out),
+        scientific_completion=(not dry_run),
         assertions=list(assertions),
     )
 
@@ -327,13 +378,23 @@ def _reject_receipt(
     *,
     dry_run: bool,
     provenance: Mapping[str, Any] | None,
+    state_hash: str,
+    duplicate_triple: Mapping[str, str] | None = None,
 ) -> dict[str, Any]:
-    return {
+    rec: dict[str, Any] = {
+        "receipt_schema_version": RECEIPT_SCHEMA_VERSION,
         "receipt_id": make_id("crec"),
+        "terminal": True,
         "decision": Decision.REJECTED.value,
         "reason_code": codes[0] if codes else "REJECTED",
         "reason_codes": list(codes),
         "source_candidate_hash": ch,
+        "event_id": None,
+        "event_ids": [],
+        "accepted_assertion_count": 0,
+        "accepted_assertions": [],
+        "parent_state_hash": state_hash,
+        "resulting_state_hash": state_hash,
         "episode_id": episode_id,
         "validator_version": VALIDATOR_VERSION,
         "timestamp": utc_now_iso(),
@@ -341,6 +402,9 @@ def _reject_receipt(
         "scientific_completion": False,
         "provenance": dict(provenance or {}),
     }
+    if duplicate_triple is not None:
+        rec["duplicate_triple"] = dict(duplicate_triple)
+    return rec
 
 
 def episode_b_packet_relations(store: ContinuityStore) -> list[dict[str, str]]:

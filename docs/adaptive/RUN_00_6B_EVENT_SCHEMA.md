@@ -1,8 +1,10 @@
-# RUN 00.6B — Continuity Event Schema
+# RUN 00.6B / 00.6B.1 — Continuity Event Schema
 
-**Schema version:** `ck.continuity_event.v1`  
+**Schema version:** `ck.continuity_event.v2`  
+**Receipt schema:** `ck.continuity_receipt.v1`  
 **Validator version:** `ck.continuity_validator.v1`  
-**Authority:** append-only events are durable truth; materialized state is derived
+**Authority:** append-only events are durable truth; materialized state is derived  
+**Atomic unit:** the **candidate** (not the individual assertion)
 
 ## Candidate shape (model-visible proposal)
 
@@ -24,9 +26,11 @@ Rules:
 - `continuity_assertions` is a non-empty list of objects.
 - Each assertion has **exactly** `subject_id`, `relation`, `object_id` (non-empty strings).
 - No confidence fields.
-- Free-form prose (`answer`, notes, etc.) may exist on the raw candidate for
-  product paths but is **never** written into authoritative continuity state.
+- Free-form prose may exist on the raw candidate but is **never** written into
+  authoritative continuity state.
 - Unknown assertion fields fail closed (`SCHEMA_FAILED:unknown_fields`).
+- **Intra-candidate duplicate triples** fail closed (`DUPLICATE_ASSERTION`) —
+  no silent dedupe.
 
 ## Closed relation vocabulary
 
@@ -39,29 +43,65 @@ Global allowlist (`ALLOWED_RELATIONS`):
 - `references`
 
 A task universe may further restrict relations and valid
-`(subject_id, relation, object_id)` combinations. Unknown relations fail closed.
+`(subject_id, relation, object_id)` combinations.
 
-## Accepted event object
+## Accepted event object (v2 — one per candidate)
 
 | Field | Type | Notes |
 |---|---|---|
-| `schema_version` | string | Must be `ck.continuity_event.v1` |
+| `schema_version` | string | Must be `ck.continuity_event.v2` |
 | `event_id` | string | Unique id (`cevt_…`) |
 | `sequence` | int | Monotonic per store, starting at 1 |
-| `parent_state_hash` | hex sha256 | Hash before this event |
-| `resulting_state_hash` | hex sha256 | Hash after applying this event |
+| `parent_state_hash` | hex sha256 | Hash before this candidate event |
+| `resulting_state_hash` | hex sha256 | Hash after applying **entire** assertion batch |
 | `episode_id` | string | e.g. `episode_a` |
-| `subject_id` | string | Closed-set subject |
-| `relation` | string | Closed-set relation |
-| `object_id` | string | Closed-set object |
+| `assertions` | array | Canonical ordered unique triples |
 | `source_candidate_hash` | hex sha256 | SHA-256 of raw candidate UTF-8 bytes |
 | `validator_version` | string | `ck.continuity_validator.v1` |
 | `acceptance_reason_code` | string | e.g. `ACCEPTED` |
-| `timestamp` | ISO-8601 UTC | Event time (not used for hash chain) |
+| `timestamp` | ISO-8601 UTC | Not used for hash chain |
 | `repo_commit` | string\|null | Short git hash when available |
 | `provenance` | object | Optional model/runtime metadata |
 
-Unknown event fields fail closed on replay.
+**Unsupported:** v1 single-triple top-level `subject_id`/`relation`/`object_id`
+without `assertions`. Replay fails closed on unknown schema versions.
+
+### Assertion batch rules
+
+- Unique triples only (duplicates fail accept and fail replay).
+- Sorted by `(subject_id, relation, object_id)` before hashing and persistence.
+- Input order must not affect canonical payload bytes (apart from event_id,
+  timestamp, candidate hash).
+
+## Terminal receipt (exactly one per candidate)
+
+### Accepted
+
+| Field | Notes |
+|---|---|
+| `receipt_schema_version` | `ck.continuity_receipt.v1` |
+| `terminal` | `true` |
+| `decision` | `accepted` |
+| `source_candidate_hash` | candidate hash |
+| `event_id` | single event id |
+| `accepted_assertion_count` | batch size |
+| `accepted_assertions` | canonical triples |
+| `parent_state_hash` / `resulting_state_hash` | batch boundary hashes |
+| `reason_codes` | e.g. `["ACCEPTED"]` |
+
+### Rejected
+
+| Field | Notes |
+|---|---|
+| `terminal` | `true` |
+| `decision` | `rejected` |
+| `source_candidate_hash` | candidate hash |
+| `event_id` | `null` |
+| `event_ids` | `[]` |
+| `accepted_assertion_count` | `0` |
+| `parent_state_hash` / `resulting_state_hash` | **unchanged** (same value) |
+| `reason_codes` | all failure codes |
+| `duplicate_triple` | optional diagnostic for intra-candidate dupes |
 
 ## State hash method
 
@@ -71,26 +111,11 @@ Unknown event fields fail closed on replay.
 {
   "schema_version": "ck.materialized_state.v1",
   "genesis_hash": "<sha256 of canonical genesis JSON>",
-  "accepted_relations": [
-    {"object_id":"…","relation":"…","subject_id":"…"}
-  ]
+  "accepted_relations": [ /* sorted unique triples from seed + all event batches */ ]
 }
 ```
 
-2. `accepted_relations` are unique triples sorted by
-   `(subject_id, relation, object_id)`.
-3. Canonical JSON: UTF-8, `sort_keys=True`, separators `(',', ':')`.
-4. State hash = lowercase hex SHA-256 of those bytes.
+2. Canonical JSON: UTF-8, `sort_keys=True`, separators `(',', ':')`.
+3. State hash = lowercase hex SHA-256 of those bytes.
 
-Genesis seed relations (if any) are included before event-derived atoms.
-
-## Rejection receipt
-
-Rejected candidates write a receipt under `receipts/reject_*.json` with:
-
-- `decision: rejected`
-- `reason_codes` (e.g. `UNKNOWN_SUBJECT`, `PARSE_FAILED:…`, `DUPLICATE_ASSERTION:…`)
-- `source_candidate_hash`
-- `scientific_completion: false`
-
-No continuity event file is created on rejection.
+Each v2 event contributes its full `assertions` batch atomically to the relation set.

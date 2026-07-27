@@ -5,7 +5,8 @@
 **Branch:** `grok/ck-run-00-6b-episode-a`  
 **Starting commit:** `db668a91e32843c3e53de58325cc17fff4b9c746`  
 **Ending commit:** none created (no commit/push)  
-**Disposition:** implementation complete for 00.6B; M0 remains `NO-GO`
+**Disposition:** implementation complete for 00.6B; amended by **RUN 00.6B.1**
+(candidate atomicity). M0 remains `NO-GO`
 
 ## 1. Baseline
 
@@ -110,7 +111,9 @@ Success: no issues found in 4 source files
 ```
 
 Baseline before 00.6B modules: **127 passed** (00.6A suite).  
-After 00.6B: **152 passed** (+25).
+After 00.6B: **152 passed** (+25).  
+After 00.6B.1: **172 passed** (+20 candidate-atomicity tests; existing 00.6B tests
+updated deliberately for v2 batch events).
 
 No M0. No model matrix. No live Ollama required for these tests.
 
@@ -154,13 +157,15 @@ Result: zero events, unchanged state hash, rejection receipts retained.
    full orchestrator integration is a follow-on if Anthony authorizes.
 2. **Product `pipeline.py` / existing `next_state.thread_touch` path** unchanged
    as the static control.
-3. **Single-assertion candidates** are the primary tested shape; multi-assertion
-   candidates append one event per assertion in order.
+3. **Multi-assertion candidates (00.6B.1):** one event + one receipt per
+   candidate with a canonical `assertions[]` batch; all-or-nothing; no partial
+   accept; no silent dedupe.
 4. **M0 headline** remains ineligible (00.6A.2 policy); this run does not
    flip `headline_eligible`.
 5. **Control matching / scorer repair** still out of scope.
 6. **Structured `continuity_assertions` not yet forced** in the default product
    JSON schema for chat turns (additive API only).
+7. **Event schema v1** (single triple fields) is unsupported; only v2 is accepted.
 
 ## 11. Negative-action confirmation
 
@@ -178,7 +183,7 @@ Result: zero events, unchanged state hash, rejection receipts retained.
 
 ## 12. Ready for independent adversarial review?
 
-**Yes — for RUN 00.6B scope** (append-only Episode A continuity lifecycle).
+**Yes — for RUN 00.6B + 00.6B.1 focused re-review** (lifecycle + candidate atomicity).
 
 Reviewers should verify:
 
@@ -189,4 +194,7 @@ Reviewers should verify:
 5. fresh-process reconstruction without Episode A memory
 6. prose never enters `accepted_relations`
 7. dry-run isolation
-8. existing 127 + 25 tests green; M0 still NO-GO
+8. **00.6B.1:** intra-candidate duplicates rejected; one event + one receipt per candidate; all-or-nothing multi-assertion
+9. 172 tests green; M0 still NO-GO
+
+See `RUN_00_6B_1_AMENDMENT_RECEIPT.md`.

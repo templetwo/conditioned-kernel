@@ -99,9 +99,10 @@ def test_accepted_assertion_appends_one_event(tmp_path: Path):
     assert len(events) == 1
     ev = events[0]
     assert ev["schema_version"] == EVENT_SCHEMA_VERSION
-    assert ev["subject_id"] == "thread_2"
-    assert ev["relation"] == "remains_open"
-    assert ev["object_id"] == "question_4"
+    assert len(ev["assertions"]) == 1
+    assert ev["assertions"][0]["subject_id"] == "thread_2"
+    assert ev["assertions"][0]["relation"] == "remains_open"
+    assert ev["assertions"][0]["object_id"] == "question_4"
     assert ev["validator_version"] == VALIDATOR_VERSION
     assert ev["parent_state_hash"]
     assert ev["resulting_state_hash"]
@@ -353,10 +354,10 @@ def test_duplicate_event_handling_is_deterministic(tmp_path: Path):
 def test_mutated_historical_event_breaks_replay(tmp_path: Path):
     store = _store(tmp_path)
     process_episode_a_candidate(_valid_raw(), store=store, episode_id="episode_a")
-    # Mutate on disk
+    # Mutate on disk (batch assertion payload)
     path = next(store.events_dir.glob("*.json"))
     data = json.loads(path.read_text())
-    data["object_id"] = "tampered"
+    data["assertions"][0]["object_id"] = "tampered"
     path.write_text(json.dumps(data) + "\n")
     with pytest.raises(ReplayError):
         replay_store(store)

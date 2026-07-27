@@ -1,6 +1,7 @@
 """Append-only continuity event schema and canonical state hashing.
 
-RUN 00.6B: events are authoritative; materialized state is derived.
+RUN 00.6B / 00.6B.1: candidate is the atomic acceptance unit.
+Event schema v2 carries a canonical ordered assertion batch per candidate.
 """
 
 from __future__ import annotations
@@ -9,12 +10,13 @@ import hashlib
 import json
 from typing import Any, Mapping, Sequence
 
-EVENT_SCHEMA_VERSION = "ck.continuity_event.v1"
+# v2 only — one event per accepted candidate with assertions[].
+EVENT_SCHEMA_VERSION = "ck.continuity_event.v2"
 GENESIS_SCHEMA_VERSION = "ck.genesis.v1"
 VALIDATOR_VERSION = "ck.continuity_validator.v1"
+RECEIPT_SCHEMA_VERSION = "ck.continuity_receipt.v1"
 RELATION_ATOM_KEYS = frozenset({"subject_id", "relation", "object_id"})
 
-# Global closed relation vocabulary (universe may subset further).
 ALLOWED_RELATIONS = frozenset(
     {
         "remains_open",
@@ -58,7 +60,7 @@ def relation_atom(
 def normalize_relations(
     relations: Sequence[Mapping[str, Any]],
 ) -> list[dict[str, str]]:
-    """Sort relation atoms for deterministic materialization."""
+    """Sort relation atoms for deterministic materialization and event payload."""
     atoms: list[dict[str, str]] = []
     for r in relations:
         atoms.append(
@@ -72,13 +74,24 @@ def normalize_relations(
     return atoms
 
 
+def event_assertion_atoms(event: Mapping[str, Any]) -> list[dict[str, str]]:
+    """Extract assertion atoms from a v2 batch event."""
+    if "assertions" not in event:
+        raise ValueError("event missing assertions batch (v2 required)")
+    raw = event["assertions"]
+    if not isinstance(raw, list) or not raw:
+        raise ValueError("event assertions must be a non-empty list")
+    return normalize_relations(raw)
+
+
 def materialize_state(
     genesis: Mapping[str, Any],
     events: Sequence[Mapping[str, Any]],
 ) -> dict[str, Any]:
     """Derive canonical state from genesis + ordered accepted events.
 
-    Free-form prose never enters accepted_relations.
+    Each event contributes its full assertion batch. Free-form prose never enters
+    accepted_relations.
     """
     rels: list[dict[str, str]] = []
     for seed in genesis.get("seed_relations") or []:
@@ -91,15 +104,21 @@ def materialize_state(
                 )
             )
     for ev in events:
-        rels.append(
-            relation_atom(
-                str(ev["subject_id"]),
-                str(ev["relation"]),
-                str(ev["object_id"]),
+        # Support internal prospective shapes that only carry assertions
+        if "assertions" in ev:
+            rels.extend(event_assertion_atoms(ev))
+        elif all(k in ev for k in ("subject_id", "relation", "object_id")):
+            # Prospective single-atom dict used only before packaging into a batch
+            rels.append(
+                relation_atom(
+                    str(ev["subject_id"]),
+                    str(ev["relation"]),
+                    str(ev["object_id"]),
+                )
             )
-        )
-    # Deduplicate while preserving deterministic order via sort
-    unique = { (a["subject_id"], a["relation"], a["object_id"]): a for a in rels }
+        else:
+            raise ValueError("event lacks assertions batch")
+    unique = {(a["subject_id"], a["relation"], a["object_id"]): a for a in rels}
     ordered = normalize_relations(list(unique.values()))
     return {
         "schema_version": "ck.materialized_state.v1",
@@ -122,15 +141,21 @@ def build_event(
     parent_state_hash: str,
     resulting_state_hash: str,
     episode_id: str,
-    subject_id: str,
-    relation: str,
-    object_id: str,
+    assertions: Sequence[Mapping[str, Any]],
     source_candidate_hash: str,
     acceptance_reason_code: str,
     timestamp: str,
     repo_commit: str | None,
     provenance: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
+    """Build one candidate-atomic continuity event with a canonical assertion batch."""
+    ordered = normalize_relations(assertions)
+    if not ordered:
+        raise ValueError("build_event requires a non-empty assertion batch")
+    # Fail closed on internal duplicates (caller should already reject)
+    triples = [(a["subject_id"], a["relation"], a["object_id"]) for a in ordered]
+    if len(triples) != len(set(triples)):
+        raise ValueError("build_event refuses duplicate assertions in batch")
     return {
         "schema_version": EVENT_SCHEMA_VERSION,
         "event_id": event_id,
@@ -138,9 +163,7 @@ def build_event(
         "parent_state_hash": parent_state_hash,
         "resulting_state_hash": resulting_state_hash,
         "episode_id": episode_id,
-        "subject_id": subject_id,
-        "relation": relation,
-        "object_id": object_id,
+        "assertions": ordered,
         "source_candidate_hash": source_candidate_hash,
         "validator_version": VALIDATOR_VERSION,
         "acceptance_reason_code": acceptance_reason_code,
