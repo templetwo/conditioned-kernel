@@ -406,3 +406,81 @@ def finalize_publication_gate(
         ),
         "reason_codes": list(publication_receipt.reason_codes),
     }
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Module CLI: python -m conditioned_kernel.artifact_publication ..."""
+    import argparse
+    import sys
+
+    from conditioned_kernel.governed_run_finalization import (
+        FinalizationError,
+        finalize_governed_run,
+        verify_publication_only,
+    )
+    from conditioned_kernel.paths import repo_root
+
+    p = argparse.ArgumentParser(
+        prog="python -m conditioned_kernel.artifact_publication",
+        description="Governed artifact publication verification / finalization",
+    )
+    sub = p.add_subparsers(dest="command", required=True)
+
+    vp = sub.add_parser("verify-publication")
+    vp.add_argument("--run-dir", required=True)
+    vp.add_argument("--commit-ref", default=None)
+    vp.add_argument("--repo-root", default=None)
+    vp.add_argument("--staging", action="store_true")
+    vp.add_argument("--json", action="store_true", dest="as_json")
+
+    fp = sub.add_parser("finalize-governed-run")
+    fp.add_argument("--run-dir", required=True)
+    fp.add_argument("--commit-ref", default=None)
+    fp.add_argument("--repo-root", default=None)
+    fp.add_argument("--staging", action="store_true")
+    fp.add_argument("--execution-complete", action="store_true")
+    fp.add_argument("--allow-incomplete", action="store_true")
+    fp.add_argument("--json", action="store_true", dest="as_json")
+
+    args = p.parse_args(argv)
+    root = args.repo_root or str(repo_root())
+    try:
+        if args.command == "verify-publication":
+            rec = verify_publication_only(
+                run_dir=args.run_dir,
+                repository_root=root,
+                commit_ref=args.commit_ref,
+                staging_mode=bool(args.staging),
+            )
+            if args.as_json:
+                print(json.dumps(rec, indent=2, sort_keys=True))
+            else:
+                print(
+                    f"publication_complete={rec.get('publication_complete')} "
+                    f"reasons={rec.get('reason_codes')}"
+                )
+            return 0 if rec.get("publication_complete") else 1
+        result = finalize_governed_run(
+            run_dir=args.run_dir,
+            repository_root=root,
+            commit_ref=args.commit_ref,
+            execution_complete=bool(getattr(args, "execution_complete", False)),
+            staging_mode=bool(args.staging),
+            write_receipts=True,
+            fail_closed=not bool(getattr(args, "allow_incomplete", False)),
+        )
+        if args.as_json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            print(
+                f"publication_complete={result['publication_complete']} "
+                f"review_ready={result['review_ready']}"
+            )
+        return 0 if result["publication_complete"] else 1
+    except FinalizationError as e:
+        print(f"FAIL {e.reason_code}: {e}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

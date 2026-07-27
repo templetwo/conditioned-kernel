@@ -327,12 +327,130 @@ def build_parser() -> argparse.ArgumentParser:
     sm.add_argument("--dry", action="store_true", help="Skip Ollama; inject valid candidate")
     sm.set_defaults(func=_cmd_smoke)
 
+    # RUN 00.8B.2 — publication gate (no Ollama required)
+    vp = sub.add_parser(
+        "verify-publication",
+        help="Verify governed-run artifact publication completeness (exit 0 iff complete)",
+    )
+    vp.add_argument("--run-dir", required=True, help="Governed run directory")
+    vp.add_argument(
+        "--commit-ref",
+        default=None,
+        help="Git commit to verify against (default: HEAD)",
+    )
+    vp.add_argument(
+        "--repo-root",
+        default=None,
+        help="Repository root (default: auto-detect)",
+    )
+    vp.add_argument(
+        "--staging",
+        action="store_true",
+        help="Pre-commit mode: skip commit-tree presence check",
+    )
+    vp.add_argument(
+        "--json",
+        action="store_true",
+        dest="as_json",
+        help="Emit full publication receipt JSON",
+    )
+    vp.set_defaults(func=_cmd_verify_publication)
+
+    fp = sub.add_parser(
+        "finalize-governed-run",
+        help="Finalize governed run: invoke publication verifier (fail closed if incomplete)",
+    )
+    fp.add_argument("--run-dir", required=True, help="Governed run directory")
+    fp.add_argument("--commit-ref", default=None, help="Git commit (default: HEAD)")
+    fp.add_argument("--repo-root", default=None, help="Repository root (default: auto)")
+    fp.add_argument(
+        "--staging",
+        action="store_true",
+        help="Pre-commit staging verification (no commit-tree check)",
+    )
+    fp.add_argument(
+        "--execution-complete",
+        action="store_true",
+        help="Mark execution as complete (does not imply publication_complete)",
+    )
+    fp.add_argument(
+        "--allow-incomplete",
+        action="store_true",
+        help="Write receipts even when publication fails (still exit nonzero)",
+    )
+    fp.add_argument("--json", action="store_true", dest="as_json")
+    fp.set_defaults(func=_cmd_finalize_governed_run)
+
     return p
+
+
+def _cmd_verify_publication(args: argparse.Namespace) -> int:
+    from conditioned_kernel.governed_run_finalization import (
+        FinalizationError,
+        verify_publication_only,
+    )
+
+    try:
+        rec = verify_publication_only(
+            run_dir=args.run_dir,
+            repository_root=args.repo_root or str(repo_root()),
+            commit_ref=args.commit_ref,
+            staging_mode=bool(args.staging),
+        )
+    except FinalizationError as e:
+        print(f"verify-publication: FAIL {e.reason_code}: {e}", file=sys.stderr)
+        return 2
+    if args.as_json:
+        print(json.dumps(rec, indent=2, sort_keys=True))
+    else:
+        print(
+            f"publication_complete={rec.get('publication_complete')} "
+            f"declared={rec.get('declared_artifact_count')} "
+            f"reasons={rec.get('reason_codes')}"
+        )
+    return 0 if rec.get("publication_complete") else 1
+
+
+def _cmd_finalize_governed_run(args: argparse.Namespace) -> int:
+    from conditioned_kernel.governed_run_finalization import (
+        FinalizationError,
+        finalize_governed_run,
+    )
+
+    try:
+        result = finalize_governed_run(
+            run_dir=args.run_dir,
+            repository_root=args.repo_root or str(repo_root()),
+            commit_ref=args.commit_ref,
+            execution_complete=bool(args.execution_complete),
+            staging_mode=bool(args.staging),
+            write_receipts=True,
+            fail_closed=not bool(args.allow_incomplete),
+        )
+    except FinalizationError as e:
+        print(f"finalize-governed-run: FAIL {e.reason_code}: {e}", file=sys.stderr)
+        # Attempt to still surface a receipt if written under allow path
+        return 1
+    if args.as_json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+    else:
+        print(
+            f"finalize: execution_complete={result['execution_complete']} "
+            f"publication_complete={result['publication_complete']} "
+            f"review_ready={result['review_ready']} "
+            f"release_ready={result['release_ready']}"
+        )
+        if result.get("reason_codes"):
+            print(f"reasons: {result['reason_codes']}")
+    return 0 if result["publication_complete"] else 1
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    # Publication commands do not need state/logs defaults
+    if args.command in ("verify-publication", "finalize-governed-run"):
+        return int(args.func(args))
     if not getattr(args, "state_dir", None):
         args.state_dir = str(default_state_dir())
     if not getattr(args, "logs_dir", None):

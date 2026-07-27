@@ -741,11 +741,57 @@ def execute_commissioning_run(
         },
     )
 
-    # Artifact hash manifest
+    # Artifact hash manifest (exclude self + post-verify publication receipts)
+    exclude_names = {
+        "artifact_manifest_hashes.json",
+        "publication_receipt.json",
+        "finalization_receipt.json",
+    }
     hashes = {}
     for p in sorted(run_dir.rglob("*")):
-        if p.is_file() and p.name != "artifact_manifest_hashes.json":
+        if p.is_file() and p.name not in exclude_names:
             hashes[str(p.relative_to(run_dir))] = sha256_hex(p.read_bytes())
     _write_json(run_dir / "artifact_manifest_hashes.json", hashes)
+
+    # RUN 00.8B.2 — mandatory publication gate (always invoke verifier)
+    # Staging mode: evidence not yet in a commit; still fail ignore/untracked
+    # for publication_complete. Execution report is separate.
+    from conditioned_kernel.governed_run_finalization import (
+        FinalizationError,
+        finalize_governed_run,
+    )
+
+    try:
+        fin = finalize_governed_run(
+            run_dir=run_dir,
+            repository_root=_repo_root(),
+            commit_ref=repo_head,
+            execution_complete=all_term,
+            run_id=str(plan["commissioning_plan_id"]),
+            staging_mode=True,
+            write_receipts=True,
+            fail_closed=False,
+        )
+    except FinalizationError as e:
+        fin = {
+            "publication_complete": False,
+            "review_ready": False,
+            "release_ready": False,
+            "execution_complete": all_term,
+            "reason_codes": [e.reason_code],
+            "verifier_invoked": True,
+            "error": str(e),
+            "scientific_completion": False,
+            "headline_eligible": False,
+            "m0_authorized": False,
+        }
+    report["publication_complete"] = bool(fin.get("publication_complete"))
+    report["review_ready"] = bool(fin.get("review_ready"))
+    report["release_ready"] = bool(fin.get("release_ready"))
+    report["finalization"] = fin
+    report["scientific_completion"] = False
+    report["headline_eligible"] = False
+    report["m0_authorized"] = False
+    _write_json(run_dir / "terminal_report.json", report)
 
     return report
