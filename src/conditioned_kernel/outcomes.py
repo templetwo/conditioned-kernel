@@ -240,16 +240,24 @@ def is_scientific_completion(outcome: "ExecutionOutcome | TerminalStatus") -> bo
 
 @dataclass(frozen=True)
 class ManifestCell:
-    """One planned execution cell. Identity is content-derived and stable."""
+    """One planned execution cell. Identity is content-derived and stable.
+
+    Optional ``cell_id_override`` (RUN 00.6F) allows a precomputed deterministic
+    identity (e.g. SHA-256 of canonical planned-cell fields) without changing
+    the default colon-joined scheme used by existing matrix/continuity paths.
+    """
 
     run_id: str
     task_id: str
     condition_id: str
     episode: str | None = None
     replicate_id: str = "0"
+    cell_id_override: str | None = None
 
     @property
     def cell_id(self) -> str:
+        if self.cell_id_override is not None:
+            return self.cell_id_override
         ep = self.episode if self.episode is not None else "-"
         return f"{self.run_id}:{self.task_id}:{self.condition_id}:{ep}:{self.replicate_id}"
 
@@ -689,9 +697,13 @@ class TerminalLedger:
 
     def record(self, cell_id: str, outcome: ExecutionOutcome) -> None:
         if cell_id not in self._planned:
-            raise TerminalLedgerError(f"cell not in planned manifest: {cell_id}")
+            raise TerminalLedgerError(
+                f"UNPLANNED_CELL: cell not in planned manifest: {cell_id}"
+            )
         if cell_id in self._rows:
-            raise TerminalLedgerError(f"duplicate terminal record for cell: {cell_id}")
+            raise TerminalLedgerError(
+                f"DUPLICATE_TERMINALIZATION: duplicate terminal record for cell: {cell_id}"
+            )
         # Bind cell identity if missing
         if outcome.manifest_cell_id is None:
             cell = self._planned[cell_id]

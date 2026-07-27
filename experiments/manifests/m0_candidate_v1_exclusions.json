@@ -1,0 +1,214 @@
+{
+  "manifest_id": "ck.m0.candidate.v1",
+  "schema_version": "ck.m0_exclusion_ledger.v1",
+  "tasks": [
+    {
+      "annotation_path": null,
+      "annotation_sha256": null,
+      "annotation_version": null,
+      "exclusion_reasons": [
+        "MISSING_CONTINUITY_UNIVERSE",
+        "MISSING_TASK_DEP_ANNOTATION"
+      ],
+      "inclusion_verdict": "EXCLUDED",
+      "source_path": "experiments/probes/continuity_tasks.json",
+      "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+      "task_id": "cont_constraint_persistence_01"
+    },
+    {
+      "annotation_path": null,
+      "annotation_sha256": null,
+      "annotation_version": null,
+      "exclusion_reasons": [
+        "MISSING_CONTINUITY_UNIVERSE",
+        "MISSING_TASK_DEP_ANNOTATION"
+      ],
+      "inclusion_verdict": "EXCLUDED",
+      "source_path": "experiments/probes/continuity_tasks.json",
+      "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+      "task_id": "cont_constraint_persistence_02"
+    },
+    {
+      "annotation_path": null,
+      "annotation_sha256": null,
+      "annotation_version": null,
+      "exclusion_reasons": [
+        "MISSING_CONTINUITY_UNIVERSE",
+        "MISSING_TASK_DEP_ANNOTATION"
+      ],
+      "inclusion_verdict": "EXCLUDED",
+      "source_path": "experiments/probes/continuity_tasks.json",
+      "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+      "task_id": "cont_constraint_persistence_03"
+    },
+    {
+      "annotation_path": null,
+      "annotation_sha256": null,
+      "annotation_version": null,
+      "exclusion_reasons": [
+        "MISSING_CONTINUITY_UNIVERSE",
+        "MISSING_TASK_DEP_ANNOTATION"
+      ],
+      "inclusion_verdict": "EXCLUDED",
+      "source_path": "experiments/probes/continuity_tasks.json",
+      "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+      "task_id": "cont_constraint_persistence_04"
+    },
+    {
+      "annotation_path": null,
+      "annotation_sha256": null,
+      "annotation_version": null,
+      "exclusion_reasons": [
+        "MISSING_CONTINUITY_UNIVERSE",
+        "MISSING_TASK_DEP_ANNOTATION"
+      ],
+      "inclusion_verdict": "EXCLUDED",
+      "source_path": "experiments/probes/continuity_tasks.json",
+      "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+      "task_id": "cont_failure_avoidance_01"
+    },
+    {
+      "annotation_path": null,
+      "annotation_sha256": null,
+      "annotation_version": null,
+      "exclusion_reasons": [
+        "MISSING_CONTINUITY_UNIVERSE",
+        "MISSING_TASK_DEP_ANNOTATION"
+      ],
+      "inclusion_verdict": "EXCLUDED",
+      "source_path": "experiments/probes/continuity_tasks.json",
+      "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+      "task_id": "cont_failure_avoidance_02"
+    },
+    {
+      "annotation_path": null,
+      "annotation_sha256": null,
+      "annotation_version": null,
+      "exclusion_reasons": [
+        "MISSING_CONTINUITY_UNIVERSE",
+        "MISSING_TASK_DEP_ANNOTATION"
+      ],
+      "inclusion_verdict": "EXCLUDED",
+      "source_path": "experiments/probes/continuity_tasks.json",
+      "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+      "task_id": "cont_failure_avoidance_03"
+    },
+    {
+      "annotation_path": null,
+      "annotation_sha256": null,
+      "annotation_version": null,
+      "exclusion_reasons": [
+        "MISSING_CONTINUITY_UNIVERSE",
+        "MISSING_TASK_DEP_ANNOTATION"
+      ],
+      "inclusion_verdict": "EXCLUDED",
+      "source_path": "experiments/probes/continuity_tasks.json",
+      "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+      "task_id": "cont_failure_avoidance_04"
+    },
+    {
+      "annotation_path": null,
+      "annotation_sha256": null,
+      "annotation_version": null,
+      "exclusion_reasons": [
+        "MISSING_CONTINUITY_UNIVERSE",
+        "MISSING_TASK_DEP_ANNOTATION"
+      ],
+      "inclusion_verdict": "EXCLUDED",
+      "source_path": "experiments/probes/continuity_tasks.json",
+      "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+      "task_id": "cont_goal_recovery_01"
+    },
+    {
+      "annotation_path": null,
+      "annotation_sha256": null,
+      "annotation_version": null,
+      "exclusion_reasons": [
+        "MISSING_CONTINUITY_UNIVERSE",
+        "MISSING_TASK_DEP_ANNOTATION"
+      ],
+      "inclusion_verdict": "EXCLUDED",
+      "source_path": "experiments/probes/continuity_tasks.json",
+      "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+      "task_id": "cont_goal_recovery_02"
+    },
+    {
+      "annotation_path": null,
+      "annotation_sha256": null,
+      "annotation_version": null,
+      "exclusion_reasons": [
+        "MISSING_CONTINUITY_UNIVERSE",
+        "MISSING_TASK_DEP_ANNOTATION"
+      ],
+      "inclusion_verdict": "EXCLUDED",
+      "source_path": "experiments/probes/continuity_tasks.json",
+      "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+      "task_id": "cont_goal_recovery_03"
+    },
+    {
+      "annotation_path": null,
+      "annotation_sha256": null,
+      "annotation_version": null,
+      "exclusion_reasons": [
+        "MISSING_CONTINUITY_UNIVERSE",
+        "MISSING_TASK_DEP_ANNOTATION"
+      ],
+      "inclusion_verdict": "EXCLUDED",
+      "source_path": "experiments/probes/continuity_tasks.json",
+      "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+      "task_id": "cont_goal_recovery_04"
+    },
+    {
+      "annotation_path": null,
+      "annotation_sha256": null,
+      "annotation_version": null,
+      "exclusion_reasons": [
+        "MISSING_CONTINUITY_UNIVERSE",
+        "MISSING_TASK_DEP_ANNOTATION"
+      ],
+      "inclusion_verdict": "EXCLUDED",
+      "source_path": "experiments/probes/continuity_tasks.json",
+      "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+      "task_id": "cont_thread_resume_01"
+    },
+    {
+      "annotation_path": null,
+      "annotation_sha256": null,
+      "annotation_version": null,
+      "exclusion_reasons": [
+        "MISSING_CONTINUITY_UNIVERSE",
+        "MISSING_TASK_DEP_ANNOTATION"
+      ],
+      "inclusion_verdict": "EXCLUDED",
+      "source_path": "experiments/probes/continuity_tasks.json",
+      "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+      "task_id": "cont_thread_resume_02"
+    },
+    {
+      "annotation_path": null,
+      "annotation_sha256": null,
+      "annotation_version": null,
+      "exclusion_reasons": [
+        "MISSING_CONTINUITY_UNIVERSE",
+        "MISSING_TASK_DEP_ANNOTATION"
+      ],
+      "inclusion_verdict": "EXCLUDED",
+      "source_path": "experiments/probes/continuity_tasks.json",
+      "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+      "task_id": "cont_thread_resume_03"
+    },
+    {
+      "annotation_path": null,
+      "annotation_sha256": null,
+      "annotation_version": null,
+      "exclusion_reasons": [
+        "MISSING_CONTINUITY_UNIVERSE",
+        "MISSING_TASK_DEP_ANNOTATION"
+      ],
+      "inclusion_verdict": "EXCLUDED",
+      "source_path": "experiments/probes/continuity_tasks.json",
+      "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+      "task_id": "cont_thread_resume_04"
+    }
+  ]
+}

@@ -1,0 +1,499 @@
+{
+  "authorization_status": "unratified",
+  "condition_set": [
+    "C0_bare",
+    "C1_budget_matched_bare",
+    "C2_instruction_identical",
+    "C3_static_ck"
+  ],
+  "contrast_definitions": [
+    {
+      "control": "C1_budget_matched_bare",
+      "id": "C3_vs_C1",
+      "interpretation": "structured substrate continuity under equal finalized request-byte length",
+      "role": "primary",
+      "treatment": "C3_static_ck"
+    },
+    {
+      "control": "C2_instruction_identical",
+      "id": "C3_vs_C2",
+      "interpretation": "reconstructed continuity state under shared operative instructions; byte difference disclosed",
+      "role": "secondary_diagnostic",
+      "treatment": "C3_static_ck"
+    },
+    {
+      "control": "C0_bare",
+      "headline_eligible": false,
+      "id": "C3_vs_C0",
+      "interpretation": "knowingly confounded; must never be presented as primary causal estimate",
+      "role": "descriptive_only",
+      "treatment": "C3_static_ck"
+    }
+  ],
+  "control_contract_version": "ck.control_verifier.v1",
+  "creation_timestamp": "2026-07-27T00:00:00Z",
+  "exclusion_ledger": {
+    "manifest_id": "ck.m0.candidate.v1",
+    "schema_version": "ck.m0_exclusion_ledger.v1",
+    "tasks": [
+      {
+        "annotation_path": null,
+        "annotation_sha256": null,
+        "annotation_version": null,
+        "exclusion_reasons": [
+          "MISSING_CONTINUITY_UNIVERSE",
+          "MISSING_TASK_DEP_ANNOTATION"
+        ],
+        "inclusion_verdict": "EXCLUDED",
+        "source_path": "experiments/probes/continuity_tasks.json",
+        "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+        "task_id": "cont_constraint_persistence_01"
+      },
+      {
+        "annotation_path": null,
+        "annotation_sha256": null,
+        "annotation_version": null,
+        "exclusion_reasons": [
+          "MISSING_CONTINUITY_UNIVERSE",
+          "MISSING_TASK_DEP_ANNOTATION"
+        ],
+        "inclusion_verdict": "EXCLUDED",
+        "source_path": "experiments/probes/continuity_tasks.json",
+        "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+        "task_id": "cont_constraint_persistence_02"
+      },
+      {
+        "annotation_path": null,
+        "annotation_sha256": null,
+        "annotation_version": null,
+        "exclusion_reasons": [
+          "MISSING_CONTINUITY_UNIVERSE",
+          "MISSING_TASK_DEP_ANNOTATION"
+        ],
+        "inclusion_verdict": "EXCLUDED",
+        "source_path": "experiments/probes/continuity_tasks.json",
+        "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+        "task_id": "cont_constraint_persistence_03"
+      },
+      {
+        "annotation_path": null,
+        "annotation_sha256": null,
+        "annotation_version": null,
+        "exclusion_reasons": [
+          "MISSING_CONTINUITY_UNIVERSE",
+          "MISSING_TASK_DEP_ANNOTATION"
+        ],
+        "inclusion_verdict": "EXCLUDED",
+        "source_path": "experiments/probes/continuity_tasks.json",
+        "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+        "task_id": "cont_constraint_persistence_04"
+      },
+      {
+        "annotation_path": null,
+        "annotation_sha256": null,
+        "annotation_version": null,
+        "exclusion_reasons": [
+          "MISSING_CONTINUITY_UNIVERSE",
+          "MISSING_TASK_DEP_ANNOTATION"
+        ],
+        "inclusion_verdict": "EXCLUDED",
+        "source_path": "experiments/probes/continuity_tasks.json",
+        "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+        "task_id": "cont_failure_avoidance_01"
+      },
+      {
+        "annotation_path": null,
+        "annotation_sha256": null,
+        "annotation_version": null,
+        "exclusion_reasons": [
+          "MISSING_CONTINUITY_UNIVERSE",
+          "MISSING_TASK_DEP_ANNOTATION"
+        ],
+        "inclusion_verdict": "EXCLUDED",
+        "source_path": "experiments/probes/continuity_tasks.json",
+        "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+        "task_id": "cont_failure_avoidance_02"
+      },
+      {
+        "annotation_path": null,
+        "annotation_sha256": null,
+        "annotation_version": null,
+        "exclusion_reasons": [
+          "MISSING_CONTINUITY_UNIVERSE",
+          "MISSING_TASK_DEP_ANNOTATION"
+        ],
+        "inclusion_verdict": "EXCLUDED",
+        "source_path": "experiments/probes/continuity_tasks.json",
+        "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+        "task_id": "cont_failure_avoidance_03"
+      },
+      {
+        "annotation_path": null,
+        "annotation_sha256": null,
+        "annotation_version": null,
+        "exclusion_reasons": [
+          "MISSING_CONTINUITY_UNIVERSE",
+          "MISSING_TASK_DEP_ANNOTATION"
+        ],
+        "inclusion_verdict": "EXCLUDED",
+        "source_path": "experiments/probes/continuity_tasks.json",
+        "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+        "task_id": "cont_failure_avoidance_04"
+      },
+      {
+        "annotation_path": null,
+        "annotation_sha256": null,
+        "annotation_version": null,
+        "exclusion_reasons": [
+          "MISSING_CONTINUITY_UNIVERSE",
+          "MISSING_TASK_DEP_ANNOTATION"
+        ],
+        "inclusion_verdict": "EXCLUDED",
+        "source_path": "experiments/probes/continuity_tasks.json",
+        "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+        "task_id": "cont_goal_recovery_01"
+      },
+      {
+        "annotation_path": null,
+        "annotation_sha256": null,
+        "annotation_version": null,
+        "exclusion_reasons": [
+          "MISSING_CONTINUITY_UNIVERSE",
+          "MISSING_TASK_DEP_ANNOTATION"
+        ],
+        "inclusion_verdict": "EXCLUDED",
+        "source_path": "experiments/probes/continuity_tasks.json",
+        "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+        "task_id": "cont_goal_recovery_02"
+      },
+      {
+        "annotation_path": null,
+        "annotation_sha256": null,
+        "annotation_version": null,
+        "exclusion_reasons": [
+          "MISSING_CONTINUITY_UNIVERSE",
+          "MISSING_TASK_DEP_ANNOTATION"
+        ],
+        "inclusion_verdict": "EXCLUDED",
+        "source_path": "experiments/probes/continuity_tasks.json",
+        "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+        "task_id": "cont_goal_recovery_03"
+      },
+      {
+        "annotation_path": null,
+        "annotation_sha256": null,
+        "annotation_version": null,
+        "exclusion_reasons": [
+          "MISSING_CONTINUITY_UNIVERSE",
+          "MISSING_TASK_DEP_ANNOTATION"
+        ],
+        "inclusion_verdict": "EXCLUDED",
+        "source_path": "experiments/probes/continuity_tasks.json",
+        "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+        "task_id": "cont_goal_recovery_04"
+      },
+      {
+        "annotation_path": null,
+        "annotation_sha256": null,
+        "annotation_version": null,
+        "exclusion_reasons": [
+          "MISSING_CONTINUITY_UNIVERSE",
+          "MISSING_TASK_DEP_ANNOTATION"
+        ],
+        "inclusion_verdict": "EXCLUDED",
+        "source_path": "experiments/probes/continuity_tasks.json",
+        "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+        "task_id": "cont_thread_resume_01"
+      },
+      {
+        "annotation_path": null,
+        "annotation_sha256": null,
+        "annotation_version": null,
+        "exclusion_reasons": [
+          "MISSING_CONTINUITY_UNIVERSE",
+          "MISSING_TASK_DEP_ANNOTATION"
+        ],
+        "inclusion_verdict": "EXCLUDED",
+        "source_path": "experiments/probes/continuity_tasks.json",
+        "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+        "task_id": "cont_thread_resume_02"
+      },
+      {
+        "annotation_path": null,
+        "annotation_sha256": null,
+        "annotation_version": null,
+        "exclusion_reasons": [
+          "MISSING_CONTINUITY_UNIVERSE",
+          "MISSING_TASK_DEP_ANNOTATION"
+        ],
+        "inclusion_verdict": "EXCLUDED",
+        "source_path": "experiments/probes/continuity_tasks.json",
+        "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+        "task_id": "cont_thread_resume_03"
+      },
+      {
+        "annotation_path": null,
+        "annotation_sha256": null,
+        "annotation_version": null,
+        "exclusion_reasons": [
+          "MISSING_CONTINUITY_UNIVERSE",
+          "MISSING_TASK_DEP_ANNOTATION"
+        ],
+        "inclusion_verdict": "EXCLUDED",
+        "source_path": "experiments/probes/continuity_tasks.json",
+        "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
+        "task_id": "cont_thread_resume_04"
+      }
+    ]
+  },
+  "execution_scope": "dry_planning_only",
+  "experiment_contract_id": null,
+  "generation_parameters": {
+    "num_ctx": 2048,
+    "seed": 0,
+    "stream": false,
+    "temperature": 0.0
+  },
+  "headline_eligible": false,
+  "headline_ineligible_reason": "m0_manifest_and_admission_contract_not_yet_ratified",
+  "included_tasks": [
+    {
+      "annotation_path": "tests/fixtures/control_task_live_plumbing_01.json",
+      "annotation_sha256": "6d0abcad48233539c34900cfa82fe64dda0599bc8d5a256ad83dd0cb52645e36",
+      "dependency_annotation_hash": "6d0abcad48233539c34900cfa82fe64dda0599bc8d5a256ad83dd0cb52645e36",
+      "expected_relation_hash": "94fbcce49ca6e3f4ceea93aab2b4ca705641e4dc596b4c40bc17672964db73b2",
+      "gold": {
+        "contract_version": "ck.task_rel.v1",
+        "expected_relations": [
+          {
+            "object_id": "question_cold_start",
+            "relation": "references",
+            "subject_id": "thread_gamma_receipt"
+          },
+          {
+            "object_id": "question_cold_start",
+            "relation": "remains_open",
+            "subject_id": "thread_gamma_receipt"
+          }
+        ],
+        "object_universe": [
+          "question_cold_start"
+        ],
+        "relation_universe": [
+          "remains_open",
+          "references"
+        ],
+        "subject_universe": [
+          "thread_gamma_receipt"
+        ],
+        "symmetric_relations": [],
+        "task_id": "live_plumbing_01"
+      },
+      "source_path": "experiments/probes/live_plumbing_task.json",
+      "source_sha256": "e66b41660727d2c7c69f121e48131dcea8036f2a1adb5305de70d18d8e6b830d",
+      "task_id": "live_plumbing_01"
+    }
+  ],
+  "ledger_schema_version": "ck.terminal_ledger.v1",
+  "manifest_id": "ck.m0.candidate.v1",
+  "manifest_sha256": "92c9b2431fc0edd2947c38fe43c06bdec793c4e9254701cd08549a223453bb6b",
+  "model_tag": "qwen2.5:0.5b",
+  "packet_contract_version": "ck.packet_contract.v1",
+  "planned_cell_count": 4,
+  "planned_cell_schema_version": "ck.planned_cell.v1",
+  "planned_cells": [
+    {
+      "cell_id": "8b395dd27f26a0a590af02036b15f0acd7487d3ec5c9beda1fb221c199f5d976",
+      "condition_id": "C0_bare",
+      "dependency_annotation_hash": "6d0abcad48233539c34900cfa82fe64dda0599bc8d5a256ad83dd0cb52645e36",
+      "expected_relation_hash": "94fbcce49ca6e3f4ceea93aab2b4ca705641e4dc596b4c40bc17672964db73b2",
+      "generation_parameters": {
+        "num_ctx": 2048,
+        "seed": 0,
+        "stream": false,
+        "temperature": 0.0
+      },
+      "headline_eligible": false,
+      "identity_payload": {
+        "condition_id": "C0_bare",
+        "manifest_id": "ck.m0.candidate.v1",
+        "model_tag": "qwen2.5:0.5b",
+        "packet_contract_version": "ck.packet_contract.v1",
+        "replicate_id": "0",
+        "scorer_schema_version": "ck.relational_score.v1",
+        "seed": 0,
+        "task_id": "live_plumbing_01"
+      },
+      "manifest_id": "ck.m0.candidate.v1",
+      "model_tag": "qwen2.5:0.5b",
+      "packet_contract_version": "ck.packet_contract.v1",
+      "paired_primary_cell_id": null,
+      "planned_cell_hash": "919b5070f4c98e6d046fa05485b936dd9416f6cf791865d92839268309855c12",
+      "planned_status": "planned",
+      "replicate_id": "0",
+      "schema_version": "ck.planned_cell.v1",
+      "scientific_completion": false,
+      "scorer_schema_version": "ck.relational_score.v1",
+      "source_state_dependency": null,
+      "task_contract_version": "ck.task_rel.v1",
+      "task_id": "live_plumbing_01"
+    },
+    {
+      "cell_id": "61cb06bdbdf3809ab9717bebb9f53273cb3c78c9cf928c33ed29891a313140d6",
+      "condition_id": "C1_budget_matched_bare",
+      "dependency_annotation_hash": "6d0abcad48233539c34900cfa82fe64dda0599bc8d5a256ad83dd0cb52645e36",
+      "expected_relation_hash": "94fbcce49ca6e3f4ceea93aab2b4ca705641e4dc596b4c40bc17672964db73b2",
+      "generation_parameters": {
+        "num_ctx": 2048,
+        "seed": 0,
+        "stream": false,
+        "temperature": 0.0
+      },
+      "headline_eligible": false,
+      "identity_payload": {
+        "condition_id": "C1_budget_matched_bare",
+        "manifest_id": "ck.m0.candidate.v1",
+        "model_tag": "qwen2.5:0.5b",
+        "packet_contract_version": "ck.packet_contract.v1",
+        "replicate_id": "0",
+        "scorer_schema_version": "ck.relational_score.v1",
+        "seed": 0,
+        "task_id": "live_plumbing_01"
+      },
+      "manifest_id": "ck.m0.candidate.v1",
+      "model_tag": "qwen2.5:0.5b",
+      "packet_contract_version": "ck.packet_contract.v1",
+      "paired_primary_cell_id": "02257559ce995c4e083053187e0a0883f895e2cea59f022cb30f3712c8f3ac91",
+      "planned_cell_hash": "7ff5a2bd49d216293131a5ea8636dd8d4d072b05c9fcfb1b90572036aa2ed6cb",
+      "planned_status": "planned",
+      "replicate_id": "0",
+      "schema_version": "ck.planned_cell.v1",
+      "scientific_completion": false,
+      "scorer_schema_version": "ck.relational_score.v1",
+      "source_state_dependency": null,
+      "task_contract_version": "ck.task_rel.v1",
+      "task_id": "live_plumbing_01"
+    },
+    {
+      "cell_id": "050924029259255dae8a516935d673ba74110feb50410d9bb7e59b05e11265b5",
+      "condition_id": "C2_instruction_identical",
+      "dependency_annotation_hash": "6d0abcad48233539c34900cfa82fe64dda0599bc8d5a256ad83dd0cb52645e36",
+      "expected_relation_hash": "94fbcce49ca6e3f4ceea93aab2b4ca705641e4dc596b4c40bc17672964db73b2",
+      "generation_parameters": {
+        "num_ctx": 2048,
+        "seed": 0,
+        "stream": false,
+        "temperature": 0.0
+      },
+      "headline_eligible": false,
+      "identity_payload": {
+        "condition_id": "C2_instruction_identical",
+        "manifest_id": "ck.m0.candidate.v1",
+        "model_tag": "qwen2.5:0.5b",
+        "packet_contract_version": "ck.packet_contract.v1",
+        "replicate_id": "0",
+        "scorer_schema_version": "ck.relational_score.v1",
+        "seed": 0,
+        "task_id": "live_plumbing_01"
+      },
+      "manifest_id": "ck.m0.candidate.v1",
+      "model_tag": "qwen2.5:0.5b",
+      "packet_contract_version": "ck.packet_contract.v1",
+      "paired_primary_cell_id": null,
+      "planned_cell_hash": "47f02e44f55826e30ce2e76c93013f1070d3c678abfd99a7d300bf98852eb290",
+      "planned_status": "planned",
+      "replicate_id": "0",
+      "schema_version": "ck.planned_cell.v1",
+      "scientific_completion": false,
+      "scorer_schema_version": "ck.relational_score.v1",
+      "source_state_dependency": null,
+      "task_contract_version": "ck.task_rel.v1",
+      "task_id": "live_plumbing_01"
+    },
+    {
+      "cell_id": "02257559ce995c4e083053187e0a0883f895e2cea59f022cb30f3712c8f3ac91",
+      "condition_id": "C3_static_ck",
+      "dependency_annotation_hash": "6d0abcad48233539c34900cfa82fe64dda0599bc8d5a256ad83dd0cb52645e36",
+      "expected_relation_hash": "94fbcce49ca6e3f4ceea93aab2b4ca705641e4dc596b4c40bc17672964db73b2",
+      "generation_parameters": {
+        "num_ctx": 2048,
+        "seed": 0,
+        "stream": false,
+        "temperature": 0.0
+      },
+      "headline_eligible": false,
+      "identity_payload": {
+        "condition_id": "C3_static_ck",
+        "manifest_id": "ck.m0.candidate.v1",
+        "model_tag": "qwen2.5:0.5b",
+        "packet_contract_version": "ck.packet_contract.v1",
+        "replicate_id": "0",
+        "scorer_schema_version": "ck.relational_score.v1",
+        "seed": 0,
+        "task_id": "live_plumbing_01"
+      },
+      "manifest_id": "ck.m0.candidate.v1",
+      "model_tag": "qwen2.5:0.5b",
+      "packet_contract_version": "ck.packet_contract.v1",
+      "paired_primary_cell_id": "61cb06bdbdf3809ab9717bebb9f53273cb3c78c9cf928c33ed29891a313140d6",
+      "planned_cell_hash": "a287de9cee7c50cba073235e8839c2657f6a047ae8ccd7b410a1907da42bfc56",
+      "planned_status": "planned",
+      "replicate_id": "0",
+      "schema_version": "ck.planned_cell.v1",
+      "scientific_completion": false,
+      "scorer_schema_version": "ck.relational_score.v1",
+      "source_state_dependency": "episode_a_continuity_state",
+      "task_contract_version": "ck.task_rel.v1",
+      "task_id": "live_plumbing_01"
+    }
+  ],
+  "planned_primary_pairs": [
+    {
+      "c1_cell_id": "61cb06bdbdf3809ab9717bebb9f53273cb3c78c9cf928c33ed29891a313140d6",
+      "c3_cell_id": "02257559ce995c4e083053187e0a0883f895e2cea59f022cb30f3712c8f3ac91",
+      "replicate_id": "0",
+      "task_id": "live_plumbing_01"
+    }
+  ],
+  "planned_primary_pairs_n": 1,
+  "replicate_policy": {
+    "replicate_ids": [
+      "0"
+    ],
+    "replicates_per_task_condition": 1
+  },
+  "repository_commit": "5826b334a1fcc56e859e4fef79e8ce1e140abf20",
+  "required_future_authorization_receipt_fields": [
+    "manifest_id",
+    "manifest_sha256",
+    "authorizing_principal",
+    "authorization_timestamp",
+    "experiment_contract_id",
+    "authorized_model",
+    "authorized_planned_cell_count"
+  ],
+  "retry_policy": {
+    "future_retry_requires_new_cell_id": true,
+    "replacement_runs": false,
+    "retries_in_manifest": 0
+  },
+  "runtime_requirements": {
+    "backend": "ollama",
+    "failure_on_unhonored_option": "RUNTIME_PROVENANCE_FAILURE",
+    "honor_seed": true,
+    "honor_temperature": true,
+    "no_replacement_runs": true,
+    "no_result_dependent_retries": true,
+    "no_silent_parameter_fallback": true
+  },
+  "schema_version": "ck.m0_manifest.v1",
+  "scientific_completion": false,
+  "scorer_schema_version": "ck.relational_score.v1",
+  "task_dependency_annotation_version": "ck.task_dep.v1",
+  "task_inclusion_rule": {
+    "description": "Include task iff stable task_id, closed subject/object/relation universe, one or more frozen expected relations, valid ck.task_dep.v1 annotation with required facts/ops/forbidden leakage fields, and valid relational scorer contract. No cherry-picking by difficulty or model behavior.",
+    "id": "ck.m0.eligibility.static_v1"
+  },
+  "task_registry_version": "ck.task_registry.v1",
+  "terminal_cell_schema_version": "ck.terminal_cell.v1"
+}
