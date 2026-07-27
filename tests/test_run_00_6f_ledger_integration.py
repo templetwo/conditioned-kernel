@@ -86,13 +86,19 @@ def test_duplicate_terminalization_fails_closed(session, manifest):
 
 
 def test_unplanned_cell_fails_closed(session, manifest):
+    from conditioned_kernel.m0_ledger_integration import synthetic_pass_receipts
+
     pc = copy.deepcopy(manifest["planned_cells"][0])
+    # receipts for a planned cell identity, but cell_id is unplanned
+    p_rec, c_rec = synthetic_pass_receipts(manifest["planned_cells"][0])
     pc["cell_id"] = "0" * 64
     with pytest.raises(M0LedgerError) as ei:
         session.terminalize(
             IntegrationInputs(
                 planned_cell=pc,
                 classification=M0TerminalClassification.TIMEOUT,
+                packet_receipt=p_rec,
+                control_receipt=c_rec,
             )
         )
     assert ei.value.reason_code == "UNPLANNED_CELL"
@@ -291,13 +297,18 @@ def test_no_retry_replacement(session, manifest):
 
 
 def test_wrong_manifest_id_rejected(session, manifest):
+    from conditioned_kernel.m0_ledger_integration import synthetic_pass_receipts
+
     pc = copy.deepcopy(manifest["planned_cells"][0])
+    p_rec, c_rec = synthetic_pass_receipts(pc)
     pc["manifest_id"] = "ck.m0.forged"
     with pytest.raises(M0LedgerError) as ei:
         session.terminalize(
             IntegrationInputs(
                 planned_cell=pc,
                 classification=M0TerminalClassification.TIMEOUT,
+                packet_receipt=p_rec,
+                control_receipt=c_rec,
             )
         )
     assert ei.value.reason_code == "WRONG_MANIFEST_ID"

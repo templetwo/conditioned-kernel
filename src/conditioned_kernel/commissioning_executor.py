@@ -273,11 +273,10 @@ class CommissioningExecutor:
                 IntegrationInputs(
                     planned_cell=planned,
                     classification=cls,
-                    reason_codes=tuple(scored.get("reason_codes") or ()),
-                    score_record=score_record,
                     packet_receipt=packet_receipt,
                     control_receipt=control_receipt,
-                    require_evidence_receipts=True,
+                    reason_codes=tuple(scored.get("reason_codes") or ()),
+                    score_record=score_record,
                     model_digest=digest,
                     runtime_provenance=prov,
                     provenance_complete=None,  # compute

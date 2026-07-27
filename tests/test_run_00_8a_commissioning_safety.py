@@ -29,6 +29,7 @@ from conditioned_kernel.m0_ledger_integration import (
     M0LedgerError,
     M0LedgerSession,
     M0TerminalClassification,
+    synthetic_pass_receipts,
     terminalize_synthetic,
 )
 from conditioned_kernel.m0_manifest import (
@@ -230,11 +231,14 @@ def test_score_condition_mismatch_fails(manifest):
     )
     # Score computed for C3, applied to C1
     rec = _score(manifest, c3)
+    p_rec, c_rec = synthetic_pass_receipts(c1)
     with pytest.raises(M0LedgerError) as ei:
         s.terminalize(
             IntegrationInputs(
                 planned_cell=c1,
                 classification=M0TerminalClassification.SCORED,
+                packet_receipt=p_rec,
+                control_receipt=c_rec,
                 score_record=rec,
             )
         )
@@ -244,11 +248,14 @@ def test_score_condition_mismatch_fails(manifest):
 def test_scored_without_score_record_fails(manifest):
     s = M0LedgerSession(copy.deepcopy(manifest))
     pc = manifest["planned_cells"][0]
+    p_rec, c_rec = synthetic_pass_receipts(pc)
     with pytest.raises(M0LedgerError) as ei:
         s.terminalize(
             IntegrationInputs(
                 planned_cell=pc,
                 classification=M0TerminalClassification.SCORED,
+                packet_receipt=p_rec,
+                control_receipt=c_rec,
                 score_record=None,
             )
         )
@@ -261,11 +268,14 @@ def test_expected_hash_mismatch_fails(manifest):
     rec = _score(manifest, pc)
     rec = dict(rec)
     rec["expected_relation_hash"] = "deadbeef" * 8
+    p_rec, c_rec = synthetic_pass_receipts(pc)
     with pytest.raises(M0LedgerError) as ei:
         s.terminalize(
             IntegrationInputs(
                 planned_cell=pc,
                 classification=M0TerminalClassification.SCORED,
+                packet_receipt=p_rec,
+                control_receipt=c_rec,
                 score_record=rec,
             )
         )
@@ -299,13 +309,14 @@ def test_failed_control_receipt_cannot_be_called_pass(manifest):
         verdict="FAIL",
         reason_codes=["BYTE_MISMATCH"],
     )
-    # Caller tries to say pass — receipt wins
+    # Caller diagnostic PASS string cannot override FAIL receipt
     term = s.terminalize(
         IntegrationInputs(
             planned_cell=pc,
             classification=M0TerminalClassification.SCORED,
             score_record=_score(manifest, pc),
-            control_verification_status="pass",  # liar
+            packet_verification_status_diagnostic="pass",
+            control_verification_status_diagnostic="pass",
             control_receipt=fail_rec,
             packet_receipt=make_packet_receipt(
                 cell_id=pc["cell_id"],
@@ -316,7 +327,6 @@ def test_failed_control_receipt_cannot_be_called_pass(manifest):
                 packet_contract_version="ck.packet_contract.v1",
                 verdict="PASS",
             ),
-            require_evidence_receipts=True,
             model_digest="sha256:x",
             runtime_provenance=_full_prov(pc),
             provenance_complete=None,

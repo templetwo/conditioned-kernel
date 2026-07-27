@@ -95,16 +95,23 @@ def map_classification_to_status(cls: M0TerminalClassification) -> TerminalStatu
 class IntegrationInputs:
     """Inputs for one planned-cell terminalization.
 
-    RUN 00.8A: when packet_receipt / control_receipt are supplied, verification
-    status is derived from those receipts (caller status strings ignored).
-    provenance_complete is computed from runtime_provenance when present.
+    RUN 00.8A.1 — evidence receipts are mandatory. Packet/control status is
+    derived only from verified canonical receipts. Caller-supplied
+    packet/control status strings are non-authoritative diagnostics only and
+    never decide terminal validity.
+
+    Schema surface: ``ck.terminal_integration.v2`` (v1 optional-receipt bypass
+    removed; no production flag turns verification off).
     """
 
     planned_cell: Mapping[str, Any]
     classification: M0TerminalClassification
+    packet_receipt: Mapping[str, Any]
+    control_receipt: Mapping[str, Any]
     reason_codes: tuple[str, ...] = ()
-    packet_verification_status: str = "not_run"
-    control_verification_status: str = "not_run"
+    # Non-authoritative diagnostics only (ignored for pass/fail derivation).
+    packet_verification_status_diagnostic: str | None = None
+    control_verification_status_diagnostic: str | None = None
     inference_status: str | None = None
     scorer_status: str | None = None
     score_record: Mapping[str, Any] | None = None
@@ -115,9 +122,6 @@ class IntegrationInputs:
     provenance_complete: bool | None = None  # None → compute from runtime_provenance
     artifact_hashes: Mapping[str, str] | None = None
     terminal_timestamp: str | None = None
-    packet_receipt: Mapping[str, Any] | None = None
-    control_receipt: Mapping[str, Any] | None = None
-    require_evidence_receipts: bool = False
     raw_response_sha256: str | None = None
 
 
@@ -172,45 +176,50 @@ class M0LedgerSession:
         reason_codes = list(inputs.reason_codes)
         classification = inputs.classification
 
-        # --- Evidence-derived packet/control status (00.8A) ---
-        packet_status = inputs.packet_verification_status
-        control_status = inputs.control_verification_status
-        packet_receipt_hash = inputs.packet_request_hash
-        control_receipt_hash = inputs.control_receipt_hash
+        # --- Evidence-derived packet/control status (00.8A.1: always mandatory) ---
+        # Caller-supplied status strings are never authority.
+        if inputs.packet_receipt is None:
+            raise M0LedgerError("PACKET_RECEIPT_REQUIRED", cell_id)
+        if inputs.control_receipt is None:
+            raise M0LedgerError("CONTROL_RECEIPT_REQUIRED", cell_id)
 
-        if inputs.require_evidence_receipts or inputs.packet_receipt is not None:
-            if inputs.packet_receipt is None and inputs.require_evidence_receipts:
-                raise M0LedgerError("PACKET_RECEIPT_REQUIRED", cell_id)
-            if inputs.packet_receipt is not None:
-                p_st, p_hash, p_reasons = verify_packet_receipt(
-                    inputs.packet_receipt,
-                    cell_id=cell_id,
-                    task_id=str(planned["task_id"]),
-                    condition_id=str(planned["condition_id"]),
-                )
-                packet_status = p_st
-                packet_receipt_hash = p_hash
-                if p_st != "pass":
-                    classification = M0TerminalClassification.PACKET_CONTRACT_FAILED
-                    reason_codes = p_reasons + reason_codes
+        p_st, p_hash, p_reasons = verify_packet_receipt(
+            inputs.packet_receipt,
+            cell_id=cell_id,
+            task_id=str(planned["task_id"]),
+            condition_id=str(planned["condition_id"]),
+        )
+        packet_status = p_st
+        packet_receipt_hash = p_hash
+        if p_st != "pass":
+            classification = M0TerminalClassification.PACKET_CONTRACT_FAILED
+            reason_codes = (
+                ["EVIDENCE_RECEIPT_UNVERIFIED", *p_reasons] + reason_codes
+                if p_reasons
+                else ["EVIDENCE_RECEIPT_UNVERIFIED"] + reason_codes
+            )
+            if any("MISMATCH" in r for r in p_reasons):
+                reason_codes = ["EVIDENCE_RECEIPT_CELL_MISMATCH", *reason_codes]
 
-        if inputs.require_evidence_receipts or inputs.control_receipt is not None:
-            if inputs.control_receipt is None and inputs.require_evidence_receipts:
-                raise M0LedgerError("CONTROL_RECEIPT_REQUIRED", cell_id)
-            if inputs.control_receipt is not None:
-                c_st, c_hash, c_reasons = verify_control_receipt(
-                    inputs.control_receipt,
-                    cell_id=cell_id,
-                    task_id=str(planned["task_id"]),
-                    condition_id=str(planned["condition_id"]),
-                )
-                control_status = c_st
-                control_receipt_hash = c_hash
-                if c_st != "pass" and classification is not (
-                    M0TerminalClassification.PACKET_CONTRACT_FAILED
-                ):
-                    classification = M0TerminalClassification.CONTROL_CONTRACT_FAILED
-                    reason_codes = c_reasons + reason_codes
+        c_st, c_hash, c_reasons = verify_control_receipt(
+            inputs.control_receipt,
+            cell_id=cell_id,
+            task_id=str(planned["task_id"]),
+            condition_id=str(planned["condition_id"]),
+        )
+        control_status = c_st
+        control_receipt_hash = c_hash
+        if c_st != "pass" and classification is not (
+            M0TerminalClassification.PACKET_CONTRACT_FAILED
+        ):
+            classification = M0TerminalClassification.CONTROL_CONTRACT_FAILED
+            reason_codes = (
+                ["EVIDENCE_RECEIPT_UNVERIFIED", *c_reasons] + reason_codes
+                if c_reasons
+                else ["EVIDENCE_RECEIPT_UNVERIFIED"] + reason_codes
+            )
+            if any("MISMATCH" in r for r in c_reasons):
+                reason_codes = ["EVIDENCE_RECEIPT_CELL_MISMATCH", *reason_codes]
 
         score_rec = inputs.score_record
         primary_score: float | None
@@ -271,11 +280,10 @@ class M0LedgerSession:
             scorer_status = inputs.scorer_status
             proposed_hash = None
 
-        # Provenance: when require_evidence_receipts or provenance_complete is None,
-        # derive completeness. Explicit True (legacy fixture path) remains allowed
-        # only without require_evidence_receipts.
+        # Provenance: derive when None; explicit True remains fixture-path allowed
+        # once evidence receipts have already been verified above.
         runtime_prov = dict(inputs.runtime_provenance or {})
-        if inputs.require_evidence_receipts or inputs.provenance_complete is None:
+        if inputs.provenance_complete is None:
             provenance_complete, missing = compute_provenance_completeness(runtime_prov)
             if missing:
                 reason_codes = list(missing) + reason_codes
@@ -413,6 +421,37 @@ def json_marker_scored(score: float) -> str:
     return f'{{"m0_scored":true,"primary_score":{score!r}}}'
 
 
+def synthetic_pass_receipts(planned_cell: Mapping[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Canonical synthetic PASS receipts for offline fixtures (not caller PASS strings)."""
+    from conditioned_kernel.evidence_verification import (
+        make_control_receipt,
+        make_packet_receipt,
+    )
+    from conditioned_kernel.m0_manifest import PACKET_CONTRACT_VERSION
+
+    cell_id = str(planned_cell["cell_id"])
+    task_id = str(planned_cell["task_id"])
+    condition_id = str(planned_cell["condition_id"])
+    packet = make_packet_receipt(
+        cell_id=cell_id,
+        task_id=task_id,
+        condition_id=condition_id,
+        request_sha256="ab" * 32,
+        complete_byte_length=64,
+        packet_contract_version=PACKET_CONTRACT_VERSION,
+        verdict="PASS",
+    )
+    control = make_control_receipt(
+        cell_id=cell_id,
+        task_id=task_id,
+        condition_id=condition_id,
+        paired_cell_id=planned_cell.get("paired_primary_cell_id"),
+        verdict="PASS",
+        byte_match=True,
+    )
+    return packet, control
+
+
 def terminalize_synthetic(
     session: M0LedgerSession,
     *,
@@ -420,23 +459,71 @@ def terminalize_synthetic(
     classification: M0TerminalClassification,
     score_record: Mapping[str, Any] | None = None,
     reason_codes: Sequence[str] = (),
-    packet_verification_status: str = "pass",
-    control_verification_status: str = "pass",
     inference_status: str | None = None,
     provenance_complete: bool = True,
     model_digest: str | None = "sha256:fixture",
     runtime_provenance: Mapping[str, Any] | None = None,
-    packet_request_hash: str | None = None,
-    control_receipt_hash: str | None = None,
+    packet_receipt: Mapping[str, Any] | None = None,
+    control_receipt: Mapping[str, Any] | None = None,
+    # Legacy kwargs: map status strings to synthetic FAIL/PASS *receipts*
+    # (never used as authority strings on the terminalize path).
+    packet_verification_status: str = "pass",
+    control_verification_status: str = "pass",
 ) -> dict[str, Any]:
+    """Offline helper: always supplies verified synthetic receipts.
+
+    Caller PASS/FAIL strings only select which synthetic receipt artifact to
+    build; terminalize derives status from those receipts alone.
+    """
+    from conditioned_kernel.evidence_verification import (
+        make_control_receipt,
+        make_packet_receipt,
+    )
+    from conditioned_kernel.m0_manifest import PACKET_CONTRACT_VERSION
+
     pc = session._planned_by_id[cell_id]
+    cell_id_s = str(pc["cell_id"])
+    task_id = str(pc["task_id"])
+    condition_id = str(pc["condition_id"])
+
+    if packet_receipt is None:
+        p_verdict = (
+            "FAIL"
+            if str(packet_verification_status).lower() in ("fail", "failed")
+            else "PASS"
+        )
+        packet_receipt = make_packet_receipt(
+            cell_id=cell_id_s,
+            task_id=task_id,
+            condition_id=condition_id,
+            request_sha256="ab" * 32,
+            complete_byte_length=64 if p_verdict == "PASS" else 0,
+            packet_contract_version=PACKET_CONTRACT_VERSION,
+            verdict=p_verdict,
+            reason_codes=["PACKET_SYNTHETIC_FAIL"] if p_verdict == "FAIL" else [],
+        )
+    if control_receipt is None:
+        c_verdict = (
+            "FAIL"
+            if str(control_verification_status).lower() in ("fail", "failed")
+            else "PASS"
+        )
+        control_receipt = make_control_receipt(
+            cell_id=cell_id_s,
+            task_id=task_id,
+            condition_id=condition_id,
+            paired_cell_id=pc.get("paired_primary_cell_id"),
+            verdict=c_verdict,
+            reason_codes=["CONTROL_SYNTHETIC_FAIL"] if c_verdict == "FAIL" else [],
+            byte_match=c_verdict == "PASS",
+        )
     return session.terminalize(
         IntegrationInputs(
             planned_cell=pc,
             classification=classification,
+            packet_receipt=packet_receipt,
+            control_receipt=control_receipt,
             reason_codes=tuple(reason_codes),
-            packet_verification_status=packet_verification_status,
-            control_verification_status=control_verification_status,
             inference_status=inference_status or classification.value.lower(),
             scorer_status=(
                 "SCORED"
@@ -444,8 +531,6 @@ def terminalize_synthetic(
                 else classification.value
             ),
             score_record=score_record,
-            packet_request_hash=packet_request_hash,
-            control_receipt_hash=control_receipt_hash,
             model_digest=model_digest,
             runtime_provenance=runtime_provenance
             or {"backend": "offline_fixture", "model_tag": pc["model_tag"]},
