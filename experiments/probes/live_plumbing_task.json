@@ -1,0 +1,39 @@
+[
+  {
+    "id": "live_plumbing_01",
+    "category": "live_plumbing",
+    "continuity_universe": {
+      "subject_ids": ["thread_gamma_receipt"],
+      "object_ids": ["question_cold_start"],
+      "relations": ["remains_open", "references"],
+      "valid_combinations": [
+        ["thread_gamma_receipt", "remains_open", "question_cold_start"],
+        ["thread_gamma_receipt", "references", "question_cold_start"]
+      ],
+      "forbidden_assertions": []
+    },
+    "episode_a": {
+      "objective": "Select a valid closed-set continuity relation for thread_gamma_receipt about question_cold_start.",
+      "prompt": "Select a valid closed-set continuity relation for thread_gamma_receipt about question_cold_start. Return JSON with continuity_assertions only.",
+      "seed_state": {
+        "goal": "Ship the continuity cold-start receipt on the Orin board.",
+        "threads": [
+          {
+            "id": "thread_gamma_receipt",
+            "title": "Wire episode_a_process_id into the cold-start receipt fields"
+          }
+        ],
+        "facts": [
+          "This system is fully local.",
+          "Active sprint code is CK-SPRINT-GAMMA-7.",
+          "Deliverable is the continuity cold-start receipt on Orin.",
+          "Sensors are out of scope for v0."
+        ]
+      }
+    },
+    "episode_b": {
+      "prompt": "After cold start: which continuity relation is accepted for thread_gamma_receipt?"
+    },
+    "notes": "RUN 00.6C live plumbing fixture. Gold triple is not labeled in the packet; universe defines closed sets only."
+  }
+]

@@ -51,6 +51,11 @@ from conditioned_kernel.continuity import (  # noqa: E402
     score_episode_b,
 )
 from conditioned_kernel.edge import DEFAULT_PROFILE_ID, load_profile  # noqa: E402
+from conditioned_kernel.continuity_live import (  # noqa: E402
+    live_plumbing_headline_policy,
+    run_episode_a_live,
+    run_episode_b_live,
+)
 from conditioned_kernel.generate import DEFAULT_BASE_URL, OllamaClient, RunStatus  # noqa: E402
 from conditioned_kernel.outcomes import (  # noqa: E402
     EmptyManifestError,
@@ -67,16 +72,109 @@ ARMS = ("bare_serialized", "ck_packet", "broken_packet")
 
 
 def continuity_headline_policy() -> dict[str, Any]:
-    """Experiment-owned headline policy (not ledger infrastructure).
-
-    Continuity remains headline-ineligible until Episode A accept / persist /
-    reload is implemented. Ledger facts may show inference completion; that
-    alone never grants eligibility.
-    """
+    """Legacy three-arm path policy (Episode A lifecycle deferred historically)."""
     return {
         "headline_eligible": False,
         "scientific_status": "deferred_episode_a_lifecycle",
         "headline_ineligible_reason": "episode_a_accept_persist_reload_not_implemented",
+    }
+
+
+# Re-export for tests / external callers
+__all_live__ = (
+    "episode_a_live",
+    "episode_b_live",
+    "live_plumbing_headline_policy",
+    "run_live_plumbing",
+)
+
+
+def episode_a_live(
+    task: dict[str, Any],
+    model: str,
+    prof: Any,
+    *,
+    store_root: Path,
+    dry: bool = False,
+    dry_candidate_text: str | None = None,
+) -> dict[str, Any]:
+    """Episode A worker: typed inference → continuity_gate → durable store."""
+    r = run_episode_a_live(
+        task,
+        store_root=store_root,
+        model=model,
+        timeout_s=float(prof.timeout_s),
+        num_ctx=int(prof.num_ctx),
+        dry=dry,
+        dry_candidate_text=dry_candidate_text,
+        provenance={"model": model, "profile": prof.profile_id},
+    )
+    gate_dict = None
+    if r.gate is not None:
+        gate_dict = {
+            "decision": r.gate.decision.value,
+            "reason_code": r.gate.reason_code,
+            "reason_codes": list(r.gate.reason_codes),
+            "candidate_hash": r.gate.candidate_hash,
+            "scientific_completion": False,
+            "events_n": len(r.gate.events),
+        }
+    return {
+        "pid": os.getpid(),
+        "end_time": _now(),
+        "mode": "live_plumbing",
+        "store_path": r.store_path,
+        "inference_status": r.inference_status,
+        "inference": r.inference,
+        "final_response": r.final_response,
+        "gate": gate_dict,
+        "gate_invocations": r.gate_invocations,
+        "packet_hash": r.packet_hash,
+        "events_n": r.events_n,
+        "rejection_receipts_n": r.rejection_receipts_n,
+        "scientific_completion": False,
+        "dry_run": r.dry_run,
+        "error": r.error,
+    }
+
+
+def episode_b_live(
+    task: dict[str, Any],
+    model: str,
+    prof: Any,
+    *,
+    store_root: Path,
+    dry: bool = False,
+    invoke_model: bool = False,
+) -> dict[str, Any]:
+    """Episode B worker: fresh open of store → verified replay → packet."""
+    start_pid, start_time = os.getpid(), _now()
+    r = run_episode_b_live(
+        task,
+        store_root=store_root,
+        model=model,
+        timeout_s=float(prof.timeout_s),
+        num_ctx=int(prof.num_ctx),
+        dry=dry,
+        invoke_model=invoke_model and not dry,
+    )
+    return {
+        "pid": start_pid,
+        "start_time": start_time,
+        "end_time": _now(),
+        "mode": "live_plumbing",
+        "replay_ok": r.replay_ok,
+        "state_hash": r.state_hash,
+        "packet_hash": r.packet_hash,
+        "relation_count": r.relation_count,
+        "accepted_relations": r.accepted_relations,
+        "packet": r.packet,
+        "inference_status": r.inference_status,
+        "inference": r.inference,
+        "scientific_completion": False,
+        "dry_run": r.dry_run,
+        "used_episode_a_memory": r.used_episode_a_memory,
+        "error": r.error,
     }
 
 # Same rules the CK system prompt states, minus the compiled structure. Fixed
@@ -325,6 +423,217 @@ def _spawn(args: list[str], payload: dict) -> dict:
             Path(p).unlink(missing_ok=True)
 
 
+def run_live_plumbing(
+    tasks: list[dict[str, Any]],
+    *,
+    model: str,
+    prof: Any,
+    dry: bool,
+    out: Path,
+    store_base: Path,
+    invoke_episode_b_model: bool = False,
+    inject_final_response: str | None = None,
+) -> dict[str, Any]:
+    """Bounded live plumbing: Episode A → process boundary → fresh Episode B.
+
+    scientific_completion_n is always 0. Headline ineligible (live_plumbing_only).
+    """
+    run_id = f"live_plumbing_{int(time.time())}"
+    store_base.mkdir(parents=True, exist_ok=True)
+    rows: list[dict[str, Any]] = []
+    policy = live_plumbing_headline_policy()
+
+    # Planned passages: (task, episode A) and (task, episode B)
+    planned: list[ManifestCell] = []
+    for t in tasks:
+        tid = str(t.get("id"))
+        planned.append(
+            ManifestCell(
+                run_id=run_id, task_id=tid, condition_id="live_ck", episode="A"
+            )
+        )
+        planned.append(
+            ManifestCell(
+                run_id=run_id, task_id=tid, condition_id="live_ck", episode="B"
+            )
+        )
+    ledger = TerminalLedger(planned, run_id=run_id)
+
+    for t in tasks:
+        tid = str(t.get("id"))
+        store_root = store_base / tid
+        dry_cand = inject_final_response
+        if dry and dry_cand is None:
+            # dry with no inject: pure plumbing without model or gate accept
+            dry_cand = None
+
+        # --- Episode A (subprocess) ---
+        ep_a_payload = {
+            "task": t,
+            "store_root": str(store_root),
+            "dry_candidate_text": dry_cand,
+            "live_plumbing": True,
+        }
+        dry_flags = ["--dry"] if dry else []
+        ep_a = _spawn(
+            [
+                "--episode", "a-live",
+                "--model", model,
+                "--profile", prof.profile_id,
+                *dry_flags,
+            ],
+            ep_a_payload,
+        )
+        cell_a = next(c for c in planned if c.task_id == tid and c.episode == "A")
+        if ep_a.get("error") and not ep_a.get("inference_status"):
+            oc_a = ExecutionOutcome.not_run(
+                cell=cell_a, reason="episode_a_worker_error"
+            )
+        elif dry and ep_a.get("dry_run") and ep_a.get("gate") is None:
+            oc_a = ExecutionOutcome.dry_run_only(cell=cell_a, reason="live_plumbing_dry")
+        elif ep_a.get("gate", {}).get("decision") == "accepted":
+            oc_a = ExecutionOutcome(
+                status=TerminalStatus.COMPLETED_INVALID,
+                output=ep_a.get("final_response"),
+                scientific_completion=False,
+                dry_run=False,
+                quality_admitted=True,
+                decision="accept",
+                reason_codes=("live_plumbing_accepted", "scientific_completion_deferred"),
+                **ExecutionOutcome._cell_fields(cell_a),
+            )
+        elif ep_a.get("gate", {}).get("decision") == "rejected":
+            oc_a = ExecutionOutcome(
+                status=TerminalStatus.COMPLETED_INVALID,
+                output=ep_a.get("final_response"),
+                scientific_completion=False,
+                dry_run=False,
+                quality_admitted=False,
+                decision="reject",
+                reason_codes=tuple(ep_a.get("gate", {}).get("reason_codes") or ("rejected",)),
+                **ExecutionOutcome._cell_fields(cell_a),
+            )
+        elif ep_a.get("inference_status") in (
+            TerminalStatus.TIMEOUT.value,
+            TerminalStatus.NO_FINAL_RESPONSE.value,
+            TerminalStatus.TRANSPORT_ERROR.value,
+            TerminalStatus.INVALID_RESPONSE.value,
+        ):
+            st = TerminalStatus(ep_a["inference_status"])
+            oc_a = ExecutionOutcome.from_lifecycle(
+                cell=cell_a,
+                status=st,
+                output=None,
+                reason_codes=(ep_a["inference_status"],),
+                error=ep_a.get("error"),
+            )
+        else:
+            oc_a = ExecutionOutcome.not_run(
+                cell=cell_a, reason=str(ep_a.get("error") or "episode_a_unknown")
+            )
+        ledger.record(cell_a.cell_id, oc_a)
+        rows.append({"task_id": tid, "episode": "A", **ep_a, "manifest_cell_id": cell_a.cell_id})
+
+        # --- Episode B (fresh subprocess; store path only) ---
+        ep_b_payload = {
+            "task": t,
+            "store_root": str(store_root),
+            "live_plumbing": True,
+            "invoke_model": bool(invoke_episode_b_model) and not dry,
+        }
+        ep_b = _spawn(
+            [
+                "--episode", "b-live",
+                "--model", model,
+                "--profile", prof.profile_id,
+                *dry_flags,
+            ],
+            ep_b_payload,
+        )
+        cell_b = next(c for c in planned if c.task_id == tid and c.episode == "B")
+        if dry:
+            oc_b = ExecutionOutcome.dry_run_only(cell=cell_b, reason="live_plumbing_dry")
+        elif ep_b.get("replay_ok") is False:
+            oc_b = ExecutionOutcome.from_lifecycle(
+                cell=cell_b,
+                status=TerminalStatus.COMPLETED_INVALID,
+                output=None,
+                reason_codes=("replay_failed",),
+                error=ep_b.get("error"),
+            )
+        elif ep_b.get("replay_ok"):
+            oc_b = ExecutionOutcome(
+                status=TerminalStatus.COMPLETED_INVALID,
+                output=None,
+                scientific_completion=False,
+                dry_run=False,
+                quality_admitted=bool(ep_b.get("relation_count")),
+                reason_codes=("episode_b_replay_ok", "live_plumbing_only"),
+                **ExecutionOutcome._cell_fields(cell_b),
+            )
+        else:
+            oc_b = ExecutionOutcome.not_run(
+                cell=cell_b, reason=str(ep_b.get("error") or "episode_b_unknown")
+            )
+        ledger.record(cell_b.cell_id, oc_b)
+        rows.append({"task_id": tid, "episode": "B", **ep_b, "manifest_cell_id": cell_b.cell_id})
+
+        print(
+            f"  {tid}: A status={ep_a.get('inference_status')} "
+            f"gate={ep_a.get('gate', {}).get('decision')} events={ep_a.get('events_n')} "
+            f"| B replay={ep_b.get('replay_ok')} rels={ep_b.get('relation_count')} "
+            f"pids={ep_a.get('pid')}/{ep_b.get('pid')}",
+            flush=True,
+        )
+
+    ledger.validate()
+    diag = ledger.diagnostic_counts()
+    # Force plumbing policy: never scientific completion
+    report = {
+        "created_at": _now(),
+        "run_id": run_id,
+        "mode": "live_plumbing",
+        "model": model,
+        "profile": prof.profile_id,
+        "dry_run": bool(dry),
+        "n_tasks": len(tasks),
+        "rows": rows,
+        "terminal_ledger": {
+            "planned_n": diag["planned_n"],
+            "terminal_n": diag["terminal_n"],
+            "scientific_completion_n": 0,
+            "diagnostic_counts": {**diag, "scientific_completion_n": 0},
+        },
+        **policy,
+        "scientific_completion_n": 0,
+    }
+    event = {
+        "event": "continuity.live_plumbing.completed",
+        "run_id": run_id,
+        "model": model,
+        "profile": prof.profile_id,
+        "dry_run": bool(dry),
+        "planned_n": diag["planned_n"],
+        "terminal_n": diag["terminal_n"],
+        "inference_completed_n": diag["inference_completed_n"],
+        "accepted_n": diag["accepted_n"],
+        "failed_n": diag["failed_n"],
+        "dry_run_n": diag["dry_run_n"],
+        "scientific_completion_n": 0,
+        **policy,
+        "artifact": str(out),
+    }
+    report["event"] = event
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(report, indent=2) + "\n")
+    print(json.dumps({k: report[k] for k in (
+        "mode", "scientific_completion_n", "headline_eligible", "scientific_status"
+    )}, indent=2), flush=True)
+    print("CK_EVENT " + json.dumps(event, separators=(",", ":")), flush=True)
+    print(f"wrote {out}", flush=True)
+    return report
+
+
 def main() -> int:
     p = argparse.ArgumentParser(description="Continuity experiment (two-episode, three-arm)")
     p.add_argument("--tasks", type=Path,
@@ -337,10 +646,33 @@ def main() -> int:
     p.add_argument("--bare-mode", choices=["fair", "plain"], default="fair",
                    help="fair: control gets CK's exact system prompt (isolates structure). "
                         "plain: control gets a neutral prompt (confounds instruction+structure).")
-    p.add_argument("--episode", choices=["a", "b"], default=None, help="internal worker mode")
+    p.add_argument("--episode", choices=["a", "b", "a-live", "b-live"], default=None,
+                   help="internal worker mode")
     p.add_argument("--arm", default=None)
     p.add_argument("--payload", type=Path, default=None)
     p.add_argument("--out-json", type=Path, default=None)
+    p.add_argument(
+        "--live-plumbing",
+        action="store_true",
+        help="RUN 00.6C path: Episode A continuity_assertions → store → fresh Episode B",
+    )
+    p.add_argument(
+        "--store-dir",
+        type=Path,
+        default=None,
+        help="Base directory for live-plumbing ContinuityStore (default: temp under out)",
+    )
+    p.add_argument(
+        "--invoke-episode-b-model",
+        action="store_true",
+        help="After verified replay, invoke model once on Episode B (smoke only)",
+    )
+    p.add_argument(
+        "--inject-final-response",
+        type=str,
+        default=None,
+        help="Offline/test: inject Episode A final-response text (no Ollama)",
+    )
     a = p.parse_args()
 
     prof = load_profile(a.profile)
@@ -351,10 +683,53 @@ def main() -> int:
         payload = json.loads(a.payload.read_text())
         if a.episode == "a":
             res = episode_a(payload["task"], model, prof, a.dry)
-        else:
+        elif a.episode == "b":
             res = episode_b(payload["task"], a.arm, payload["artifacts"], model, prof,
                             a.dry, a.bare_mode)
+        elif a.episode == "a-live":
+            res = episode_a_live(
+                payload["task"],
+                model,
+                prof,
+                store_root=Path(payload["store_root"]),
+                dry=a.dry,
+                dry_candidate_text=payload.get("dry_candidate_text"),
+            )
+        else:  # b-live
+            res = episode_b_live(
+                payload["task"],
+                model,
+                prof,
+                store_root=Path(payload["store_root"]),
+                dry=a.dry,
+                invoke_model=bool(payload.get("invoke_model")),
+            )
         a.out_json.write_text(json.dumps(res))
+        return 0
+
+    # ---- live plumbing orchestrator (00.6C) --------------------------------
+    if a.live_plumbing:
+        tasks = json.loads(a.tasks.read_text())
+        if a.limit:
+            tasks = tasks[: a.limit]
+        out = a.out or (
+            ROOT / "experiments" / "runs" / f"live_plumbing_{int(time.time())}.json"
+        )
+        store_base = a.store_dir or (out.parent / f"{out.stem}_stores")
+        print(
+            f"live_plumbing: {len(tasks)} task(s), model={model}, dry={a.dry}",
+            flush=True,
+        )
+        run_live_plumbing(
+            tasks,
+            model=model,
+            prof=prof,
+            dry=a.dry,
+            out=out,
+            store_base=store_base,
+            invoke_episode_b_model=a.invoke_episode_b_model,
+            inject_final_response=a.inject_final_response,
+        )
         return 0
 
     # ---- orchestrator -----------------------------------------------------
