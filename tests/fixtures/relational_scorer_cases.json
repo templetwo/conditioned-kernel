@@ -1,0 +1,523 @@
+{
+  "schema_note": "RUN 00.6E frozen offline fixtures. scorer_validation_only. headline_eligible=false.",
+  "scientific_status": "scorer_validation_only",
+  "scientific_completion": false,
+  "headline_eligible": false,
+  "headline_ineligible_reason": "m0_manifest_and_admission_contract_not_yet_ratified",
+  "base_gold": {
+    "task_id": "rel_task_01",
+    "contract_version": "ck.task_rel.v1",
+    "subject_universe": ["ent_A", "ent_B", "ent_C"],
+    "object_universe": ["ent_A", "ent_B", "ent_C", "ent_D"],
+    "relation_universe": ["remains_open", "depends_on", "blocks"],
+    "symmetric_relations": [],
+    "expected_relations": [
+      {
+        "subject_id": "ent_A",
+        "relation": "remains_open",
+        "object_id": "ent_B"
+      }
+    ]
+  },
+  "multi_gold": {
+    "task_id": "rel_task_multi",
+    "contract_version": "ck.task_rel.v1",
+    "subject_universe": ["ent_A", "ent_B", "ent_C"],
+    "object_universe": ["ent_A", "ent_B", "ent_C", "ent_D"],
+    "relation_universe": ["remains_open", "depends_on", "blocks"],
+    "symmetric_relations": [],
+    "expected_relations": [
+      {
+        "subject_id": "ent_A",
+        "relation": "remains_open",
+        "object_id": "ent_B"
+      },
+      {
+        "subject_id": "ent_B",
+        "relation": "depends_on",
+        "object_id": "ent_C"
+      },
+      {
+        "subject_id": "ent_C",
+        "relation": "blocks",
+        "object_id": "ent_D"
+      }
+    ]
+  },
+  "symmetric_gold": {
+    "task_id": "rel_task_sym",
+    "contract_version": "ck.task_rel.v1",
+    "subject_universe": ["ent_A", "ent_B"],
+    "object_universe": ["ent_A", "ent_B"],
+    "relation_universe": ["linked_to", "blocks"],
+    "symmetric_relations": ["linked_to"],
+    "expected_relations": [
+      {
+        "subject_id": "ent_A",
+        "relation": "linked_to",
+        "object_id": "ent_B"
+      }
+    ]
+  },
+  "property_universe": {
+    "task_id": "rel_prop_01",
+    "contract_version": "ck.task_rel.v1",
+    "subject_universe": ["s1", "s2"],
+    "object_universe": ["o1", "o2"],
+    "relation_universe": ["r1", "r2"],
+    "symmetric_relations": [],
+    "expected_relations": [
+      {
+        "subject_id": "s1",
+        "relation": "r1",
+        "object_id": "o1"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": 1,
+      "name": "perfect_one_relation",
+      "gold": "base_gold",
+      "inference_status": "completed",
+      "proposed_assertions": [
+        {
+          "subject_id": "ent_A",
+          "relation": "remains_open",
+          "object_id": "ent_B"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "perfect_multi_relation",
+      "gold": "multi_gold",
+      "inference_status": "completed",
+      "proposed_assertions": [
+        {
+          "subject_id": "ent_A",
+          "relation": "remains_open",
+          "object_id": "ent_B"
+        },
+        {
+          "subject_id": "ent_B",
+          "relation": "depends_on",
+          "object_id": "ent_C"
+        },
+        {
+          "subject_id": "ent_C",
+          "relation": "blocks",
+          "object_id": "ent_D"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "empty_assertion_list",
+      "gold": "base_gold",
+      "inference_status": "completed",
+      "proposed_assertions": []
+    },
+    {
+      "id": 4,
+      "name": "one_correct_one_missing",
+      "gold": "multi_gold",
+      "inference_status": "completed",
+      "proposed_assertions": [
+        {
+          "subject_id": "ent_A",
+          "relation": "remains_open",
+          "object_id": "ent_B"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "wrong_relation_correct_subject_object",
+      "gold": "base_gold",
+      "inference_status": "completed",
+      "proposed_assertions": [
+        {
+          "subject_id": "ent_A",
+          "relation": "depends_on",
+          "object_id": "ent_B"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "reversed_subject_object",
+      "gold": "base_gold",
+      "inference_status": "completed",
+      "proposed_assertions": [
+        {
+          "subject_id": "ent_B",
+          "relation": "remains_open",
+          "object_id": "ent_A"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "unsupported_in_universe",
+      "gold": "base_gold",
+      "inference_status": "completed",
+      "proposed_assertions": [
+        {
+          "subject_id": "ent_A",
+          "relation": "blocks",
+          "object_id": "ent_C"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "out_of_universe_subject",
+      "gold": "base_gold",
+      "inference_status": "completed",
+      "proposed_assertions": [
+        {
+          "subject_id": "ent_Z",
+          "relation": "remains_open",
+          "object_id": "ent_B"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "out_of_universe_object",
+      "gold": "base_gold",
+      "inference_status": "completed",
+      "proposed_assertions": [
+        {
+          "subject_id": "ent_A",
+          "relation": "remains_open",
+          "object_id": "ent_Z"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "out_of_universe_relation",
+      "gold": "base_gold",
+      "inference_status": "completed",
+      "proposed_assertions": [
+        {
+          "subject_id": "ent_A",
+          "relation": "loves",
+          "object_id": "ent_B"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "exact_plus_unsupported",
+      "gold": "base_gold",
+      "inference_status": "completed",
+      "proposed_assertions": [
+        {
+          "subject_id": "ent_A",
+          "relation": "remains_open",
+          "object_id": "ent_B"
+        },
+        {
+          "subject_id": "ent_A",
+          "relation": "blocks",
+          "object_id": "ent_C"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "exact_plus_duplicate",
+      "gold": "base_gold",
+      "inference_status": "completed",
+      "proposed_assertions": [
+        {
+          "subject_id": "ent_A",
+          "relation": "remains_open",
+          "object_id": "ent_B"
+        },
+        {
+          "subject_id": "ent_A",
+          "relation": "remains_open",
+          "object_id": "ent_B"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "name": "shotgun_all_identifiers_false_triples",
+      "gold": "base_gold",
+      "inference_status": "completed",
+      "proposed_assertions": [
+        {
+          "subject_id": "ent_A",
+          "relation": "depends_on",
+          "object_id": "ent_C"
+        },
+        {
+          "subject_id": "ent_B",
+          "relation": "blocks",
+          "object_id": "ent_A"
+        },
+        {
+          "subject_id": "ent_C",
+          "relation": "remains_open",
+          "object_id": "ent_D"
+        },
+        {
+          "subject_id": "ent_A",
+          "relation": "blocks",
+          "object_id": "ent_D"
+        },
+        {
+          "subject_id": "ent_B",
+          "relation": "depends_on",
+          "object_id": "ent_D"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "name": "every_relation_on_one_pair",
+      "gold": "base_gold",
+      "inference_status": "completed",
+      "proposed_assertions": [
+        {
+          "subject_id": "ent_A",
+          "relation": "remains_open",
+          "object_id": "ent_B"
+        },
+        {
+          "subject_id": "ent_A",
+          "relation": "depends_on",
+          "object_id": "ent_B"
+        },
+        {
+          "subject_id": "ent_A",
+          "relation": "blocks",
+          "object_id": "ent_B"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "name": "prose_identifiers_no_structured",
+      "gold": "base_gold",
+      "inference_status": "completed",
+      "proposed_assertions": [],
+      "note": "Structured parser yielded empty; prose mentioning ent_A/remains_open/ent_B is not scored."
+    },
+    {
+      "id": 16,
+      "name": "duplicate_only_correct",
+      "gold": "base_gold",
+      "inference_status": "completed",
+      "proposed_assertions": [
+        {
+          "subject_id": "ent_A",
+          "relation": "remains_open",
+          "object_id": "ent_B"
+        },
+        {
+          "subject_id": "ent_A",
+          "relation": "remains_open",
+          "object_id": "ent_B"
+        },
+        {
+          "subject_id": "ent_A",
+          "relation": "remains_open",
+          "object_id": "ent_B"
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "name": "duplicate_only_incorrect",
+      "gold": "base_gold",
+      "inference_status": "completed",
+      "proposed_assertions": [
+        {
+          "subject_id": "ent_A",
+          "relation": "depends_on",
+          "object_id": "ent_B"
+        },
+        {
+          "subject_id": "ent_A",
+          "relation": "depends_on",
+          "object_id": "ent_B"
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "name": "same_proposal_order_a",
+      "gold": "multi_gold",
+      "inference_status": "completed",
+      "proposed_assertions": [
+        {
+          "subject_id": "ent_C",
+          "relation": "blocks",
+          "object_id": "ent_D"
+        },
+        {
+          "subject_id": "ent_A",
+          "relation": "remains_open",
+          "object_id": "ent_B"
+        },
+        {
+          "subject_id": "ent_B",
+          "relation": "depends_on",
+          "object_id": "ent_C"
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "name": "same_proposal_order_b",
+      "gold": "multi_gold",
+      "inference_status": "completed",
+      "proposed_assertions": [
+        {
+          "subject_id": "ent_B",
+          "relation": "depends_on",
+          "object_id": "ent_C"
+        },
+        {
+          "subject_id": "ent_C",
+          "relation": "blocks",
+          "object_id": "ent_D"
+        },
+        {
+          "subject_id": "ent_A",
+          "relation": "remains_open",
+          "object_id": "ent_B"
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "name": "malformed_json_proxy",
+      "gold": "base_gold",
+      "inference_status": "completed",
+      "malformed": true,
+      "proposed_assertions": null
+    },
+    {
+      "id": 21,
+      "name": "wrong_output_schema_key",
+      "gold": "base_gold",
+      "inference_status": "completed",
+      "malformed": true,
+      "proposed_assertions": null,
+      "note": "Wrong schema key → parser returns malformed/null assertions."
+    },
+    {
+      "id": 22,
+      "name": "empty_final_response",
+      "gold": "base_gold",
+      "inference_status": "no_final_response",
+      "proposed_assertions": null
+    },
+    {
+      "id": 23,
+      "name": "timeout",
+      "gold": "base_gold",
+      "inference_status": "timeout",
+      "proposed_assertions": null
+    },
+    {
+      "id": 24,
+      "name": "transport_error",
+      "gold": "base_gold",
+      "inference_status": "transport_error",
+      "proposed_assertions": null
+    },
+    {
+      "id": 25,
+      "name": "invalid_response",
+      "gold": "base_gold",
+      "inference_status": "invalid_response",
+      "proposed_assertions": null
+    },
+    {
+      "id": 26,
+      "name": "no_final_response",
+      "gold": "base_gold",
+      "inference_status": "no_final_response",
+      "proposed_assertions": null
+    },
+    {
+      "id": 27,
+      "name": "task_contract_duplicate_expected",
+      "gold_inline": {
+        "task_id": "rel_bad_dup",
+        "contract_version": "ck.task_rel.v1",
+        "subject_universe": ["ent_A", "ent_B"],
+        "object_universe": ["ent_A", "ent_B"],
+        "relation_universe": ["remains_open"],
+        "expected_relations": [
+          {
+            "subject_id": "ent_A",
+            "relation": "remains_open",
+            "object_id": "ent_B"
+          },
+          {
+            "subject_id": "ent_A",
+            "relation": "remains_open",
+            "object_id": "ent_B"
+          }
+        ]
+      },
+      "inference_status": "completed",
+      "proposed_assertions": []
+    },
+    {
+      "id": 28,
+      "name": "task_contract_unknown_identifier",
+      "gold_inline": {
+        "task_id": "rel_bad_id",
+        "contract_version": "ck.task_rel.v1",
+        "subject_universe": ["ent_A"],
+        "object_universe": ["ent_B"],
+        "relation_universe": ["remains_open"],
+        "expected_relations": [
+          {
+            "subject_id": "ent_Z",
+            "relation": "remains_open",
+            "object_id": "ent_B"
+          }
+        ]
+      },
+      "inference_status": "completed",
+      "proposed_assertions": []
+    },
+    {
+      "id": 29,
+      "name": "symmetric_relation_reverse_is_tp",
+      "gold": "symmetric_gold",
+      "inference_status": "completed",
+      "proposed_assertions": [
+        {
+          "subject_id": "ent_B",
+          "relation": "linked_to",
+          "object_id": "ent_A"
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "name": "asymmetric_relation_incorrectly_reversed",
+      "gold": "base_gold",
+      "inference_status": "completed",
+      "proposed_assertions": [
+        {
+          "subject_id": "ent_B",
+          "relation": "remains_open",
+          "object_id": "ent_A"
+        }
+      ]
+    }
+  ]
+}
