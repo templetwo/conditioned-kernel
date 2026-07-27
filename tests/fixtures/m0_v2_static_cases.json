@@ -1,0 +1,57 @@
+{
+  "schema": "ck.m0_v2_static_fixtures.v1",
+  "scientific_completion": false,
+  "m0_authorized": false,
+  "passing_toy_contracts": [
+    {
+      "task_id": "m0v2_toy_pass_01",
+      "contract_version": "ck.m0_task_contract.v2",
+      "task_family": "episode_a_accept_then_episode_b_state_query",
+      "entity_universe": ["e1", "e2", "e3", "e4"],
+      "relation_universe": ["rel_a", "rel_b", "rel_c"],
+      "expected_relation_semantics": "all_required",
+      "output_schema_id": "continuity_assertions_v1",
+      "state_hash": "aa",
+      "episode_a_state_hash": "aa",
+      "episode_b_query": "Which relations remain accepted in the replayed state?",
+      "accepted_relation_set": [
+        {"subject_id": "e1", "relation": "rel_a", "object_id": "e2"}
+      ],
+      "expected_relations": [
+        {"subject_id": "e1", "relation": "rel_a", "object_id": "e2"}
+      ],
+      "in_universe_distractors": [
+        {"subject_id": "e1", "relation": "rel_b", "object_id": "e2"},
+        {"subject_id": "e2", "relation": "rel_a", "object_id": "e3"}
+      ],
+      "rejected_relation_set": [
+        {"subject_id": "e1", "relation": "rel_b", "object_id": "e2"}
+      ]
+    },
+    {
+      "task_id": "m0v2_toy_pass_02",
+      "contract_version": "ck.m0_task_contract.v2",
+      "task_family": "episode_a_accept_then_episode_b_state_query",
+      "entity_universe": ["a", "b", "c", "d", "e"],
+      "relation_universe": ["r1", "r2"],
+      "expected_relation_semantics": "all_required",
+      "output_schema_id": "continuity_assertions_v1",
+      "state_hash": "bb",
+      "episode_a_state_hash": "bb",
+      "episode_b_query": "Report accepted relations still open after cold start.",
+      "accepted_relation_set": [
+        {"subject_id": "a", "relation": "r1", "object_id": "b"},
+        {"subject_id": "c", "relation": "r2", "object_id": "d"}
+      ],
+      "expected_relations": [
+        {"subject_id": "a", "relation": "r1", "object_id": "b"},
+        {"subject_id": "c", "relation": "r2", "object_id": "d"}
+      ],
+      "in_universe_distractors": [
+        {"subject_id": "a", "relation": "r2", "object_id": "b"},
+        {"subject_id": "b", "relation": "r1", "object_id": "c"},
+        {"subject_id": "e", "relation": "r1", "object_id": "a"}
+      ]
+    }
+  ]
+}
