@@ -250,17 +250,18 @@ def evaluate_admission(
             seen_r.add(r)
             headline_ineligible_reasons.append(r)
 
-    primary_headline_eligible = len(headline_ineligible_reasons) == 0
+    # Structural readiness for a future primary contrast summary.
+    primary_headline_structurally_ready = len(headline_ineligible_reasons) == 0
     primary_headline = None
     partial_descriptive: dict[str, Any] | None = None
-    if primary_headline_eligible and valid_pairs:
-        # Descriptive pair deltas only when fully admitted — still not M0 publish
-        # (scientific_completion stays false without experiment contract)
+    if primary_headline_structurally_ready and valid_pairs:
         primary_headline = {
             "contrast": "C3_vs_C1",
             "pairs": valid_pairs,
-            "note": "structurally admitted only; scientific_completion remains false "
-            "until experiment_contract_id is ratified outside this run",
+            "note": (
+                "structurally ready only; report headline_eligible remains false "
+                "while scientific_completion is false (RUN 00.6F.1 invariant)"
+            ),
         }
     elif valid_pairs or invalid_pair_reasons:
         partial_descriptive = {
@@ -268,6 +269,27 @@ def evaluate_admission(
             "invalid_pairs": invalid_pair_reasons,
             "note": "descriptive only; not a complete-case primary headline",
         }
+
+    # Report-policy invariant:
+    #   headline_eligible == true  ⇒  scientific_completion == true
+    # A report may be scientifically complete but headline-ineligible.
+    # During unratified M0 candidate era both remain false.
+    scientific_completion = False
+    headline_eligible = False
+    if headline_eligible and not scientific_completion:
+        raise ValueError(
+            "REPORT_POLICY_VIOLATION: headline_eligible requires scientific_completion"
+        )
+    # primary_headline_eligible tracks structural gate only; never implies
+    # report-level headline_eligible while scientifically incomplete.
+    primary_headline_eligible = (
+        primary_headline_structurally_ready and scientific_completion
+    )
+    if primary_headline_structurally_ready and not scientific_completion:
+        if "SCIENTIFIC_COMPLETION_REQUIRED_FOR_HEADLINE" not in headline_ineligible_reasons:
+            headline_ineligible_reasons.append(
+                "SCIENTIFIC_COMPLETION_REQUIRED_FOR_HEADLINE"
+            )
 
     report = {
         "schema_version": ADMISSION_SCHEMA_VERSION,
@@ -292,12 +314,13 @@ def evaluate_admission(
         "ledger_integrity_ok": ledger_ok,
         "manifest_integrity_ok": manifest_ok,
         "primary_headline_eligible": primary_headline_eligible,
+        "primary_headline_structurally_ready": primary_headline_structurally_ready,
         "headline_ineligible_reasons": headline_ineligible_reasons,
         "primary_headline": primary_headline,
         "partial_descriptive_summaries": partial_descriptive,
         "invalid_primary_pair_reasons": invalid_pair_reasons,
-        "scientific_completion": False,
-        "headline_eligible": False,
+        "scientific_completion": scientific_completion,
+        "headline_eligible": headline_eligible,
         "conditions": {
             ConditionId.C0_BARE.value: _count_class_condition(
                 unique_rows, ConditionId.C0_BARE.value

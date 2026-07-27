@@ -1,0 +1,54 @@
+{
+  "id": "live_plumbing_01_m0_v1",
+  "predecessor_task_id": "live_plumbing_01",
+  "version": "m0_v1",
+  "category": "live_plumbing",
+  "contract_note": "RUN 00.6F.1 pre-run task-contract correction. Instructions require every supported closed-set continuity assertion so conjunctive gold (all_required) is instruction-aligned. Not prompt tuning from model scores. Original live_plumbing_01 smoke artifact is unchanged.",
+  "expected_relation_semantics": "all_required",
+  "output_schema_id": "continuity_assertions_v1",
+  "continuity_universe": {
+    "subject_ids": ["thread_gamma_receipt"],
+    "object_ids": ["question_cold_start"],
+    "relations": ["remains_open", "references"],
+    "valid_combinations": [
+      ["thread_gamma_receipt", "remains_open", "question_cold_start"],
+      ["thread_gamma_receipt", "references", "question_cold_start"]
+    ],
+    "forbidden_assertions": []
+  },
+  "expected_relations": [
+    {
+      "subject_id": "thread_gamma_receipt",
+      "relation": "remains_open",
+      "object_id": "question_cold_start"
+    },
+    {
+      "subject_id": "thread_gamma_receipt",
+      "relation": "references",
+      "object_id": "question_cold_start"
+    }
+  ],
+  "episode_a": {
+    "objective": "Return every supported continuity assertion from the permitted closed universe for thread_gamma_receipt about question_cold_start.",
+    "prompt": "Return every supported continuity assertion from the permitted closed universe. Use only identifiers and relations listed in the packet. Emit the full conjunctive set of valid continuity relations for thread_gamma_receipt about question_cold_start. Return JSON with continuity_assertions only; do not omit any supported relation from the closed universe.",
+    "seed_state": {
+      "goal": "Ship the continuity cold-start receipt on the Orin board.",
+      "threads": [
+        {
+          "id": "thread_gamma_receipt",
+          "title": "Wire episode_a_process_id into the cold-start receipt fields"
+        }
+      ],
+      "facts": [
+        "This system is fully local.",
+        "Active sprint code is CK-SPRINT-GAMMA-7.",
+        "Deliverable is the continuity cold-start receipt on Orin.",
+        "Sensors are out of scope for v0."
+      ]
+    }
+  },
+  "episode_b": {
+    "prompt": "After cold start: emit every supported continuity assertion still accepted for thread_gamma_receipt about question_cold_start from the permitted closed universe."
+  },
+  "notes": "M0 v1 relational task. Conjunctive gold: both remains_open and references. Instruction-aligned all_required semantics."
+}

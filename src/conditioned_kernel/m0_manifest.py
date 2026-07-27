@@ -40,8 +40,33 @@ TERMINAL_CELL_SCHEMA_VERSION = "ck.terminal_cell.v1"
 ADMISSION_SCHEMA_VERSION = "ck.m0_admission_report.v1"
 
 # Frozen wall-clock for byte-determinism of this candidate freeze (not live time).
-FREEZE_TIMESTAMP = "2026-07-27T00:00:00Z"
-REPO_COMMIT_DEFAULT = "5826b334a1fcc56e859e4fef79e8ce1e140abf20"
+FREEZE_TIMESTAMP = "2026-07-27T12:00:00Z"
+REPO_COMMIT_DEFAULT = "a5d8ed03b40373d3c84954da03f942066ed1eaf4"
+
+# M0 v1: only conjunctive gold is eligible.
+GOLD_SEMANTICS_ALL_REQUIRED = "all_required"
+GOLD_SEMANTICS_REJECTED = frozenset(
+    {"one_of", "choose_any", "alternatives", "unspecified", ""}
+)
+KNOWN_OUTPUT_SCHEMA_IDS = frozenset({"continuity_assertions_v1"})
+
+# Instruction text must require the full conjunctive set when expected_n > 1.
+_ALL_REQUIRED_INSTRUCTION_MARKERS = (
+    "every supported continuity assertion",
+    "all supported continuity assertion",
+    "return every supported",
+    "emit every supported",
+    "full conjunctive set",
+    "do not omit any supported relation",
+)
+_ONE_OF_INSTRUCTION_MARKERS = (
+    "select a valid",
+    "choose one",
+    "choose a valid",
+    "one valid",
+    "a single valid",
+    "pick one",
+)
 
 MODEL_TAG = "qwen2.5:0.5b"
 TEMPERATURE = 0.0
@@ -119,14 +144,28 @@ def _repo_root() -> Path:
 
 
 def default_task_sources() -> list[Path]:
+    """All discovered task sources (order does not affect manifest identity)."""
     root = _repo_root()
-    return [
+    sources: list[Path] = [
         root / "experiments" / "probes" / "continuity_tasks.json",
         root / "experiments" / "probes" / "live_plumbing_task.json",
+    ]
+    m0_dir = root / "experiments" / "probes" / "m0_task_contracts"
+    if m0_dir.is_dir():
+        sources.extend(sorted(m0_dir.glob("*.json")))
+    return sources
+
+
+def default_annotation_dirs() -> list[Path]:
+    root = _repo_root()
+    return [
+        root / "tests" / "fixtures",
+        root / "tests" / "fixtures" / "m0_task_dep",
     ]
 
 
 def default_annotation_dir() -> Path:
+    """Primary annotation directory (backward compatible)."""
     return _repo_root() / "tests" / "fixtures"
 
 
@@ -171,29 +210,37 @@ def discover_raw_tasks(sources: Sequence[Path] | None = None) -> list[dict[str, 
 
 def discover_annotations(
     annotation_dir: Path | None = None,
+    annotation_dirs: Sequence[Path] | None = None,
 ) -> dict[str, dict[str, Any]]:
     """Map task_id → annotation payload for ck.task_dep.v1 files."""
-    d = annotation_dir if annotation_dir is not None else default_annotation_dir()
+    if annotation_dirs is not None:
+        dirs = list(annotation_dirs)
+    elif annotation_dir is not None:
+        dirs = [annotation_dir]
+    else:
+        dirs = default_annotation_dirs()
     found: dict[str, dict[str, Any]] = {}
-    if not d.is_dir():
-        return found
-    for path in sorted(d.glob("*.json")):
-        try:
-            data = load_json(path)
-        except (OSError, json.JSONDecodeError):
+    for d in dirs:
+        if not d.is_dir():
             continue
-        if not isinstance(data, Mapping):
-            continue
-        if str(data.get("version") or "") != TASK_DEP_ANNOTATION_VERSION:
-            continue
-        tid = str(data.get("task_id") or "")
-        if not tid:
-            continue
-        found[tid] = {
-            "path": str(path.relative_to(_repo_root())),
-            "sha256": file_sha256(path),
-            "data": data,
-        }
+        for path in sorted(d.rglob("*.json")):
+            try:
+                data = load_json(path)
+            except (OSError, json.JSONDecodeError):
+                continue
+            if not isinstance(data, Mapping):
+                continue
+            if str(data.get("version") or "") != TASK_DEP_ANNOTATION_VERSION:
+                continue
+            tid = str(data.get("task_id") or "")
+            if not tid:
+                continue
+            # Later dirs / paths overwrite earlier only if same tid — last sorted wins
+            found[tid] = {
+                "path": str(path.relative_to(_repo_root())),
+                "sha256": file_sha256(path),
+                "data": data,
+            }
     return found
 
 
@@ -219,26 +266,92 @@ def _universe_from_task(raw: Mapping[str, Any]) -> dict[str, Any] | None:
     }
 
 
-def _expected_from_universe(universe: Mapping[str, Any]) -> list[dict[str, str]]:
-    """Freeze expected relations from valid_combinations (primary gold set).
-
-    Uses all listed valid combinations as the closed expected set when present;
-    otherwise empty (ineligible).
-    """
+def _normalize_expected(items: Sequence[Any]) -> list[dict[str, str]]:
     expected: list[dict[str, str]] = []
-    for comb in universe.get("valid_combinations") or []:
-        if not isinstance(comb, (list, tuple)) or len(comb) != 3:
-            continue
-        expected.append(
-            {
-                "subject_id": str(comb[0]),
-                "relation": str(comb[1]),
-                "object_id": str(comb[2]),
-            }
-        )
-    # Stable order
+    for item in items:
+        if isinstance(item, Mapping):
+            expected.append(
+                {
+                    "subject_id": str(item["subject_id"]),
+                    "relation": str(item.get("relation") or ""),
+                    "object_id": str(item["object_id"]),
+                }
+            )
+        elif isinstance(item, (list, tuple)) and len(item) == 3:
+            expected.append(
+                {
+                    "subject_id": str(item[0]),
+                    "relation": str(item[1]),
+                    "object_id": str(item[2]),
+                }
+            )
+    expected = [e for e in expected if e["subject_id"] and e["relation"] and e["object_id"]]
     expected.sort(key=lambda t: (t["subject_id"], t["relation"], t["object_id"]))
     return expected
+
+
+def _expected_from_task(
+    raw: Mapping[str, Any], universe: Mapping[str, Any] | None
+) -> list[dict[str, str]]:
+    """Prefer explicit expected_relations; never silently treat valid_combinations
+    as conjunctive gold unless the task also declares all_required semantics and
+    provides explicit expected_relations OR m0_contract flag.
+
+    valid_combinations alone without expected_relations → empty (not inventing).
+    """
+    if "expected_relations" in raw and raw["expected_relations"] is not None:
+        return _normalize_expected(list(raw.get("expected_relations") or []))
+    # Explicit m0 contracts may still list only valid_combinations when
+    # expected_relation_semantics=all_required and instruction_aligned is set.
+    if (
+        str(raw.get("expected_relation_semantics") or "") == GOLD_SEMANTICS_ALL_REQUIRED
+        and bool(raw.get("valid_combinations_are_conjunctive_expected"))
+        and universe is not None
+    ):
+        return _normalize_expected(list(universe.get("valid_combinations") or []))
+    return []
+
+
+def _instruction_text(raw: Mapping[str, Any]) -> str:
+    parts: list[str] = []
+    ea = raw.get("episode_a") or {}
+    eb = raw.get("episode_b") or {}
+    if isinstance(ea, Mapping):
+        parts.append(str(ea.get("prompt") or ""))
+        parts.append(str(ea.get("objective") or ""))
+    if isinstance(eb, Mapping):
+        parts.append(str(eb.get("prompt") or ""))
+    parts.append(str(raw.get("prompt") or ""))
+    parts.append(str(raw.get("objective") or ""))
+    return " ".join(parts).lower()
+
+
+def _instruction_requires_all_supported(text: str) -> bool:
+    return any(m in text for m in _ALL_REQUIRED_INSTRUCTION_MARKERS)
+
+
+def _instruction_suggests_one_of(text: str) -> bool:
+    return any(m in text for m in _ONE_OF_INSTRUCTION_MARKERS)
+
+
+def _resolve_gold_semantics(raw: Mapping[str, Any]) -> str:
+    """Return normalized semantics string (may be empty/unspecified/unknown)."""
+    if "expected_relation_semantics" not in raw:
+        # Free-text corpus tasks with answer_key alternatives
+        eb = raw.get("episode_b") or {}
+        if isinstance(eb, Mapping) and eb.get("answer_key"):
+            return "unspecified"
+        return "unspecified"
+    val = str(raw.get("expected_relation_semantics") or "").strip().lower()
+    return val
+
+
+def _annotation_field_value(ann: Mapping[str, Any], field_id: str) -> str | None:
+    for f in ann.get("fields") or []:
+        if isinstance(f, Mapping) and str(f.get("field_id")) == field_id:
+            v = str(f.get("value") or "").strip()
+            return v or None
+    return None
 
 
 def _annotation_completeness(ann: Mapping[str, Any]) -> list[str]:
@@ -261,11 +374,36 @@ def _annotation_completeness(ann: Mapping[str, Any]) -> list[str]:
     return reasons
 
 
+def _try_packet_compile(ann_data: Mapping[str, Any]) -> str | None:
+    """Return reason code if packet compile fails; None if ok."""
+    try:
+        from conditioned_kernel.control_contract import (
+            RuntimeSettings,
+            compile_condition_packet,
+            validate_annotation,
+        )
+
+        tda = TaskDependencyAnnotation.from_dict(ann_data)
+        validate_annotation(tda)
+        rt = RuntimeSettings(
+            model_tag=MODEL_TAG,
+            temperature=TEMPERATURE,
+            seed=SEED,
+            num_ctx=NUM_CTX,
+        )
+        # Deterministic compile for C3 (includes state) proves packet path.
+        compile_condition_packet(ConditionId.C3_STATIC_CK, tda, rt)
+    except Exception as e:  # noqa: BLE001
+        code = getattr(e, "reason_code", None) or type(e).__name__
+        return f"PACKET_COMPILE_FAILED:{code}"
+    return None
+
+
 def evaluate_task_eligibility(
     task: Mapping[str, Any],
     annotations: Mapping[str, Mapping[str, Any]],
 ) -> dict[str, Any]:
-    """Static eligibility before any model output exists."""
+    """Static eligibility before any model output exists (RUN 00.6F.1)."""
     tid = str(task["task_id"])
     reasons: list[str] = []
     raw = task["raw"]
@@ -273,17 +411,49 @@ def evaluate_task_eligibility(
     if not tid:
         reasons.append("MISSING_TASK_ID")
 
+    # Free-text continuity corpus (answer_key) cannot supply closed relation gold
+    # without redesign — do not invent triples.
+    eb = raw.get("episode_b") or {}
+    if isinstance(eb, Mapping) and eb.get("answer_key") and not raw.get(
+        "continuity_universe"
+    ):
+        reasons.append("TASK_REQUIRES_REDESIGN")
+        reasons.append("AMBIGUOUS_EXPECTED_RELATIONS")
+
     universe = _universe_from_task(raw)
     if universe is None:
         reasons.append("MISSING_CONTINUITY_UNIVERSE")
 
+    instr_early = _instruction_text(raw)
+    # Choose-one instructions + multi valid_combinations without all_required contract
+    if universe is not None:
+        n_valid = len(universe.get("valid_combinations") or [])
+        if n_valid > 1 and (
+            _instruction_suggests_one_of(instr_early)
+            or "select a valid closed-set" in instr_early
+        ):
+            if not _instruction_requires_all_supported(instr_early):
+                reasons.append("INSTRUCTION_GOLD_SEMANTICS_MISMATCH")
+
+    semantics = _resolve_gold_semantics(raw)
+    if semantics in GOLD_SEMANTICS_REJECTED or semantics == "unspecified":
+        if semantics in {"one_of", "choose_any", "alternatives"}:
+            reasons.append("UNSUPPORTED_GOLD_SEMANTICS")
+        elif semantics == "unspecified" or semantics == "":
+            reasons.append("UNSUPPORTED_GOLD_SEMANTICS")
+        else:
+            reasons.append("UNSUPPORTED_GOLD_SEMANTICS")
+    elif semantics != GOLD_SEMANTICS_ALL_REQUIRED:
+        reasons.append("UNSUPPORTED_GOLD_SEMANTICS")
+
     ann_entry = annotations.get(tid)
+    ann_data = None
+    ann_hash = None
+    ann_path = None
+    ann_version = None
+    output_schema_id: str | None = None
     if ann_entry is None:
         reasons.append("MISSING_TASK_DEP_ANNOTATION")
-        ann_data = None
-        ann_hash = None
-        ann_path = None
-        ann_version = None
     else:
         ann_data = ann_entry["data"]
         ann_hash = ann_entry["sha256"]
@@ -292,77 +462,117 @@ def evaluate_task_eligibility(
         if ann_version != TASK_DEP_ANNOTATION_VERSION:
             reasons.append("WRONG_TASK_DEP_VERSION")
         reasons.extend(_annotation_completeness(ann_data))
+        output_schema_id = _annotation_field_value(ann_data, "output_schema_id")
+        # Task-level override
+        if raw.get("output_schema_id"):
+            output_schema_id = str(raw["output_schema_id"]).strip() or output_schema_id
+
+    # Task-level output_schema_id if annotation missing field
+    if not output_schema_id and raw.get("output_schema_id"):
+        output_schema_id = str(raw["output_schema_id"]).strip() or None
+
+    if not output_schema_id:
+        reasons.append("MISSING_OUTPUT_SCHEMA_ID")
+    elif output_schema_id not in KNOWN_OUTPUT_SCHEMA_IDS:
+        reasons.append("UNKNOWN_OUTPUT_SCHEMA_ID")
 
     expected: list[dict[str, str]] = []
     gold_dict: dict[str, Any] | None = None
     expected_hash: str | None = None
     if universe is not None:
-        expected = _expected_from_universe(universe)
+        expected = _expected_from_task(raw, universe)
         if not expected:
+            # Do not silently promote valid_combinations
+            if universe.get("valid_combinations") and "expected_relations" not in raw:
+                reasons.append("AMBIGUOUS_EXPECTED_RELATIONS")
             reasons.append("MISSING_EXPECTED_RELATIONS")
         else:
-            gold_dict = {
-                "task_id": tid,
-                "contract_version": "ck.task_rel.v1",
-                "subject_universe": universe["subject_universe"],
-                "object_universe": universe["object_universe"],
-                "relation_universe": universe["relation_universe"],
-                "symmetric_relations": [],
-                "expected_relations": expected,
-            }
-            try:
-                gold = RelationalGold.from_dict(gold_dict)
-                expected_hash = triples_hash(gold.expected_relations)
-            except TaskContractError as e:
-                reasons.append(f"INVALID_SCORER_CONTRACT:{e.reason_code}")
-                gold_dict = None
-                expected_hash = None
+            instr = _instruction_text(raw)
+            if len(expected) > 1:
+                if _instruction_suggests_one_of(instr) and not _instruction_requires_all_supported(
+                    instr
+                ):
+                    reasons.append("INSTRUCTION_GOLD_SEMANTICS_MISMATCH")
+                elif not _instruction_requires_all_supported(instr):
+                    reasons.append("INSTRUCTION_GOLD_SEMANTICS_MISMATCH")
+            if semantics == GOLD_SEMANTICS_ALL_REQUIRED and "INSTRUCTION_GOLD_SEMANTICS_MISMATCH" not in reasons:
+                gold_dict = {
+                    "task_id": tid,
+                    "contract_version": "ck.task_rel.v1",
+                    "subject_universe": universe["subject_universe"],
+                    "object_universe": universe["object_universe"],
+                    "relation_universe": universe["relation_universe"],
+                    "symmetric_relations": [],
+                    "expected_relations": expected,
+                    "expected_relation_semantics": GOLD_SEMANTICS_ALL_REQUIRED,
+                }
+                try:
+                    gold = RelationalGold.from_dict(gold_dict)
+                    expected_hash = triples_hash(gold.expected_relations)
+                except TaskContractError as e:
+                    reasons.append(f"INVALID_SCORER_CONTRACT:{e.reason_code}")
+                    gold_dict = None
+                    expected_hash = None
 
-    # Packet compilation is deterministic for annotated live_plumbing tasks;
-    # without annotation we already excluded.
+    # Deterministic packet compilation required for inclusion
     if ann_data is not None and "MISSING_TASK_DEP_ANNOTATION" not in reasons:
-        # Require output schema id in operational state for packet compile path
-        op_ids = {
-            str(f.get("field_id"))
-            for f in (ann_data.get("fields") or [])
-            if isinstance(f, Mapping)
-        }
-        if "output_schema_id" not in op_ids and not any(
-            str(f.get("field_id")) == "output_schema_id"
-            for f in (ann_data.get("fields") or [])
-            if isinstance(f, Mapping)
-        ):
-            # soft: control fixture has it; check value presence
-            pass
+        compile_fail = _try_packet_compile(ann_data)
+        if compile_fail:
+            reasons.append(compile_fail)
 
-    if reasons:
-        return {
-            "task_id": tid,
-            "inclusion_verdict": InclusionVerdict.EXCLUDED.value,
-            "exclusion_reasons": sorted(set(reasons)),
-            "annotation_version": ann_version,
-            "annotation_path": ann_path,
-            "annotation_sha256": ann_hash,
-            "source_path": task["source_path"],
-            "source_sha256": task["source_sha256"],
-            "gold": None,
-            "expected_relation_hash": None,
-            "dependency_annotation_hash": ann_hash,
-        }
+    task_contract_hash = sha256_hex(canonical_json_bytes(dict(raw)))
 
-    return {
+    base_meta = {
         "task_id": tid,
-        "inclusion_verdict": InclusionVerdict.INCLUDED.value,
-        "exclusion_reasons": [],
         "annotation_version": ann_version,
         "annotation_path": ann_path,
         "annotation_sha256": ann_hash,
         "source_path": task["source_path"],
         "source_sha256": task["source_sha256"],
-        "gold": gold_dict,
-        "expected_relation_hash": expected_hash,
+        "expected_relation_semantics": semantics or "unspecified",
+        "expected_relation_count": len(expected),
+        "identifier_universe_count": (
+            len(set(universe["subject_universe"]) | set(universe["object_universe"]))
+            if universe
+            else 0
+        ),
+        "relation_universe_count": (
+            len(universe["relation_universe"]) if universe else 0
+        ),
+        "output_schema_id": output_schema_id,
+        "task_contract_hash": task_contract_hash,
         "dependency_annotation_hash": ann_hash,
     }
+
+    if reasons:
+        return {
+            **base_meta,
+            "inclusion_verdict": InclusionVerdict.EXCLUDED.value,
+            "exclusion_reasons": sorted(set(reasons)),
+            "gold": None,
+            "expected_relation_hash": None,
+        }
+
+    return {
+        **base_meta,
+        "inclusion_verdict": InclusionVerdict.INCLUDED.value,
+        "exclusion_reasons": [],
+        "gold": gold_dict,
+        "expected_relation_hash": expected_hash,
+    }
+
+
+def build_corpus_eligibility_rows(
+    *,
+    sources: Sequence[Path] | None = None,
+    annotation_dir: Path | None = None,
+) -> list[dict[str, Any]]:
+    """One row per discovered task for human review tables."""
+    tasks = discover_raw_tasks(sources)
+    annotations = discover_annotations(annotation_dir=annotation_dir)
+    rows = [evaluate_task_eligibility(t, annotations) for t in tasks]
+    rows.sort(key=lambda r: r["task_id"])
+    return rows
 
 
 # ---------------------------------------------------------------------------
@@ -625,11 +835,16 @@ def build_candidate_manifest(
             "id": "ck.m0.eligibility.static_v1",
             "description": (
                 "Include task iff stable task_id, closed subject/object/relation "
-                "universe, one or more frozen expected relations, valid "
-                "ck.task_dep.v1 annotation with required facts/ops/forbidden "
-                "leakage fields, and valid relational scorer contract. No "
-                "cherry-picking by difficulty or model behavior."
+                "universe, explicit conjunctive expected relations with "
+                "expected_relation_semantics=all_required, instruction text that "
+                "requires every supported assertion when expected_n>1, "
+                "nonempty known output_schema_id, valid ck.task_dep.v1 "
+                "annotation (facts/ops/forbidden leakage), deterministic packet "
+                "compile, and valid relational scorer contract. Never silently "
+                "treat valid_combinations as conjunctive gold. No cherry-picking."
             ),
+            "gold_semantics_m0_v1": GOLD_SEMANTICS_ALL_REQUIRED,
+            "known_output_schema_ids": sorted(KNOWN_OUTPUT_SCHEMA_IDS),
         },
         "included_tasks": [
             {
@@ -640,10 +855,20 @@ def build_candidate_manifest(
                 "annotation_sha256": e["annotation_sha256"],
                 "expected_relation_hash": e["expected_relation_hash"],
                 "dependency_annotation_hash": e["dependency_annotation_hash"],
+                "expected_relation_semantics": e.get(
+                    "expected_relation_semantics"
+                ),
+                "output_schema_id": e.get("output_schema_id"),
+                "task_contract_hash": e.get("task_contract_hash"),
                 "gold": e["gold"],
             }
             for e in included
         ],
+        "discovery_summary": {
+            "discovered_n": len(eligibility),
+            "included_n": len(included),
+            "excluded_n": len(excluded),
+        },
         "exclusion_ledger": exclusion_ledger,
         "planned_cells": planned_cells,
         "planned_cell_count": len(planned_cells),

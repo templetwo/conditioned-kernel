@@ -58,13 +58,17 @@ No imputation. No replacement of failed cells.
 The 100% rule is a **structural admission gate** for this bounded prototype, not
 an efficacy threshold.
 
-## Scientific stamps
-
-Even when structurally headline-eligible under the gate above:
+## Scientific stamps and report-policy invariant (00.6F.1)
 
 ```text
-scientific_completion = false   # until experiment_contract_id ratified outside 00.6F
-headline_eligible = false       # report-level stamp for unratified candidate era
+headline_eligible == true  ⇒  scientific_completion == true
 ```
+
+A report may be scientifically complete but headline-ineligible.  
+A report may **never** be headline-eligible while scientifically incomplete.
+
+During RUN 00.6F / 00.6F.1 both remain false. Structural pair readiness is
+exposed as `primary_headline_structurally_ready` and does **not** flip
+report-level `headline_eligible`.
 
 RUN 00.6F never mints `experiment_contract_id`.

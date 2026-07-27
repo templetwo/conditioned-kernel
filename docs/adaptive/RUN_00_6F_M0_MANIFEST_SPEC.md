@@ -23,19 +23,22 @@ accounting. This run does **not** execute the experiment.
 
 A planned cell may succeed or fail; it may never disappear.
 
-## Inclusion rule (`ck.m0.eligibility.static_v1`)
+## Inclusion rule (`ck.m0.eligibility.static_v1`) — RUN 00.6F.1
 
 A task is eligible **only if** all hold before any model output:
 
 - stable `task_id`
 - closed subject / object / relation universe (`continuity_universe`)
-- one or more frozen expected relations (from `valid_combinations`)
-- `ck.task_dep.v1` annotation with:
-  - ≥1 `REQUIRED_TASK_FACT`
-  - ≥1 `REQUIRED_OPERATIONAL_STATE`
-  - ≥1 `FORBIDDEN_ANSWER_LEAKAGE`
+- **explicit** `expected_relations` (never silently promote `valid_combinations`)
+- `expected_relation_semantics = all_required` (only M0 v1 value)
+- when `expected_n > 1`, instructions require every supported assertion
+- nonempty known `output_schema_id` (e.g. `continuity_assertions_v1`)
+- `ck.task_dep.v1` annotation with required facts / ops / forbidden leakage
+- deterministic packet compilation
 - valid relational scorer gold contract (`ck.task_rel.v1`)
-- no unresolved schema ambiguity
+
+Rejected semantics: `one_of`, `choose_any`, `alternatives`, `unspecified`, unknown
+→ `UNSUPPORTED_GOLD_SEMANTICS`.
 
 No cherry-picking by difficulty or prior model behavior.
 

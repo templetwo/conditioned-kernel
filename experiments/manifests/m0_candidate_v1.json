@@ -31,7 +31,12 @@
     }
   ],
   "control_contract_version": "ck.control_verifier.v1",
-  "creation_timestamp": "2026-07-27T00:00:00Z",
+  "creation_timestamp": "2026-07-27T12:00:00Z",
+  "discovery_summary": {
+    "discovered_n": 18,
+    "excluded_n": 17,
+    "included_n": 1
+  },
   "exclusion_ledger": {
     "manifest_id": "ck.m0.candidate.v1",
     "schema_version": "ck.m0_exclusion_ledger.v1",
@@ -41,8 +46,12 @@
         "annotation_sha256": null,
         "annotation_version": null,
         "exclusion_reasons": [
+          "AMBIGUOUS_EXPECTED_RELATIONS",
           "MISSING_CONTINUITY_UNIVERSE",
-          "MISSING_TASK_DEP_ANNOTATION"
+          "MISSING_OUTPUT_SCHEMA_ID",
+          "MISSING_TASK_DEP_ANNOTATION",
+          "TASK_REQUIRES_REDESIGN",
+          "UNSUPPORTED_GOLD_SEMANTICS"
         ],
         "inclusion_verdict": "EXCLUDED",
         "source_path": "experiments/probes/continuity_tasks.json",
@@ -54,8 +63,12 @@
         "annotation_sha256": null,
         "annotation_version": null,
         "exclusion_reasons": [
+          "AMBIGUOUS_EXPECTED_RELATIONS",
           "MISSING_CONTINUITY_UNIVERSE",
-          "MISSING_TASK_DEP_ANNOTATION"
+          "MISSING_OUTPUT_SCHEMA_ID",
+          "MISSING_TASK_DEP_ANNOTATION",
+          "TASK_REQUIRES_REDESIGN",
+          "UNSUPPORTED_GOLD_SEMANTICS"
         ],
         "inclusion_verdict": "EXCLUDED",
         "source_path": "experiments/probes/continuity_tasks.json",
@@ -67,8 +80,12 @@
         "annotation_sha256": null,
         "annotation_version": null,
         "exclusion_reasons": [
+          "AMBIGUOUS_EXPECTED_RELATIONS",
           "MISSING_CONTINUITY_UNIVERSE",
-          "MISSING_TASK_DEP_ANNOTATION"
+          "MISSING_OUTPUT_SCHEMA_ID",
+          "MISSING_TASK_DEP_ANNOTATION",
+          "TASK_REQUIRES_REDESIGN",
+          "UNSUPPORTED_GOLD_SEMANTICS"
         ],
         "inclusion_verdict": "EXCLUDED",
         "source_path": "experiments/probes/continuity_tasks.json",
@@ -80,8 +97,12 @@
         "annotation_sha256": null,
         "annotation_version": null,
         "exclusion_reasons": [
+          "AMBIGUOUS_EXPECTED_RELATIONS",
           "MISSING_CONTINUITY_UNIVERSE",
-          "MISSING_TASK_DEP_ANNOTATION"
+          "MISSING_OUTPUT_SCHEMA_ID",
+          "MISSING_TASK_DEP_ANNOTATION",
+          "TASK_REQUIRES_REDESIGN",
+          "UNSUPPORTED_GOLD_SEMANTICS"
         ],
         "inclusion_verdict": "EXCLUDED",
         "source_path": "experiments/probes/continuity_tasks.json",
@@ -93,8 +114,12 @@
         "annotation_sha256": null,
         "annotation_version": null,
         "exclusion_reasons": [
+          "AMBIGUOUS_EXPECTED_RELATIONS",
           "MISSING_CONTINUITY_UNIVERSE",
-          "MISSING_TASK_DEP_ANNOTATION"
+          "MISSING_OUTPUT_SCHEMA_ID",
+          "MISSING_TASK_DEP_ANNOTATION",
+          "TASK_REQUIRES_REDESIGN",
+          "UNSUPPORTED_GOLD_SEMANTICS"
         ],
         "inclusion_verdict": "EXCLUDED",
         "source_path": "experiments/probes/continuity_tasks.json",
@@ -106,8 +131,12 @@
         "annotation_sha256": null,
         "annotation_version": null,
         "exclusion_reasons": [
+          "AMBIGUOUS_EXPECTED_RELATIONS",
           "MISSING_CONTINUITY_UNIVERSE",
-          "MISSING_TASK_DEP_ANNOTATION"
+          "MISSING_OUTPUT_SCHEMA_ID",
+          "MISSING_TASK_DEP_ANNOTATION",
+          "TASK_REQUIRES_REDESIGN",
+          "UNSUPPORTED_GOLD_SEMANTICS"
         ],
         "inclusion_verdict": "EXCLUDED",
         "source_path": "experiments/probes/continuity_tasks.json",
@@ -119,8 +148,12 @@
         "annotation_sha256": null,
         "annotation_version": null,
         "exclusion_reasons": [
+          "AMBIGUOUS_EXPECTED_RELATIONS",
           "MISSING_CONTINUITY_UNIVERSE",
-          "MISSING_TASK_DEP_ANNOTATION"
+          "MISSING_OUTPUT_SCHEMA_ID",
+          "MISSING_TASK_DEP_ANNOTATION",
+          "TASK_REQUIRES_REDESIGN",
+          "UNSUPPORTED_GOLD_SEMANTICS"
         ],
         "inclusion_verdict": "EXCLUDED",
         "source_path": "experiments/probes/continuity_tasks.json",
@@ -132,8 +165,12 @@
         "annotation_sha256": null,
         "annotation_version": null,
         "exclusion_reasons": [
+          "AMBIGUOUS_EXPECTED_RELATIONS",
           "MISSING_CONTINUITY_UNIVERSE",
-          "MISSING_TASK_DEP_ANNOTATION"
+          "MISSING_OUTPUT_SCHEMA_ID",
+          "MISSING_TASK_DEP_ANNOTATION",
+          "TASK_REQUIRES_REDESIGN",
+          "UNSUPPORTED_GOLD_SEMANTICS"
         ],
         "inclusion_verdict": "EXCLUDED",
         "source_path": "experiments/probes/continuity_tasks.json",
@@ -145,8 +182,12 @@
         "annotation_sha256": null,
         "annotation_version": null,
         "exclusion_reasons": [
+          "AMBIGUOUS_EXPECTED_RELATIONS",
           "MISSING_CONTINUITY_UNIVERSE",
-          "MISSING_TASK_DEP_ANNOTATION"
+          "MISSING_OUTPUT_SCHEMA_ID",
+          "MISSING_TASK_DEP_ANNOTATION",
+          "TASK_REQUIRES_REDESIGN",
+          "UNSUPPORTED_GOLD_SEMANTICS"
         ],
         "inclusion_verdict": "EXCLUDED",
         "source_path": "experiments/probes/continuity_tasks.json",
@@ -158,8 +199,12 @@
         "annotation_sha256": null,
         "annotation_version": null,
         "exclusion_reasons": [
+          "AMBIGUOUS_EXPECTED_RELATIONS",
           "MISSING_CONTINUITY_UNIVERSE",
-          "MISSING_TASK_DEP_ANNOTATION"
+          "MISSING_OUTPUT_SCHEMA_ID",
+          "MISSING_TASK_DEP_ANNOTATION",
+          "TASK_REQUIRES_REDESIGN",
+          "UNSUPPORTED_GOLD_SEMANTICS"
         ],
         "inclusion_verdict": "EXCLUDED",
         "source_path": "experiments/probes/continuity_tasks.json",
@@ -171,8 +216,12 @@
         "annotation_sha256": null,
         "annotation_version": null,
         "exclusion_reasons": [
+          "AMBIGUOUS_EXPECTED_RELATIONS",
           "MISSING_CONTINUITY_UNIVERSE",
-          "MISSING_TASK_DEP_ANNOTATION"
+          "MISSING_OUTPUT_SCHEMA_ID",
+          "MISSING_TASK_DEP_ANNOTATION",
+          "TASK_REQUIRES_REDESIGN",
+          "UNSUPPORTED_GOLD_SEMANTICS"
         ],
         "inclusion_verdict": "EXCLUDED",
         "source_path": "experiments/probes/continuity_tasks.json",
@@ -184,8 +233,12 @@
         "annotation_sha256": null,
         "annotation_version": null,
         "exclusion_reasons": [
+          "AMBIGUOUS_EXPECTED_RELATIONS",
           "MISSING_CONTINUITY_UNIVERSE",
-          "MISSING_TASK_DEP_ANNOTATION"
+          "MISSING_OUTPUT_SCHEMA_ID",
+          "MISSING_TASK_DEP_ANNOTATION",
+          "TASK_REQUIRES_REDESIGN",
+          "UNSUPPORTED_GOLD_SEMANTICS"
         ],
         "inclusion_verdict": "EXCLUDED",
         "source_path": "experiments/probes/continuity_tasks.json",
@@ -197,8 +250,12 @@
         "annotation_sha256": null,
         "annotation_version": null,
         "exclusion_reasons": [
+          "AMBIGUOUS_EXPECTED_RELATIONS",
           "MISSING_CONTINUITY_UNIVERSE",
-          "MISSING_TASK_DEP_ANNOTATION"
+          "MISSING_OUTPUT_SCHEMA_ID",
+          "MISSING_TASK_DEP_ANNOTATION",
+          "TASK_REQUIRES_REDESIGN",
+          "UNSUPPORTED_GOLD_SEMANTICS"
         ],
         "inclusion_verdict": "EXCLUDED",
         "source_path": "experiments/probes/continuity_tasks.json",
@@ -210,8 +267,12 @@
         "annotation_sha256": null,
         "annotation_version": null,
         "exclusion_reasons": [
+          "AMBIGUOUS_EXPECTED_RELATIONS",
           "MISSING_CONTINUITY_UNIVERSE",
-          "MISSING_TASK_DEP_ANNOTATION"
+          "MISSING_OUTPUT_SCHEMA_ID",
+          "MISSING_TASK_DEP_ANNOTATION",
+          "TASK_REQUIRES_REDESIGN",
+          "UNSUPPORTED_GOLD_SEMANTICS"
         ],
         "inclusion_verdict": "EXCLUDED",
         "source_path": "experiments/probes/continuity_tasks.json",
@@ -223,8 +284,12 @@
         "annotation_sha256": null,
         "annotation_version": null,
         "exclusion_reasons": [
+          "AMBIGUOUS_EXPECTED_RELATIONS",
           "MISSING_CONTINUITY_UNIVERSE",
-          "MISSING_TASK_DEP_ANNOTATION"
+          "MISSING_OUTPUT_SCHEMA_ID",
+          "MISSING_TASK_DEP_ANNOTATION",
+          "TASK_REQUIRES_REDESIGN",
+          "UNSUPPORTED_GOLD_SEMANTICS"
         ],
         "inclusion_verdict": "EXCLUDED",
         "source_path": "experiments/probes/continuity_tasks.json",
@@ -236,13 +301,32 @@
         "annotation_sha256": null,
         "annotation_version": null,
         "exclusion_reasons": [
+          "AMBIGUOUS_EXPECTED_RELATIONS",
           "MISSING_CONTINUITY_UNIVERSE",
-          "MISSING_TASK_DEP_ANNOTATION"
+          "MISSING_OUTPUT_SCHEMA_ID",
+          "MISSING_TASK_DEP_ANNOTATION",
+          "TASK_REQUIRES_REDESIGN",
+          "UNSUPPORTED_GOLD_SEMANTICS"
         ],
         "inclusion_verdict": "EXCLUDED",
         "source_path": "experiments/probes/continuity_tasks.json",
         "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
         "task_id": "cont_thread_resume_04"
+      },
+      {
+        "annotation_path": "tests/fixtures/control_task_live_plumbing_01.json",
+        "annotation_sha256": "6d0abcad48233539c34900cfa82fe64dda0599bc8d5a256ad83dd0cb52645e36",
+        "annotation_version": "ck.task_dep.v1",
+        "exclusion_reasons": [
+          "AMBIGUOUS_EXPECTED_RELATIONS",
+          "INSTRUCTION_GOLD_SEMANTICS_MISMATCH",
+          "MISSING_EXPECTED_RELATIONS",
+          "UNSUPPORTED_GOLD_SEMANTICS"
+        ],
+        "inclusion_verdict": "EXCLUDED",
+        "source_path": "experiments/probes/live_plumbing_task.json",
+        "source_sha256": "e66b41660727d2c7c69f121e48131dcea8036f2a1adb5305de70d18d8e6b830d",
+        "task_id": "live_plumbing_01"
       }
     ]
   },
@@ -258,12 +342,14 @@
   "headline_ineligible_reason": "m0_manifest_and_admission_contract_not_yet_ratified",
   "included_tasks": [
     {
-      "annotation_path": "tests/fixtures/control_task_live_plumbing_01.json",
-      "annotation_sha256": "6d0abcad48233539c34900cfa82fe64dda0599bc8d5a256ad83dd0cb52645e36",
-      "dependency_annotation_hash": "6d0abcad48233539c34900cfa82fe64dda0599bc8d5a256ad83dd0cb52645e36",
+      "annotation_path": "tests/fixtures/m0_task_dep/live_plumbing_01_m0_v1.json",
+      "annotation_sha256": "d9c200bc404a85d3857ed0f6fd9c41d44fc8efe4b9aae9c22f34afca71459dcc",
+      "dependency_annotation_hash": "d9c200bc404a85d3857ed0f6fd9c41d44fc8efe4b9aae9c22f34afca71459dcc",
       "expected_relation_hash": "94fbcce49ca6e3f4ceea93aab2b4ca705641e4dc596b4c40bc17672964db73b2",
+      "expected_relation_semantics": "all_required",
       "gold": {
         "contract_version": "ck.task_rel.v1",
+        "expected_relation_semantics": "all_required",
         "expected_relations": [
           {
             "object_id": "question_cold_start",
@@ -287,25 +373,27 @@
           "thread_gamma_receipt"
         ],
         "symmetric_relations": [],
-        "task_id": "live_plumbing_01"
+        "task_id": "live_plumbing_01_m0_v1"
       },
-      "source_path": "experiments/probes/live_plumbing_task.json",
-      "source_sha256": "e66b41660727d2c7c69f121e48131dcea8036f2a1adb5305de70d18d8e6b830d",
-      "task_id": "live_plumbing_01"
+      "output_schema_id": "continuity_assertions_v1",
+      "source_path": "experiments/probes/m0_task_contracts/live_plumbing_01_m0_v1.json",
+      "source_sha256": "f3a3e72e3231172f138e05300aeb35b70757715252983de364d889ce17df799f",
+      "task_contract_hash": "6019ce380ec3172f78db04d78b54a1f38770269671bd1fbcf797cd2b3758096a",
+      "task_id": "live_plumbing_01_m0_v1"
     }
   ],
   "ledger_schema_version": "ck.terminal_ledger.v1",
   "manifest_id": "ck.m0.candidate.v1",
-  "manifest_sha256": "92c9b2431fc0edd2947c38fe43c06bdec793c4e9254701cd08549a223453bb6b",
+  "manifest_sha256": "9ec3d37a177b6d403048d8d6441b70a7fcdc6b89a4336c29bcf9ac610d88e922",
   "model_tag": "qwen2.5:0.5b",
   "packet_contract_version": "ck.packet_contract.v1",
   "planned_cell_count": 4,
   "planned_cell_schema_version": "ck.planned_cell.v1",
   "planned_cells": [
     {
-      "cell_id": "8b395dd27f26a0a590af02036b15f0acd7487d3ec5c9beda1fb221c199f5d976",
+      "cell_id": "582407aaa64ea3c0d88f91ba1bfb340cffed1374510777e709161b5159f42349",
       "condition_id": "C0_bare",
-      "dependency_annotation_hash": "6d0abcad48233539c34900cfa82fe64dda0599bc8d5a256ad83dd0cb52645e36",
+      "dependency_annotation_hash": "d9c200bc404a85d3857ed0f6fd9c41d44fc8efe4b9aae9c22f34afca71459dcc",
       "expected_relation_hash": "94fbcce49ca6e3f4ceea93aab2b4ca705641e4dc596b4c40bc17672964db73b2",
       "generation_parameters": {
         "num_ctx": 2048,
@@ -322,13 +410,13 @@
         "replicate_id": "0",
         "scorer_schema_version": "ck.relational_score.v1",
         "seed": 0,
-        "task_id": "live_plumbing_01"
+        "task_id": "live_plumbing_01_m0_v1"
       },
       "manifest_id": "ck.m0.candidate.v1",
       "model_tag": "qwen2.5:0.5b",
       "packet_contract_version": "ck.packet_contract.v1",
       "paired_primary_cell_id": null,
-      "planned_cell_hash": "919b5070f4c98e6d046fa05485b936dd9416f6cf791865d92839268309855c12",
+      "planned_cell_hash": "50d234286d2becfa298400a2b7d9d0677dec92299b4ff90d62ff68646ab57257",
       "planned_status": "planned",
       "replicate_id": "0",
       "schema_version": "ck.planned_cell.v1",
@@ -336,12 +424,12 @@
       "scorer_schema_version": "ck.relational_score.v1",
       "source_state_dependency": null,
       "task_contract_version": "ck.task_rel.v1",
-      "task_id": "live_plumbing_01"
+      "task_id": "live_plumbing_01_m0_v1"
     },
     {
-      "cell_id": "61cb06bdbdf3809ab9717bebb9f53273cb3c78c9cf928c33ed29891a313140d6",
+      "cell_id": "ccce0f29d4efb2e464b6f6cb197ee191f46cc58a78bab26d6e0ed286fa5655bb",
       "condition_id": "C1_budget_matched_bare",
-      "dependency_annotation_hash": "6d0abcad48233539c34900cfa82fe64dda0599bc8d5a256ad83dd0cb52645e36",
+      "dependency_annotation_hash": "d9c200bc404a85d3857ed0f6fd9c41d44fc8efe4b9aae9c22f34afca71459dcc",
       "expected_relation_hash": "94fbcce49ca6e3f4ceea93aab2b4ca705641e4dc596b4c40bc17672964db73b2",
       "generation_parameters": {
         "num_ctx": 2048,
@@ -358,13 +446,13 @@
         "replicate_id": "0",
         "scorer_schema_version": "ck.relational_score.v1",
         "seed": 0,
-        "task_id": "live_plumbing_01"
+        "task_id": "live_plumbing_01_m0_v1"
       },
       "manifest_id": "ck.m0.candidate.v1",
       "model_tag": "qwen2.5:0.5b",
       "packet_contract_version": "ck.packet_contract.v1",
-      "paired_primary_cell_id": "02257559ce995c4e083053187e0a0883f895e2cea59f022cb30f3712c8f3ac91",
-      "planned_cell_hash": "7ff5a2bd49d216293131a5ea8636dd8d4d072b05c9fcfb1b90572036aa2ed6cb",
+      "paired_primary_cell_id": "05ef4eca5e621b0eda232bb458991527d3b0e9f3e300cd2b0177d5400cbf879f",
+      "planned_cell_hash": "5b8f685e5ea66705b11e6c417514c4f336dc9deaa40abf9c11826b38d5b85166",
       "planned_status": "planned",
       "replicate_id": "0",
       "schema_version": "ck.planned_cell.v1",
@@ -372,12 +460,12 @@
       "scorer_schema_version": "ck.relational_score.v1",
       "source_state_dependency": null,
       "task_contract_version": "ck.task_rel.v1",
-      "task_id": "live_plumbing_01"
+      "task_id": "live_plumbing_01_m0_v1"
     },
     {
-      "cell_id": "050924029259255dae8a516935d673ba74110feb50410d9bb7e59b05e11265b5",
+      "cell_id": "4d5cb21cb2d63d2cd7780d8ac2639c80f8be098e4c120a1d3b3784290bfba420",
       "condition_id": "C2_instruction_identical",
-      "dependency_annotation_hash": "6d0abcad48233539c34900cfa82fe64dda0599bc8d5a256ad83dd0cb52645e36",
+      "dependency_annotation_hash": "d9c200bc404a85d3857ed0f6fd9c41d44fc8efe4b9aae9c22f34afca71459dcc",
       "expected_relation_hash": "94fbcce49ca6e3f4ceea93aab2b4ca705641e4dc596b4c40bc17672964db73b2",
       "generation_parameters": {
         "num_ctx": 2048,
@@ -394,13 +482,13 @@
         "replicate_id": "0",
         "scorer_schema_version": "ck.relational_score.v1",
         "seed": 0,
-        "task_id": "live_plumbing_01"
+        "task_id": "live_plumbing_01_m0_v1"
       },
       "manifest_id": "ck.m0.candidate.v1",
       "model_tag": "qwen2.5:0.5b",
       "packet_contract_version": "ck.packet_contract.v1",
       "paired_primary_cell_id": null,
-      "planned_cell_hash": "47f02e44f55826e30ce2e76c93013f1070d3c678abfd99a7d300bf98852eb290",
+      "planned_cell_hash": "40c1978dd35d40ddcf59925452fc6a086603b6222790672750ba11f43cb6027e",
       "planned_status": "planned",
       "replicate_id": "0",
       "schema_version": "ck.planned_cell.v1",
@@ -408,12 +496,12 @@
       "scorer_schema_version": "ck.relational_score.v1",
       "source_state_dependency": null,
       "task_contract_version": "ck.task_rel.v1",
-      "task_id": "live_plumbing_01"
+      "task_id": "live_plumbing_01_m0_v1"
     },
     {
-      "cell_id": "02257559ce995c4e083053187e0a0883f895e2cea59f022cb30f3712c8f3ac91",
+      "cell_id": "05ef4eca5e621b0eda232bb458991527d3b0e9f3e300cd2b0177d5400cbf879f",
       "condition_id": "C3_static_ck",
-      "dependency_annotation_hash": "6d0abcad48233539c34900cfa82fe64dda0599bc8d5a256ad83dd0cb52645e36",
+      "dependency_annotation_hash": "d9c200bc404a85d3857ed0f6fd9c41d44fc8efe4b9aae9c22f34afca71459dcc",
       "expected_relation_hash": "94fbcce49ca6e3f4ceea93aab2b4ca705641e4dc596b4c40bc17672964db73b2",
       "generation_parameters": {
         "num_ctx": 2048,
@@ -430,13 +518,13 @@
         "replicate_id": "0",
         "scorer_schema_version": "ck.relational_score.v1",
         "seed": 0,
-        "task_id": "live_plumbing_01"
+        "task_id": "live_plumbing_01_m0_v1"
       },
       "manifest_id": "ck.m0.candidate.v1",
       "model_tag": "qwen2.5:0.5b",
       "packet_contract_version": "ck.packet_contract.v1",
-      "paired_primary_cell_id": "61cb06bdbdf3809ab9717bebb9f53273cb3c78c9cf928c33ed29891a313140d6",
-      "planned_cell_hash": "a287de9cee7c50cba073235e8839c2657f6a047ae8ccd7b410a1907da42bfc56",
+      "paired_primary_cell_id": "ccce0f29d4efb2e464b6f6cb197ee191f46cc58a78bab26d6e0ed286fa5655bb",
+      "planned_cell_hash": "50ada93cabb1f9176208aaa3e0e06cbf78c8ee137d078f0cb939e2a9320804c3",
       "planned_status": "planned",
       "replicate_id": "0",
       "schema_version": "ck.planned_cell.v1",
@@ -444,15 +532,15 @@
       "scorer_schema_version": "ck.relational_score.v1",
       "source_state_dependency": "episode_a_continuity_state",
       "task_contract_version": "ck.task_rel.v1",
-      "task_id": "live_plumbing_01"
+      "task_id": "live_plumbing_01_m0_v1"
     }
   ],
   "planned_primary_pairs": [
     {
-      "c1_cell_id": "61cb06bdbdf3809ab9717bebb9f53273cb3c78c9cf928c33ed29891a313140d6",
-      "c3_cell_id": "02257559ce995c4e083053187e0a0883f895e2cea59f022cb30f3712c8f3ac91",
+      "c1_cell_id": "ccce0f29d4efb2e464b6f6cb197ee191f46cc58a78bab26d6e0ed286fa5655bb",
+      "c3_cell_id": "05ef4eca5e621b0eda232bb458991527d3b0e9f3e300cd2b0177d5400cbf879f",
       "replicate_id": "0",
-      "task_id": "live_plumbing_01"
+      "task_id": "live_plumbing_01_m0_v1"
     }
   ],
   "planned_primary_pairs_n": 1,
@@ -462,7 +550,7 @@
     ],
     "replicates_per_task_condition": 1
   },
-  "repository_commit": "5826b334a1fcc56e859e4fef79e8ce1e140abf20",
+  "repository_commit": "a5d8ed03b40373d3c84954da03f942066ed1eaf4",
   "required_future_authorization_receipt_fields": [
     "manifest_id",
     "manifest_sha256",
@@ -491,8 +579,12 @@
   "scorer_schema_version": "ck.relational_score.v1",
   "task_dependency_annotation_version": "ck.task_dep.v1",
   "task_inclusion_rule": {
-    "description": "Include task iff stable task_id, closed subject/object/relation universe, one or more frozen expected relations, valid ck.task_dep.v1 annotation with required facts/ops/forbidden leakage fields, and valid relational scorer contract. No cherry-picking by difficulty or model behavior.",
-    "id": "ck.m0.eligibility.static_v1"
+    "description": "Include task iff stable task_id, closed subject/object/relation universe, explicit conjunctive expected relations with expected_relation_semantics=all_required, instruction text that requires every supported assertion when expected_n>1, nonempty known output_schema_id, valid ck.task_dep.v1 annotation (facts/ops/forbidden leakage), deterministic packet compile, and valid relational scorer contract. Never silently treat valid_combinations as conjunctive gold. No cherry-picking.",
+    "gold_semantics_m0_v1": "all_required",
+    "id": "ck.m0.eligibility.static_v1",
+    "known_output_schema_ids": [
+      "continuity_assertions_v1"
+    ]
   },
   "task_registry_version": "ck.task_registry.v1",
   "terminal_cell_schema_version": "ck.terminal_cell.v1"

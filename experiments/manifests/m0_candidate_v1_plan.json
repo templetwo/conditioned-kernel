@@ -1,120 +1,193 @@
 {
   "authorization_status": "unratified",
   "eligible_tasks": [
-    "live_plumbing_01"
+    "live_plumbing_01_m0_v1"
   ],
   "excluded_tasks": [
     {
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "task_id": "cont_constraint_persistence_01"
     },
     {
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "task_id": "cont_constraint_persistence_02"
     },
     {
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "task_id": "cont_constraint_persistence_03"
     },
     {
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "task_id": "cont_constraint_persistence_04"
     },
     {
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "task_id": "cont_failure_avoidance_01"
     },
     {
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "task_id": "cont_failure_avoidance_02"
     },
     {
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "task_id": "cont_failure_avoidance_03"
     },
     {
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "task_id": "cont_failure_avoidance_04"
     },
     {
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "task_id": "cont_goal_recovery_01"
     },
     {
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "task_id": "cont_goal_recovery_02"
     },
     {
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "task_id": "cont_goal_recovery_03"
     },
     {
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "task_id": "cont_goal_recovery_04"
     },
     {
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "task_id": "cont_thread_resume_01"
     },
     {
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "task_id": "cont_thread_resume_02"
     },
     {
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "task_id": "cont_thread_resume_03"
     },
     {
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "task_id": "cont_thread_resume_04"
+    },
+    {
+      "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
+        "INSTRUCTION_GOLD_SEMANTICS_MISMATCH",
+        "MISSING_EXPECTED_RELATIONS",
+        "UNSUPPORTED_GOLD_SEMANTICS"
+      ],
+      "task_id": "live_plumbing_01"
     }
   ],
   "execution_scope": "dry_planning_only",
@@ -126,16 +199,16 @@
   },
   "headline_eligible": false,
   "manifest_id": "ck.m0.candidate.v1",
-  "manifest_sha256": "92c9b2431fc0edd2947c38fe43c06bdec793c4e9254701cd08549a223453bb6b",
+  "manifest_sha256": "9ec3d37a177b6d403048d8d6441b70a7fcdc6b89a4336c29bcf9ac610d88e922",
   "model_client_imported": false,
   "model_tag": "qwen2.5:0.5b",
   "no_model_execution": true,
   "planned_cell_count": 4,
   "planned_cell_ids": [
-    "8b395dd27f26a0a590af02036b15f0acd7487d3ec5c9beda1fb221c199f5d976",
-    "61cb06bdbdf3809ab9717bebb9f53273cb3c78c9cf928c33ed29891a313140d6",
-    "050924029259255dae8a516935d673ba74110feb50410d9bb7e59b05e11265b5",
-    "02257559ce995c4e083053187e0a0883f895e2cea59f022cb30f3712c8f3ac91"
+    "582407aaa64ea3c0d88f91ba1bfb340cffed1374510777e709161b5159f42349",
+    "ccce0f29d4efb2e464b6f6cb197ee191f46cc58a78bab26d6e0ed286fa5655bb",
+    "4d5cb21cb2d63d2cd7780d8ac2639c80f8be098e4c120a1d3b3784290bfba420",
+    "05ef4eca5e621b0eda232bb458991527d3b0e9f3e300cd2b0177d5400cbf879f"
   ],
   "planned_cells_by_condition": {
     "C0_bare": 1,
@@ -144,10 +217,10 @@
     "C3_static_ck": 1
   },
   "planned_primary_pairs_n": 1,
-  "repository_commit": "5826b334a1fcc56e859e4fef79e8ce1e140abf20",
+  "repository_commit": "a5d8ed03b40373d3c84954da03f942066ed1eaf4",
   "schema_version": "ck.m0_dry_plan.v1",
   "scientific_completion": false,
   "task_annotation_hashes": {
-    "live_plumbing_01": "6d0abcad48233539c34900cfa82fe64dda0599bc8d5a256ad83dd0cb52645e36"
+    "live_plumbing_01_m0_v1": "d9c200bc404a85d3857ed0f6fd9c41d44fc8efe4b9aae9c22f34afca71459dcc"
   }
 }

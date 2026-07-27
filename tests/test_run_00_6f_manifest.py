@@ -165,9 +165,10 @@ def test_missing_task_annotation_excludes(manifest):
     )
 
 
-def test_live_plumbing_included(manifest):
+def test_live_plumbing_m0_v1_included(manifest):
     ids = [t["task_id"] for t in manifest["included_tasks"]]
-    assert "live_plumbing_01" in ids
+    assert "live_plumbing_01_m0_v1" in ids
+    assert "live_plumbing_01" not in ids
 
 
 def test_model_and_params_frozen(manifest):

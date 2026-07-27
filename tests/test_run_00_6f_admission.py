@@ -99,8 +99,10 @@ def test_full_auth_and_complete_pairs_structurally_eligible():
     )
     assert rep["primary_pair_coverage"] == 1.0
     assert rep["terminalization_coverage"] == 1.0
-    assert rep["primary_headline_eligible"] is True
-    # Still not scientific completion
+    # RUN 00.6F.1: structural readiness ≠ report headline eligibility
+    assert rep.get("primary_headline_structurally_ready") is True
+    assert rep["primary_headline_eligible"] is False
+    assert "SCIENTIFIC_COMPLETION_REQUIRED_FOR_HEADLINE" in rep["headline_ineligible_reasons"]
     assert rep["scientific_completion"] is False
     assert rep["headline_eligible"] is False
 

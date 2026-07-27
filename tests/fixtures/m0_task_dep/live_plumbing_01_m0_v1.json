@@ -1,0 +1,61 @@
+{
+  "task_id": "live_plumbing_01_m0_v1",
+  "version": "ck.task_dep.v1",
+  "fields": [
+    {
+      "field_id": "fact_local",
+      "classification": "REQUIRED_TASK_FACT",
+      "value": "This system is fully local."
+    },
+    {
+      "field_id": "fact_deliverable",
+      "classification": "REQUIRED_TASK_FACT",
+      "value": "Deliverable is the continuity cold-start receipt on Orin."
+    },
+    {
+      "field_id": "objective",
+      "classification": "REQUIRED_OPERATIONAL_STATE",
+      "value": "Return every supported continuity assertion from the permitted closed universe for thread_gamma_receipt about question_cold_start."
+    },
+    {
+      "field_id": "subject_universe",
+      "classification": "REQUIRED_OPERATIONAL_STATE",
+      "value": "thread_gamma_receipt"
+    },
+    {
+      "field_id": "object_universe",
+      "classification": "REQUIRED_OPERATIONAL_STATE",
+      "value": "question_cold_start"
+    },
+    {
+      "field_id": "relation_universe",
+      "classification": "REQUIRED_OPERATIONAL_STATE",
+      "value": "remains_open|references"
+    },
+    {
+      "field_id": "output_schema_id",
+      "classification": "REQUIRED_OPERATIONAL_STATE",
+      "value": "continuity_assertions_v1"
+    },
+    {
+      "field_id": "expected_relation_semantics",
+      "classification": "REQUIRED_OPERATIONAL_STATE",
+      "value": "all_required"
+    },
+    {
+      "field_id": "optional_note",
+      "classification": "OPTIONAL_SUPPORT",
+      "value": "Edge target is jetson_orin_nano_8gb. Pre-run task-contract correction RUN 00.6F.1."
+    },
+    {
+      "field_id": "gold_assertion_leak",
+      "classification": "FORBIDDEN_ANSWER_LEAKAGE",
+      "value": "GOLD_ASSERTION_thread_gamma_receipt_remains_open_AND_references_question_cold_start"
+    },
+    {
+      "field_id": "unrelated_thread",
+      "classification": "IRRELEVANT",
+      "value": "thread_unrelated_archive_99"
+    }
+  ]
+}

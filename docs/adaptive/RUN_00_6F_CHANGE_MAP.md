@@ -40,13 +40,22 @@
 | 00.6F new | +50 |
 | Full suite | **374 passed** |
 
-## Manifest freeze fingerprint
+## Manifest freeze fingerprint (00.6F.1)
 
 ```text
 manifest_id     = ck.m0.candidate.v1
-manifest_sha256 = 92c9b2431fc0edd2947c38fe43c06bdec793c4e9254701cd08549a223453bb6b
+manifest_sha256 = 9ec3d37a177b6d403048d8d6441b70a7fcdc6b89a4336c29bcf9ac610d88e922
 planned_cells   = 4
 primary_pairs   = 1
-included_tasks  = live_plumbing_01
-excluded_tasks  = 16
+included_tasks  = live_plumbing_01_m0_v1
+excluded_tasks  = 17
+discovered      = 18
 ```
+
+## 00.6F.1 amendment adds
+
+- gold semantics gate (`all_required` only)
+- fail-closed `output_schema_id`
+- Path A `live_plumbing_01_m0_v1` task contract
+- full corpus eligibility table
+- report-policy: headline ⇒ scientific_completion

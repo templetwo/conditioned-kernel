@@ -17,23 +17,22 @@ admission accounting offline. No models. No M0 execution.
 
 **Rule:** `ck.m0.eligibility.static_v1` — see `RUN_00_6F_M0_MANIFEST_SPEC.md`.
 
-## 2. Included tasks
+## 2. Included tasks (after 00.6F.1)
 
 | task_id | source | annotation |
 |---|---|---|
-| `live_plumbing_01` | `experiments/probes/live_plumbing_task.json` | `tests/fixtures/control_task_live_plumbing_01.json` |
+| `live_plumbing_01_m0_v1` | `experiments/probes/m0_task_contracts/live_plumbing_01_m0_v1.json` | `tests/fixtures/m0_task_dep/live_plumbing_01_m0_v1.json` |
 
-Expected relations: both `valid_combinations` from the closed universe
-(`remains_open` and `references` for `thread_gamma_receipt` → `question_cold_start`).
+Expected relations (conjunctive `all_required`): both closed-universe supported
+relations; instructions require every supported assertion.
 
-## 3. Excluded tasks (complete)
+## 3. Excluded tasks (complete after 00.6F.1)
 
-All 16 continuity corpus tasks excluded with:
+- 16 free-text continuity corpus tasks → `TASK_REQUIRES_REDESIGN` (+ missing universe/annotation/schema)  
+- Original `live_plumbing_01` → `INSTRUCTION_GOLD_SEMANTICS_MISMATCH` / ambiguous expected  
 
-- `MISSING_CONTINUITY_UNIVERSE`
-- `MISSING_TASK_DEP_ANNOTATION`
-
-Ledger: `experiments/manifests/m0_candidate_v1_exclusions.json`
+Ledger: `experiments/manifests/m0_candidate_v1_exclusions.json`  
+Table: `RUN_00_6F_1_CORPUS_ELIGIBILITY_TABLE.md`
 
 ## 4. Model / replicate / retry freeze
 
@@ -51,7 +50,7 @@ Primary C3↔C1; secondary C3↔C2; descriptive C3↔C0.
 
 - schema: `ck.m0_manifest.v1`
 - id: `ck.m0.candidate.v1`
-- **manifest_sha256:** `92c9b2431fc0edd2947c38fe43c06bdec793c4e9254701cd08549a223453bb6b`
+- **manifest_sha256 (00.6F.1):** `9ec3d37a177b6d403048d8d6441b70a7fcdc6b89a4336c29bcf9ac610d88e922`
 
 ## 7. Planned-cell schema and count
 

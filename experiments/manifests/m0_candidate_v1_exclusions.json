@@ -7,8 +7,12 @@
       "annotation_sha256": null,
       "annotation_version": null,
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "inclusion_verdict": "EXCLUDED",
       "source_path": "experiments/probes/continuity_tasks.json",
@@ -20,8 +24,12 @@
       "annotation_sha256": null,
       "annotation_version": null,
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "inclusion_verdict": "EXCLUDED",
       "source_path": "experiments/probes/continuity_tasks.json",
@@ -33,8 +41,12 @@
       "annotation_sha256": null,
       "annotation_version": null,
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "inclusion_verdict": "EXCLUDED",
       "source_path": "experiments/probes/continuity_tasks.json",
@@ -46,8 +58,12 @@
       "annotation_sha256": null,
       "annotation_version": null,
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "inclusion_verdict": "EXCLUDED",
       "source_path": "experiments/probes/continuity_tasks.json",
@@ -59,8 +75,12 @@
       "annotation_sha256": null,
       "annotation_version": null,
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "inclusion_verdict": "EXCLUDED",
       "source_path": "experiments/probes/continuity_tasks.json",
@@ -72,8 +92,12 @@
       "annotation_sha256": null,
       "annotation_version": null,
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "inclusion_verdict": "EXCLUDED",
       "source_path": "experiments/probes/continuity_tasks.json",
@@ -85,8 +109,12 @@
       "annotation_sha256": null,
       "annotation_version": null,
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "inclusion_verdict": "EXCLUDED",
       "source_path": "experiments/probes/continuity_tasks.json",
@@ -98,8 +126,12 @@
       "annotation_sha256": null,
       "annotation_version": null,
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "inclusion_verdict": "EXCLUDED",
       "source_path": "experiments/probes/continuity_tasks.json",
@@ -111,8 +143,12 @@
       "annotation_sha256": null,
       "annotation_version": null,
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "inclusion_verdict": "EXCLUDED",
       "source_path": "experiments/probes/continuity_tasks.json",
@@ -124,8 +160,12 @@
       "annotation_sha256": null,
       "annotation_version": null,
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "inclusion_verdict": "EXCLUDED",
       "source_path": "experiments/probes/continuity_tasks.json",
@@ -137,8 +177,12 @@
       "annotation_sha256": null,
       "annotation_version": null,
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "inclusion_verdict": "EXCLUDED",
       "source_path": "experiments/probes/continuity_tasks.json",
@@ -150,8 +194,12 @@
       "annotation_sha256": null,
       "annotation_version": null,
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "inclusion_verdict": "EXCLUDED",
       "source_path": "experiments/probes/continuity_tasks.json",
@@ -163,8 +211,12 @@
       "annotation_sha256": null,
       "annotation_version": null,
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "inclusion_verdict": "EXCLUDED",
       "source_path": "experiments/probes/continuity_tasks.json",
@@ -176,8 +228,12 @@
       "annotation_sha256": null,
       "annotation_version": null,
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "inclusion_verdict": "EXCLUDED",
       "source_path": "experiments/probes/continuity_tasks.json",
@@ -189,8 +245,12 @@
       "annotation_sha256": null,
       "annotation_version": null,
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "inclusion_verdict": "EXCLUDED",
       "source_path": "experiments/probes/continuity_tasks.json",
@@ -202,13 +262,32 @@
       "annotation_sha256": null,
       "annotation_version": null,
       "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
         "MISSING_CONTINUITY_UNIVERSE",
-        "MISSING_TASK_DEP_ANNOTATION"
+        "MISSING_OUTPUT_SCHEMA_ID",
+        "MISSING_TASK_DEP_ANNOTATION",
+        "TASK_REQUIRES_REDESIGN",
+        "UNSUPPORTED_GOLD_SEMANTICS"
       ],
       "inclusion_verdict": "EXCLUDED",
       "source_path": "experiments/probes/continuity_tasks.json",
       "source_sha256": "94d6af90a87b2592cc3eb191d560f8e00a5fce1fefce898ab721b8e4acaa8ba5",
       "task_id": "cont_thread_resume_04"
+    },
+    {
+      "annotation_path": "tests/fixtures/control_task_live_plumbing_01.json",
+      "annotation_sha256": "6d0abcad48233539c34900cfa82fe64dda0599bc8d5a256ad83dd0cb52645e36",
+      "annotation_version": "ck.task_dep.v1",
+      "exclusion_reasons": [
+        "AMBIGUOUS_EXPECTED_RELATIONS",
+        "INSTRUCTION_GOLD_SEMANTICS_MISMATCH",
+        "MISSING_EXPECTED_RELATIONS",
+        "UNSUPPORTED_GOLD_SEMANTICS"
+      ],
+      "inclusion_verdict": "EXCLUDED",
+      "source_path": "experiments/probes/live_plumbing_task.json",
+      "source_sha256": "e66b41660727d2c7c69f121e48131dcea8036f2a1adb5305de70d18d8e6b830d",
+      "task_id": "live_plumbing_01"
     }
   ]
 }
