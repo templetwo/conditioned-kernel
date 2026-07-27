@@ -64,6 +64,8 @@ def _auth(manifest, **overrides):
         "experiment_contract_id": "ck.exp.m0.v1",
         "authorized_model": manifest["model_tag"],
         "authorized_planned_cell_count": manifest["planned_cell_count"],
+        "authorized_condition_set": list(manifest.get("condition_set") or []),
+        "resolved_model_digest": "sha256:fixture-digest",
     }
     base.update(overrides)
     return base

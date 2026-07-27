@@ -943,12 +943,33 @@ def build_dry_plan(manifest: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+class FrozenArtifactError(ValueError):
+    def __init__(self, reason_code: str, message: str = "") -> None:
+        self.reason_code = reason_code
+        super().__init__(message or reason_code)
+
+
+# Retired 00.6F.1 candidate — never overwrite; never ratify.
+RETIRED_MANIFEST_ID = "ck.m0.candidate.v1"
+RETIRED_MANIFEST_SHA256 = (
+    "9ec3d37a177b6d403048d8d6441b70a7fcdc6b89a4336c29bcf9ac610d88e922"
+)
+
+
 def write_frozen_artifacts(
     *,
     out_dir: Path | None = None,
     repo_commit: str = REPO_COMMIT_DEFAULT,
+    allow_identical_rewrite: bool = True,
+    force_supersession: bool = False,
+    supersession_id: str | None = None,
 ) -> dict[str, Path]:
-    """Write candidate manifest, exclusions, and dry plan under experiments/manifests."""
+    """Write candidate manifest, exclusions, and dry plan under experiments/manifests.
+
+    RUN 00.8A: refuse silent overwrite when existing bytes differ.
+    Identical rewrite of the same content is allowed when allow_identical_rewrite.
+    force_supersession writes a new ID/filename and retains the prior artifact.
+    """
     root = _repo_root()
     d = out_dir if out_dir is not None else root / "experiments" / "manifests"
     d.mkdir(parents=True, exist_ok=True)
@@ -956,15 +977,44 @@ def write_frozen_artifacts(
     plan = build_dry_plan(manifest)
     exclusions = manifest["exclusion_ledger"]
 
+    manifest_name = "m0_candidate_v1.json"
+    if force_supersession:
+        sid = supersession_id or f"m0_candidate_superseded_{manifest['manifest_sha256'][:12]}"
+        manifest_name = f"{sid}.json"
+        manifest = dict(manifest)
+        manifest["supersedes_manifest_id"] = RETIRED_MANIFEST_ID
+        manifest["supersedes_manifest_sha256"] = RETIRED_MANIFEST_SHA256
+        # re-hash after supersession fields
+        body = {k: v for k, v in manifest.items() if k != "manifest_sha256"}
+        manifest["manifest_sha256"] = sha256_hex(canonical_json_bytes(body))
+        plan = build_dry_plan(manifest)
+
     paths = {
-        "manifest": d / "m0_candidate_v1.json",
-        "exclusions": d / "m0_candidate_v1_exclusions.json",
-        "plan": d / "m0_candidate_v1_plan.json",
+        "manifest": d / manifest_name,
+        "exclusions": d / manifest_name.replace(".json", "_exclusions.json"),
+        "plan": d / manifest_name.replace(".json", "_plan.json"),
     }
-    paths["manifest"].write_text(
-        json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
-        encoding="utf-8",
-    )
+
+    new_bytes = (
+        json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
+    ).encode("utf-8")
+    if paths["manifest"].is_file() and not force_supersession:
+        old = paths["manifest"].read_bytes()
+        if old != new_bytes:
+            raise FrozenArtifactError(
+                "FROZEN_ARTIFACT_OVERWRITE_REFUSED",
+                f"refusing to overwrite {paths['manifest']} with different bytes; "
+                "use force_supersession=True to retain prior artifact under a new name",
+            )
+        if not allow_identical_rewrite:
+            raise FrozenArtifactError(
+                "FROZEN_ARTIFACT_EXISTS",
+                str(paths["manifest"]),
+            )
+        # identical — no write needed for manifest; still refresh companions
+    else:
+        paths["manifest"].write_bytes(new_bytes)
+
     paths["exclusions"].write_text(
         json.dumps(exclusions, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
         encoding="utf-8",

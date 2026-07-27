@@ -55,17 +55,31 @@ class EdgeProfile:
             ram_gb=int(data.get("ram_gb") or 8),
             model=str(data.get("model") or "qwen2.5:0.5b"),
             mode=str(data.get("mode") or "chat_json"),
-            num_ctx=int(data.get("num_ctx") or 2048),
-            temperature=float(data.get("temperature") or 0.3),
-            seed=int(data.get("seed") or 42),
-            max_repair=int(data.get("max_repair") or 1),
+            num_ctx=int(data["num_ctx"] if data.get("num_ctx") is not None else 2048),
+            # Preserve valid falsy zeros (RUN 00.8A): temperature=0.0 and seed=0
+            # must not fall through value-or-default logic.
+            temperature=float(
+                data["temperature"] if data.get("temperature") is not None else 0.3
+            ),
+            seed=int(data["seed"] if data.get("seed") is not None else 42),
+            max_repair=int(data["max_repair"] if data.get("max_repair") is not None else 1),
             keep_alive=str(data.get("keep_alive") if data.get("keep_alive") is not None else "2m"),
-            timeout_s=float(data.get("timeout_s") or 90),
-            max_packet_bytes=int(data.get("max_packet_bytes") or 6000),
-            max_facts=int(data.get("max_facts") or 8),
-            max_open_threads=int(data.get("max_open_threads") or 4),
-            max_answer_words=int(data.get("max_answer_words") or 120),
-            max_log_file_bytes=int(data.get("max_log_file_bytes") or 5_242_880),
+            timeout_s=float(data["timeout_s"] if data.get("timeout_s") is not None else 90),
+            max_packet_bytes=int(
+                data["max_packet_bytes"] if data.get("max_packet_bytes") is not None else 6000
+            ),
+            max_facts=int(data["max_facts"] if data.get("max_facts") is not None else 8),
+            max_open_threads=int(
+                data["max_open_threads"] if data.get("max_open_threads") is not None else 4
+            ),
+            max_answer_words=int(
+                data["max_answer_words"] if data.get("max_answer_words") is not None else 120
+            ),
+            max_log_file_bytes=int(
+                data["max_log_file_bytes"]
+                if data.get("max_log_file_bytes") is not None
+                else 5_242_880
+            ),
             one_model_only=bool(data.get("one_model_only", True)),
             stream=bool(data.get("stream", False)),
             cloud=bool(data.get("cloud", False)),

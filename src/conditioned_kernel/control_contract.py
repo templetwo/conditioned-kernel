@@ -24,7 +24,9 @@ PADDING_MECHANISM_VERSION = "ck.padding.spaces_v1"
 CONTROL_VERIFIER_VERSION = "ck.control_verifier.v1"
 
 # Frozen padding: only U+0020 SPACE after a fixed delimiter with no task content.
-PAD_DELIMITER = "\n<<CK_PAD>>\n"  # no relation names, no task identifiers
+# Condition-neutral pad marker (RUN 00.8A): no CK brand, no condition identity.
+# Mechanically inert delimiter for C1 byte-budget padding only.
+PAD_DELIMITER = "\n<<__>>\n"
 PAD_BYTE = b" "  # U+0020
 
 # Scientific-experiment guard (ExecutionScope.SCIENTIFIC_EXPERIMENT)
@@ -252,8 +254,9 @@ def _content_body(
     if not operational:
         raise PacketCompileError("MISSING_REQUIRED_OPERATIONAL_STATE")
 
+    # RUN 00.8A: do not embed condition_id in model-visible packet body.
+    # Condition identity remains on CompiledPacket metadata only.
     body: dict[str, Any] = {
-        "condition": condition.value,
         "task_id": ann.task_id,
         "packet_contract_version": PACKET_CONTRACT_VERSION,
         "task_dep_version": ann.version,
@@ -427,7 +430,7 @@ def compile_condition_packet(
         # C0: minimal — only required facts concatenated, no schema identity claim
         facts = "; ".join(_sorted_fact_lines(ann.classified(FieldClass.REQUIRED_TASK_FACT)))
         user_content = f"{prompt}\nFacts: {facts}"
-        body = {"condition": condition.value, "user_content": user_content}
+        body = {"user_content": user_content}
         schema: dict[str, Any] = {}  # bare may omit structured schema
         complete = build_serialized_model_input(
             condition=condition,
@@ -685,7 +688,9 @@ class ControlComparisonReceipt:
             "verifier_version": self.verifier_version,
             "repo_commit": self.repo_commit,
             "scientific_completion": False,
-            "headline_eligible": self.headline_eligible and self.verdict is ControlVerdict.PASS,
+            # Control verification never establishes headline eligibility (00.8A).
+            "headline_eligible": False,
+            "scientific_status": "control_verification_only",
         }
 
 
