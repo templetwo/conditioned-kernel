@@ -110,6 +110,19 @@ finalize_governed_run(... staging_mode=True) → publication_complete=True
 - Tests are static pure-Python contract checks plus on-disk commissioning packet
   bytes (instrument evidence only).
 
+
+## Publication discipline
+
+| Step | Result |
+|---|---|
+| Staging `finalize_governed_run(staging_mode=True)` | `publication_complete=True` |
+| Commit | `db5186ba6a5ba62ba941986715ee50cfae563215` |
+| Committed verification against that commit | `publication_complete=True`, 3/3 declared hashes verified and present in commit |
+| Governed design packet | `experiments/runs/scientific_contract_00_9a_1/` |
+| Silently ignored governed artifacts | **none** |
+
+No push in this round (independent review gate first).
+
 ## Remaining limitations
 
 1. Leakage derivability still requires an explicit permitted universe argument

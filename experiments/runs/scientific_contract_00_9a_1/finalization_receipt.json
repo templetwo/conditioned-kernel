@@ -1,6 +1,6 @@
 {
   "artifact_manifest_path": "/Users/vaquez/conditioned-kernel/experiments/runs/scientific_contract_00_9a_1/artifact_manifest_hashes.json",
-  "commit_ref": "862429c4e181fed2c31fb2aa57bc8010a4b28265",
+  "commit_ref": "db5186ba6a5ba62ba941986715ee50cfae563215",
   "efficacy_claim_permitted": false,
   "execution_complete": false,
   "headline_eligible": false,
@@ -11,8 +11,8 @@
     "absent_from_commit_paths": [],
     "artifact_manifest_path": "experiments/runs/scientific_contract_00_9a_1/artifact_manifest_hashes.json",
     "artifact_manifest_sha256": "e7594d6d2baac7cb1accd44e8f40a7a20ca0471e20e9425753b235282a8a1817",
-    "commit_ref": "862429c4e181fed2c31fb2aa57bc8010a4b28265",
-    "committed_artifact_count": 0,
+    "commit_ref": "db5186ba6a5ba62ba941986715ee50cfae563215",
+    "committed_artifact_count": 3,
     "committed_hash_mismatches": [],
     "declared_artifact_count": 3,
     "execution_complete": null,
@@ -44,6 +44,6 @@
   "run_id": "ck.run.00.9a.1.contract_closure",
   "schema_version": "ck.governed_run_finalization.v1",
   "scientific_completion": false,
-  "staging_mode": true,
+  "staging_mode": false,
   "verifier_invoked": true
 }
