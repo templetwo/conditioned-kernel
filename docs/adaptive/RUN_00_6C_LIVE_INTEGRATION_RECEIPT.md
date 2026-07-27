@@ -3,7 +3,8 @@
 **Date:** 2026-07-27  
 **Branch:** `grok/ck-run-00-6c-live-continuity`  
 **Starting commit:** `e1d6730f5ec3ef64a3ff2171f1a0038aad98756e`  
-**Disposition:** live plumbing wired; one bounded smoke completed; M0 remains `NO-GO`
+**Disposition:** live plumbing wired; amended by **RUN 00.6C.1** (durable receipt
+truth). M0 remains `NO-GO`
 
 ## 1. Mission
 
@@ -150,6 +151,8 @@ outcome under the frozen packet contract, not a tuned scientific claim.
 
 ## 9. Ready for independent review?
 
-**Yes — for RUN 00.6C live plumbing scope.**
+**Yes — for RUN 00.6C + 00.6C.1** (live plumbing + durable receipt truth).
 
-M0 remains `NO-GO`. One bounded smoke completed; no further smoke/tuning.
+See `RUN_00_6C_1_RECEIPT_TRUTH_AMENDMENT.md` for the disk-receipt defect fix.
+
+M0 remains `NO-GO`.

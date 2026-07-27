@@ -14,7 +14,9 @@ from typing import Any, Mapping, Sequence
 EVENT_SCHEMA_VERSION = "ck.continuity_event.v2"
 GENESIS_SCHEMA_VERSION = "ck.genesis.v1"
 VALIDATOR_VERSION = "ck.continuity_validator.v1"
-RECEIPT_SCHEMA_VERSION = "ck.continuity_receipt.v1"
+# v2: execution_scope + scientific_completion are durable terminal fields
+# set before persistence (never post-patched).
+RECEIPT_SCHEMA_VERSION = "ck.continuity_receipt.v2"
 RELATION_ATOM_KEYS = frozenset({"subject_id", "relation", "object_id"})
 
 ALLOWED_RELATIONS = frozenset(
@@ -147,8 +149,13 @@ def build_event(
     timestamp: str,
     repo_commit: str | None,
     provenance: Mapping[str, Any] | None = None,
+    execution_scope: str | None = None,
 ) -> dict[str, Any]:
-    """Build one candidate-atomic continuity event with a canonical assertion batch."""
+    """Build one candidate-atomic continuity event with a canonical assertion batch.
+
+    execution_scope is required for new events (live plumbing / offline / etc.).
+    Kept as an additive field on schema v2 so event/receipt pairs can agree.
+    """
     ordered = normalize_relations(assertions)
     if not ordered:
         raise ValueError("build_event requires a non-empty assertion batch")
@@ -156,6 +163,8 @@ def build_event(
     triples = [(a["subject_id"], a["relation"], a["object_id"]) for a in ordered]
     if len(triples) != len(set(triples)):
         raise ValueError("build_event refuses duplicate assertions in batch")
+    if not execution_scope:
+        raise ValueError("build_event requires execution_scope")
     return {
         "schema_version": EVENT_SCHEMA_VERSION,
         "event_id": event_id,
@@ -169,5 +178,6 @@ def build_event(
         "acceptance_reason_code": acceptance_reason_code,
         "timestamp": timestamp,
         "repo_commit": repo_commit,
+        "execution_scope": str(execution_scope),
         "provenance": dict(provenance or {}),
     }

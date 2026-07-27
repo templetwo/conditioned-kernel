@@ -35,6 +35,74 @@ class Decision(str, Enum):
     REJECTED = "rejected"
 
 
+class ExecutionScope(str, Enum):
+    """Closed execution-scope vocabulary (RUN 00.6C.1).
+
+    Scientific completion is never inferred from ACCEPTED alone; it is a
+    function of scope (and only scientific_experiment may be true).
+    """
+
+    OFFLINE_TEST = "offline_test"
+    DRY_RUN = "dry_run"
+    LIVE_PLUMBING = "live_plumbing"
+    SCIENTIFIC_EXPERIMENT = "scientific_experiment"
+
+
+def parse_execution_scope(value: ExecutionScope | str) -> ExecutionScope:
+    if isinstance(value, ExecutionScope):
+        return value
+    try:
+        return ExecutionScope(str(value))
+    except ValueError as e:
+        raise ValueError(f"unknown execution_scope: {value!r}") from e
+
+
+def scientific_completion_for(
+    scope: ExecutionScope, *, accepted: bool
+) -> bool:
+    """Only scientific_experiment + ACCEPTED may claim scientific completion."""
+    return accepted and scope is ExecutionScope.SCIENTIFIC_EXPERIMENT
+
+
+def verify_event_receipt_pair(
+    event: Mapping[str, Any],
+    receipt: Mapping[str, Any],
+) -> None:
+    """Fail closed if event and terminal receipt contradict each other."""
+    pairs = (
+        ("source_candidate_hash", "source_candidate_hash"),
+        ("event_id", "event_id"),
+        ("execution_scope", "execution_scope"),
+        ("parent_state_hash", "parent_state_hash"),
+        ("resulting_state_hash", "resulting_state_hash"),
+        ("episode_id", "episode_id"),
+    )
+    for ek, rk in pairs:
+        if ek not in event and rk not in receipt:
+            continue
+        if event.get(ek) != receipt.get(rk):
+            raise ValueError(
+                f"event/receipt mismatch on {ek}: "
+                f"event={event.get(ek)!r} receipt={receipt.get(rk)!r}"
+            )
+    # Live plumbing / dry / offline may never claim scientific completion.
+    scope = str(receipt.get("execution_scope") or event.get("execution_scope") or "")
+    if scope in {
+        ExecutionScope.LIVE_PLUMBING.value,
+        ExecutionScope.DRY_RUN.value,
+        ExecutionScope.OFFLINE_TEST.value,
+    }:
+        if receipt.get("scientific_completion") is True:
+            raise ValueError(
+                f"scientific_completion cannot be true for execution_scope={scope}"
+            )
+    if receipt.get("decision") == Decision.ACCEPTED.value:
+        if not receipt.get("event_id"):
+            raise ValueError("accepted receipt requires event_id")
+        if event.get("event_id") != receipt.get("event_id"):
+            raise ValueError("accepted event_id mismatch")
+
+
 @dataclass(frozen=True)
 class ContinuityAssertion:
     subject_id: str
@@ -214,6 +282,7 @@ def process_episode_a_candidate(
     *,
     store: ContinuityStore,
     episode_id: str,
+    execution_scope: ExecutionScope | str = ExecutionScope.OFFLINE_TEST,
     dry_run: bool = False,
     dry_store_root: Path | str | None = None,
     provenance: Mapping[str, Any] | None = None,
@@ -225,7 +294,26 @@ def process_episode_a_candidate(
     - ACCEPTED → exactly one continuity event + one terminal receipt
     - REJECTED → zero events + one terminal receipt
     - multi-assertion is all-or-nothing
+
+    Durable receipt truth (00.6C.1):
+    - execution_scope is resolved before any write
+    - scientific_completion is derived from scope, never from ACCEPTED alone
+    - returned receipt is the same object that was persisted
     """
+    scope = parse_execution_scope(execution_scope)
+    if dry_run:
+        # Dry path may only use dry_run (or offline_test callers that set dry_run).
+        if scope is ExecutionScope.SCIENTIFIC_EXPERIMENT:
+            raise ValueError("scientific_experiment cannot use dry_run storage")
+        if scope is ExecutionScope.LIVE_PLUMBING:
+            # Allow dry live-plumbing tests only if explicitly dry_run scope.
+            pass
+        if scope not in (ExecutionScope.DRY_RUN, ExecutionScope.OFFLINE_TEST, ExecutionScope.LIVE_PLUMBING):
+            raise ValueError(f"dry_run incompatible with execution_scope={scope.value}")
+        if scope is not ExecutionScope.DRY_RUN and dry_run:
+            # Canonical dry persistence scope.
+            scope = ExecutionScope.DRY_RUN
+
     active = store
     if dry_run:
         if dry_store_root is None:
@@ -246,14 +334,16 @@ def process_episode_a_candidate(
             dry_run=dry_run,
             provenance=provenance,
             state_hash=state_hash_before,
+            execution_scope=scope,
         )
         active.append_terminal_receipt(receipt)
+        disk = _load_persisted_receipt(active, event_id=None, candidate_hash=ch)
         return EpisodeAResult(
             decision=Decision.REJECTED,
             reason_code=parse_codes[0],
             reason_codes=tuple(parse_codes),
             candidate_hash=ch,
-            receipt=receipt,
+            receipt=disk,
             dry_run=dry_run,
             scientific_completion=False,
         )
@@ -268,15 +358,17 @@ def process_episode_a_candidate(
             dry_run=dry_run,
             provenance=provenance,
             state_hash=state_hash_before,
+            execution_scope=scope,
             duplicate_triple=dup_triple,
         )
         active.append_terminal_receipt(receipt)
+        disk = _load_persisted_receipt(active, event_id=None, candidate_hash=ch)
         return EpisodeAResult(
             decision=Decision.REJECTED,
             reason_code=dup_codes[0],
             reason_codes=tuple(dup_codes),
             candidate_hash=ch,
-            receipt=receipt,
+            receipt=disk,
             dry_run=dry_run,
             scientific_completion=False,
             assertions=list(assertions),
@@ -298,20 +390,23 @@ def process_episode_a_candidate(
             dry_run=dry_run,
             provenance=provenance,
             state_hash=state_hash_before,
+            execution_scope=scope,
         )
         active.append_terminal_receipt(receipt)
+        disk = _load_persisted_receipt(active, event_id=None, candidate_hash=ch)
         return EpisodeAResult(
             decision=Decision.REJECTED,
             reason_code=v_codes[0],
             reason_codes=tuple(v_codes),
             candidate_hash=ch,
-            receipt=receipt,
+            receipt=disk,
             dry_run=dry_run,
             scientific_completion=False,
             assertions=list(assertions),
         )
 
     # B — One event per accepted candidate (canonical ordered batch)
+    sci = scientific_completion_for(scope, accepted=True)
     commit = repo_commit if repo_commit is not None else _repo_commit()
     ts = utc_now_iso()
     parent = state_hash_before
@@ -334,6 +429,7 @@ def process_episode_a_candidate(
         timestamp=ts,
         repo_commit=commit,
         provenance=provenance or {},
+        execution_scope=scope.value,
     )
     receipt = {
         "receipt_schema_version": RECEIPT_SCHEMA_VERSION,
@@ -353,10 +449,16 @@ def process_episode_a_candidate(
         "validator_version": VALIDATOR_VERSION,
         "timestamp": ts,
         "dry_run": dry_run,
-        "scientific_completion": False if dry_run else True,
+        "execution_scope": scope.value,
+        "scientific_completion": sci,
         "provenance": dict(provenance or {}),
     }
+    # Consistency before durable write
+    verify_event_receipt_pair(event, receipt)
     active.append_event_and_receipt(event, receipt)
+    # Re-read from disk as audit-of-record and return that object.
+    disk_receipt = _load_persisted_receipt(active, event_id=event_id, candidate_hash=ch)
+    verify_event_receipt_pair(event, disk_receipt)
 
     return EpisodeAResult(
         decision=Decision.ACCEPTED,
@@ -364,10 +466,32 @@ def process_episode_a_candidate(
         reason_codes=("ACCEPTED",),
         candidate_hash=ch,
         events=[event],
-        receipt=receipt,
+        receipt=disk_receipt,
         dry_run=dry_run,
-        scientific_completion=(not dry_run),
+        scientific_completion=bool(disk_receipt.get("scientific_completion")),
         assertions=list(assertions),
+    )
+
+
+def _load_persisted_receipt(
+    store: ContinuityStore,
+    *,
+    event_id: str | None,
+    candidate_hash: str,
+) -> dict[str, Any]:
+    """Load the terminal receipt that was just written for this candidate."""
+    for rec in store.terminal_receipts():
+        if rec.get("source_candidate_hash") == candidate_hash:
+            if event_id is None or rec.get("event_id") == event_id:
+                return rec
+    # Fallback: read event-id named file
+    if event_id:
+        path = store.receipts_dir / f"{event_id}.json"
+        if path.exists():
+            with path.open("r", encoding="utf-8") as f:
+                return json.load(f)
+    raise FileNotFoundError(
+        f"persisted receipt not found for candidate {candidate_hash[:12]}…"
     )
 
 
@@ -379,8 +503,10 @@ def _reject_receipt(
     dry_run: bool,
     provenance: Mapping[str, Any] | None,
     state_hash: str,
+    execution_scope: ExecutionScope,
     duplicate_triple: Mapping[str, str] | None = None,
 ) -> dict[str, Any]:
+    sci = scientific_completion_for(execution_scope, accepted=False)
     rec: dict[str, Any] = {
         "receipt_schema_version": RECEIPT_SCHEMA_VERSION,
         "receipt_id": make_id("crec"),
@@ -399,7 +525,8 @@ def _reject_receipt(
         "validator_version": VALIDATOR_VERSION,
         "timestamp": utc_now_iso(),
         "dry_run": dry_run,
-        "scientific_completion": False,
+        "execution_scope": execution_scope.value,
+        "scientific_completion": sci,
         "provenance": dict(provenance or {}),
     }
     if duplicate_triple is not None:

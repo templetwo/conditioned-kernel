@@ -47,6 +47,7 @@ def _verify_event_content_integrity(event: Mapping[str, Any]) -> None:
         "acceptance_reason_code",
         "timestamp",
         "repo_commit",
+        "execution_scope",
         "provenance",
     }
     unknown = set(event.keys()) - allowed

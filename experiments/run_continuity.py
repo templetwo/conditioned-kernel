@@ -51,11 +51,16 @@ from conditioned_kernel.continuity import (  # noqa: E402
     score_episode_b,
 )
 from conditioned_kernel.edge import DEFAULT_PROFILE_ID, load_profile  # noqa: E402
+from conditioned_kernel.continuity_gate import (  # noqa: E402
+    ExecutionScope,
+    verify_event_receipt_pair,
+)
 from conditioned_kernel.continuity_live import (  # noqa: E402
     live_plumbing_headline_policy,
     run_episode_a_live,
     run_episode_b_live,
 )
+from conditioned_kernel.continuity_store import ContinuityStore  # noqa: E402
 from conditioned_kernel.generate import DEFAULT_BASE_URL, OllamaClient, RunStatus  # noqa: E402
 from conditioned_kernel.outcomes import (  # noqa: E402
     EmptyManifestError,
@@ -116,8 +121,10 @@ def episode_a_live(
             "reason_code": r.gate.reason_code,
             "reason_codes": list(r.gate.reason_codes),
             "candidate_hash": r.gate.candidate_hash,
-            "scientific_completion": False,
+            "scientific_completion": bool(r.gate.receipt.get("scientific_completion")),
+            "execution_scope": r.gate.receipt.get("execution_scope"),
             "events_n": len(r.gate.events),
+            "event_id": r.gate.receipt.get("event_id"),
         }
     return {
         "pid": os.getpid(),
@@ -532,7 +539,49 @@ def run_live_plumbing(
                 cell=cell_a, reason=str(ep_a.get("error") or "episode_a_unknown")
             )
         ledger.record(cell_a.cell_id, oc_a)
-        rows.append({"task_id": tid, "episode": "A", **ep_a, "manifest_cell_id": cell_a.cell_id})
+
+        # Durable terminal facts: load receipts from disk and verify consistency.
+        # Fail closed if disk receipt contradicts live-plumbing non-science rule.
+        disk_receipts: list[dict[str, Any]] = []
+        if store_root.exists() and (store_root / "genesis.json").exists():
+            store = ContinuityStore.open(store_root)
+            disk_receipts = store.terminal_receipts()
+            events = store.list_events()
+            for rec in disk_receipts:
+                if rec.get("execution_scope") != ExecutionScope.LIVE_PLUMBING.value:
+                    # offline inject path always uses live_plumbing scope from gate
+                    if rec.get("execution_scope") not in (
+                        ExecutionScope.LIVE_PLUMBING.value,
+                        ExecutionScope.DRY_RUN.value,
+                        None,  # pure dry without gate
+                    ):
+                        raise SystemExit(
+                            f"RECEIPT_SCOPE_MISMATCH: {rec.get('execution_scope')}"
+                        )
+                if rec.get("scientific_completion") is True:
+                    raise SystemExit(
+                        "RECEIPT_SCIENCE_LIE: persisted scientific_completion=true "
+                        "under live plumbing"
+                    )
+                if rec.get("decision") == "accepted":
+                    matching = [
+                        e for e in events if e.get("event_id") == rec.get("event_id")
+                    ]
+                    if not matching:
+                        raise SystemExit(
+                            f"RECEIPT_EVENT_MISSING: event_id={rec.get('event_id')}"
+                        )
+                    verify_event_receipt_pair(matching[0], rec)
+
+        rows.append(
+            {
+                "task_id": tid,
+                "episode": "A",
+                **ep_a,
+                "manifest_cell_id": cell_a.cell_id,
+                "persisted_terminal_receipt": disk_receipts[-1] if disk_receipts else None,
+            }
+        )
 
         # --- Episode B (fresh subprocess; store path only) ---
         ep_b_payload = {
@@ -588,7 +637,22 @@ def run_live_plumbing(
 
     ledger.validate()
     diag = ledger.diagnostic_counts()
-    # Force plumbing policy: never scientific completion
+
+    # Collect all persisted terminal receipts from all task stores.
+    persisted: list[dict[str, Any]] = []
+    for t in tasks:
+        tid = str(t.get("id"))
+        sr = store_base / tid
+        if sr.exists() and (sr / "genesis.json").exists():
+            persisted.extend(ContinuityStore.open(sr).terminal_receipts())
+
+    # Scientific completion count derived only from durable receipts (must be 0).
+    sci_n = sum(1 for r in persisted if r.get("scientific_completion") is True)
+    if sci_n != 0:
+        raise SystemExit(
+            f"RECEIPT_SCIENCE_LIE: {sci_n} persisted receipt(s) claim scientific_completion"
+        )
+
     report = {
         "created_at": _now(),
         "run_id": run_id,
@@ -598,14 +662,15 @@ def run_live_plumbing(
         "dry_run": bool(dry),
         "n_tasks": len(tasks),
         "rows": rows,
+        "persisted_terminal_receipts": persisted,
         "terminal_ledger": {
             "planned_n": diag["planned_n"],
             "terminal_n": diag["terminal_n"],
-            "scientific_completion_n": 0,
-            "diagnostic_counts": {**diag, "scientific_completion_n": 0},
+            "scientific_completion_n": sci_n,
+            "diagnostic_counts": {**diag, "scientific_completion_n": sci_n},
         },
         **policy,
-        "scientific_completion_n": 0,
+        "scientific_completion_n": sci_n,
     }
     event = {
         "event": "continuity.live_plumbing.completed",
@@ -619,7 +684,7 @@ def run_live_plumbing(
         "accepted_n": diag["accepted_n"],
         "failed_n": diag["failed_n"],
         "dry_run_n": diag["dry_run_n"],
-        "scientific_completion_n": 0,
+        "scientific_completion_n": sci_n,
         **policy,
         "artifact": str(out),
     }

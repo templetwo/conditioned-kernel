@@ -337,10 +337,14 @@ def run_episode_a_live(
 
     final = inference.output  # may be ""
     gate_invocations = 1
+    # Scope is fixed before any durable write — never post-patched after.
+    from conditioned_kernel.continuity_gate import ExecutionScope
+
     gate = process_episode_a_candidate(
         final,
         store=store,
         episode_id="episode_a",
+        execution_scope=ExecutionScope.LIVE_PLUMBING,
         dry_run=False,  # write to the live store path (tests use temp dirs)
         provenance={
             **dict(provenance or {}),
@@ -349,20 +353,8 @@ def run_episode_a_live(
             "live_plumbing": True,
         },
     )
-    # Plumbing never claims scientific completion at the experiment layer.
-    if gate.scientific_completion:
-        # Force incomplete for live plumbing policy (gate may mark lifecycle ok).
-        gate = EpisodeAResult(
-            decision=gate.decision,
-            reason_code=gate.reason_code,
-            reason_codes=gate.reason_codes,
-            candidate_hash=gate.candidate_hash,
-            events=gate.events,
-            receipt={**gate.receipt, "scientific_completion": False, "live_plumbing": True},
-            dry_run=gate.dry_run,
-            scientific_completion=False,
-            assertions=gate.assertions,
-        )
+    # Receipt already has execution_scope=live_plumbing and scientific_completion=false
+    # as persisted audit-of-record. No in-memory override of durable fields.
 
     return LiveEpisodeAResult(
         inference=inference.to_dict(),
