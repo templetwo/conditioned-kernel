@@ -1,21 +1,23 @@
 # RUN 00.6D — Change Map
 
 **Branch:** `grok/ck-run-00-6d-controls`  
-**Starting commit:** `b67fa2b0879830559dc9c19942f5647549763f78`  
-**Scope:** packet sufficiency + mechanical control contracts (no model runs)
+**Starting commit:** `b67fa2b` / control commit `3abd15e`  
+**Scope:** packet sufficiency + mechanical control contracts (no model runs)  
+**Amendment:** RUN 00.6D.1 — C1 target mandatory at construction; dead pad removed
 
 ## Production
 
 | File | Role |
 |---|---|
-| `src/conditioned_kernel/control_contract.py` | **created** — annotations, compile C0–C3, padding, verifier, science guard |
+| `src/conditioned_kernel/control_contract.py` | **created** — annotations, compile C0–C3, padding, verifier; **00.6D.1:** C1 target mandatory |
 
 ## Tests / fixtures
 
 | File | Role |
 |---|---|
 | `tests/fixtures/control_task_live_plumbing_01.json` | frozen task-dependency annotation |
-| `tests/test_run_00_6d_controls.py` | **created** — 31 offline tests |
+| `tests/test_run_00_6d_controls.py` | offline control suite |
+| `tests/test_run_00_6d_1_c1_integrity.py` | **00.6D.1** — C1 construction integrity |
 
 ## Documentation
 

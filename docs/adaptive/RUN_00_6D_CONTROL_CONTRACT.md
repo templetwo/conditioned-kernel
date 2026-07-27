@@ -2,22 +2,37 @@
 
 ## Primary budget rule
 
-**Exact UTF-8 byte count equality** of the final serialized runtime request
-for budget-matched pairs (C3 vs C1).
+**Exact UTF-8 byte-count equality** of the final serialized runtime request
+for budget-matched pairs (C3 vs C1). Complete request **strings** are not
+required to be identical (structure must differ); SHA-256 of each remains a
+required diagnostic.
 
 Token counts may be recorded later as diagnostics; they are not binding here.
 
 Equality is measured **after** final serialization (`complete_bytes`), not on
 templates.
 
+### C1 construction-time enforcement (00.6D.1)
+
+`C1_budget_matched_bare` **must** receive `target_complete_bytes` (the paired
+C3 complete-request UTF-8 length). Compilation fails closed if the target is
+absent, invalid, or unreachable. A C1 object is returned only when
+`len(complete_bytes) == target` and `byte_match_verified=true`. The pair
+builder retains independent verification as defense in depth.
+
 ## Padding mechanism (`ck.padding.spaces_v1`)
 
+**Authoritative implementation:** `_pad_user_to_complete_target()` only
+(00.6D.1 removed unused `apply_space_padding`).
+
 1. Build unpadded user content (`Packet:\n` + canonical body JSON).  
-2. Append fixed delimiter `\n<<CK_PAD>>\n` only if space permits.  
-3. Append only U+0020 SPACE bytes until the complete request UTF-8 length equals
-   the treatment target.  
+2. Search padding that makes the **complete request** UTF-8 length equal the
+   C3 target (JSON escaping means user-byte deltas ≠ complete-byte deltas).  
+3. Padding region: fixed delimiter `\n<<CK_PAD>>\n` when it fits, else pure
+   U+0020 SPACE.  
 4. Padding is scanned for task ids, relation names, and forbidden fragments.  
-5. Padding bytes and mechanism version appear on receipts.  
+5. C1 receipts record `padding_bytes_n`, `target_complete_bytes`,
+   `actual_complete_bytes`, `byte_match_verified`.  
 
 Padding is never model-generated and never meaningful prose.
 

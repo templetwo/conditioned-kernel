@@ -3,7 +3,8 @@
 **Date:** 2026-07-27  
 **Branch:** `grok/ck-run-00-6d-controls`  
 **Starting commit:** `b67fa2b0879830559dc9c19942f5647549763f78`  
-**Disposition:** packet sufficiency + control contracts implemented offline; M0 remains `NO-GO`
+**Disposition:** packet sufficiency + control contracts implemented offline;
+amended by **RUN 00.6D.1** (C1 construction-time match). M0 remains `NO-GO`
 
 ## 1. Mission
 
@@ -70,22 +71,23 @@ Covered in `tests/test_run_00_6d_controls.py`:
 ## 9. Commands and results
 
 ```text
-pytest -q tests/test_run_00_6d_controls.py
-31 passed
+# After 00.6D.1
+pytest -q tests/test_run_00_6d_controls.py tests/test_run_00_6d_1_c1_integrity.py
+46 passed
 
 pytest -q
-236 passed in 3.77s
+251 passed in 3.73s
 
 python -m ruff check src/conditioned_kernel/control_contract.py \
-  tests/test_run_00_6d_controls.py
+  tests/test_run_00_6d_controls.py tests/test_run_00_6d_1_c1_integrity.py
 All checks passed!
 
 python -m mypy --follow-imports=skip src/conditioned_kernel/control_contract.py
 Success: no issues found in 1 source file
 ```
 
-**Proof no models were run:** all 00.6D tests are offline fixtures; no Ollama
-calls; no live-plumbing smoke in this run.
+**Proof no models were run:** all 00.6D/00.6D.1 tests are offline fixtures; no
+Ollama calls; no live-plumbing smoke in the control amendment.
 
 ## 10. Files changed
 
@@ -116,6 +118,8 @@ calls; no live-plumbing smoke in this run.
 
 ## 13. Ready for independent adversarial review?
 
-**Yes — for RUN 00.6D scope** (contracts, verifier, fixtures, offline tests).
+**Yes — for RUN 00.6D + 00.6D.1** (contracts + C1 construction integrity).
+
+See `RUN_00_6D_1_C1_INTEGRITY_AMENDMENT.md`.
 
 M0 remains `NO-GO`. Continuity scorer repair still pending.

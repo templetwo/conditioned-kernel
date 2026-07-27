@@ -82,13 +82,21 @@ def test_equality_measured_after_final_serialization():
 
 def test_one_byte_drift_fails_verification():
     c3, c1, _ = build_matched_c3_c1_pair(_ann(), _rt())
-    # Force one-byte shorter right by rebuilding without full pad
-    short = compile_condition_packet(
-        ConditionId.C1_BUDGET_MATCHED_BARE,
-        _ann(),
-        _rt(),
-        target_complete_bytes=c3.byte_count - 1,
-    )
+    # One-byte shorter target: either construction fails closed, or pair verify fails
+    try:
+        short = compile_condition_packet(
+            ConditionId.C1_BUDGET_MATCHED_BARE,
+            _ann(),
+            _rt(),
+            target_complete_bytes=c3.byte_count - 1,
+        )
+    except PacketCompileError as e:
+        assert e.reason_code in (
+            "C1_TARGET_UNREACHABLE",
+            "C1_BYTE_MATCH_FAILED",
+            "BYTE_BUDGET_OVERFLOW",
+        )
+        return
     rec = verify_control_pair(
         c3,
         short,
@@ -109,14 +117,14 @@ def test_task_fact_mismatch_fails():
             f["value"] = f["value"] + " EXTRA_HELPFUL_FACT"
             break
     bad = TaskDependencyAnnotation.from_dict(data)
-    # No byte target: fact mismatch is the signal under test
-    c1_bad = compile_condition_packet(
-        ConditionId.C1_BUDGET_MATCHED_BARE,
+    # Use C2 (no C1 target required) so the signal under test is fact mismatch
+    c2_bad = compile_condition_packet(
+        ConditionId.C2_INSTRUCTION_IDENTICAL,
         bad,
         _rt(),
     )
     rec = verify_control_pair(
-        c3, c1_bad, require_byte_equality=False, require_instruction_identity=True
+        c3, c2_bad, require_byte_equality=False, require_instruction_identity=True
     )
     assert rec.verdict is ControlVerdict.FAIL
     assert "TASK_FACT_MISMATCH" in rec.prohibited_mismatches
@@ -348,12 +356,12 @@ def test_c0_c1_c2_c3_contrasts_documented():
 
 def test_failed_verifier_marks_headline_ineligible():
     c3, c1, _ = build_matched_c3_c1_pair(_ann(), _rt())
-    short = compile_condition_packet(
-        ConditionId.C1_BUDGET_MATCHED_BARE, _ann(), _rt(),
-        target_complete_bytes=c3.byte_count - 1,
+    # Model-tag mismatch is a reliable prohibited failure without C1 pad issues
+    other = compile_condition_packet(
+        ConditionId.C2_INSTRUCTION_IDENTICAL, _ann(), _rt(model_tag="other:1b")
     )
     rec = verify_control_pair(
-        c3, short, require_byte_equality=True, require_instruction_identity=True
+        c3, other, require_byte_equality=False, require_instruction_identity=True
     )
     assert rec.verdict is ControlVerdict.FAIL
     assert rec.headline_eligible is False
@@ -425,12 +433,11 @@ def test_adv_control_missing_decisive_fact():
     c3 = compile_condition_packet(
         ConditionId.C3_STATIC_CK, _ann(), _rt(), accepted_relations=[]
     )
-    c1 = compile_condition_packet(
-        ConditionId.C1_BUDGET_MATCHED_BARE, ann_missing, _rt(),
-        target_complete_bytes=c3.byte_count,
+    c2 = compile_condition_packet(
+        ConditionId.C2_INSTRUCTION_IDENTICAL, ann_missing, _rt(),
     )
     rec = verify_control_pair(
-        c3, c1, require_byte_equality=False, require_instruction_identity=True
+        c3, c2, require_byte_equality=False, require_instruction_identity=True
     )
     assert rec.verdict is ControlVerdict.FAIL
     assert "TASK_FACT_MISMATCH" in rec.prohibited_mismatches
@@ -449,11 +456,11 @@ def test_adv_control_extra_helpful_fact():
     c3 = compile_condition_packet(
         ConditionId.C3_STATIC_CK, _ann(), _rt(), accepted_relations=[]
     )
-    c1 = compile_condition_packet(
-        ConditionId.C1_BUDGET_MATCHED_BARE, ann_extra, _rt(),
+    c2 = compile_condition_packet(
+        ConditionId.C2_INSTRUCTION_IDENTICAL, ann_extra, _rt(),
     )
     rec = verify_control_pair(
-        c3, c1, require_byte_equality=False, require_instruction_identity=True
+        c3, c2, require_byte_equality=False, require_instruction_identity=True
     )
     assert "TASK_FACT_MISMATCH" in rec.prohibited_mismatches
 

@@ -295,31 +295,6 @@ def _scan_forbidden(body: Mapping[str, Any], ann: TaskDependencyAnnotation) -> N
             )
 
 
-def apply_space_padding(user_content: str, target_user_utf8_len: int) -> tuple[str, int]:
-    """Append deterministic U+0020 padding after PAD_DELIMITER to hit exact byte length.
-
-    Returns (padded_user_content, padding_byte_count).
-    """
-    raw = user_content.encode("utf-8")
-    if len(raw) > target_user_utf8_len:
-        raise PacketCompileError(
-            "BYTE_BUDGET_OVERFLOW",
-            f"content {len(raw)} exceeds target {target_user_utf8_len}",
-        )
-    need = target_user_utf8_len - len(raw)
-    if need == 0:
-        return user_content, 0
-    # Delimiter + spaces must fit exactly in `need` bytes.
-    delim = PAD_DELIMITER.encode("utf-8")
-    if need < len(delim):
-        # Pad with pure spaces only when delimiter cannot fit.
-        return user_content + (" " * need), need
-    spaces = need - len(delim)
-    padded = user_content + PAD_DELIMITER + (" " * spaces)
-    assert len(padded.encode("utf-8")) == target_user_utf8_len
-    return padded, need
-
-
 def build_serialized_model_input(
     *,
     condition: ConditionId,
@@ -365,9 +340,17 @@ class CompiledPacket:
     packet_contract_version: str = PACKET_CONTRACT_VERSION
     task_dep_version: str = TASK_DEP_ANNOTATION_VERSION
     padding_mechanism_version: str = PADDING_MECHANISM_VERSION
+    # C1-only integrity fields (must be verified before a C1 object is returned)
+    target_complete_bytes: int | None = None
+    byte_match_verified: bool = False
+    paired_condition: str | None = None
 
     @property
     def byte_count(self) -> int:
+        return len(self.complete_bytes)
+
+    @property
+    def actual_complete_bytes(self) -> int:
         return len(self.complete_bytes)
 
     @property
@@ -375,22 +358,51 @@ class CompiledPacket:
         return sha256_hex(self.complete_bytes)
 
     def to_receipt_dict(self) -> dict[str, Any]:
-        return {
+        d: dict[str, Any] = {
             "condition_id": self.condition_id.value,
             "task_id": self.task_id,
             "byte_count": self.byte_count,
+            "actual_complete_bytes": self.actual_complete_bytes,
             "input_sha256": self.input_sha256,
             "system_sha256": sha256_hex(self.system_text.encode("utf-8")),
             "user_sha256": sha256_hex(self.user_content.encode("utf-8")),
             "instruction_block_hash": instruction_block_hash(self.system_text),
             "output_schema_hash": sha256_hex(canonical_json_bytes(self.schema)),
             "padding_bytes": self.padding_bytes,
+            "padding_bytes_n": self.padding_bytes,
             "padding_mechanism_version": self.padding_mechanism_version,
             "packet_contract_version": self.packet_contract_version,
             "task_dep_version": self.task_dep_version,
             "runtime": self.runtime.to_dict(),
             "scientific_completion": False,
+            "headline_eligible": False,
+            "byte_match_verified": self.byte_match_verified,
+            "target_complete_bytes": self.target_complete_bytes,
+            "paired_condition": self.paired_condition,
         }
+        return d
+
+
+def _require_c1_target(target_complete_bytes: Any) -> int:
+    """C1 must receive an explicit positive int target (complete-request UTF-8 length)."""
+    if target_complete_bytes is None:
+        raise PacketCompileError(
+            "C1_TARGET_REQUIRED",
+            "C1_budget_matched_bare requires target_complete_bytes "
+            "(finalized C3 complete-request UTF-8 length)",
+        )
+    # bool is a subclass of int — reject it
+    if isinstance(target_complete_bytes, bool) or not isinstance(target_complete_bytes, int):
+        raise PacketCompileError(
+            "C1_TARGET_INVALID",
+            f"target_complete_bytes must be a positive int, got {type(target_complete_bytes).__name__}",
+        )
+    if target_complete_bytes <= 0:
+        raise PacketCompileError(
+            "C1_TARGET_INVALID",
+            f"target_complete_bytes must be > 0, got {target_complete_bytes}",
+        )
+    return target_complete_bytes
 
 
 def compile_condition_packet(
@@ -402,7 +414,11 @@ def compile_condition_packet(
     target_complete_bytes: int | None = None,
     bare_prompt: str | None = None,
 ) -> CompiledPacket:
-    """Compile one condition's model-visible input. Fail closed on sufficiency."""
+    """Compile one condition's model-visible input. Fail closed on sufficiency.
+
+    C1_budget_matched_bare REQUIRES target_complete_bytes (paired C3 complete
+    request UTF-8 length). No unverified C1 object is ever returned.
+    """
     validate_annotation(ann)
 
     if condition is ConditionId.C0_BARE:
@@ -431,28 +447,13 @@ def compile_condition_packet(
             body=body,
             complete_bytes=complete,
             task_dep_version=ann.version,
+            byte_match_verified=False,
         )
 
-    include_state = condition is ConditionId.C3_STATIC_CK
-    body = _content_body(
-        condition=condition,
-        ann=ann,
-        accepted_relations=accepted_relations,
-        include_reconstructed_state=include_state,
-    )
-    _scan_forbidden(body, ann)
-
-    # Shared instructions for C1/C2/C3
-    system_text = SHARED_SYSTEM_INSTRUCTIONS
-    # Canonical body serialization (representation region)
-    representation = canonical_json_bytes(body).decode("utf-8")
-    user_content = "Packet:\n" + representation
-    padding_bytes = 0
-
-    if condition is ConditionId.C1_BUDGET_MATCHED_BARE and target_complete_bytes is not None:
-        # Iteratively pad user content until complete request hits target.
-        # C1 user content is flat serialization of the same body without
-        # accepted_relations (structure contrast lives in C3 only).
+    # --- C1: mandatory target + construction-time verification ---
+    if condition is ConditionId.C1_BUDGET_MATCHED_BARE:
+        target = _require_c1_target(target_complete_bytes)
+        system_text = SHARED_SYSTEM_INSTRUCTIONS
         flat_body = _content_body(
             condition=condition,
             ann=ann,
@@ -462,8 +463,6 @@ def compile_condition_packet(
         _scan_forbidden(flat_body, ann)
         representation = canonical_json_bytes(flat_body).decode("utf-8")
         user_content = "Packet:\n" + representation
-        body = flat_body
-        # Binary search / linear expand padding to hit exact complete byte length.
         base = build_serialized_model_input(
             condition=condition,
             system_text=system_text,
@@ -471,20 +470,70 @@ def compile_condition_packet(
             runtime=runtime,
             schema=OUTPUT_SCHEMA,
         )
-        if len(base) > target_complete_bytes:
+        if len(base) > target:
             raise PacketCompileError(
-                "BYTE_BUDGET_OVERFLOW",
-                f"C1 base {len(base)} > target {target_complete_bytes}",
+                "C1_TARGET_UNREACHABLE",
+                f"C1 unpadded complete length {len(base)} > target {target}",
             )
-        # Adding N bytes to user content does not always add N to complete JSON
-        # (escaping). Search for padding count that yields exact total.
-        user_content, padding_bytes = _pad_user_to_complete_target(
+        try:
+            user_content, padding_bytes = _pad_user_to_complete_target(
+                system_text=system_text,
+                user_content=user_content,
+                runtime=runtime,
+                condition=condition,
+                target=target,
+            )
+        except PacketCompileError as e:
+            # Normalize pad-search failure for C1 callers
+            if e.reason_code in ("BYTE_MATCH_UNACHIEVABLE", "BYTE_BUDGET_OVERFLOW"):
+                raise PacketCompileError(
+                    "C1_TARGET_UNREACHABLE",
+                    str(e),
+                ) from e
+            raise
+        complete = build_serialized_model_input(
+            condition=condition,
             system_text=system_text,
             user_content=user_content,
             runtime=runtime,
-            condition=condition,
-            target=target_complete_bytes,
+            schema=OUTPUT_SCHEMA,
         )
+        # Construction-time verification (not deferred to pair builder)
+        if len(complete) != target:
+            raise PacketCompileError(
+                "C1_BYTE_MATCH_FAILED",
+                f"final C1 complete length {len(complete)} != target {target}",
+            )
+        return CompiledPacket(
+            condition_id=condition,
+            task_id=ann.task_id,
+            system_text=system_text,
+            user_content=user_content,
+            padding_bytes=padding_bytes,
+            schema=dict(OUTPUT_SCHEMA),
+            runtime=runtime,
+            body=flat_body,
+            complete_bytes=complete,
+            task_dep_version=ann.version,
+            target_complete_bytes=target,
+            byte_match_verified=True,
+            paired_condition=ConditionId.C3_STATIC_CK.value,
+        )
+
+    # --- C2 / C3 ---
+    include_state = condition is ConditionId.C3_STATIC_CK
+    body = _content_body(
+        condition=condition,
+        ann=ann,
+        accepted_relations=accepted_relations,
+        include_reconstructed_state=include_state,
+    )
+    _scan_forbidden(body, ann)
+
+    system_text = SHARED_SYSTEM_INSTRUCTIONS
+    representation = canonical_json_bytes(body).decode("utf-8")
+    user_content = "Packet:\n" + representation
+    padding_bytes = 0
 
     complete = build_serialized_model_input(
         condition=condition,
@@ -504,6 +553,7 @@ def compile_condition_packet(
         body=body,
         complete_bytes=complete,
         task_dep_version=ann.version,
+        byte_match_verified=False,
     )
 
 
@@ -552,7 +602,7 @@ def _pad_user_to_complete_target(
         else:
             hi = mid - 1
     raise PacketCompileError(
-        "BYTE_MATCH_UNACHIEVABLE",
+        "C1_TARGET_UNREACHABLE",
         f"could not hit exact target {target} (best={best})",
     )
 
@@ -795,15 +845,23 @@ def build_matched_c3_c1_pair(
         runtime,
         accepted_relations=accepted_relations,
     )
+    # C1 construction independently verifies len(complete)==target
     c1 = compile_condition_packet(
         ConditionId.C1_BUDGET_MATCHED_BARE,
         ann,
         runtime,
         target_complete_bytes=c3.byte_count,
     )
+    if not c1.byte_match_verified or c1.actual_complete_bytes != c3.byte_count:
+        raise PacketCompileError(
+            "C1_BYTE_MATCH_FAILED",
+            "pair builder defense-in-depth: C1 not verified against C3 length",
+        )
     # Padding leak scan on C1 padding region
     base_user = "Packet:\n" + canonical_json_bytes(c1.body).decode("utf-8")
-    pad_region = c1.user_content[len(base_user) :] if c1.user_content.startswith(base_user) else ""
+    pad_region = (
+        c1.user_content[len(base_user) :] if c1.user_content.startswith(base_user) else ""
+    )
     ids = [f.field_id for f in ann.fields] + [f.value for f in ann.fields]
     rels = ["remains_open", "is_answered", "depends_on", "blocked_by", "references"]
     forbidden = [f.value for f in ann.classified(FieldClass.FORBIDDEN_ANSWER_LEAKAGE)]
@@ -813,7 +871,13 @@ def build_matched_c3_c1_pair(
         relation_names=rels,
         identifiers=ids,
     )
+    # Independent pair-level verification (defense in depth)
     receipt = verify_c3_vs_c1(c3, c1, repo_commit=repo_commit)
+    if receipt.verdict is not ControlVerdict.PASS:
+        raise PacketCompileError(
+            CONTROL_CONTRACT_FAILED,
+            f"pair builder verify failed: {receipt.reason_codes}",
+        )
     return c3, c1, receipt
 
 
