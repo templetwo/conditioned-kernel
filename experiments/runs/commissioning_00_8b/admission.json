@@ -1,0 +1,146 @@
+{
+  "admission_report_sha256": "61bbfddafb8fd0f0cf82ce8a88d95cad35ca4dfaf1ae5d6ba1585176d9596d5b",
+  "authorization_reasons": [
+    "MISSING_AUTHORIZATION_RECEIPT",
+    "MANIFEST_HASH_MISMATCH"
+  ],
+  "authorization_status": "unratified",
+  "conditions": {
+    "C0_bare": 1,
+    "C1_budget_matched_bare": 1,
+    "C2_instruction_identical": 1,
+    "C3_static_ck": 1
+  },
+  "control_contract_failures": 0,
+  "duplicate_terminal_record_n": 0,
+  "execution_scope": "commissioning_validation",
+  "failure_counts_by_classification": {
+    "CONTROL_CONTRACT_FAILED": 0,
+    "INTERNAL_EXECUTION_ERROR": 0,
+    "INVALID_RESPONSE": 0,
+    "MALFORMED_ASSERTIONS": 1,
+    "NO_FINAL_RESPONSE": 0,
+    "PACKET_CONTRACT_FAILED": 0,
+    "PROVENANCE_INCOMPLETE": 0,
+    "RUNTIME_PROVENANCE_FAILURE": 0,
+    "SCORED": 3,
+    "SCORER_INTERNAL_ERROR": 0,
+    "TASK_CONTRACT_ERROR": 0,
+    "TIMEOUT": 0,
+    "TRANSPORT_ERROR": 0,
+    "UPSTREAM_STATE_UNAVAILABLE": 0
+  },
+  "headline_eligible": false,
+  "headline_ineligible_reasons": [
+    "MISSING_AUTHORIZATION_RECEIPT",
+    "MANIFEST_HASH_MISMATCH"
+  ],
+  "invalid_primary_pair_reasons": [],
+  "ledger_integrity_ok": true,
+  "m0_authorized": false,
+  "manifest_hash_claimed": "c0d2b3975dd1647ac6685491ce4e2ea5eae84d447962f1592b222fe175373ec1",
+  "manifest_hash_computed": "a38a4ae5c0005522e8a10538fcdb5a963defe3ae43773e3b43e3b3c4efe100b0",
+  "manifest_id": "ck.run.00.8b.ollama.v1",
+  "manifest_integrity_ok": false,
+  "manifest_integrity_reasons": [
+    "MANIFEST_HASH_MISMATCH"
+  ],
+  "manifest_sha256": "c0d2b3975dd1647ac6685491ce4e2ea5eae84d447962f1592b222fe175373ec1",
+  "missing_terminal_record_n": 0,
+  "observed_score_coverage": 0.75,
+  "partial_descriptive_summaries": {
+    "invalid_pairs": [],
+    "note": "descriptive only; not a complete-case primary headline",
+    "valid_pairs": [
+      {
+        "c1_cell_id": "ccce0f29d4efb2e464b6f6cb197ee191f46cc58a78bab26d6e0ed286fa5655bb",
+        "c1_score": 0.0,
+        "c3_cell_id": "05ef4eca5e621b0eda232bb458991527d3b0e9f3e300cd2b0177d5400cbf879f",
+        "c3_score": 1.0,
+        "task_id": "live_plumbing_01_m0_v1"
+      }
+    ]
+  },
+  "per_condition_classification_counts": {
+    "C0_bare": {
+      "CONTROL_CONTRACT_FAILED": 0,
+      "INTERNAL_EXECUTION_ERROR": 0,
+      "INVALID_RESPONSE": 0,
+      "MALFORMED_ASSERTIONS": 1,
+      "NO_FINAL_RESPONSE": 0,
+      "PACKET_CONTRACT_FAILED": 0,
+      "PROVENANCE_INCOMPLETE": 0,
+      "RUNTIME_PROVENANCE_FAILURE": 0,
+      "SCORED": 0,
+      "SCORER_INTERNAL_ERROR": 0,
+      "TASK_CONTRACT_ERROR": 0,
+      "TIMEOUT": 0,
+      "TRANSPORT_ERROR": 0,
+      "UPSTREAM_STATE_UNAVAILABLE": 0
+    },
+    "C1_budget_matched_bare": {
+      "CONTROL_CONTRACT_FAILED": 0,
+      "INTERNAL_EXECUTION_ERROR": 0,
+      "INVALID_RESPONSE": 0,
+      "MALFORMED_ASSERTIONS": 0,
+      "NO_FINAL_RESPONSE": 0,
+      "PACKET_CONTRACT_FAILED": 0,
+      "PROVENANCE_INCOMPLETE": 0,
+      "RUNTIME_PROVENANCE_FAILURE": 0,
+      "SCORED": 1,
+      "SCORER_INTERNAL_ERROR": 0,
+      "TASK_CONTRACT_ERROR": 0,
+      "TIMEOUT": 0,
+      "TRANSPORT_ERROR": 0,
+      "UPSTREAM_STATE_UNAVAILABLE": 0
+    },
+    "C2_instruction_identical": {
+      "CONTROL_CONTRACT_FAILED": 0,
+      "INTERNAL_EXECUTION_ERROR": 0,
+      "INVALID_RESPONSE": 0,
+      "MALFORMED_ASSERTIONS": 0,
+      "NO_FINAL_RESPONSE": 0,
+      "PACKET_CONTRACT_FAILED": 0,
+      "PROVENANCE_INCOMPLETE": 0,
+      "RUNTIME_PROVENANCE_FAILURE": 0,
+      "SCORED": 1,
+      "SCORER_INTERNAL_ERROR": 0,
+      "TASK_CONTRACT_ERROR": 0,
+      "TIMEOUT": 0,
+      "TRANSPORT_ERROR": 0,
+      "UPSTREAM_STATE_UNAVAILABLE": 0
+    },
+    "C3_static_ck": {
+      "CONTROL_CONTRACT_FAILED": 0,
+      "INTERNAL_EXECUTION_ERROR": 0,
+      "INVALID_RESPONSE": 0,
+      "MALFORMED_ASSERTIONS": 0,
+      "NO_FINAL_RESPONSE": 0,
+      "PACKET_CONTRACT_FAILED": 0,
+      "PROVENANCE_INCOMPLETE": 0,
+      "RUNTIME_PROVENANCE_FAILURE": 0,
+      "SCORED": 1,
+      "SCORER_INTERNAL_ERROR": 0,
+      "TASK_CONTRACT_ERROR": 0,
+      "TIMEOUT": 0,
+      "TRANSPORT_ERROR": 0,
+      "UPSTREAM_STATE_UNAVAILABLE": 0
+    }
+  },
+  "planned_cells_n": 4,
+  "planned_primary_pairs_n": 1,
+  "primary_headline": null,
+  "primary_headline_eligible": false,
+  "primary_headline_structurally_ready": false,
+  "primary_pair_coverage": 1.0,
+  "provenance_failures": 0,
+  "schema_version": "ck.m0_admission_report.v1",
+  "scientific_completion": false,
+  "scientific_status": "commissioning_safety_only",
+  "scored_cells_n": 3,
+  "task_contract_failures": 0,
+  "terminal_cells_n": 4,
+  "terminalization_coverage": 1.0,
+  "unplanned_terminal_record_n": 0,
+  "valid_primary_pairs_n": 1
+}

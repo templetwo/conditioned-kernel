@@ -43,3 +43,9 @@ logs/*.jsonl
 !experiments/runs/ladder_*/
 !experiments/runs/continuity_*/
 !experiments/runs/plaingen_*/
+# RUN 00.8B: same lesson, second occurrence. The commissioning run dir holds the
+# ONLY evidence for the first real-model execution (packets, raw responses,
+# receipts, ledger, request/response hashes). RUN_00_8B_TERMINAL_REPORT.md cites
+# those hashes, so without this line the CLAIM reaches the public repo and the
+# EVIDENCE does not — exactly the failure described above.
+!experiments/runs/commissioning_*/

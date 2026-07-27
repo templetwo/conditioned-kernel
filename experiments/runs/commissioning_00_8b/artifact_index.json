@@ -1,0 +1,30 @@
+{
+  "05ef4eca5e621b0eda232bb458991527d3b0e9f3e300cd2b0177d5400cbf879f": {
+    "condition_id": "C3_static_ck",
+    "primary_score": 1.0,
+    "request_sha256": "3b7d28c7e1673acfa4c95a2f66018852cd97f41093b88cffeefb4017bc9ca5f1",
+    "response_sha256": "d330858dc9625c192f268525f2745c53e9cbb71a614318f395acd935099508b5",
+    "terminal_classification": "SCORED"
+  },
+  "4d5cb21cb2d63d2cd7780d8ac2639c80f8be098e4c120a1d3b3784290bfba420": {
+    "condition_id": "C2_instruction_identical",
+    "primary_score": 0.0,
+    "request_sha256": "0cb9d7b9e66a706523d95c93c3eeb25a98d93d9187aceac7751d528ccfedf4d2",
+    "response_sha256": "235d134e5288586d8d1436d9dcecd8cf1634ae50893465834e34b4dd7a5248d7",
+    "terminal_classification": "SCORED"
+  },
+  "582407aaa64ea3c0d88f91ba1bfb340cffed1374510777e709161b5159f42349": {
+    "condition_id": "C0_bare",
+    "primary_score": null,
+    "request_sha256": "2b9562a149612736a2d8497b25cf9119f82b3fce05930a91a2235582bc55c4c3",
+    "response_sha256": "3ed7cf4e1c21a161e77fa2ca08461e326ab209780aca0dfc8fe61d56c2ce6053",
+    "terminal_classification": "MALFORMED_ASSERTIONS"
+  },
+  "ccce0f29d4efb2e464b6f6cb197ee191f46cc58a78bab26d6e0ed286fa5655bb": {
+    "condition_id": "C1_budget_matched_bare",
+    "primary_score": 0.0,
+    "request_sha256": "c8d06add326b2f7d9276230776ec8e5741482b31d7358fbd7966c291a00e5ac7",
+    "response_sha256": "e0e868bb2f6dbab7d1ff1fe0cad0103d9a8c1d15f7a25e3057df2f7c34bdc43e",
+    "terminal_classification": "SCORED"
+  }
+}

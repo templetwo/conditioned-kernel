@@ -1,0 +1,15 @@
+{
+  "assertions": null,
+  "headline_eligible": false,
+  "inference_status": "completed",
+  "malformed": true,
+  "parse_kind": "WRONG_SCHEMA_KEY",
+  "raw_response_byte_length": 128,
+  "raw_response_sha256": "3ed7cf4e1c21a161e77fa2ca08461e326ab209780aca0dfc8fe61d56c2ce6053",
+  "response_channel_status": "text",
+  "schema_version": "ck.response_scoring_adapter.v1",
+  "scientific_completion": false,
+  "scientific_status": "commissioning_safety_only",
+  "scorer_schema_version": "ck.relational_score.v1",
+  "terminal_classification": "MALFORMED_ASSERTIONS"
+}

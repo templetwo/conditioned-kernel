@@ -1,0 +1,15 @@
+{
+  "cell_id": "4d5cb21cb2d63d2cd7780d8ac2639c80f8be098e4c120a1d3b3784290bfba420",
+  "complete_byte_length": 2047,
+  "condition_id": "C2_instruction_identical",
+  "headline_eligible": false,
+  "packet_contract_version": "ck.packet_contract.v1",
+  "reason_codes": [],
+  "receipt_sha256": "c52346a14ed5a8cbc7c19b86a46d49899b4ab13e31b3b6172b532ad8fc7c069e",
+  "request_sha256": "0cb9d7b9e66a706523d95c93c3eeb25a98d93d9187aceac7751d528ccfedf4d2",
+  "schema_version": "ck.packet_receipt.v1",
+  "scientific_completion": false,
+  "scientific_status": "control_verification_only",
+  "task_id": "live_plumbing_01_m0_v1",
+  "verdict": "PASS"
+}

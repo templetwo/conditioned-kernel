@@ -1,0 +1,20 @@
+{
+  "cell_id": "582407aaa64ea3c0d88f91ba1bfb340cffed1374510777e709161b5159f42349",
+  "condition_id": "C0_bare",
+  "efficacy_claim_permitted": false,
+  "execution_scope": "commissioning_validation",
+  "headline_eligible": false,
+  "m0_authorized": false,
+  "model_tag": "qwen2.5:0.5b",
+  "request_sha256": "2b9562a149612736a2d8497b25cf9119f82b3fce05930a91a2235582bc55c4c3",
+  "requested_options": {
+    "num_ctx": 2048,
+    "seed": 0,
+    "temperature": 0.0
+  },
+  "resolved_model_digest": "a8b0c51577010a279d933d14c2a8ab4b268079d44c5c8830c0a93900f1827c67",
+  "scientific_completion": false,
+  "scientific_status": "commissioning_instrument_test_only",
+  "task_id": "live_plumbing_01_m0_v1",
+  "timestamp": "2026-07-27T19:50:28+00:00"
+}

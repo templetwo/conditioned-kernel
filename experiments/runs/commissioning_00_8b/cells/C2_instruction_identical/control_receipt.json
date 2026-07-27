@@ -1,0 +1,16 @@
+{
+  "byte_match": true,
+  "cell_id": "4d5cb21cb2d63d2cd7780d8ac2639c80f8be098e4c120a1d3b3784290bfba420",
+  "condition_id": "C2_instruction_identical",
+  "headline_eligible": false,
+  "left_hash": null,
+  "paired_cell_id": null,
+  "reason_codes": [],
+  "receipt_sha256": "cd64703e4d0509d26887370260c8e053a0e217f60231f65ac7756a77bc9bbd7a",
+  "right_hash": null,
+  "schema_version": "ck.control_receipt.v1",
+  "scientific_completion": false,
+  "scientific_status": "control_verification_only",
+  "task_id": "live_plumbing_01_m0_v1",
+  "verdict": "PASS"
+}

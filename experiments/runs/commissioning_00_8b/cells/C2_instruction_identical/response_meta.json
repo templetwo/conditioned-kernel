@@ -1,0 +1,18 @@
+{
+  "duration_wall_s": 0.848,
+  "efficacy_claim_permitted": false,
+  "elapsed_seconds": 0.8479787499818485,
+  "ended_at": "2026-07-27T19:50:30+00:00",
+  "error": null,
+  "execution_scope": "commissioning_validation",
+  "final_response_chars": 290,
+  "headline_eligible": false,
+  "inference_status": "completed",
+  "m0_authorized": false,
+  "raw_response_byte_length": 290,
+  "raw_response_sha256": "235d134e5288586d8d1436d9dcecd8cf1634ae50893465834e34b4dd7a5248d7",
+  "scientific_completion": false,
+  "scientific_status": "commissioning_instrument_test_only",
+  "started_at": "2026-07-27T19:50:30+00:00",
+  "thinking_chars": 0
+}

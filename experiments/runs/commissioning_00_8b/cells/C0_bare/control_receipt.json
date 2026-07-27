@@ -1,0 +1,18 @@
+{
+  "byte_match": true,
+  "cell_id": "582407aaa64ea3c0d88f91ba1bfb340cffed1374510777e709161b5159f42349",
+  "condition_id": "C0_bare",
+  "headline_eligible": false,
+  "left_hash": null,
+  "paired_cell_id": null,
+  "reason_codes": [
+    "C0_NO_PRIMARY_PAIR_CONTROL"
+  ],
+  "receipt_sha256": "7ab7f5ff5c0a44a3c799352661584bc9cb3d08686b4f9bb65f668f046f13bbf8",
+  "right_hash": null,
+  "schema_version": "ck.control_receipt.v1",
+  "scientific_completion": false,
+  "scientific_status": "control_verification_only",
+  "task_id": "live_plumbing_01_m0_v1",
+  "verdict": "PASS"
+}

@@ -1,0 +1,83 @@
+{
+  "condition_pair": [
+    "C3_static_ck",
+    "C2_instruction_identical"
+  ],
+  "headline_eligible": false,
+  "intended_differences": [
+    "C3 has reconstructed state; C2 does not"
+  ],
+  "left": {
+    "actual_complete_bytes": 2290,
+    "byte_count": 2290,
+    "byte_match_verified": false,
+    "condition_id": "C3_static_ck",
+    "headline_eligible": false,
+    "input_sha256": "3b7d28c7e1673acfa4c95a2f66018852cd97f41093b88cffeefb4017bc9ca5f1",
+    "instruction_block_hash": "40b6c095692815ea40b65c6fa082b3535809ee5440658330b7db63b111f8c748",
+    "output_schema_hash": "351890f0c7ce23a77aa87eb217678d6a65e8c6f66bcea3a1776e48e9a039d001",
+    "packet_contract_version": "ck.packet_contract.v1",
+    "padding_bytes": 0,
+    "padding_bytes_n": 0,
+    "padding_mechanism_version": "ck.padding.spaces_v1",
+    "paired_condition": null,
+    "runtime": {
+      "endpoint": "http://127.0.0.1:11434",
+      "model_tag": "qwen2.5:0.5b",
+      "num_ctx": 2048,
+      "runtime_version": null,
+      "seed": 0,
+      "temperature": 0.0
+    },
+    "scientific_completion": false,
+    "system_sha256": "40b6c095692815ea40b65c6fa082b3535809ee5440658330b7db63b111f8c748",
+    "target_complete_bytes": null,
+    "task_dep_version": "ck.task_dep.v1",
+    "task_id": "live_plumbing_01_m0_v1",
+    "user_sha256": "430578197978f27c73c0d5d6246c47ecd6b2c4b69fc669e2b537e086a875d2c4"
+  },
+  "packet_contract_version": "ck.packet_contract.v1",
+  "permitted_padding": {
+    "left_padding_bytes": 0,
+    "mechanism": "ck.padding.spaces_v1",
+    "right_padding_bytes": 0
+  },
+  "prohibited_mismatches": [],
+  "reason_codes": [],
+  "repo_commit": "117c2119554fc2cb3163e8fbcaf7ebb7c97b7d49",
+  "right": {
+    "actual_complete_bytes": 2047,
+    "byte_count": 2047,
+    "byte_match_verified": false,
+    "condition_id": "C2_instruction_identical",
+    "headline_eligible": false,
+    "input_sha256": "0cb9d7b9e66a706523d95c93c3eeb25a98d93d9187aceac7751d528ccfedf4d2",
+    "instruction_block_hash": "40b6c095692815ea40b65c6fa082b3535809ee5440658330b7db63b111f8c748",
+    "output_schema_hash": "351890f0c7ce23a77aa87eb217678d6a65e8c6f66bcea3a1776e48e9a039d001",
+    "packet_contract_version": "ck.packet_contract.v1",
+    "padding_bytes": 0,
+    "padding_bytes_n": 0,
+    "padding_mechanism_version": "ck.padding.spaces_v1",
+    "paired_condition": null,
+    "runtime": {
+      "endpoint": "http://127.0.0.1:11434",
+      "model_tag": "qwen2.5:0.5b",
+      "num_ctx": 2048,
+      "runtime_version": null,
+      "seed": 0,
+      "temperature": 0.0
+    },
+    "scientific_completion": false,
+    "system_sha256": "40b6c095692815ea40b65c6fa082b3535809ee5440658330b7db63b111f8c748",
+    "target_complete_bytes": null,
+    "task_dep_version": "ck.task_dep.v1",
+    "task_id": "live_plumbing_01_m0_v1",
+    "user_sha256": "f32cf48673f969508c93944a96ac69dc847e3ac5cbab1b3b0f559ae54700ec3d"
+  },
+  "scientific_completion": false,
+  "scientific_status": "control_verification_only",
+  "task_dep_version": "ck.task_dep.v1",
+  "task_id": "live_plumbing_01_m0_v1",
+  "verdict": "PASS",
+  "verifier_version": "ck.control_verifier.v1"
+}

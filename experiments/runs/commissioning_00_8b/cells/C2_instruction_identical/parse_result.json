@@ -1,0 +1,26 @@
+{
+  "assertions": [
+    {
+      "object_id": "Local conditioned kernel continuity assertion",
+      "relation": "local_conditioned_kernel",
+      "subject_id": "thread_gamma_receipt"
+    },
+    {
+      "object_id": "Local conditioned kernel continuity assertion",
+      "relation": "local_conditioned_kernel",
+      "subject_id": "Deliverable"
+    }
+  ],
+  "headline_eligible": false,
+  "inference_status": "completed",
+  "malformed": false,
+  "parse_kind": "STRUCTURED_ASSERTIONS",
+  "raw_response_byte_length": 290,
+  "raw_response_sha256": "235d134e5288586d8d1436d9dcecd8cf1634ae50893465834e34b4dd7a5248d7",
+  "response_channel_status": "text",
+  "schema_version": "ck.response_scoring_adapter.v1",
+  "scientific_completion": false,
+  "scientific_status": "commissioning_safety_only",
+  "scorer_schema_version": "ck.relational_score.v1",
+  "terminal_classification": "SCORED"
+}

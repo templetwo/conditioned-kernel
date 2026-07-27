@@ -1,0 +1,63 @@
+{
+  "accepted_relations": [
+    {
+      "object_id": "question_cold_start",
+      "relation": "references",
+      "subject_id": "thread_gamma_receipt"
+    },
+    {
+      "object_id": "question_cold_start",
+      "relation": "remains_open",
+      "subject_id": "thread_gamma_receipt"
+    }
+  ],
+  "optional_support": [
+    "optional_note=Edge target is jetson_orin_nano_8gb. Pre-run task-contract correction RUN 00.6F.1."
+  ],
+  "output_schema": {
+    "properties": {
+      "continuity_assertions": {
+        "items": {
+          "properties": {
+            "object_id": {
+              "type": "string"
+            },
+            "relation": {
+              "type": "string"
+            },
+            "subject_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "subject_id",
+            "relation",
+            "object_id"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "continuity_assertions"
+    ],
+    "type": "object"
+  },
+  "packet_contract_version": "ck.packet_contract.v1",
+  "required_operational_state": [
+    "expected_relation_semantics=all_required",
+    "object_universe=question_cold_start",
+    "objective=Return every supported continuity assertion from the permitted closed universe for thread_gamma_receipt about question_cold_start.",
+    "output_schema_id=continuity_assertions_v1",
+    "relation_universe=remains_open|references",
+    "subject_universe=thread_gamma_receipt"
+  ],
+  "required_task_facts": [
+    "fact_deliverable=Deliverable is the continuity cold-start receipt on Orin.",
+    "fact_local=This system is fully local."
+  ],
+  "task_dep_version": "ck.task_dep.v1",
+  "task_id": "live_plumbing_01_m0_v1",
+  "unknown_behavior": "If no valid closed-set assertion can be formed, return {\"continuity_assertions\":[]} which will be rejected as incomplete."
+}

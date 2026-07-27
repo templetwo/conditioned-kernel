@@ -1,0 +1,1 @@
+{ "fact_deliverable": "Deliverable is the continuity cold-start receipt on Orin.", "fact_local": "This system is fully local." }

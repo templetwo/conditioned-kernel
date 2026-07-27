@@ -1,0 +1,71 @@
+{
+  "authorization_receipt_present": false,
+  "commissioning_plan_id": "ck.run.00.8b.ollama.v1",
+  "commissioning_plan_sha256": "c0d2b3975dd1647ac6685491ce4e2ea5eae84d447962f1592b222fe175373ec1",
+  "efficacy_claim_permitted": false,
+  "execution_scope": "commissioning_validation",
+  "headline_eligible": false,
+  "host": {
+    "architecture": "arm64",
+    "os_version": "Darwin Kernel Version 25.5.0: Mon Apr 27 20:41:06 PDT 2026; root:xnu-12377.121.6~2/RELEASE_ARM64_T6030",
+    "platform": "macOS-26.5.1-arm64-arm-64bit",
+    "python": "3.10.12",
+    "release": "25.5.0",
+    "system": "Darwin"
+  },
+  "ledger_path": "experiments/runs/commissioning_00_8b/ledger",
+  "m0_authorized": false,
+  "max_model_invocations": 4,
+  "model": {
+    "details": {
+      "families": [
+        "qwen2"
+      ],
+      "family": "qwen2",
+      "format": "gguf",
+      "parameter_size": "494.03M",
+      "parent_model": "",
+      "quantization_level": "Q4_K_M"
+    },
+    "family": "qwen2",
+    "format": "gguf",
+    "model_tag": "qwen2.5:0.5b",
+    "parameter_size": "494.03M",
+    "quantization": "Q4_K_M",
+    "resolved_model_digest": "a8b0c51577010a279d933d14c2a8ab4b268079d44c5c8830c0a93900f1827c67",
+    "show_details": {
+      "families": [
+        "qwen2"
+      ],
+      "family": "qwen2",
+      "format": "gguf",
+      "parameter_size": "494.03M",
+      "parent_model": "",
+      "quantization_level": "Q4_K_M"
+    },
+    "size_bytes": 397821319
+  },
+  "ollama_base_url": "http://127.0.0.1:11434",
+  "ollama_version": "0.20.7",
+  "option_confirmation_capability": "requested_but_not_confirmable",
+  "planned_cell_count": 4,
+  "reason_codes": [],
+  "repository_head": "117c2119554fc2cb3163e8fbcaf7ebb7c97b7d49",
+  "requested_generation_options": {
+    "num_ctx": 2048,
+    "seed": 0,
+    "temperature": 0.0
+  },
+  "schema_version": "ck.commissioning_preflight.v1",
+  "scientific_completion": false,
+  "scientific_scope_selected": false,
+  "scientific_status": "commissioning_instrument_test_only",
+  "serialized_generation_options": {
+    "num_ctx": 2048,
+    "seed": 0,
+    "temperature": 0.0
+  },
+  "source_candidate_manifest_sha256": "9ec3d37a177b6d403048d8d6441b70a7fcdc6b89a4336c29bcf9ac610d88e922",
+  "timestamp": "2026-07-27T19:50:28+00:00",
+  "verdict": "COMMISSIONING_PREFLIGHT_PASS"
+}

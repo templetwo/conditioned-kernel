@@ -1,0 +1,8 @@
+{
+  "headline_eligible": false,
+  "manifest_sha256": "c0d2b3975dd1647ac6685491ce4e2ea5eae84d447962f1592b222fe175373ec1",
+  "planned_cell_count": 4,
+  "schema_version": "ck.persistent_terminal_ledger.v1",
+  "scientific_completion": false,
+  "scientific_status": "commissioning_safety_only"
+}

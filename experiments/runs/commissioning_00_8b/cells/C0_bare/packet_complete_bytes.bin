@@ -1,0 +1,1 @@
+{"format":{"type":"object"},"messages":[{"content":"Answer the task briefly.","role":"system"},{"content":"Complete the task.\nFacts: fact_deliverable=Deliverable is the continuity cold-start receipt on Orin.; fact_local=This system is fully local.","role":"user"}],"model":"qwen2.5:0.5b","options":{"num_ctx":2048,"seed":0,"temperature":0.0},"stream":false}

@@ -1,0 +1,69 @@
+{
+  "condition_id": "C3_static_ck",
+  "duplicate_assertion_n": 0,
+  "exact_relation_set_match": true,
+  "expected_n": 2,
+  "expected_relation_hash": "94fbcce49ca6e3f4ceea93aab2b4ca705641e4dc596b4c40bc17672964db73b2",
+  "f1": 1.0,
+  "f1_undefined_reason": null,
+  "false_negative_n": 0,
+  "false_negatives": [],
+  "headline_eligible": false,
+  "headline_ineligible_reason": "m0_manifest_and_admission_contract_not_yet_ratified",
+  "inference_status": "completed",
+  "invalid_reason": null,
+  "model_runtime_provenance": {
+    "model_tag": "qwen2.5:0.5b"
+  },
+  "out_of_universe_assertion_n": 0,
+  "precision": 1.0,
+  "precision_undefined_reason": null,
+  "primary_score": 1.0,
+  "primary_score_undefined_reason": null,
+  "proposal_classifications": [
+    {
+      "canonical_triple": {
+        "object_id": "question_cold_start",
+        "relation": "references",
+        "subject_id": "thread_gamma_receipt"
+      },
+      "classification": "TRUE_POSITIVE",
+      "triple": {
+        "object_id": "question_cold_start",
+        "relation": "references",
+        "subject_id": "thread_gamma_receipt"
+      }
+    },
+    {
+      "canonical_triple": {
+        "object_id": "question_cold_start",
+        "relation": "remains_open",
+        "subject_id": "thread_gamma_receipt"
+      },
+      "classification": "TRUE_POSITIVE",
+      "triple": {
+        "object_id": "question_cold_start",
+        "relation": "remains_open",
+        "subject_id": "thread_gamma_receipt"
+      }
+    }
+  ],
+  "proposed_assertion_hash": "94fbcce49ca6e3f4ceea93aab2b4ca705641e4dc596b4c40bc17672964db73b2",
+  "proposed_raw_n": 2,
+  "proposed_unique_n": 2,
+  "proposed_unique_set_hash": "94fbcce49ca6e3f4ceea93aab2b4ca705641e4dc596b4c40bc17672964db73b2",
+  "recall": 1.0,
+  "recall_undefined_reason": null,
+  "repo_commit": "117c2119554fc2cb3163e8fbcaf7ebb7c97b7d49",
+  "reversed_direction_n": 0,
+  "schema_version": "ck.relational_score.v1",
+  "scientific_completion": false,
+  "scientific_status": "scorer_validation_only",
+  "scorer_schema_version": "ck.relational_score.v1",
+  "scoring_status": "SCORED",
+  "task_contract_version": "ck.task_rel.v1",
+  "task_id": "live_plumbing_01_m0_v1",
+  "true_positive_n": 2,
+  "unsupported_assertion_n": 0,
+  "wrong_relation_n": 0
+}

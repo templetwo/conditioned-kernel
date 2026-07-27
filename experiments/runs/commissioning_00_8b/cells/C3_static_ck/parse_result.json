@@ -1,0 +1,26 @@
+{
+  "assertions": [
+    {
+      "object_id": "question_cold_start",
+      "relation": "references",
+      "subject_id": "thread_gamma_receipt"
+    },
+    {
+      "object_id": "question_cold_start",
+      "relation": "remains_open",
+      "subject_id": "thread_gamma_receipt"
+    }
+  ],
+  "headline_eligible": false,
+  "inference_status": "completed",
+  "malformed": false,
+  "parse_kind": "STRUCTURED_ASSERTIONS",
+  "raw_response_byte_length": 303,
+  "raw_response_sha256": "d330858dc9625c192f268525f2745c53e9cbb71a614318f395acd935099508b5",
+  "response_channel_status": "text",
+  "schema_version": "ck.response_scoring_adapter.v1",
+  "scientific_completion": false,
+  "scientific_status": "commissioning_safety_only",
+  "scorer_schema_version": "ck.relational_score.v1",
+  "terminal_classification": "SCORED"
+}

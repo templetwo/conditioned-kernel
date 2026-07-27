@@ -1,0 +1,243 @@
+{
+  "commissioning_plan_id": "ck.run.00.8b.ollama.v1",
+  "commissioning_plan_sha256": "c0d2b3975dd1647ac6685491ce4e2ea5eae84d447962f1592b222fe175373ec1",
+  "condition_set": [
+    "C0_bare",
+    "C1_budget_matched_bare",
+    "C2_instruction_identical",
+    "C3_static_ck"
+  ],
+  "efficacy_claim_permitted": false,
+  "execution_order": [
+    "C0_bare",
+    "C1_budget_matched_bare",
+    "C2_instruction_identical",
+    "C3_static_ck"
+  ],
+  "execution_order_note": "Fixed operational order C0→C1→C2→C3; not scientifically randomized",
+  "execution_scope": "commissioning_validation",
+  "generation_parameters": {
+    "num_ctx": 2048,
+    "seed": 0,
+    "stream": false,
+    "temperature": 0.0
+  },
+  "headline_eligible": false,
+  "included_tasks": [
+    {
+      "annotation_path": "tests/fixtures/m0_task_dep/live_plumbing_01_m0_v1.json",
+      "annotation_sha256": "d9c200bc404a85d3857ed0f6fd9c41d44fc8efe4b9aae9c22f34afca71459dcc",
+      "dependency_annotation_hash": "d9c200bc404a85d3857ed0f6fd9c41d44fc8efe4b9aae9c22f34afca71459dcc",
+      "expected_relation_hash": "94fbcce49ca6e3f4ceea93aab2b4ca705641e4dc596b4c40bc17672964db73b2",
+      "expected_relation_semantics": "all_required",
+      "gold": {
+        "contract_version": "ck.task_rel.v1",
+        "expected_relation_semantics": "all_required",
+        "expected_relations": [
+          {
+            "object_id": "question_cold_start",
+            "relation": "references",
+            "subject_id": "thread_gamma_receipt"
+          },
+          {
+            "object_id": "question_cold_start",
+            "relation": "remains_open",
+            "subject_id": "thread_gamma_receipt"
+          }
+        ],
+        "object_universe": [
+          "question_cold_start"
+        ],
+        "relation_universe": [
+          "remains_open",
+          "references"
+        ],
+        "subject_universe": [
+          "thread_gamma_receipt"
+        ],
+        "symmetric_relations": [],
+        "task_id": "live_plumbing_01_m0_v1"
+      },
+      "output_schema_id": "continuity_assertions_v1",
+      "source_path": "experiments/probes/m0_task_contracts/live_plumbing_01_m0_v1.json",
+      "source_sha256": "f3a3e72e3231172f138e05300aeb35b70757715252983de364d889ce17df799f",
+      "task_contract_hash": "6019ce380ec3172f78db04d78b54a1f38770269671bd1fbcf797cd2b3758096a",
+      "task_id": "live_plumbing_01_m0_v1"
+    }
+  ],
+  "m0_authorized": false,
+  "max_model_invocations": 4,
+  "model_tag": "qwen2.5:0.5b",
+  "planned_cell_count": 4,
+  "planned_cells": [
+    {
+      "cell_id": "582407aaa64ea3c0d88f91ba1bfb340cffed1374510777e709161b5159f42349",
+      "condition_id": "C0_bare",
+      "dependency_annotation_hash": "d9c200bc404a85d3857ed0f6fd9c41d44fc8efe4b9aae9c22f34afca71459dcc",
+      "expected_relation_hash": "94fbcce49ca6e3f4ceea93aab2b4ca705641e4dc596b4c40bc17672964db73b2",
+      "generation_parameters": {
+        "num_ctx": 2048,
+        "seed": 0,
+        "stream": false,
+        "temperature": 0.0
+      },
+      "headline_eligible": false,
+      "identity_payload": {
+        "condition_id": "C0_bare",
+        "manifest_id": "ck.m0.candidate.v1",
+        "model_tag": "qwen2.5:0.5b",
+        "packet_contract_version": "ck.packet_contract.v1",
+        "replicate_id": "0",
+        "scorer_schema_version": "ck.relational_score.v1",
+        "seed": 0,
+        "task_id": "live_plumbing_01_m0_v1"
+      },
+      "manifest_id": "ck.run.00.8b.ollama.v1",
+      "model_tag": "qwen2.5:0.5b",
+      "packet_contract_version": "ck.packet_contract.v1",
+      "paired_primary_cell_id": null,
+      "planned_cell_hash": "50d234286d2becfa298400a2b7d9d0677dec92299b4ff90d62ff68646ab57257",
+      "planned_status": "planned",
+      "replicate_id": "0",
+      "schema_version": "ck.planned_cell.v1",
+      "scientific_completion": false,
+      "scorer_schema_version": "ck.relational_score.v1",
+      "source_candidate_manifest_id": "ck.m0.candidate.v1",
+      "source_candidate_manifest_sha256": "9ec3d37a177b6d403048d8d6441b70a7fcdc6b89a4336c29bcf9ac610d88e922",
+      "source_state_dependency": null,
+      "task_contract_version": "ck.task_rel.v1",
+      "task_id": "live_plumbing_01_m0_v1"
+    },
+    {
+      "cell_id": "ccce0f29d4efb2e464b6f6cb197ee191f46cc58a78bab26d6e0ed286fa5655bb",
+      "condition_id": "C1_budget_matched_bare",
+      "dependency_annotation_hash": "d9c200bc404a85d3857ed0f6fd9c41d44fc8efe4b9aae9c22f34afca71459dcc",
+      "expected_relation_hash": "94fbcce49ca6e3f4ceea93aab2b4ca705641e4dc596b4c40bc17672964db73b2",
+      "generation_parameters": {
+        "num_ctx": 2048,
+        "seed": 0,
+        "stream": false,
+        "temperature": 0.0
+      },
+      "headline_eligible": false,
+      "identity_payload": {
+        "condition_id": "C1_budget_matched_bare",
+        "manifest_id": "ck.m0.candidate.v1",
+        "model_tag": "qwen2.5:0.5b",
+        "packet_contract_version": "ck.packet_contract.v1",
+        "replicate_id": "0",
+        "scorer_schema_version": "ck.relational_score.v1",
+        "seed": 0,
+        "task_id": "live_plumbing_01_m0_v1"
+      },
+      "manifest_id": "ck.run.00.8b.ollama.v1",
+      "model_tag": "qwen2.5:0.5b",
+      "packet_contract_version": "ck.packet_contract.v1",
+      "paired_primary_cell_id": "05ef4eca5e621b0eda232bb458991527d3b0e9f3e300cd2b0177d5400cbf879f",
+      "planned_cell_hash": "5b8f685e5ea66705b11e6c417514c4f336dc9deaa40abf9c11826b38d5b85166",
+      "planned_status": "planned",
+      "replicate_id": "0",
+      "schema_version": "ck.planned_cell.v1",
+      "scientific_completion": false,
+      "scorer_schema_version": "ck.relational_score.v1",
+      "source_candidate_manifest_id": "ck.m0.candidate.v1",
+      "source_candidate_manifest_sha256": "9ec3d37a177b6d403048d8d6441b70a7fcdc6b89a4336c29bcf9ac610d88e922",
+      "source_state_dependency": null,
+      "task_contract_version": "ck.task_rel.v1",
+      "task_id": "live_plumbing_01_m0_v1"
+    },
+    {
+      "cell_id": "4d5cb21cb2d63d2cd7780d8ac2639c80f8be098e4c120a1d3b3784290bfba420",
+      "condition_id": "C2_instruction_identical",
+      "dependency_annotation_hash": "d9c200bc404a85d3857ed0f6fd9c41d44fc8efe4b9aae9c22f34afca71459dcc",
+      "expected_relation_hash": "94fbcce49ca6e3f4ceea93aab2b4ca705641e4dc596b4c40bc17672964db73b2",
+      "generation_parameters": {
+        "num_ctx": 2048,
+        "seed": 0,
+        "stream": false,
+        "temperature": 0.0
+      },
+      "headline_eligible": false,
+      "identity_payload": {
+        "condition_id": "C2_instruction_identical",
+        "manifest_id": "ck.m0.candidate.v1",
+        "model_tag": "qwen2.5:0.5b",
+        "packet_contract_version": "ck.packet_contract.v1",
+        "replicate_id": "0",
+        "scorer_schema_version": "ck.relational_score.v1",
+        "seed": 0,
+        "task_id": "live_plumbing_01_m0_v1"
+      },
+      "manifest_id": "ck.run.00.8b.ollama.v1",
+      "model_tag": "qwen2.5:0.5b",
+      "packet_contract_version": "ck.packet_contract.v1",
+      "paired_primary_cell_id": null,
+      "planned_cell_hash": "40c1978dd35d40ddcf59925452fc6a086603b6222790672750ba11f43cb6027e",
+      "planned_status": "planned",
+      "replicate_id": "0",
+      "schema_version": "ck.planned_cell.v1",
+      "scientific_completion": false,
+      "scorer_schema_version": "ck.relational_score.v1",
+      "source_candidate_manifest_id": "ck.m0.candidate.v1",
+      "source_candidate_manifest_sha256": "9ec3d37a177b6d403048d8d6441b70a7fcdc6b89a4336c29bcf9ac610d88e922",
+      "source_state_dependency": null,
+      "task_contract_version": "ck.task_rel.v1",
+      "task_id": "live_plumbing_01_m0_v1"
+    },
+    {
+      "cell_id": "05ef4eca5e621b0eda232bb458991527d3b0e9f3e300cd2b0177d5400cbf879f",
+      "condition_id": "C3_static_ck",
+      "dependency_annotation_hash": "d9c200bc404a85d3857ed0f6fd9c41d44fc8efe4b9aae9c22f34afca71459dcc",
+      "expected_relation_hash": "94fbcce49ca6e3f4ceea93aab2b4ca705641e4dc596b4c40bc17672964db73b2",
+      "generation_parameters": {
+        "num_ctx": 2048,
+        "seed": 0,
+        "stream": false,
+        "temperature": 0.0
+      },
+      "headline_eligible": false,
+      "identity_payload": {
+        "condition_id": "C3_static_ck",
+        "manifest_id": "ck.m0.candidate.v1",
+        "model_tag": "qwen2.5:0.5b",
+        "packet_contract_version": "ck.packet_contract.v1",
+        "replicate_id": "0",
+        "scorer_schema_version": "ck.relational_score.v1",
+        "seed": 0,
+        "task_id": "live_plumbing_01_m0_v1"
+      },
+      "manifest_id": "ck.run.00.8b.ollama.v1",
+      "model_tag": "qwen2.5:0.5b",
+      "packet_contract_version": "ck.packet_contract.v1",
+      "paired_primary_cell_id": "ccce0f29d4efb2e464b6f6cb197ee191f46cc58a78bab26d6e0ed286fa5655bb",
+      "planned_cell_hash": "50ada93cabb1f9176208aaa3e0e06cbf78c8ee137d078f0cb939e2a9320804c3",
+      "planned_status": "planned",
+      "replicate_id": "0",
+      "schema_version": "ck.planned_cell.v1",
+      "scientific_completion": false,
+      "scorer_schema_version": "ck.relational_score.v1",
+      "source_candidate_manifest_id": "ck.m0.candidate.v1",
+      "source_candidate_manifest_sha256": "9ec3d37a177b6d403048d8d6441b70a7fcdc6b89a4336c29bcf9ac610d88e922",
+      "source_state_dependency": "episode_a_continuity_state",
+      "task_contract_version": "ck.task_rel.v1",
+      "task_id": "live_plumbing_01_m0_v1"
+    }
+  ],
+  "planned_primary_pairs": [
+    {
+      "c1_cell_id": "ccce0f29d4efb2e464b6f6cb197ee191f46cc58a78bab26d6e0ed286fa5655bb",
+      "c3_cell_id": "05ef4eca5e621b0eda232bb458991527d3b0e9f3e300cd2b0177d5400cbf879f",
+      "replicate_id": "0",
+      "task_id": "live_plumbing_01_m0_v1"
+    }
+  ],
+  "replicates": 1,
+  "repository_head": "117c2119554fc2cb3163e8fbcaf7ebb7c97b7d49",
+  "retries": 0,
+  "schema_version": "ck.commissioning_plan.v1",
+  "scientific_completion": false,
+  "scientific_status": "commissioning_instrument_test_only",
+  "source_candidate_manifest_id": "ck.m0.candidate.v1",
+  "source_candidate_manifest_sha256": "9ec3d37a177b6d403048d8d6441b70a7fcdc6b89a4336c29bcf9ac610d88e922",
+  "task_gold_leak_disclosure": "Source candidate task contains gold-visible structure in control packets; this run is instrument validation only and permits no efficacy or thesis interpretation."
+}

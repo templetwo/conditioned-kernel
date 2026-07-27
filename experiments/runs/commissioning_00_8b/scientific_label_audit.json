@@ -1,0 +1,14 @@
+{
+  "any_headline_eligible_true": false,
+  "any_m0_authorized_true": false,
+  "any_scientific_completion_true": false,
+  "authorization_receipt_minted": false,
+  "described_as_m0": false,
+  "efficacy_claim_permitted": false,
+  "execution_scope": "commissioning_validation",
+  "headline_eligible": false,
+  "m0_authorized": false,
+  "scientific_completion": false,
+  "scientific_scope_entered": false,
+  "scientific_status": "commissioning_instrument_test_only"
+}

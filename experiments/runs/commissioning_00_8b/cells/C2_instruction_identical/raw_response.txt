@@ -1,0 +1,1 @@
+{"continuity_assertions":[{"subject_id":"thread_gamma_receipt","relation":"local_conditioned_kernel","object_id":"Local conditioned kernel continuity assertion"},{"subject_id":"Deliverable","relation":"local_conditioned_kernel","object_id":"Local conditioned kernel continuity assertion"}]}

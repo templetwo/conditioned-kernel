@@ -1,0 +1,37 @@
+{
+  "confirmed_generation_options": {},
+  "duration_wall_s": 0.848,
+  "ended_at": "2026-07-27T19:50:30+00:00",
+  "host_architecture": "arm64",
+  "model_tag": "qwen2.5:0.5b",
+  "ollama_backend": "local_http_api",
+  "option_confirmation_status": "requested_but_not_confirmable",
+  "option_states": {
+    "num_ctx": "requested_but_not_confirmable",
+    "seed": "requested_but_not_confirmable",
+    "temperature": "requested_but_not_confirmable"
+  },
+  "packet_request_sha256": "0cb9d7b9e66a706523d95c93c3eeb25a98d93d9187aceac7751d528ccfedf4d2",
+  "process_id": 26362,
+  "provenance_complete": false,
+  "provenance_missing_reasons": [
+    "GENERATION_OPTION_UNVERIFIED",
+    "RUNTIME_PROVENANCE_FAILURE"
+  ],
+  "raw_response_sha256": "235d134e5288586d8d1436d9dcecd8cf1634ae50893465834e34b4dd7a5248d7",
+  "request_byte_length": 2047,
+  "requested_generation_options": {
+    "num_ctx": 2048,
+    "seed": 0,
+    "temperature": 0.0
+  },
+  "resolved_model_digest": "a8b0c51577010a279d933d14c2a8ab4b268079d44c5c8830c0a93900f1827c67",
+  "response_byte_length": 290,
+  "runtime_version": "0.20.7",
+  "started_at": "2026-07-27T19:50:30+00:00",
+  "tokenizer_metadata": {
+    "family": "qwen2",
+    "parameter_size": "494.03M",
+    "quantization": "Q4_K_M"
+  }
+}

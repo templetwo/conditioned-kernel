@@ -1,0 +1,11 @@
+{
+  "disposition": "RETIRED_NEVER_RATIFY_COMMISSIONING_REFERENCE_ONLY",
+  "efficacy_claim_permitted": false,
+  "execution_scope": "commissioning_validation",
+  "headline_eligible": false,
+  "m0_authorized": false,
+  "scientific_completion": false,
+  "scientific_status": "commissioning_instrument_test_only",
+  "source_candidate_manifest_id": "ck.m0.candidate.v1",
+  "source_candidate_manifest_sha256": "9ec3d37a177b6d403048d8d6441b70a7fcdc6b89a4336c29bcf9ac610d88e922"
+}

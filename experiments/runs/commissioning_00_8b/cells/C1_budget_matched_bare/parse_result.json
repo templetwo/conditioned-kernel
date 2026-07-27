@@ -1,0 +1,21 @@
+{
+  "assertions": [
+    {
+      "object_id": "Deliverable",
+      "relation": "Deliverable is the continuity cold-start receipt on Orin.",
+      "subject_id": "thread_gamma_receipt"
+    }
+  ],
+  "headline_eligible": false,
+  "inference_status": "completed",
+  "malformed": false,
+  "parse_kind": "STRUCTURED_ASSERTIONS",
+  "raw_response_byte_length": 204,
+  "raw_response_sha256": "e0e868bb2f6dbab7d1ff1fe0cad0103d9a8c1d15f7a25e3057df2f7c34bdc43e",
+  "response_channel_status": "text",
+  "schema_version": "ck.response_scoring_adapter.v1",
+  "scientific_completion": false,
+  "scientific_status": "commissioning_safety_only",
+  "scorer_schema_version": "ck.relational_score.v1",
+  "terminal_classification": "SCORED"
+}

@@ -1,0 +1,14 @@
+{
+  "continuity_assertions": [
+    {
+      "subject_id": "thread_gamma_receipt",
+      "relation": "references",
+      "object_id": "question_cold_start"
+    },
+    {
+        "subject_id": "thread_gamma_receipt",
+        "relation": "remains_open",
+        "object_id": "question_cold_start"
+    }
+  ]
+}

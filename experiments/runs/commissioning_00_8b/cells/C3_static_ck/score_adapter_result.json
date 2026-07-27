@@ -1,0 +1,13 @@
+{
+  "adapter_schema_version": "ck.response_scoring_adapter.v1",
+  "headline_eligible": false,
+  "parse_kind": "STRUCTURED_ASSERTIONS",
+  "primary_score": 1.0,
+  "raw_response_byte_length": 303,
+  "raw_response_sha256": "d330858dc9625c192f268525f2745c53e9cbb71a614318f395acd935099508b5",
+  "reason_codes": [],
+  "response_channel_status": "text",
+  "scientific_completion": false,
+  "score_record_hash": "dccdbaa16de54cf92af220f87e31ba635c6c086d70ebb093e97de86812283cd3",
+  "terminal_classification": "SCORED"
+}

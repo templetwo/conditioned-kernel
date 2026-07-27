@@ -1,0 +1,15 @@
+{
+  "adapter_schema_version": "ck.response_scoring_adapter.v1",
+  "headline_eligible": false,
+  "parse_kind": "WRONG_SCHEMA_KEY",
+  "primary_score": null,
+  "raw_response_byte_length": 128,
+  "raw_response_sha256": "3ed7cf4e1c21a161e77fa2ca08461e326ab209780aca0dfc8fe61d56c2ce6053",
+  "reason_codes": [
+    "WRONG_SCHEMA_KEY"
+  ],
+  "response_channel_status": "text",
+  "scientific_completion": false,
+  "score_record_hash": null,
+  "terminal_classification": "MALFORMED_ASSERTIONS"
+}
