@@ -52,7 +52,20 @@ Canonical triple shape:
 }
 ```
 
-(`predicate_id` is accepted as an alias for `relation` at the parse boundary.)
+Sole scorer predicate field: `relation` (no `predicate_id` alias — RUN 00.6E.1).
+
+### Symmetric canonicalization (RUN 00.6E.1)
+
+For relations explicitly listed in `symmetric_relations`:
+
+```text
+canonical_subject = min(subject_id, object_id)
+canonical_object  = max(subject_id, object_id)
+```
+
+Both directions of a symmetric fact are one unique assertion. A second emission
+is `DUPLICATE_ASSERTION`, never `UNSUPPORTED_ASSERTION`. Asymmetric relations
+preserve subject/object order exactly.
 
 ## Output
 
@@ -89,11 +102,11 @@ For unique proposed triples (when scored):
 
 | Class | Meaning |
 |---|---|
-| `TRUE_POSITIVE` | Exact triple match (or symmetric reverse if marked) |
-| `WRONG_RELATION` | Same subject+object, different relation |
-| `REVERSED_DIRECTION` | Same relation, swapped ends (asymmetric) |
+| `TRUE_POSITIVE` | Canonical form matches remaining expected |
+| `WRONG_RELATION` | Same ordered subject+object, different relation |
+| `REVERSED_DIRECTION` | Same relation, swapped ends (**asymmetric only**) |
 | `UNSUPPORTED_ASSERTION` | In-universe, not expected, not WR/RD |
-| `DUPLICATE_ASSERTION` | Repeat of an already-seen unique proposal |
+| `DUPLICATE_ASSERTION` | Canonical form already seen (includes symmetric reverse) |
 | `OUT_OF_UNIVERSE_ASSERTION` | Identifier or relation outside closed universe |
 
 Expected triples not recovered: `FALSE_NEGATIVE`.
@@ -102,17 +115,20 @@ Exactly one primary class per proposed triple occurrence.
 
 ## Classification precedence
 
-1. `DUPLICATE_ASSERTION` (already in seen unique set)
+1. `DUPLICATE_ASSERTION` (canonical form already in seen unique set)
 2. `OUT_OF_UNIVERSE_ASSERTION`
-3. `TRUE_POSITIVE` (exact remaining expected, or symmetric reverse)
+3. `TRUE_POSITIVE` (canonical form in remaining expected)
 4. `WRONG_RELATION`
-5. `REVERSED_DIRECTION`
+5. `REVERSED_DIRECTION` (asymmetric only)
 6. `UNSUPPORTED_ASSERTION`
 
 ## Canonical matching
 
-Exact TP requires equality of `subject_id`, `relation`, `object_id` after
-canonical string identity only (strip on proposal parse).
+Exact TP requires equality of the **canonical** triple
+(`subject_id`, `relation`, `object_id`) after:
+
+- strip on proposal parse
+- min/max endpoint reordering **only** for relations in `symmetric_relations`
 
 No embeddings, fuzzy match, LLM judge, paraphrase, substring, or identifier-only
 overlap.

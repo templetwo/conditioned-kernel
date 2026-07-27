@@ -22,6 +22,7 @@ from conditioned_kernel.relational_scorer import (
     RelationalGold,
     ScoringStatus,
     TaskContractError,
+    canonicalize_triple,
     classify_proposal,
     primary_score_formula,
     score_cell,
@@ -29,10 +30,11 @@ from conditioned_kernel.relational_scorer import (
     score_record_canonical_bytes,
     score_record_hash,
     triples_hash,
+    unique_triples_hash,
 )
 
 FIXTURE_PATH = Path(__file__).parent / "fixtures" / "relational_scorer_cases.json"
-REPO_COMMIT = "02a002773fb17e4939abca8612a4038c74a1d163"
+REPO_COMMIT = "ce9ab1b5dd9733cda838ea49ac8126600d95d0fc"
 
 
 @pytest.fixture(scope="module")
@@ -824,3 +826,493 @@ def test_no_model_invocation_marker():
     assert "httpx" not in src
     assert "requests." not in src
     assert "ExecutionScope" not in src
+
+
+# ===========================================================================
+# RUN 00.6E.1 — Symmetric relation canonicalization
+# ===========================================================================
+
+
+def _sym_gold(
+    *,
+    expected_subject: str = "ent_A",
+    expected_object: str = "ent_B",
+    relation: str = "related_to",
+    task_id: str = "sym_canon_01",
+) -> dict:
+    return {
+        "task_id": task_id,
+        "contract_version": "ck.task_rel.v1",
+        "subject_universe": ["ent_A", "ent_B", "ent_C"],
+        "object_universe": ["ent_A", "ent_B", "ent_C"],
+        "relation_universe": [relation, "remains_open", "relation_one", "relation_two", "relation_three"],
+        "symmetric_relations": [relation],
+        "expected_relations": [
+            {
+                "subject_id": expected_subject,
+                "relation": relation,
+                "object_id": expected_object,
+            }
+        ],
+    }
+
+
+def _score_sym(gold: dict, proposed: list[dict], *, condition_id: str = "C3") -> dict:
+    return score_cell(
+        task_id=gold["task_id"],
+        condition_id=condition_id,
+        gold=gold,
+        proposed_assertions=proposed,
+        inference_status="completed",
+        model_provenance={"model_tag": "fixture-none", "runtime": "offline"},
+        repo_commit=REPO_COMMIT,
+    )
+
+
+# --- Test-first reproduction of the 00.6E defect (must stay green after fix) ---
+
+
+def test_6e1_defect_both_directions_not_unsupported():
+    """Reproduction of pre-00.6E.1 defect: both directions scored as TP+UNSUPPORTED.
+
+    Before the amendment this returned unsupported_assertion_n=1 and
+    primary_score=0.5. After amendment: TP=1, DUP=1, UNSUP=0, score=1.0.
+    """
+    gold = _sym_gold()
+    rec = _score_sym(
+        gold,
+        [
+            {"subject_id": "ent_A", "relation": "related_to", "object_id": "ent_B"},
+            {"subject_id": "ent_B", "relation": "related_to", "object_id": "ent_A"},
+        ],
+    )
+    # Corrected semantics (00.6E.1)
+    assert rec["true_positive_n"] == 1
+    assert rec["duplicate_assertion_n"] == 1
+    assert rec["unsupported_assertion_n"] == 0
+    assert rec["false_negative_n"] == 0
+    assert rec["primary_score"] == 1.0
+    assert rec["exact_relation_set_match"] is False
+    classes = [c["classification"] for c in rec["proposal_classifications"]]
+    assert classes == [
+        RelationClass.TRUE_POSITIVE.value,
+        RelationClass.DUPLICATE_ASSERTION.value,
+    ]
+
+
+def test_6e1_01_symmetric_reverse_alone_one_tp():
+    gold = _sym_gold()
+    rec = _score_sym(
+        gold,
+        [{"subject_id": "ent_B", "relation": "related_to", "object_id": "ent_A"}],
+    )
+    assert rec["true_positive_n"] == 1
+    assert rec["false_negative_n"] == 0
+    assert rec["duplicate_assertion_n"] == 0
+    assert rec["reversed_direction_n"] == 0
+    assert rec["unsupported_assertion_n"] == 0
+
+
+def test_6e1_02_symmetric_reverse_alone_score_1():
+    gold = _sym_gold()
+    rec = _score_sym(
+        gold,
+        [{"subject_id": "ent_B", "relation": "related_to", "object_id": "ent_A"}],
+    )
+    assert rec["primary_score"] == 1.0
+
+
+def test_6e1_03_symmetric_reverse_alone_exact_match():
+    gold = _sym_gold()
+    rec = _score_sym(
+        gold,
+        [{"subject_id": "ent_B", "relation": "related_to", "object_id": "ent_A"}],
+    )
+    assert rec["exact_relation_set_match"] is True
+
+
+def test_6e1_04_both_directions_one_tp():
+    gold = _sym_gold()
+    rec = _score_sym(
+        gold,
+        [
+            {"subject_id": "ent_A", "relation": "related_to", "object_id": "ent_B"},
+            {"subject_id": "ent_B", "relation": "related_to", "object_id": "ent_A"},
+        ],
+    )
+    assert rec["true_positive_n"] == 1
+
+
+def test_6e1_05_both_directions_one_duplicate():
+    gold = _sym_gold()
+    rec = _score_sym(
+        gold,
+        [
+            {"subject_id": "ent_A", "relation": "related_to", "object_id": "ent_B"},
+            {"subject_id": "ent_B", "relation": "related_to", "object_id": "ent_A"},
+        ],
+    )
+    assert rec["duplicate_assertion_n"] == 1
+
+
+def test_6e1_06_both_directions_zero_unsupported():
+    gold = _sym_gold()
+    rec = _score_sym(
+        gold,
+        [
+            {"subject_id": "ent_A", "relation": "related_to", "object_id": "ent_B"},
+            {"subject_id": "ent_B", "relation": "related_to", "object_id": "ent_A"},
+        ],
+    )
+    assert rec["unsupported_assertion_n"] == 0
+
+
+def test_6e1_07_both_directions_primary_score_1():
+    gold = _sym_gold()
+    rec = _score_sym(
+        gold,
+        [
+            {"subject_id": "ent_A", "relation": "related_to", "object_id": "ent_B"},
+            {"subject_id": "ent_B", "relation": "related_to", "object_id": "ent_A"},
+        ],
+    )
+    assert rec["primary_score"] == 1.0
+
+
+def test_6e1_08_both_directions_not_exact_match():
+    gold = _sym_gold()
+    rec = _score_sym(
+        gold,
+        [
+            {"subject_id": "ent_A", "relation": "related_to", "object_id": "ent_B"},
+            {"subject_id": "ent_B", "relation": "related_to", "object_id": "ent_A"},
+        ],
+    )
+    assert rec["exact_relation_set_match"] is False
+
+
+def test_6e1_09_three_alternating_restatements_one_tp_two_dups():
+    gold = _sym_gold()
+    rec = _score_sym(
+        gold,
+        [
+            {"subject_id": "ent_A", "relation": "related_to", "object_id": "ent_B"},
+            {"subject_id": "ent_B", "relation": "related_to", "object_id": "ent_A"},
+            {"subject_id": "ent_A", "relation": "related_to", "object_id": "ent_B"},
+        ],
+    )
+    assert rec["true_positive_n"] == 1
+    assert rec["duplicate_assertion_n"] == 2
+    assert rec["unsupported_assertion_n"] == 0
+    assert rec["primary_score"] == 1.0
+    assert rec["exact_relation_set_match"] is False
+
+
+def test_6e1_10_symmetric_duplicates_do_not_improve_primary_score():
+    gold = _sym_gold()
+    clean = _score_sym(
+        gold,
+        [{"subject_id": "ent_A", "relation": "related_to", "object_id": "ent_B"}],
+    )
+    both = _score_sym(
+        gold,
+        [
+            {"subject_id": "ent_A", "relation": "related_to", "object_id": "ent_B"},
+            {"subject_id": "ent_B", "relation": "related_to", "object_id": "ent_A"},
+        ],
+    )
+    assert both["primary_score"] == clean["primary_score"] == 1.0
+    assert both["true_positive_n"] == clean["true_positive_n"] == 1
+
+
+def test_6e1_11_symmetric_duplicates_do_not_reduce_primary_score():
+    gold = _sym_gold()
+    clean = _score_sym(
+        gold,
+        [{"subject_id": "ent_B", "relation": "related_to", "object_id": "ent_A"}],
+    )
+    both = _score_sym(
+        gold,
+        [
+            {"subject_id": "ent_B", "relation": "related_to", "object_id": "ent_A"},
+            {"subject_id": "ent_A", "relation": "related_to", "object_id": "ent_B"},
+        ],
+    )
+    assert both["primary_score"] == clean["primary_score"] == 1.0
+
+
+def test_6e1_12_asymmetric_reversal_remains_reversed_direction(fx):
+    rec = _score(fx, _case(fx, "asymmetric_relation_incorrectly_reversed"))
+    assert rec["reversed_direction_n"] == 1
+    assert rec["true_positive_n"] == 0
+    assert rec["false_negative_n"] == 1
+    assert rec["duplicate_assertion_n"] == 0
+    assert rec["unsupported_assertion_n"] == 0
+
+
+def test_6e1_13_undeclared_relation_never_symmetric_canonicalized():
+    """remains_open not in symmetric_relations → reverse is REVERSED_DIRECTION."""
+    gold = {
+        "task_id": "asym_only",
+        "contract_version": "ck.task_rel.v1",
+        "subject_universe": ["ent_A", "ent_B"],
+        "object_universe": ["ent_A", "ent_B"],
+        "relation_universe": ["remains_open", "related_to"],
+        "symmetric_relations": [],  # empty — nothing is symmetric
+        "expected_relations": [
+            {
+                "subject_id": "ent_A",
+                "relation": "remains_open",
+                "object_id": "ent_B",
+            }
+        ],
+    }
+    raw = RelationTriple("ent_B", "remains_open", "ent_A")
+    assert canonicalize_triple(raw, frozenset()) == raw  # no reordering
+    rec = _score_sym(
+        gold,
+        [{"subject_id": "ent_B", "relation": "remains_open", "object_id": "ent_A"}],
+    )
+    assert rec["reversed_direction_n"] == 1
+    assert rec["true_positive_n"] == 0
+
+
+def test_6e1_14_expected_opposite_source_order_identical_hash():
+    g1 = _sym_gold(expected_subject="ent_A", expected_object="ent_B", task_id="h1")
+    g2 = _sym_gold(expected_subject="ent_B", expected_object="ent_A", task_id="h2")
+    # Different task_id but same expected fact after canonicalization
+    gold1 = RelationalGold.from_dict({**g1, "task_id": "same"})
+    gold2 = RelationalGold.from_dict({**g2, "task_id": "same"})
+    assert gold1.expected_relations == gold2.expected_relations
+    assert triples_hash(gold1.expected_relations) == triples_hash(
+        gold2.expected_relations
+    )
+    r1 = _score_sym(
+        {**g1, "task_id": "same"},
+        [{"subject_id": "ent_A", "relation": "related_to", "object_id": "ent_B"}],
+    )
+    r2 = _score_sym(
+        {**g2, "task_id": "same"},
+        [{"subject_id": "ent_A", "relation": "related_to", "object_id": "ent_B"}],
+    )
+    assert r1["expected_relation_hash"] == r2["expected_relation_hash"]
+
+
+def test_6e1_15_proposal_order_does_not_change_counts_score_hashes():
+    gold = _sym_gold()
+    ab = {"subject_id": "ent_A", "relation": "related_to", "object_id": "ent_B"}
+    ba = {"subject_id": "ent_B", "relation": "related_to", "object_id": "ent_A"}
+    r1 = _score_sym(gold, [ab, ba])
+    r2 = _score_sym(gold, [ba, ab])
+    for k in (
+        "true_positive_n",
+        "duplicate_assertion_n",
+        "unsupported_assertion_n",
+        "primary_score",
+        "exact_relation_set_match",
+        "expected_relation_hash",
+        "proposed_assertion_hash",
+        "proposed_unique_set_hash",
+        "proposed_unique_n",
+    ):
+        assert r1[k] == r2[k], k
+
+
+def test_6e1_16_raw_multiset_hash_exposes_duplicate_cardinality():
+    gold = _sym_gold()
+    single = _score_sym(
+        gold,
+        [{"subject_id": "ent_A", "relation": "related_to", "object_id": "ent_B"}],
+    )
+    both = _score_sym(
+        gold,
+        [
+            {"subject_id": "ent_A", "relation": "related_to", "object_id": "ent_B"},
+            {"subject_id": "ent_B", "relation": "related_to", "object_id": "ent_A"},
+        ],
+    )
+    # Raw multiset hash must differ when both directions are emitted
+    assert single["proposed_assertion_hash"] != both["proposed_assertion_hash"]
+    assert both["proposed_raw_n"] == 2
+    assert single["proposed_raw_n"] == 1
+
+
+def test_6e1_17_unique_set_hash_collapses_symmetric_directions():
+    gold = _sym_gold()
+    single = _score_sym(
+        gold,
+        [{"subject_id": "ent_A", "relation": "related_to", "object_id": "ent_B"}],
+    )
+    both = _score_sym(
+        gold,
+        [
+            {"subject_id": "ent_A", "relation": "related_to", "object_id": "ent_B"},
+            {"subject_id": "ent_B", "relation": "related_to", "object_id": "ent_A"},
+        ],
+    )
+    reverse_only = _score_sym(
+        gold,
+        [{"subject_id": "ent_B", "relation": "related_to", "object_id": "ent_A"}],
+    )
+    # Unique canonical set is one fact in all three cases
+    assert (
+        single["proposed_unique_set_hash"]
+        == both["proposed_unique_set_hash"]
+        == reverse_only["proposed_unique_set_hash"]
+    )
+    assert single["proposed_unique_n"] == both["proposed_unique_n"] == 1
+    # Explicit unique hash of one canonical triple
+    canon = canonicalize_triple(
+        RelationTriple("ent_B", "related_to", "ent_A"),
+        frozenset(["related_to"]),
+    )
+    assert both["proposed_unique_set_hash"] == unique_triples_hash([canon])
+
+
+def test_6e1_18_multi_relation_same_pair_not_wrong_relation():
+    """Adversarial: two expected relations on same ordered pair."""
+    gold = {
+        "task_id": "multi_rel_pair",
+        "contract_version": "ck.task_rel.v1",
+        "subject_universe": ["ent_A", "ent_B"],
+        "object_universe": ["ent_A", "ent_B"],
+        "relation_universe": ["relation_one", "relation_two", "relation_three"],
+        "symmetric_relations": [],
+        "expected_relations": [
+            {
+                "subject_id": "ent_A",
+                "relation": "relation_one",
+                "object_id": "ent_B",
+            },
+            {
+                "subject_id": "ent_A",
+                "relation": "relation_two",
+                "object_id": "ent_B",
+            },
+        ],
+    }
+    # Either expected relation alone is TP, not WRONG_RELATION
+    r1 = _score_sym(
+        gold,
+        [
+            {
+                "subject_id": "ent_A",
+                "relation": "relation_one",
+                "object_id": "ent_B",
+            }
+        ],
+    )
+    assert r1["true_positive_n"] == 1
+    assert r1["wrong_relation_n"] == 0
+    assert r1["false_negative_n"] == 1
+
+    r2 = _score_sym(
+        gold,
+        [
+            {
+                "subject_id": "ent_A",
+                "relation": "relation_two",
+                "object_id": "ent_B",
+            }
+        ],
+    )
+    assert r2["true_positive_n"] == 1
+    assert r2["wrong_relation_n"] == 0
+    assert r2["false_negative_n"] == 1
+
+    # Both expected → perfect
+    both = _score_sym(
+        gold,
+        [
+            {
+                "subject_id": "ent_A",
+                "relation": "relation_one",
+                "object_id": "ent_B",
+            },
+            {
+                "subject_id": "ent_A",
+                "relation": "relation_two",
+                "object_id": "ent_B",
+            },
+        ],
+    )
+    assert both["true_positive_n"] == 2
+    assert both["wrong_relation_n"] == 0
+    assert both["primary_score"] == 1.0
+    assert both["exact_relation_set_match"] is True
+
+    # Unrelated third relation on same pair is WRONG_RELATION
+    wr = _score_sym(
+        gold,
+        [
+            {
+                "subject_id": "ent_A",
+                "relation": "relation_three",
+                "object_id": "ent_B",
+            }
+        ],
+    )
+    assert wr["true_positive_n"] == 0
+    assert wr["wrong_relation_n"] == 1
+    assert wr["false_negative_n"] == 2
+
+
+def test_6e1_19_symmetric_expected_duplicate_directions_fail_contract():
+    """A/rel/B and B/rel/A both listed as expected for symmetric rel → fail closed."""
+    with pytest.raises(TaskContractError) as ei:
+        RelationalGold.from_dict(
+            {
+                "task_id": "dup_sym_expected",
+                "contract_version": "ck.task_rel.v1",
+                "subject_universe": ["ent_A", "ent_B"],
+                "object_universe": ["ent_A", "ent_B"],
+                "relation_universe": ["related_to"],
+                "symmetric_relations": ["related_to"],
+                "expected_relations": [
+                    {
+                        "subject_id": "ent_A",
+                        "relation": "related_to",
+                        "object_id": "ent_B",
+                    },
+                    {
+                        "subject_id": "ent_B",
+                        "relation": "related_to",
+                        "object_id": "ent_A",
+                    },
+                ],
+            }
+        )
+    assert ei.value.reason_code == "DUPLICATE_EXPECTED_RELATION"
+
+
+def test_6e1_20_canonicalize_helper_unit():
+    sym = frozenset(["related_to"])
+    ab = RelationTriple("ent_A", "related_to", "ent_B")
+    ba = RelationTriple("ent_B", "related_to", "ent_A")
+    assert canonicalize_triple(ab, sym) == canonicalize_triple(ba, sym)
+    assert canonicalize_triple(ab, sym).subject_id == "ent_A"
+    assert canonicalize_triple(ab, sym).object_id == "ent_B"
+    # Asymmetric: no reorder
+    open_rev = RelationTriple("ent_B", "remains_open", "ent_A")
+    assert canonicalize_triple(open_rev, sym) == open_rev
+
+
+def test_6e1_21_relation_field_only_no_predicate_id_alias():
+    gold = _sym_gold()
+    # predicate_id alone must not be accepted as a substitute for relation
+    rec = score_cell(
+        task_id=gold["task_id"],
+        condition_id="C3",
+        gold=gold,
+        proposed_assertions=[
+            {
+                "subject_id": "ent_A",
+                "predicate_id": "related_to",
+                "object_id": "ent_B",
+            }
+        ],
+        inference_status="completed",
+        repo_commit=REPO_COMMIT,
+    )
+    assert rec["scoring_status"] == ScoringStatus.MALFORMED_ASSERTIONS.value
+    assert rec["primary_score"] is None

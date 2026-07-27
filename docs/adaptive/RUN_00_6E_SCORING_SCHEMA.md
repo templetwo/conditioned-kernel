@@ -40,8 +40,9 @@
 | `f1` | float \| null | |
 | `f1_undefined_reason` | string \| null | |
 | `invalid_reason` | string \| null | terminal failure code |
-| `expected_relation_hash` | string \| null | SHA-256 of sorted expected set |
-| `proposed_assertion_hash` | string \| null | SHA-256 of sorted raw proposals |
+| `expected_relation_hash` | string \| null | SHA-256 of sorted **canonical** expected set |
+| `proposed_assertion_hash` | string \| null | SHA-256 of sorted **raw multiset** (cardinality retained) |
+| `proposed_unique_set_hash` | string \| null | SHA-256 of sorted **unique canonical** facts |
 | `false_negatives` | list[triple] | sorted |
 | `proposal_classifications` | list | each `{triple, classification}` in proposal order |
 | `task_contract_version` | string \| null | |
@@ -115,13 +116,32 @@ Clamped to `[0, 1]` if defined (formula cannot exceed 1 under correct TP account
 
 ## Canonicalization and hashing
 
+### Symmetric fact canonicalization (RUN 00.6E.1)
+
+If `relation ∈ symmetric_relations`:
+
+```text
+canonical_subject = min(subject_id, object_id)
+canonical_object  = max(subject_id, object_id)
+```
+
+Otherwise endpoints are left as proposed/expected.
+
+### Hash surfaces
+
 1. Triple key order for sort: `subject_id`, `relation`, `object_id` (lexicographic).
-2. Relation set payload for hash: sorted list of `as_dict()` triples.
-3. Canonical JSON: `json.dumps(..., ensure_ascii=False, sort_keys=True, separators=(",", ":"))`.
-4. Hash: SHA-256 hex of UTF-8 bytes.
+2. `proposed_assertion_hash`: sorted **raw multiset** of directed proposals
+   (both directions and duplicate cardinality change the hash).
+3. `proposed_unique_set_hash`: sorted **unique canonical** facts after
+   symmetric collapse (both directions of one symmetric fact → one set member).
+4. `expected_relation_hash`: sorted load-time canonical expected set.
+5. Canonical JSON: `json.dumps(..., ensure_ascii=False, sort_keys=True, separators=(",", ":"))`.
+6. Hash: SHA-256 hex of UTF-8 bytes.
 
 `score_record_canonical_bytes` / `score_record_hash` produce deterministic
 record digests for repeated scoring.
+
+Sole scorer predicate field: `relation` (no `predicate_id` alias).
 
 ## Gold / task contract fields
 

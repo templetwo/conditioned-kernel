@@ -1,8 +1,13 @@
-"""Closed-set relational continuity scorer (RUN 00.6E).
+"""Closed-set relational continuity scorer (RUN 00.6E / 00.6E.1).
 
-Primary credit requires exact subject_id + relation + object_id equality.
-Identifier mention alone never earns a true positive. Shotgunning cannot
-improve primary_score. Offline only — no model invocation.
+Primary credit requires exact subject_id + relation + object_id equality
+after ratified canonicalization. Identifier mention alone never earns a true
+positive. Shotgunning cannot improve primary_score. Offline only — no model
+invocation.
+
+RUN 00.6E.1: symmetric relations canonicalize endpoints via min/max so both
+valid directions of one fact are the same unique assertion (second emission
+is DUPLICATE_ASSERTION, never UNSUPPORTED_ASSERTION).
 """
 
 from __future__ import annotations
@@ -75,11 +80,44 @@ class RelationTriple:
 
     @staticmethod
     def from_mapping(m: Mapping[str, Any]) -> "RelationTriple":
+        """Build a triple. Sole scorer field for the predicate is ``relation``."""
+        if "relation" not in m or m["relation"] is None or str(m["relation"]) == "":
+            raise KeyError("relation")
         return RelationTriple(
             subject_id=str(m["subject_id"]),
-            relation=str(m.get("relation") or m.get("predicate_id") or ""),
+            relation=str(m["relation"]),
             object_id=str(m["object_id"]),
         )
+
+
+def canonicalize_triple(
+    t: RelationTriple,
+    symmetric_relations: frozenset[str] | set[str] | Iterable[str],
+) -> RelationTriple:
+    """Canonical form of a fact for matching / uniqueness / expected hashing.
+
+    Symmetric relations (explicitly listed):
+      canonical_subject = min(subject_id, object_id)
+      canonical_object  = max(subject_id, object_id)
+      → canonical_subject / relation / canonical_object
+
+    Asymmetric relations: subject/object order preserved exactly.
+    """
+    sym = (
+        symmetric_relations
+        if isinstance(symmetric_relations, (set, frozenset))
+        else frozenset(symmetric_relations)
+    )
+    if t.relation not in sym:
+        return t
+    lo, hi = (
+        (t.subject_id, t.object_id)
+        if t.subject_id <= t.object_id
+        else (t.object_id, t.subject_id)
+    )
+    if lo == t.subject_id and hi == t.object_id:
+        return t
+    return RelationTriple(lo, t.relation, hi)
 
 
 def sort_triples(triples: Iterable[RelationTriple]) -> list[RelationTriple]:
@@ -90,7 +128,15 @@ def sort_triples(triples: Iterable[RelationTriple]) -> list[RelationTriple]:
 
 
 def triples_hash(triples: Iterable[RelationTriple]) -> str:
+    """SHA-256 of the sorted multiset of triples (duplicate cardinality retained)."""
     payload = [t.as_dict() for t in sort_triples(triples)]
+    return sha256_hex(canonical_json_bytes(payload))
+
+
+def unique_triples_hash(triples: Iterable[RelationTriple]) -> str:
+    """SHA-256 of the sorted unique set of triples (order-independent set)."""
+    unique = sort_triples(set(triples))
+    payload = [t.as_dict() for t in unique]
     return sha256_hex(canonical_json_bytes(payload))
 
 
@@ -125,6 +171,10 @@ class RelationalGold:
         relations = frozenset(str(x) for x in (data.get("relation_universe") or []))
         symmetric = frozenset(str(x) for x in (data.get("symmetric_relations") or []))
 
+        for s in symmetric:
+            if s not in relations:
+                raise TaskContractError("MALFORMED_SYMMETRY_METADATA", s)
+
         raw_expected = list(data.get("expected_relations") or [])
         expected_list: list[RelationTriple] = []
         seen: set[RelationTriple] = set()
@@ -149,21 +199,20 @@ class RelationalGold:
                 raise TaskContractError(
                     "UNKNOWN_EXPECTED_RELATION", t.relation
                 )
-            if t in seen:
+            # Canonicalize before uniqueness: A/rel/B and B/rel/A for a
+            # symmetric relation are the same expected fact.
+            canon = canonicalize_triple(t, symmetric)
+            if canon in seen:
                 raise TaskContractError(
                     "DUPLICATE_EXPECTED_RELATION",
-                    f"{t.subject_id}/{t.relation}/{t.object_id}",
+                    f"{canon.subject_id}/{canon.relation}/{canon.object_id}",
                 )
-            seen.add(t)
-            expected_list.append(t)
+            seen.add(canon)
+            expected_list.append(canon)
 
         allow_empty = bool(data.get("allow_empty_expected", False))
         if not expected_list and not allow_empty:
             raise TaskContractError("EMPTY_EXPECTED_RELATIONS")
-
-        for s in symmetric:
-            if s not in relations:
-                raise TaskContractError("MALFORMED_SYMMETRY_METADATA", s)
 
         return RelationalGold(
             task_id=task_id,
@@ -199,33 +248,33 @@ def classify_proposal(
 ) -> RelationClass:
     """Assign exactly one primary relation-level class to a proposed triple.
 
+    Matching and uniqueness use ``canonicalize_triple`` so that both
+    directions of a declared-symmetric fact share one canonical identity.
+
     Precedence:
-    1. DUPLICATE (if already seen as unique proposal)
-    2. OUT_OF_UNIVERSE
-    3. TRUE_POSITIVE (exact match remaining expected, or symmetric reverse)
-    4. WRONG_RELATION (same subject+object, different relation vs some expected)
-    5. REVERSED_DIRECTION (same relation, swapped ends vs some expected)
+    1. DUPLICATE (canonical form already seen — includes symmetric reverse)
+    2. OUT_OF_UNIVERSE (checked on raw endpoints/relation)
+    3. TRUE_POSITIVE (canonical form in remaining expected)
+    4. WRONG_RELATION (same ordered subject+object as some expected, different
+       relation — never fires when the proposed relation itself is expected
+       for that pair, because TP is checked first)
+    5. REVERSED_DIRECTION (asymmetric only: same relation, swapped ends)
     6. UNSUPPORTED_ASSERTION
     """
-    if proposed in seen_unique:
+    canon = canonicalize_triple(proposed, gold.symmetric_relations)
+
+    # Symmetric-equivalent (or exact) restatement of an already-seen fact.
+    if canon in seen_unique:
         return RelationClass.DUPLICATE_ASSERTION
 
     if _is_out_of_universe(proposed, gold):
         return RelationClass.OUT_OF_UNIVERSE_ASSERTION
 
-    # Exact match
-    if proposed in remaining_expected:
+    if canon in remaining_expected:
         return RelationClass.TRUE_POSITIVE
 
-    # Symmetric: reverse counts as TP if relation is marked symmetric
-    if proposed.relation in gold.symmetric_relations:
-        rev = RelationTriple(
-            proposed.object_id, proposed.relation, proposed.subject_id
-        )
-        if rev in remaining_expected:
-            return RelationClass.TRUE_POSITIVE
-
-    # Wrong relation: subject+object match an expected triple, relation differs
+    # Wrong relation: ordered subject+object match an expected triple with a
+    # different relation. Multi-relation pairs are safe because TP is first.
     for exp in gold.expected_relations:
         if (
             exp.subject_id == proposed.subject_id
@@ -234,15 +283,15 @@ def classify_proposal(
         ):
             return RelationClass.WRONG_RELATION
 
-    # Reversed direction: same relation, swapped subject/object (asymmetric)
-    for exp in gold.expected_relations:
-        if (
-            exp.relation == proposed.relation
-            and exp.subject_id == proposed.object_id
-            and exp.object_id == proposed.subject_id
-            and exp.relation not in gold.symmetric_relations
-        ):
-            return RelationClass.REVERSED_DIRECTION
+    # Reversed direction: asymmetric relations only.
+    if proposed.relation not in gold.symmetric_relations:
+        for exp in gold.expected_relations:
+            if (
+                exp.relation == proposed.relation
+                and exp.subject_id == proposed.object_id
+                and exp.object_id == proposed.subject_id
+            ):
+                return RelationClass.REVERSED_DIRECTION
 
     return RelationClass.UNSUPPORTED_ASSERTION
 
@@ -470,8 +519,8 @@ def _score_cell_inner(
                     repo_commit=repo_commit,
                     gold=g,
                 )
-        rel = item.get("relation") or item.get("predicate_id")
-        if not rel or not str(rel).strip():
+        rel = item.get("relation")
+        if rel is None or not str(rel).strip():
             return _terminal_null(
                 task_id=task_id,
                 condition_id=condition_id,
@@ -490,6 +539,7 @@ def _score_cell_inner(
             )
         )
 
+    # remaining_expected and seen_unique store *canonical* facts.
     remaining = set(g.expected_relations)
     seen_unique: set[RelationTriple] = set()
     proposal_classes: list[dict[str, Any]] = []
@@ -504,21 +554,24 @@ def _score_cell_inner(
             seen_unique=seen_unique,
         )
         proposal_classes.append(
-            {"triple": prop.as_dict(), "classification": cls.value}
+            {
+                "triple": prop.as_dict(),
+                "canonical_triple": canonicalize_triple(
+                    prop, g.symmetric_relations
+                ).as_dict(),
+                "classification": cls.value,
+            }
         )
         if cls is RelationClass.DUPLICATE_ASSERTION:
             dup += 1
+            # Do not erase: raw emission already recorded; no set update.
             continue
-        # First occurrence of this unique triple
-        seen_unique.add(prop)
+        # First occurrence of this unique *canonical* fact.
+        canon = canonicalize_triple(prop, g.symmetric_relations)
+        seen_unique.add(canon)
         if cls is RelationClass.TRUE_POSITIVE:
             tp += 1
-            # Consume expected (exact or symmetric reverse)
-            if prop in remaining:
-                remaining.discard(prop)
-            elif prop.relation in g.symmetric_relations:
-                rev = RelationTriple(prop.object_id, prop.relation, prop.subject_id)
-                remaining.discard(rev)
+            remaining.discard(canon)
         elif cls is RelationClass.WRONG_RELATION:
             wr += 1
         elif cls is RelationClass.REVERSED_DIRECTION:
@@ -533,7 +586,6 @@ def _score_cell_inner(
     expected_n = len(g.expected_relations)
     proposed_raw_n = len(raw_triples)
     proposed_unique_n = len(seen_unique)
-    # Unique scored proposals = unique triples (duplicates already excluded from set)
     unique_scored_proposals = proposed_unique_n
 
     score, score_reason = primary_score_formula(
@@ -562,6 +614,8 @@ def _score_cell_inner(
         and expected_n > 0
     )
 
+    # Raw multiset hash: sorted raw emissions (both directions, cardinality).
+    # Unique-set hash: sorted unique *canonical* facts (symmetric collapse).
     record = {
         "schema_version": SCORER_SCHEMA_VERSION,
         "task_id": task_id,
@@ -585,6 +639,7 @@ def _score_cell_inner(
         "invalid_reason": None,
         "expected_relation_hash": triples_hash(g.expected_relations),
         "proposed_assertion_hash": triples_hash(raw_triples),
+        "proposed_unique_set_hash": unique_triples_hash(seen_unique),
         "false_negatives": [t.as_dict() for t in false_negatives],
         "proposal_classifications": proposal_classes,
         "task_contract_version": g.contract_version,
@@ -641,6 +696,7 @@ def _terminal_null(
         "invalid_reason": invalid_reason,
         "expected_relation_hash": exp_hash,
         "proposed_assertion_hash": None,
+        "proposed_unique_set_hash": None,
         "false_negatives": (
             [t.as_dict() for t in sort_triples(gold.expected_relations)] if gold else []
         ),

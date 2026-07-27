@@ -75,19 +75,26 @@ Mathematical review of the recommended formula:
 
 1. `DUPLICATE_ASSERTION`
 2. `OUT_OF_UNIVERSE_ASSERTION`
-3. `TRUE_POSITIVE` (exact remaining expected, or reverse if relation ∈ symmetric)
-4. `WRONG_RELATION` (same subject+object, different relation vs any expected)
-5. `REVERSED_DIRECTION` (same relation, swapped ends; relation not symmetric)
+3. `TRUE_POSITIVE` (canonical form in remaining expected; symmetric min/max)
+4. `WRONG_RELATION` (same ordered subject+object, different relation vs any expected)
+5. `REVERSED_DIRECTION` (same relation, swapped ends; asymmetric only)
 6. `UNSUPPORTED_ASSERTION`
+
+**00.6E.1:** `seen_unique` / expected store **canonical** forms so both
+directions of a declared-symmetric fact share one identity (second emission is
+DUP, not UNSUP).
 
 Unrecovered expected triples → `FALSE_NEGATIVE` list (not a proposal class).
 
 ## 7. Canonicalization and hashing
 
+- Symmetric relations: `min/max` endpoint reorder (RUN 00.6E.1)
 - Sort triples by `(subject_id, relation, object_id)`
 - Canonical JSON: `sort_keys=True`, compact separators, UTF-8
-- SHA-256 hex for expected set, proposed multiset-as-sorted-list, full records
-- Proposal order and expected order do not affect hashes of sets / primary metrics
+- `proposed_assertion_hash`: raw multiset (cardinality retained)
+- `proposed_unique_set_hash`: unique canonical facts (symmetric collapse)
+- `expected_relation_hash`: load-time canonical expected set
+- Proposal order and expected order do not affect primary metrics
 
 ## 8. Shotgun-resistance proof
 
@@ -207,26 +214,24 @@ adaptation remained untouched:
 
 ## 16. Ambiguities requiring Anthony’s ruling
 
-1. **Symmetric reverse as exact match:** implemented — if relation is in
-   `symmetric_relations` and the reverse is proposed, it is TP and can yield
-   `exact_relation_set_match=true`. Confirm whether exact match should require
-   the expected *orientation* even for symmetric relations.
-2. **Proposal hash includes duplicates vs unique only:** currently hashes the
-   full raw proposal multiset after sort (duplicates affect hash, not primary
-   score). Confirm preferred audit hash surface.
-3. **WRONG_RELATION vs multiple expected with same subject/object:** if two
-   expected triples share subject+object with different relations, a single
-   wrong-relation proposal is still classified WRONG_RELATION once; both
-   expected remain FN until exact TP recovered. Confirm acceptable.
-4. **Predicate alias:** `predicate_id` accepted as alias for `relation`. Confirm
-   freeze or remove.
-5. **Integration depth:** only `score_cell` / `score_planned_cells` — no ledger
-   auto-wire. Confirm next run should attach scores into TerminalLedger rows.
+1. **Symmetric reverse as exact match:** **resolved by 00.6E.1** — reverse alone
+   of a declared-symmetric expected fact is TP with `exact_relation_set_match=true`.
+   Both directions: score=1.0 but exact=false due to duplicate.
+2. **Proposal hash multiset vs unique:** **resolved by 00.6E.1** — retain raw
+   multiset as `proposed_assertion_hash`; add `proposed_unique_set_hash`.
+3. **WRONG_RELATION vs multiple expected on same pair:** **confirmed by 00.6E.1
+   adversarial test** — either expected is TP; third relation is WR.
+4. **Predicate alias:** **resolved by 00.6E.1** — `relation` only.
+5. **Integration depth:** still open — only `score_cell` / `score_planned_cells`;
+   no TerminalLedger auto-wire yet.
+
+See `RUN_00_6E_1_SYMMETRIC_CANONICALIZATION_AMENDMENT.md`.
 
 ## 17. Ready for independent adversarial review?
 
-**Yes — RUN 00.6E is ready for independent adversarial review.**
+**Amended by RUN 00.6E.1.** Ready for **focused re-review** of the symmetric
+both-directions case.
 
-Do not push until that review examines the implementation.
+Do not push until that review verifies the raw symmetric-duplicate case directly.
 
-M0 remains NO-GO. Stop after RUN 00.6E.
+M0 remains NO-GO.

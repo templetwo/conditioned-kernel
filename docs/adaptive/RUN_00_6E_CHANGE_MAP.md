@@ -16,9 +16,18 @@
 | `docs/adaptive/RUN_00_6E_IMPLEMENTATION_RECEIPT.md` | Receipt |
 | `docs/adaptive/RUN_00_6E_CHANGE_MAP.md` | This file |
 
-## Modified
+## Modified (RUN 00.6E.1 amendment)
 
-None (greenfield module + tests + docs only).
+| Path | Role |
+|---|---|
+| `src/conditioned_kernel/relational_scorer.py` | symmetric min/max canonicalize; unique-set hash; relation-only field |
+| `tests/test_run_00_6e_relational_scorer.py` | +00.6E.1 tests (defect repro + 20 proofs) |
+| `docs/adaptive/RUN_00_6E_*.md` | spec/schema/fixtures/receipt updated for 00.6E.1 |
+| `docs/adaptive/RUN_00_6E_1_SYMMETRIC_CANONICALIZATION_AMENDMENT.md` | amendment receipt |
+
+## Modified (00.6E original)
+
+None beyond greenfield module + tests + docs.
 
 ## Deliberately untouched
 
@@ -48,9 +57,9 @@ Outputs: one terminal score record per planned cell.
 
 | Suite | Count |
 |---|---|
-| Pre-00.6E (at base) | 251 passed |
-| 00.6E new | +51 |
-| Full suite | **302 passed** |
+| Pre-00.6E (at 02a0027) | 251 passed |
+| 00.6E new | +51 → 302 |
+| 00.6E.1 amendment | +22 → **324 passed** |
 
 ## Policy stamps on all 00.6E artifacts
 

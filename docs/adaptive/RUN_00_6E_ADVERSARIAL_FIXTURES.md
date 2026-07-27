@@ -65,6 +65,18 @@
 | 29 | symmetric_relation_reverse_is_tp | symmetry | TP=1, exact=true |
 | 30 | asymmetric_relation_incorrectly_reversed | asymmetric RD | RD=1, not TP |
 
+## RUN 00.6E.1 symmetric both-directions cases (tests)
+
+| Case | Expected outcome after amendment |
+|---|---|
+| reverse only of symmetric expected | TP=1, score=1.0, exact=true |
+| both directions of symmetric expected | TP=1, DUP=1, UNSUP=0, score=1.0, exact=false |
+| three alternating restatements | TP=1, DUP=2, score=1.0, exact=false |
+| asymmetric reverse (undeclared) | RD=1, TP=0 (unchanged) |
+| multi-relation same ordered pair | either expected is TP not WR; third relation is WR |
+| opposite expected source order | identical `expected_relation_hash` |
+| raw vs unique hashes | raw multiset differs on both-dir; unique set collapses |
+
 ## Property-test universe
 
 ```text
