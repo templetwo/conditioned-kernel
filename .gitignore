@@ -49,3 +49,5 @@ logs/*.jsonl
 # those hashes, so without this line the CLAIM reaches the public repo and the
 # EVIDENCE does not — exactly the failure described above.
 !experiments/runs/commissioning_*/
+# RUN 00.9A.1: scientific contract freeze design packet (no model execution).
+!experiments/runs/scientific_contract_*/

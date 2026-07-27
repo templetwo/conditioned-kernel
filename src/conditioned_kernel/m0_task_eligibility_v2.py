@@ -11,9 +11,11 @@ from conditioned_kernel.m0_scientific_contract import (
     MIN_DISTRACTORS,
     MIN_ELIGIBLE_TASKS,
     MIN_PERMITTED_OVER_EXPECTED_RATIO,
+    N_CANDIDATE,
     PRIMARY_ESTIMAND,
     PRIMARY_METRIC,
     PREDICTED_DIRECTION,
+    scientific_manifest_allowed,
 )
 from conditioned_kernel.relational_scorer import RelationTriple, triples_hash
 
@@ -173,13 +175,19 @@ def evaluate_corpus_v2(
     tasks: Sequence[Mapping[str, Any]],
     *,
     min_eligible: int = MIN_ELIGIBLE_TASKS,
+    n_candidate_target: int = N_CANDIDATE,
     negative_control_tasks: Sequence[Mapping[str, Any]] | None = None,
     primary_metric: str = PRIMARY_METRIC,
     estimand: str = PRIMARY_ESTIMAND,
     predicted_direction: str = PREDICTED_DIRECTION,
     post_performance_selection: bool = False,
+    rank_by_model_performance: bool = False,
 ) -> dict[str, Any]:
-    """Evaluate a candidate task list against M0-v2 corpus rules (static)."""
+    """Evaluate a candidate task list against M0-v2 corpus rules (static).
+
+    All tasks that pass the preregistered static rule enter the eligible corpus.
+    No model-performance ranking or selection is permitted.
+    """
     rows = [evaluate_task_contract_v2(t) for t in tasks]
     included = [r for r in rows if r["inclusion_verdict"] == "INCLUDED"]
     reasons: list[str] = []
@@ -187,6 +195,8 @@ def evaluate_corpus_v2(
         reasons.append("ONE_TASK_CORPUS")
     if len(included) < min_eligible:
         reasons.append("CORPUS_BELOW_MINIMUM")
+    if n_candidate_target != N_CANDIDATE:
+        reasons.append("N_CANDIDATE_NOT_FROZEN")
     if not negative_control_tasks:
         reasons.append("MISSING_NEGATIVE_CONTROL")
     if not primary_metric:
@@ -195,9 +205,13 @@ def evaluate_corpus_v2(
         reasons.append("PRIMARY_METRIC_NOT_FROZEN_CHOICE")
     if not estimand:
         reasons.append("MISSING_ESTIMAND")
+    if estimand == "median_paired_difference":
+        reasons.append("MEDIAN_NOT_PRIMARY_ESTIMAND")
+    if estimand and estimand != PRIMARY_ESTIMAND:
+        reasons.append("ESTIMAND_NOT_FROZEN_CHOICE")
     if not predicted_direction:
         reasons.append("MISSING_PREDICTED_DIRECTION")
-    if post_performance_selection:
+    if post_performance_selection or rank_by_model_performance:
         reasons.append("POST_PERFORMANCE_TASK_SELECTION")
 
     # cell id uniqueness for states
@@ -210,13 +224,25 @@ def evaluate_corpus_v2(
                 reasons.append("CELL_ID_MULTIPLE_STATES")
             seen_cells[cid] = sh
 
+    # All statically eligible tasks are included (no ranking cull)
+    all_eligible_included = len(included) == sum(
+        1 for r in rows if r["inclusion_verdict"] == "INCLUDED"
+    )
+    manifest = scientific_manifest_allowed(
+        n_eligible=len(included),
+        contract_reasons=reasons,
+    )
+
     return {
         "n_candidate": len(tasks),
+        "n_candidate_target": n_candidate_target,
         "n_eligible": len(included),
         "n_min_eligible": min_eligible,
         "rows": rows,
         "corpus_reasons": sorted(set(reasons)),
         "corpus_eligible": len(reasons) == 0 and len(included) >= min_eligible,
+        "all_eligible_included": all_eligible_included,
+        "scientific_manifest_allowed": manifest["allowed"],
         "primary_metric": primary_metric,
         "estimand": estimand,
         "predicted_direction": predicted_direction,
@@ -227,15 +253,18 @@ def evaluate_corpus_v2(
 TASK_SELECTION_POLICY: dict[str, Any] = {
     "task_family_template": "episode_a_accept_then_episode_b_state_query",
     "eligibility_rule_id": "ck.m0.eligibility.v2",
+    "n_candidate": N_CANDIDATE,
     "min_eligible": MIN_ELIGIBLE_TASKS,
+    "include_all_statically_eligible": True,
     "relation_vocabulary_policy": "closed_small_frozen_set_per_task",
     "entity_generation_policy": "synthetic_opaque_ids_no_world_knowledge",
     "distractor_policy": f"min_{MIN_DISTRACTORS}_in_universe_non_gold",
     "difficulty_bands": ["small", "medium"],
     "task_id_procedure": "sequential m0v2_task_NNN assigned before content freeze",
-    "ordering": "lexicographic task_id",
+    "ordering": "lexicographic task_id for authorship; execution order seed-pinned",
     "seed_policy": "generator seeds pinned before candidate pool if used",
     "human_vs_generated": "either allowed; no model probing for inclusion",
     "no_model_probing": True,
     "no_post_performance_selection": True,
+    "no_near_duplicate_inflation": True,
 }

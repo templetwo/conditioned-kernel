@@ -27,15 +27,20 @@ in_universe_distractor_n >= 2   (explicit or implicit non-gold permitted)
 
 Exclusion: `GOLD_SATURATES_PERMITTED_UNIVERSE`
 
-## Corpus policy (frozen before authorship)
+## Corpus policy (frozen before authorship — 00.9A.1)
 
 | Parameter | Value |
 |---|---|
+| N_candidate | **24** |
 | N_min_eligible | **12** |
+| Inclusion | all tasks passing static rule (no model ranking) |
 | One-task corpus | **prohibited** |
+| Below-minimum eligible | `CORPUS_BELOW_MINIMUM` — no scientific manifest |
 | Task selection | independent of model performance |
 | Model probing during construction | **forbidden** |
-| Ordering | lexicographic task_id |
+| Near-duplicate inflation | forbidden |
+| Ordering (authorship) | lexicographic task_id |
+| Ordering (execution) | seed-pinned counterbalance C1↔C3 |
 | Families | asymmetric/symmetric, multi-expected, mixed accept/reject quotas (prereg) |
 
 ## Selection independence

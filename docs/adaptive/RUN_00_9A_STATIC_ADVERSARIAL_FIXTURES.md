@@ -21,6 +21,11 @@ All static. No model invocation.
 | 13 | Same cell_id, two states | `CELL_ID_MULTIPLE_STATES` |
 | 14 | Missing model digest | `MISSING_MODEL_DIGEST` |
 | 15 | Null result has licensed language | (claim table documents explicit null claim) |
+| 16 | Omitted/None permitted universe | `PERMITTED_COMBINATIONS_REQUIRED` (fail-closed) |
+| 17 | Empty permitted universe | `PERMITTED_COMBINATIONS_EMPTY` |
+| 18 | Median offered as primary estimand | `MEDIAN_NOT_PRIMARY_ESTIMAND` |
+| 19 | mean_D_NC ≥ δ_m0 | pipeline_artifact |
+| 20 | Unqualified runtime | `RUNTIME_CONTRACT_UNQUALIFIED` |
 
 ## Passing toy contracts
 

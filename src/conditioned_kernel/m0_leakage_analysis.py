@@ -1,6 +1,9 @@
-"""RUN 00.9A — static anti-copy / anti-leak analysis over model-visible packets.
+"""RUN 00.9A.1 — fail-closed static anti-copy / anti-leak analysis.
 
 No model invocation. Canonical relation-aware checks, not sentinel-only grep.
+
+permitted_combinations is REQUIRED. Omitting it or passing None/empty never
+returns a clean leakage_detected=false result (fail-closed).
 """
 
 from __future__ import annotations
@@ -10,6 +13,21 @@ import re
 from typing import Any, Mapping, Sequence
 
 from conditioned_kernel.relational_scorer import RelationTriple, canonical_json_bytes
+
+C3_REQUIRED_REPRESENTATION = "structured_state_v1"
+OUTPUT_SCHEMA_KEYS = (
+    "continuity_assertions",
+    "continuity_assertions_v1",
+    "output_ready_triples",
+)
+
+
+class LeakageAnalysisError(ValueError):
+    """Fail-closed leakage analysis input/contract error."""
+
+    def __init__(self, reason_code: str, message: str = "") -> None:
+        self.reason_code = reason_code
+        super().__init__(message or reason_code)
 
 
 def _triple(m: Mapping[str, Any]) -> RelationTriple:
@@ -48,27 +66,61 @@ def gold_visible_in_text(text: str, gold: Sequence[Mapping[str, Any]]) -> list[s
     return hits
 
 
+def _parse_permitted(
+    permitted_combinations: Sequence[Any],
+) -> list[RelationTriple]:
+    combos: list[RelationTriple] = []
+    for c in permitted_combinations:
+        if isinstance(c, (list, tuple)) and len(c) == 3:
+            combos.append(RelationTriple(str(c[0]), str(c[1]), str(c[2])))
+        elif isinstance(c, Mapping):
+            combos.append(_triple(c))
+        elif isinstance(c, RelationTriple):
+            combos.append(c)
+        else:
+            raise LeakageAnalysisError(
+                "LEAKAGE_ANALYSIS_INCOMPLETE",
+                f"unparseable permitted combination: {c!r}",
+            )
+    return combos
+
+
+def require_permitted_combinations(
+    permitted_combinations: Sequence[Any] | None,
+) -> list[RelationTriple]:
+    """Fail-closed validation of the permitted universe for leakage analysis."""
+    if permitted_combinations is None:
+        raise LeakageAnalysisError("PERMITTED_COMBINATIONS_REQUIRED")
+    try:
+        items = list(permitted_combinations)
+    except TypeError as exc:
+        raise LeakageAnalysisError(
+            "PERMITTED_COMBINATIONS_REQUIRED",
+            "permitted_combinations must be a non-empty sequence",
+        ) from exc
+    if len(items) == 0:
+        raise LeakageAnalysisError("PERMITTED_COMBINATIONS_EMPTY")
+    return _parse_permitted(items)
+
+
 def gold_derivable_from_control(
     *,
     control_visible: Mapping[str, Any] | str | bytes,
     gold: Sequence[Mapping[str, Any]],
-    permitted_combinations: Sequence[Any] | None = None,
+    permitted_combinations: Sequence[Any],
 ) -> bool:
-    """True if control exposes gold triples or only-possible complete recipe."""
+    """True if control exposes gold triples or only-possible complete recipe.
+
+    permitted_combinations is required (no default). None/empty raise.
+    """
+    combos = require_permitted_combinations(permitted_combinations)
     text = packet_bytes_from_visible(control_visible)
     if gold_visible_in_text(text, gold):
         return True
-    # Mechanically complete recipe: permitted_combinations == gold only
-    if permitted_combinations is not None:
-        combos = []
-        for c in permitted_combinations:
-            if isinstance(c, (list, tuple)) and len(c) == 3:
-                combos.append(RelationTriple(str(c[0]), str(c[1]), str(c[2])))
-            elif isinstance(c, Mapping):
-                combos.append(_triple(c))
-        gold_set = {_triple(g) for g in gold}
-        if combos and set(combos) == gold_set:
-            return True
+    # Mechanically complete recipe: permitted universe equals gold only
+    gold_set = {_triple(g) for g in gold}
+    if set(combos) == gold_set:
+        return True
     # operational state fields that dump accepted_relations
     if isinstance(control_visible, Mapping):
         for key in (
@@ -76,6 +128,7 @@ def gold_derivable_from_control(
             "expected_relations",
             "gold_relations",
             "output_ready_triples",
+            "continuity_assertions",
         ):
             if key in control_visible and control_visible[key]:
                 try:
@@ -93,35 +146,71 @@ def treatment_is_output_ready(
     gold: Sequence[Mapping[str, Any]],
     output_schema_key: str = "continuity_assertions",
 ) -> bool:
-    """C3 contains exact scorer triples under the output schema key."""
+    """True when C3 contains exact scorer / output-ready gold triples.
+
+    Hard invariant for M0-v2: output-ready treatment is never eligible.
+    """
+    gold_set = {_triple(g) for g in gold}
     if not isinstance(treatment_visible, Mapping):
         text = packet_bytes_from_visible(treatment_visible)
-        return bool(gold_visible_in_text(text, gold)) and output_schema_key in text
-    if output_schema_key in treatment_visible:
-        try:
-            items = treatment_visible[output_schema_key]
+        return bool(gold_visible_in_text(text, gold)) and (
+            output_schema_key in text or "continuity_assertions" in text
+        )
+
+    for key in OUTPUT_SCHEMA_KEYS:
+        if key in treatment_visible:
+            items = treatment_visible[key]
             if isinstance(items, list) and items:
-                got = {_triple(x) for x in items if isinstance(x, Mapping)}
-                if got == {_triple(g) for g in gold}:
+                try:
+                    got = {_triple(x) for x in items if isinstance(x, Mapping)}
+                except (KeyError, TypeError):
+                    got = set()
+                if got == gold_set:
                     return True
-        except (KeyError, TypeError):
-            pass
-    # accepted_relations that are identical to required output form
-    ar = treatment_visible.get("accepted_relations")
-    if isinstance(ar, list) and ar:
+
+    # Any field that is a complete scorer-triple rendering of gold is output-ready
+    for key in (
+        "accepted_relations",
+        "expected_relations",
+        "gold_relations",
+        "output_ready_triples",
+        "continuity_assertions",
+    ):
+        items = treatment_visible.get(key)
+        if isinstance(items, list) and items:
+            try:
+                got = {_triple(x) for x in items if isinstance(x, Mapping)}
+            except (KeyError, TypeError):
+                continue
+            if got == gold_set:
+                return True
+
+    # Canonical equivalence: whole visible object equals gold list
+    if isinstance(treatment_visible, list):  # type: ignore[unreachable]
         try:
-            got = {_triple(x) for x in ar if isinstance(x, Mapping)}
-            if got == {_triple(g) for g in gold}:
-                # structured state that is byte-identical to output triples
+            got = {_triple(x) for x in treatment_visible if isinstance(x, Mapping)}
+            if got == gold_set:
                 return True
         except (KeyError, TypeError):
             pass
+
+    return False
+
+
+def c3_representation_valid(treatment_visible: Mapping[str, Any] | str | bytes) -> bool:
+    """C3 must declare structured_state_v1 (or superseding structured non-output form)."""
+    if not isinstance(treatment_visible, Mapping):
+        return False
+    rep = str(treatment_visible.get("representation") or "")
+    if rep == C3_REQUIRED_REPRESENTATION:
+        return True
+    if treatment_visible.get("structured_state_not_output_schema") is True and rep:
+        return True
     return False
 
 
 def condition_identity_visible(visible: Mapping[str, Any] | str | bytes) -> bool:
     text = packet_bytes_from_visible(visible)
-    # model-visible condition labels (supersession: forbidden outside metadata)
     patterns = [
         r'"condition"\s*:\s*"C[0-3]',
         r"C0_bare",
@@ -153,14 +242,44 @@ def information_match_check(
     return reasons
 
 
+def _incomplete_result(reason: str, extra: Sequence[str] = ()) -> dict[str, Any]:
+    reasons = sorted(set([reason, "LEAKAGE_ANALYSIS_INCOMPLETE", *extra]))
+    return {
+        "per_condition": {},
+        "exclusion_reasons": reasons,
+        "leakage_detected": True,  # never false when incomplete
+        "analysis_complete": False,
+        "task_eligible": False,
+    }
+
+
 def analyze_condition_packets(
     *,
     gold: Sequence[Mapping[str, Any]],
     packets: Mapping[str, Mapping[str, Any] | str | bytes],
-    permitted_combinations: Sequence[Any] | None = None,
-    c3_allows_structured_state: bool = True,
+    permitted_combinations: Sequence[Any],
 ) -> dict[str, Any]:
-    """Return leakage reasons per condition and aggregate exclusion reasons."""
+    """Return leakage reasons per condition. Fail-closed on missing universe.
+
+    permitted_combinations is required (no default). None/empty never yields a
+    clean leakage_detected=false outcome.
+    """
+    if permitted_combinations is None:  # type: ignore[comparison-overlap]
+        return _incomplete_result(
+            "PERMITTED_COMBINATIONS_REQUIRED",
+            ["CONTROL_DERIVABILITY_UNRESOLVED"],
+        )
+    try:
+        combos = require_permitted_combinations(permitted_combinations)
+    except LeakageAnalysisError as exc:
+        return _incomplete_result(
+            exc.reason_code,
+            ["CONTROL_DERIVABILITY_UNRESOLVED"],
+        )
+
+    if not gold:
+        return _incomplete_result("LEAKAGE_ANALYSIS_INCOMPLETE")
+
     reasons: list[str] = []
     per: dict[str, list[str]] = {}
 
@@ -178,27 +297,15 @@ def analyze_condition_packets(
             if gold_derivable_from_control(
                 control_visible=vis,
                 gold=gold,
-                permitted_combinations=permitted_combinations,
+                permitted_combinations=combos,
             ):
                 cr.append("GOLD_DERIVABLE_FROM_CONTROL")
         if cond in ("C3", "C3_static_ck"):
             if treatment_is_output_ready(treatment_visible=vis, gold=gold):
-                if not c3_allows_structured_state:
-                    cr.append("GOLD_OUTPUT_READY_IN_TREATMENT")
-                else:
-                    # Prefer structured state representation marker
-                    if isinstance(vis, Mapping) and vis.get("continuity_assertions"):
-                        cr.append("GOLD_OUTPUT_READY_IN_TREATMENT")
-                    elif isinstance(vis, Mapping) and vis.get(
-                        "structured_state_not_output_schema"
-                    ):
-                        pass  # OK: treatment is structured non-output form
-                    elif isinstance(vis, Mapping) and "accepted_relations" in vis:
-                        # accepted_relations identical to gold is still leaky if
-                        # format matches output — flag when only field is triples
-                        if treatment_is_output_ready(treatment_visible=vis, gold=gold):
-                            if vis.get("representation") != "structured_state_v1":
-                                cr.append("GOLD_OUTPUT_READY_IN_TREATMENT")
+                cr.append("GOLD_OUTPUT_READY_IN_TREATMENT")
+            elif not c3_representation_valid(vis):
+                # Missing structured non-output representation is incomplete/unsafe
+                cr.append("GOLD_OUTPUT_READY_IN_TREATMENT")
         per[cond] = cr
         reasons.extend(cr)
 
@@ -206,4 +313,7 @@ def analyze_condition_packets(
         "per_condition": per,
         "exclusion_reasons": sorted(set(reasons)),
         "leakage_detected": bool(reasons),
+        "analysis_complete": True,
+        "task_eligible": len(reasons) == 0,
+        "permitted_combination_n": len(combos),
     }

@@ -32,9 +32,12 @@ non-state metadata **without** accepted relational state.
 
 ### C3 — Structured verified continuity
 
-Replay-derived structured representation of actually accepted Episode-A state.
-Preferred: representation **distinct** from required output schema so the
-model transforms state rather than copies scorer triples.
+Replay-derived structured representation of actually accepted Episode-A state
+under **`representation=structured_state_v1`**.
+
+**Hard invariant (00.9A.1):** must **not** be byte-identical, schema-equivalent,
+or a complete output-ready rendering of expected scorer triples.
+Exclusion: `GOLD_OUTPUT_READY_IN_TREATMENT` (mandatory, not optional).
 
 ## Primary contrast
 

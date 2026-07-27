@@ -1,8 +1,8 @@
-# RUN 00.9A — M0-v2 Scientific Contract Spec
+# RUN 00.9A / 00.9A.1 — M0-v2 Scientific Contract Spec
 
-**Starting commit:** `9fbfe48b93a19d10b0a00575f59f368a3f3ec3b7`  
-**Branch:** `grok/ck-run-00-9a-scientific-contract-freeze`  
-**Contract version:** `ck.m0_scientific_contract.v2`  
+**Starting commit (00.9A.1 base):** `862429c4e181fed2c31fb2aa57bc8010a4b28265`  
+**Branch (00.9A.1):** `grok/ck-run-00-9a-1-contract-closure`  
+**Contract version:** `ck.m0_scientific_contract.v2.1`  
 **M0:** NO-GO · No model execution · No corpus authorship · No authorization
 
 ## Scientific objective
@@ -19,54 +19,50 @@ count against it, the design fails review.
 
 | Module | Role |
 |---|---|
-| `m0_scientific_contract.py` | claim ladder, estimand, conditions, falsification |
+| `m0_scientific_contract.py` | claim ladder, mean estimand, δ_m0, conditions, decision |
 | `m0_task_eligibility_v2.py` | gold non-saturation, state/gold, corpus minima |
-| `m0_leakage_analysis.py` | anti-copy / control leakage static analysis |
+| `m0_leakage_analysis.py` | **fail-closed** anti-copy / control leakage analysis |
 | `m0_preregistration_v2.py` | `ck.m0_preregistration.v2` template (unratified) |
 
-## Frozen primary choices
+## Frozen primary choices (00.9A.1)
 
 | Axis | Frozen value |
 |---|---|
 | Primary metric | `exact_relation_set_match` |
 | Secondary metric | `primary_score` |
-| Estimand | `median_paired_difference` of \(D_i = Y_i(C3)-Y_i(C1)\) |
-| Direction | `C3_greater_than_C1` |
-| N_min_eligible | 12 |
-| Max claim level | D (corpus M0) |
-| Replicates | 1 (no independent-replication claim from identical reruns) |
+| Estimand | `mean_paired_difference` of \(D_i=Y_i(C3)-Y_i(C1)\) |
+| δ_m0 | **0.25** |
+| Direction | `C3_greater_than_C1` with threshold, not any positive |
+| N_candidate | **24** |
+| N_min_eligible | **12** |
+| Primary NC | `scrambled_state` |
+| Secondary integrity | `aa_serialization` |
+| C3 representation | `structured_state_v1` (hard non-output-ready) |
+| Max claim level | D (continuation only) |
+| Replicates | 1 (no independent-replication claim) |
 | Retries | 0 |
+
+## Fail-closed leakage (00.9A.1)
+
+`permitted_combinations` is **required**. None/empty/omitted:
+
+- hard failure (`PERMITTED_COMBINATIONS_REQUIRED` / `EMPTY`)
+- or incomplete analysis with `leakage_detected=True` and
+  `LEAKAGE_ANALYSIS_INCOMPLETE` / `CONTROL_DERIVABILITY_UNRESOLVED`
+- **never** a clean `leakage_detected=false`
 
 ## State and packet freeze (two-stage)
 
-For every planned C3 cell require:
-
-- `episode_a_state_hash`
-- `accepted_relation_set_hash`
-- `replay_receipt_hash`
-- `compiled_packet_hash`
-- `finalized_request_byte_length`
-- `paired_control_packet_hash`
-- `pair_byte_target`
-
-**Stage 1:** execute and freeze Episode A.  
-**Stage 2:** compile and freeze Episode B cells from accepted state.  
-No Episode-B model execution before Stage 2 is complete and hashed.  
+Stage 1: freeze Episode A hashes. Stage 2: compile Episode B packets and hashes.
+No Episode-B model execution before Stage 2 is complete.
 One `cell_id` may not admit two Episode-A states.
 
 ## Replicate / order policy
 
-- Replicate count: 1 until load-state/determinism limitations are separately closed  
-- No retries; failures terminalized per existing commissioning discipline  
-- Task order: seeded and frozen before execution (not silent fixed C0–C3 commissioning order as science)  
-- Blocking: by task, then conditions including NC  
-- Cache / warm-cold: record; do not claim independence from identical condition reruns  
-- Each planned cell gets a distinct cell ID; replicates (if later raised) get distinct IDs  
-
-## Invalidation gates (pre-authorization)
-
-See `INVALIDATION_GATES` in `m0_scientific_contract.py`. Gates run **before**
-scientific authorization. Leakage after freeze invalidates the run.
+- Replicates: 1; retries: 0; distinct cell IDs; failures terminalized  
+- Counterbalanced condition order: ≥ half C1-before-C3, remainder C3-before-C1  
+- Seed-pinned; scrambled_state + A/A in every task block  
+- Unqualified runtime/load → `RUNTIME_CONTRACT_UNQUALIFIED` blocks authorization  
 
 ## Retired candidate
 

@@ -125,7 +125,11 @@ def test_gold_visible_in_control_rejected():
         "representation": "structured_state_v1",
         "state_graph": {"nodes": ["e1", "e2"], "edge_status": "accepted_rel_a"},
     }
-    an = analyze_condition_packets(gold=gold, packets=packets)
+    an = analyze_condition_packets(
+        gold=gold,
+        packets=packets,
+        permitted_combinations=[["e1", "rel_a", "e2"], ["e1", "rel_b", "e2"]],
+    )
     assert "GOLD_VISIBLE_IN_CONTROL" in an["exclusion_reasons"]
 
 
@@ -147,6 +151,7 @@ def test_output_ready_treatment_leakage_rejected():
     an = analyze_condition_packets(
         gold=gold,
         packets={"C3_static_ck": {"continuity_assertions": gold}},
+        permitted_combinations=[["e1", "rel_a", "e2"], ["e1", "rel_b", "e2"]],
     )
     assert "GOLD_OUTPUT_READY_IN_TREATMENT" in an["exclusion_reasons"]
 
@@ -164,7 +169,15 @@ def test_valid_structured_state_treatment_accepted():
             "state_graph": {"accepted": ["e1|rel_a|e2"]},
         },
     }
-    an = analyze_condition_packets(gold=gold, packets=packets)
+    an = analyze_condition_packets(
+        gold=gold,
+        packets=packets,
+        permitted_combinations=[
+            ["e1", "rel_a", "e2"],
+            ["e1", "rel_b", "e2"],
+            ["e2", "rel_a", "e1"],
+        ],
+    )
     assert "GOLD_OUTPUT_READY_IN_TREATMENT" not in an["exclusion_reasons"]
     assert "GOLD_VISIBLE_IN_CONTROL" not in an["exclusion_reasons"]
 
@@ -173,6 +186,7 @@ def test_condition_identity_leak_rejected():
     an = analyze_condition_packets(
         gold=[{"subject_id": "e1", "relation": "r", "object_id": "e2"}],
         packets={"C1_budget_matched_bare": {"condition": "C1_budget_matched_bare"}},
+        permitted_combinations=[["e1", "r", "e2"], ["e2", "r", "e1"]],
     )
     assert "CONDITION_IDENTITY_MODEL_VISIBLE" in an["exclusion_reasons"]
 
@@ -241,6 +255,7 @@ def test_missing_estimand_rejected():
         negative_controls_defined=True,
         model_digest="sha256:x",
         runtime_policy_present=True,
+        ordering_seed=1,
     )
     assert "MISSING_ESTIMAND" in r
 
@@ -256,6 +271,7 @@ def test_multiple_primary_metrics_rejected():
         negative_controls_defined=True,
         model_digest="sha256:x",
         runtime_policy_present=True,
+        ordering_seed=1,
     )
     assert "MULTIPLE_PRIMARY_METRICS" in r
 
@@ -270,6 +286,7 @@ def test_missing_predicted_direction_rejected():
         negative_controls_defined=True,
         model_digest="sha256:x",
         runtime_policy_present=True,
+        ordering_seed=1,
     )
     assert "MISSING_PREDICTED_DIRECTION" in r
 
@@ -284,6 +301,7 @@ def test_missing_falsification_rejected():
         negative_controls_defined=True,
         model_digest="sha256:x",
         runtime_policy_present=True,
+        ordering_seed=1,
     )
     assert "MISSING_FALSIFICATION_STATEMENT" in r
 
@@ -323,6 +341,7 @@ def test_missing_model_digest_rejected():
         negative_controls_defined=True,
         model_digest=None,
         runtime_policy_present=True,
+        ordering_seed=1,
     )
     assert "MISSING_MODEL_DIGEST" in r
 
@@ -337,6 +356,7 @@ def test_missing_runtime_policy_rejected():
         negative_controls_defined=True,
         model_digest="sha256:x",
         runtime_policy_present=False,
+        ordering_seed=1,
     )
     assert "MISSING_RUNTIME_POLICY" in r
 
@@ -352,6 +372,7 @@ def test_conflicting_c1_definition_rejected():
         model_digest="sha256:x",
         runtime_policy_present=True,
         c1_definition_conflicts=True,
+        ordering_seed=1,
     )
     assert "CONFLICTING_C1_DEFINITION" in r
 
@@ -365,7 +386,13 @@ def test_positive_claim_stays_within_d():
 
 def test_null_result_claim_explicit():
     null = licensed_claim_for_outcome("null_result")
-    assert "No paired advantage" in null or "zero" in null.lower()
+    assert (
+        "No paired advantage" in null
+        or "no minimally relevant" in null.lower()
+        or "zero" in null.lower()
+        or "inconclusive" in null.lower()
+        or "(-0.25" in null
+    )
 
 
 def test_negative_result_weakens_hypothesis():
@@ -391,7 +418,7 @@ def test_two_passing_toy_contracts():
 def test_primary_metric_and_estimand_frozen():
     d = scientific_contract_freeze_dict()
     assert d["primary_metric"] == "exact_relation_set_match"
-    assert d["estimand"]["corpus_aggregate"] == "median_paired_difference"
+    assert d["estimand"]["corpus_aggregate"] == "mean_paired_difference"
     assert d["secondary_metric"] == "primary_score"
 
 

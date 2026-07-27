@@ -1,22 +1,24 @@
 # RUN 00.9A — Fable Review Packet
 
-Independent scientific review questions:
+Independent scientific review questions (00.9A.1):
 
-1. Can any control reconstruct the gold?  
-2. Does C3 provide continuity rather than answer copying?  
-3. Is the primary estimand uniquely pinned (`median_paired_difference`)?  
-4. Can negative controls invalidate the intended interpretation?  
-5. Is task selection independent of model outcomes?  
-6. Is the minimum corpus (N≥12) large and varied enough for claim level D?  
-7. Can a frozen result weaken the hypothesis (median D < 0)?  
-8. Are state and packet hashes fully determined before Episode-B execution?  
-9. Are all prior M0/C1 definitions explicitly superseded?  
-10. Is any claim language stronger than level D permits?
+1. Omitted `permitted_combinations` fails closed (never clean false)?  
+2. Real leaked C1 packet still triggers `GOLD_DERIVABLE_FROM_CONTROL`?  
+3. Primary estimand uniquely pinned to `mean_paired_difference` with δ_m0=0.25?  
+4. Can scrambled-state `mean_D_NC` invalidate the result numerically?  
+5. Is output-ready C3 rejected as hard invariant?  
+6. Do both passing toy contracts remain eligible under stricter API?  
+7. Is task selection independent of model outcomes?  
+8. Can a frozen result weaken the hypothesis (`mean_D ≤ −0.25`)?  
+9. Are state/packet hashes determined before Episode-B execution?  
+10. Is any claim language stronger than level D / continuation-only?
 
 ## Anchors
 
 - Spec: `RUN_00_9A_SCIENTIFIC_CONTRACT_SPEC.md`  
+- Closure receipt: `RUN_00_9A_1_CONTRACT_CLOSURE_RECEIPT.md`  
 - Falsification: `RUN_00_9A_CLAIM_AND_FALSIFICATION_CONTRACT.md`  
 - Supersession: `RUN_00_9A_CONDITION_SUPERSESSION.md`  
-- Code freeze: `m0_scientific_contract.py`  
-- Tests: `test_run_00_9a_scientific_contract.py`  
+- Code freeze: `m0_scientific_contract.py`, `m0_leakage_analysis.py`  
+- Tests: `test_run_00_9a_1_contract_closure.py`  
+
