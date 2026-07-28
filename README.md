@@ -40,7 +40,7 @@ source .venv/bin/activate
 pip install -e ".[dev]"
 
 # Requires Ollama running locally with a small model, e.g.:
-#   ollama pull qwen2.5:0.5b
+#   ollama pull qwen3.5:0.8b
 ollama serve   # if not already running
 
 ck status
@@ -95,7 +95,8 @@ v0 does **not** stream model tokens to the terminal. The substrate buffers the f
 
 Primary experimental window: **0.5B–1.5B**. Stretch lower with SmolLM2-class probes; stretch upper carefully on Jetson Orin Nano 8GB.
 
-This machine already has useful Ollama tags for first runs: `qwen2.5:0.5b`, `qwen2.5:1.5b`, `granite4:350m`, `tinyllama:1.1b`.
+Default Studio kernel (orin_nano_8gb): `qwen3.5:0.8b` with `think=false` via the Ollama API.
+Also useful tags: `qwen2.5:0.5b`, `qwen2.5:1.5b`, `granite4:350m`, `tinyllama:1.1b`.
 
 ## Experiment discipline
 

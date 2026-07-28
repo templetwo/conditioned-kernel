@@ -49,6 +49,17 @@ def test_default_profile_is_orin_nano():
     assert p.one_model_only is True
     assert p.stream is False
     assert p.cloud is False
+    assert p.model == "qwen3.5:0.8b"
+    assert p.think is False
+
+
+def test_compile_sets_think_false_in_ollama_payload(tmp_path: Path):
+    state = _minimal_state(tmp_path)
+    _packet, mi = compile_turn(state, "hello", profile_id="orin_nano_8gb")
+    assert mi["model"] == "qwen3.5:0.8b"
+    assert mi["payload"]["think"] is False
+    assert mi["payload"]["options"]["num_ctx"] == 2048
+    assert mi["think"] is False
 
 
 def test_packet_trimmed_to_edge_bounds(tmp_path: Path):

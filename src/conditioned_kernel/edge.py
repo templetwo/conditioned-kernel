@@ -44,6 +44,9 @@ class EdgeProfile:
     estimated_model_ram_mb: int
     estimated_substrate_ram_mb: int
     notes: str = ""
+    # Ollama chat/generate "think" flag. False disables reasoning channel for
+    # thinking-capable kernels (e.g. qwen3.5). Never treated as the final answer.
+    think: bool = False
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "EdgeProfile":
@@ -53,7 +56,7 @@ class EdgeProfile:
             target_device=str(data.get("target_device") or "unknown"),
             arch=str(data.get("arch") or "any"),
             ram_gb=int(data.get("ram_gb") or 8),
-            model=str(data.get("model") or "qwen2.5:0.5b"),
+            model=str(data.get("model") or "qwen3.5:0.8b"),
             mode=str(data.get("mode") or "chat_json"),
             num_ctx=int(data["num_ctx"] if data.get("num_ctx") is not None else 2048),
             # Preserve valid falsy zeros (RUN 00.8A): temperature=0.0 and seed=0
@@ -88,6 +91,8 @@ class EdgeProfile:
             estimated_model_ram_mb=int(data.get("estimated_model_ram_mb") or 500),
             estimated_substrate_ram_mb=int(data.get("estimated_substrate_ram_mb") or 200),
             notes=str(data.get("notes") or ""),
+            # Default False: Studio path disables thinking for thinking-capable models.
+            think=bool(data["think"]) if data.get("think") is not None else False,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -112,6 +117,7 @@ class EdgeProfile:
             "max_log_file_bytes": self.max_log_file_bytes,
             "one_model_only": self.one_model_only,
             "stream": self.stream,
+            "think": self.think,
             "cloud": self.cloud,
             "sensors": self.sensors,
             "tools": self.tools,

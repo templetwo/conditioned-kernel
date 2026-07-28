@@ -244,7 +244,7 @@ def resolve_obligation(
     goal = str(state.current.get("goal") or "").strip()
     edge = str(flags.get("edge_target") or "jetson_orin_nano_8gb")
     active_profile = str(state.current.get("active_profile") or "orin_nano_8gb")
-    use_model = model or (profile.model if profile else "qwen2.5:0.5b")
+    use_model = model or (profile.model if profile else "qwen3.5:0.8b")
     cloud = bool(flags.get("cloud", False))
     open_threads = state.open_threads()
     recent = state.recent_turns()

@@ -165,6 +165,7 @@ def build_model_input(
     num_ctx: int = 2048,
     keep_alive: str = "2m",
     compact: bool = True,
+    think: bool = False,
 ) -> dict[str, Any]:
     # Compact JSON saves context tokens on edge devices.
     # Volatile fields are stripped from the MODEL INPUT only: packet_id and
@@ -193,6 +194,13 @@ def build_model_input(
         "Never invent thread ids. No files, URLs, tools, or cloud."
     )
 
+    options = {
+        "temperature": temperature,
+        "repeat_penalty": 1.1,
+        "seed": seed,
+        "num_ctx": num_ctx,
+    }
+
     if mode == "chat_json":
         payload: dict[str, Any] = {
             "model": model,
@@ -206,12 +214,9 @@ def build_model_input(
             "format": CANDIDATE_FORMAT,
             "stream": False,
             "keep_alive": keep_alive,
-            "options": {
-                "temperature": temperature,
-                "repeat_penalty": 1.1,
-                "seed": seed,
-                "num_ctx": num_ctx,
-            },
+            # Ollama API: disable reasoning channel (not prompt-only).
+            "think": bool(think),
+            "options": options,
         }
     else:
         # generate_raw: packet is the prompt surface; no chat template assumed.
@@ -227,12 +232,8 @@ def build_model_input(
             "stream": False,
             "format": CANDIDATE_FORMAT,
             "keep_alive": keep_alive,
-            "options": {
-                "temperature": temperature,
-                "repeat_penalty": 1.1,
-                "seed": seed,
-                "num_ctx": num_ctx,
-            },
+            "think": bool(think),
+            "options": options,
         }
 
     return {
@@ -244,6 +245,7 @@ def build_model_input(
         "packet_hash": packet_hash(packet),
         "edge_profile": (packet.get("_edge") or {}).get("profile_id"),
         "packet_bytes": (packet.get("_edge") or {}).get("packet_bytes"),
+        "think": bool(think),
     }
 
 
@@ -284,5 +286,6 @@ def compile_turn(
         num_ctx=prof.num_ctx if num_ctx is None else num_ctx,
         keep_alive=prof.keep_alive if keep_alive is None else keep_alive,
         compact=True,
+        think=bool(prof.think),
     )
     return packet, model_input
