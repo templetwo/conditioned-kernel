@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conditioned Kernel — Interior View</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app-root" id="app-root">
+
+  <header class="hdr">
+    <div class="hdr-title-row">
+      <h1 class="hdr-title">Conditioned Kernel — Interior View</h1>
+      <span class="hdr-subtitle">See how the substrate shapes each turn.</span>
+      <span class="spacer"></span>
+      <div class="layout-toggle">
+        <button id="btn-rail" class="pill" type="button">Rail</button>
+        <button id="btn-spine" class="pill" type="button">Spine</button>
+      </div>
+    </div>
+    <div class="hdr-meta-row" id="hdr-meta"></div>
+  </header>
+
+  <div class="body-row">
+
+    <section class="col-convo" data-screen-label="Conversation">
+      <div class="convo-head">
+        <h2>Conversation</h2>
+        <span class="mono convo-meta" id="convo-meta"></span>
+      </div>
+      <div class="convo-list" id="convo-list">
+        <div class="empty-placeholder">Loading session…</div>
+      </div>
+      <div class="convo-input">
+        <div class="input-row">
+          <input id="draft-input" class="draft-input" type="text" placeholder="Type a message…" autocomplete="off">
+          <button id="send-btn" class="send-btn" type="button">Send</button>
+        </div>
+        <p class="send-note mono" id="send-note"></p>
+      </div>
+    </section>
+
+    <section class="col-pipeline" data-screen-label="Turn pipeline">
+      <div class="pipeline-head">
+        <div class="pipeline-title-row">
+          <h2>Turn Pipeline</h2>
+          <span class="mono pipeline-ids" id="pipeline-ids"></span>
+          <span class="spacer"></span>
+          <button id="replay-btn" class="replay-btn mono" type="button">&#9654; replay stages</button>
+        </div>
+        <div class="utterance" id="utterance"></div>
+        <div id="flags"></div>
+      </div>
+
+      <div class="rail-flow layout-rail" id="rail-flow">
+        <div class="stage-nav rail" id="stage-nav"></div>
+        <div class="panel-scroller" id="panel-scroller">
+          <div class="panel-header" id="panel-header"></div>
+          <div class="panel-blocks" id="panel-blocks"></div>
+          <div class="notebook" id="notebook"></div>
+          <p class="provenance mono" id="provenance">Replayed from state/current.json &middot; state/threads.json &middot; logs/history.jsonl &middot; logs/candidates.jsonl &middot; logs/receipts.jsonl &middot; configs/edge/*.json. Packets are rebuilt by the same rules as compile.build_arrival_packet and edge.enforce_packet_budget; byte figures are computed, not transcribed. Context share is share of model-input bytes, not model attention.</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

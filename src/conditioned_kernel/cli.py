@@ -21,6 +21,11 @@ from conditioned_kernel.paths import default_logs_dir, default_state_dir, repo_r
 from conditioned_kernel.pipeline import run_turn
 from conditioned_kernel.state import SubstrateState
 
+# `ck dashboard` — Interior View observability dashboard (RUN 00.9A handoff).
+# Deferred import (see `_cmd_dashboard`) so `conditioned_kernel.observatory`,
+# which pulls in `http.server`, is only loaded when the subcommand actually
+# runs — every other `ck` subcommand's import graph stays exactly as it was.
+
 
 def _resolve_profile(args: argparse.Namespace):
     return load_profile(getattr(args, "profile", None) or DEFAULT_PROFILE_ID)
@@ -356,6 +361,39 @@ def _cmd_smoke(args: argparse.Namespace) -> int:
     return 0 if result.ok else 1
 
 
+def _cmd_dashboard(args: argparse.Namespace) -> int:
+    """Serve the Interior View observability dashboard.
+
+    Reuses `ck chat`'s profile/state/logs resolution pattern exactly:
+    `_apply_profile_defaults` fills unset runtime knobs from the edge
+    profile, `--new-session` clears recent dialogue memory the same way
+    `ck chat --new-session` does. Everything else is delegated to
+    `observatory.server.serve`, which owns the actual socket.
+    """
+    from conditioned_kernel.observatory.server import serve
+
+    prof = _apply_profile_defaults(args)
+    state_dir = Path(args.state_dir) if args.state_dir else None
+    logs_dir = Path(args.logs_dir) if args.logs_dir else None
+
+    if getattr(args, "new_session", False):
+        state = SubstrateState.load(state_dir=state_dir, logs_dir=logs_dir)
+        sid = state.begin_new_session()
+        print(f"[ck] new session: {sid}", file=sys.stderr)
+
+    return serve(
+        host=args.host,
+        port=args.port,
+        state_dir=state_dir,
+        logs_dir=logs_dir,
+        profile=prof,
+        model=args.model,
+        base_url=args.base_url,
+        observer_enabled=bool(args.observer),
+        open_browser=not bool(getattr(args, "no_browser", False)),
+    )
+
+
 def _runtime_parent() -> argparse.ArgumentParser:
     """Shared runtime flags — defaults come from edge profile when left unset."""
     parent = argparse.ArgumentParser(add_help=False)
@@ -423,6 +461,34 @@ def build_parser() -> argparse.ArgumentParser:
     sm = sub.add_parser("smoke", parents=[runtime], help="Smoke test (live Ollama or --dry)")
     sm.add_argument("--dry", action="store_true", help="Skip Ollama; inject valid candidate")
     sm.set_defaults(func=_cmd_smoke)
+
+    dp = sub.add_parser(
+        "dashboard",
+        parents=[runtime],
+        help="Serve the Interior View observability dashboard (loopback, static assets)",
+    )
+    dp.add_argument(
+        "--new-session",
+        action="store_true",
+        help="Clear recent dialogue memory and bump session_id before serving",
+    )
+    dp.add_argument("--port", type=int, default=8765, help="Bind port (default: 8765)")
+    dp.add_argument(
+        "--host",
+        default="127.0.0.1",
+        help="Bind host (default: 127.0.0.1, loopback only)",
+    )
+    dp.add_argument(
+        "--observer",
+        action="store_true",
+        help="Enable the build-time Claude observer pane/API (default: off, never auto-sends)",
+    )
+    dp.add_argument(
+        "--no-browser",
+        action="store_true",
+        help="Do not attempt to open a browser tab automatically",
+    )
+    dp.set_defaults(func=_cmd_dashboard)
 
     # RUN 00.8B.2 — publication gate (no Ollama required)
     vp = sub.add_parser(
