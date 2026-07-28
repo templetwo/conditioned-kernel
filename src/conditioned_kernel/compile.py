@@ -38,6 +38,7 @@ _VOLATILE_PACKET_FIELDS = frozenset(
         "intents",
         # Control-plane only (stale-response guard); never model tokens
         "prior_accepted_answer_control",
+        "prior_accepted_answers_control",
     }
 )
 
@@ -145,12 +146,21 @@ def build_arrival_packet(
         intents = ["measurement"]
         evidence_pool = list(facts)
 
-    # Durable last assistant answer for stale-response control (may be
-    # withheld from the selected dialogue field).
-    prior_answer = ""
+    # Durable dialogue ring for stale-response control (may be withheld from
+    # the selected dialogue field — companion context-field selection can
+    # omit prior turns entirely for social/off-topic messages). Keeps the
+    # full state.recent_turns() ring (bounded: 4-5 entries) so
+    # validate._stale_repeat_match can compare a candidate against every
+    # stored answer, not only the last one (RUN 00.7 F1).
     rt_full = list(state.recent_turns() or [])
+    prior_answer = ""
     if rt_full and isinstance(rt_full[-1], dict):
         prior_answer = str(rt_full[-1].get("answer") or "").strip()
+    prior_turns_control = [
+        {"user": str(t.get("user") or ""), "answer": str(t.get("answer") or "")}
+        for t in rt_full
+        if isinstance(t, dict)
+    ]
 
     packet: dict[str, Any] = {
         "packet_id": packet_id(),
@@ -165,6 +175,7 @@ def build_arrival_packet(
         "context_field": field,
         "evidence_pool_selected": evidence_pool,
         "prior_accepted_answer_control": prior_answer,
+        "prior_accepted_answers_control": prior_turns_control,
         "constraints": {
             "max_words": words,
             "must_return_json": True,
@@ -190,7 +201,11 @@ def build_arrival_packet(
     if repair_plan:
         packet["repair"] = {
             "pass_index": 1,
-            "instruction": str(repair_plan.get("instruction") or "")[:220],
+            # 400, not 220: repair.build_repair_plan's anti-repeat hint (F5)
+            # quotes up to ~120 chars of the offending answer ahead of the
+            # base instruction; 220 would drop the base instruction entirely
+            # whenever that hint is present.
+            "instruction": str(repair_plan.get("instruction") or "")[:400],
             "hints": [str(h)[:140] for h in (repair_plan.get("hints") or [])[:4]],
             "allowed_thread_ids": list(repair_plan.get("allowed_thread_ids") or [])[:6],
             "allowed_evidence_samples": [

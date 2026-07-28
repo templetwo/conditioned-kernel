@@ -101,6 +101,30 @@ def _tokens(s: str, min_len: int = 4) -> list[str]:
     return [w for w in re.findall(rf"[a-z0-9]{{{min_len},}}", s.lower()) if w not in _GOAL_STOP]
 
 
+# state._clip_text's truncation marker (RECENT_TURN_ANSWER_MAX_CHARS etc.).
+_CLIP_ELLIPSIS = "…"
+
+
+def _clip_truncated_match(candidate: str, pool_entry: str, *, min_prefix: int = 12) -> bool:
+    """True if `pool_entry` looks like a state._clip_text-truncated stored
+    string (ends in the clip ellipsis) and `candidate` shares a
+    >=min_prefix-character run of it with the un-truncated original.
+
+    Mirrors observatory/compute.py's `_explain_miss` truncation-first check
+    exactly (same ellipsis marker, same shrinking-window substring scan) so
+    the citation-audit UI and the actual accept/reject decision never
+    diverge. If either implementation's rule changes, update the other —
+    see compute.py's `_explain_miss`.
+    """
+    if not pool_entry.endswith(_CLIP_ELLIPSIS):
+        return False
+    limit = min(len(candidate), len(pool_entry))
+    for i in range(limit, min_prefix - 1, -1):
+        if candidate[:i] in pool_entry:
+            return True
+    return False
+
+
 def _packet_evidence_pool(packet: dict[str, Any]) -> set[str]:
     """Evidence pool for the turn.
 
@@ -169,6 +193,49 @@ def is_goal_echo(answer: str, goal: str) -> bool:
     if overlap >= 0.85 and len(atoks - gtoks) <= 2:
         return True
     return False
+
+
+# Explicit goal-assertion cues. Tight and case-insensitive by design (RUN
+# 00.7 F3): only fires on an outright "the goal is X" claim, never on an
+# answer that merely mentions goal-adjacent words in passing.
+_GOAL_ASSERTION_PATTERNS: tuple[re.Pattern[str], ...] = (
+    re.compile(r"the goal(?: we are working toward)? is", re.IGNORECASE),
+    re.compile(r"our goal is", re.IGNORECASE),
+    re.compile(r"the objective is", re.IGNORECASE),
+)
+
+
+def _asserted_goal_clause(answer: str) -> str | None:
+    """First clause (see `_clauses`) containing an explicit goal-assertion
+    phrase, or None if the answer never asserts what "the goal" is."""
+    for clause in _clauses(answer):
+        if any(pat.search(clause) for pat in _GOAL_ASSERTION_PATTERNS):
+            return clause
+    return None
+
+
+def is_goal_misstatement(answer: str, goal: str) -> bool:
+    """True when the answer explicitly asserts what "the goal" is, and that
+    assertion barely overlaps the packet's real goal — a confidently wrong
+    claim about the goal, not merely an answer that omits it (that is
+    `goal_not_referenced`'s job, not this check's).
+
+    Symmetric Jaccard over >=4-char lowercase tokens, no stopword
+    filtering (deliberately not `_tokens`/`_GOAL_STOP` — the framing words
+    around a misstated goal are part of what makes it low-overlap).
+    """
+    if not answer or not goal:
+        return False
+    clause = _asserted_goal_clause(answer)
+    if clause is None:
+        return False
+    ctoks = set(re.findall(r"[a-z0-9]{4,}", clause))
+    gtoks = set(re.findall(r"[a-z0-9]{4,}", goal.lower()))
+    if not ctoks or not gtoks:
+        return False
+    union = len(ctoks | gtoks)
+    jaccard = (len(ctoks & gtoks) / union) if union else 0.0
+    return jaccard < 0.2
 
 
 def is_responsive(answer: str, user_input: str) -> bool:
@@ -261,6 +328,13 @@ def _evidence_ok(evidence: list[str], pool: set[str]) -> tuple[bool, list[str]]:
         # Or a full pool entry nested in a slightly longer citation
         if any(p in s and len(p) >= 12 for p in pool):
             continue
+        # Or the pool entry is a state._clip_text-truncated stored answer
+        # and the citation shares its un-truncated prefix (honesty: most
+        # "invented" evidence misses are storage truncation, not
+        # fabrication — see _clip_truncated_match / compute.py's
+        # _explain_miss "truncation-first" rule).
+        if any(_clip_truncated_match(s, p) for p in pool):
+            continue
         bad.append(f"evidence_not_in_packet:{item[:80]}")
     return len(bad) == 0, bad
 
@@ -309,6 +383,11 @@ def is_substantial_repeat(new_text: str, prior_text: str) -> bool:
         return True
     if len(n) >= 48 and n[:80] in p:
         return True
+    # `p` may be a state._clip_text-truncated stored recent_turns answer
+    # (trailing "…"); compare against its un-clipped prefix too so the clip
+    # cannot hide a genuine repeat (see _clip_truncated_match).
+    if _clip_truncated_match(n, p, min_prefix=48):
+        return True
     nt = set(_tokens(n, min_len=4))
     pt = set(_tokens(p, min_len=4))
     if not pt or not nt:
@@ -351,6 +430,46 @@ def user_prompt_changed(packet: dict[str, Any], user_input: str) -> bool:
     prior_u = _norm_ws(str(last.get("user") or ""))
     cur = _norm_ws(user_input)
     return bool(cur) and cur != prior_u
+
+
+def _stale_repeat_match(packet: dict[str, Any], answer: str, user_input: str) -> str | None:
+    """Compare `answer` against every stored recent_turns answer, not only
+    the most recent one (RUN 00.7 F1 — the ring holds only 4-5 entries, so
+    this is bounded cost). Returns a label naming which stored turn
+    matched, or None.
+
+    `prior_accepted_answer()` / recent_turns[-1] is checked first, exactly
+    as before this fix, so existing scenarios hit the same code shape.
+    Older entries come from `prior_accepted_answers_control` (compile.py:
+    the full durable ring — independent of companion context-field
+    selection, which can withhold prior turns from `packet.recent_turns`
+    entirely). A repeat only counts against a given stored turn if the
+    CURRENT user_input differs from THAT turn's own user message — a user
+    repeating their own question may get the same answer again.
+    """
+    control = prior_accepted_answer(packet)
+    if control and user_prompt_changed(packet, user_input) and is_substantial_repeat(answer, control):
+        return "recent_turns[-1]"
+
+    turns = packet.get("prior_accepted_answers_control")
+    if not isinstance(turns, list):
+        return None
+    cur = _norm_ws(user_input)
+    control_norm = _norm_ws(control) if control else None
+    for idx, turn in enumerate(turns):
+        if not isinstance(turn, dict):
+            continue
+        stored_answer = str(turn.get("answer") or "").strip()
+        if not stored_answer:
+            continue
+        if control_norm is not None and _norm_ws(stored_answer) == control_norm:
+            continue  # already covered by the control-plane comparison above
+        stored_user_norm = _norm_ws(str(turn.get("user") or ""))
+        if not (cur and cur != stored_user_norm):
+            continue
+        if is_substantial_repeat(answer, stored_answer):
+            return f"recent_turns[{idx}]"
+    return None
 
 
 def substrate_supply_evidence(
@@ -570,17 +689,23 @@ def validate_candidate(
             state_faithful = False
             violations.append("not_responsive")
 
-    # Studio: stale-response attractor — repeating the last accepted answer
-    # while the user moved on is a hard structural failure (repair then reject).
+    # Studio: stale-response attractor — repeating any recently-accepted
+    # answer while the user moved on is a hard structural failure (repair
+    # then reject). Checked against every stored ring entry, not only the
+    # most recent one (RUN 00.7 F1) — see _stale_repeat_match.
+    stale_match: str | None = None
     if companion and answer and not work.get("authoritative_fallback"):
-        prior = prior_accepted_answer(packet)
-        if (
-            prior
-            and user_prompt_changed(packet, user_input)
-            and is_substantial_repeat(answer, prior)
-        ):
+        stale_match = _stale_repeat_match(packet, answer, user_input)
+        if stale_match:
             state_faithful = False
             violations.append("stale_response_repeat")
+
+    # Honesty: the model can assert a confidently WRONG goal ("the goal is
+    # to repair the X model") that goal_echo/goal_not_referenced never
+    # catch, since neither is about echoing the TRUE goal. RUN 00.7 F3.
+    if answer and goal and is_goal_misstatement(answer, goal):
+        state_faithful = False
+        violations.append("goal_misstatement")
 
     required = contract.get("required_sections") or [
         "answer",
@@ -663,10 +788,13 @@ def validate_candidate(
         "open_threads",
         "string",
     }
+    sanitized_touches: list[Any] = []
+    touches_changed = False
     if isinstance(touches, list):
         for tid in touches:
             s = str(tid).strip()
             if s.lower() in junk:
+                sanitized_touches.append(tid)
                 continue
             sl = s.lower()
             matched = sl in known_ids or sl in titles
@@ -680,14 +808,28 @@ def validate_candidate(
                     if title and (title in sl or sl in title):
                         matched = True
                         break
-            if not matched:
-                # Companion: unknown touches are filtered (thread may be withheld
-                # from this turn's field). Measurement: hard fail.
-                if companion:
-                    advisories.append(f"thread_touch_filtered:{s[:60]}")
-                else:
-                    state_faithful = False
-                    violations.append(f"unknown_thread_touch:{s[:60]}")
+            if matched:
+                sanitized_touches.append(tid)
+                continue
+            # Companion: an unknown id can never touch state (a thread may
+            # simply be withheld from this turn's selected field) — drop it
+            # from next_state.thread_touch before acceptance/persistence and
+            # disclose the drop as an advisory (RUN 00.7 F4: this used to be
+            # a turn-killing violation that silenced otherwise-honest
+            # answers). Measurement: unchanged hard failure, no dropping.
+            if companion:
+                advisories.append(f"unknown_thread_touch_dropped:{s[:60]}")
+                touches_changed = True
+            else:
+                state_faithful = False
+                violations.append(f"unknown_thread_touch:{s[:60]}")
+                sanitized_touches.append(tid)
+
+    if touches_changed:
+        new_next_state = dict(ns)
+        new_next_state["thread_touch"] = sanitized_touches
+        work["next_state"] = new_next_state
+        candidate["next_state"] = new_next_state
 
     decision_ready = valid_schema and state_faithful and not violations
     repairable = not decision_ready
@@ -706,4 +848,10 @@ def validate_candidate(
         "word_count": word_count,
         "acceptance_mode": acceptance_mode,
         "evidence_source": work.get("evidence_source") or "model",
+        # RUN 00.7 F1: names WHICH stored turn matched when
+        # stale_response_repeat fired ("recent_turns[-1]" or
+        # "recent_turns[i]"; see _stale_repeat_match). Additive receipt
+        # field — the violation string itself stays bare "stale_response_
+        # repeat" so every existing exact-match consumer keeps working.
+        "stale_response_match": stale_match,
     }

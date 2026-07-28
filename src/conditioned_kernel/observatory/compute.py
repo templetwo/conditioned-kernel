@@ -93,8 +93,9 @@ _CONTEXT_SHARE_SOURCES: tuple[tuple[str, str, str], ...] = (
     ("constraints", "Constraints", "packet.constraints · packet.acceptance_contract"),
     (
         "context_field",
-        "Context field selection",
-        "packet.context_field selected/omitted contributions",
+        "Selection framing",
+        "compile.build_model_input selected-context headers/joiners (companion) · "
+        "packet.context_field selected contributions (pre-context-field path)",
     ),
 )
 
@@ -137,12 +138,114 @@ def _system_text_from_model_input(model_input: dict[str, Any]) -> str:
     return prompt[:idx] if idx >= 0 else ""
 
 
+# ---------------------------------------------------------------------------
+# Companion (context_field.v1) selected-context partition.
+#
+# compile.build_model_input's companion branch renders exactly one literal
+# chat_json user message:
+#
+#   "## Selected context\n{context_block}\n\n## Current human message\n{user_input}\n"
+#
+# where context_block is "\n".join(ctx_lines) — or the fixed placeholder
+# below when nothing was selected — and each ctx_lines entry carries one of
+# three fixed literal prefixes compile.py emits ("- prior: ", "- repair: ",
+# or a bare "- " for facts/threads/must-preserve claims). We split the REAL
+# delivered message on those exact literal markers rather than
+# reconstructing it from packet fields, so every byte of the message lands
+# in exactly one bucket by construction — never re-counted, never dropped.
+# A shape mismatch (a future compile.py change) falls back to attributing
+# the whole message to framing rather than guessing at a split that isn't
+# there.
+# ---------------------------------------------------------------------------
+
+_SELECTED_CONTEXT_HEADER = "## Selected context\n"
+_CURRENT_MESSAGE_HEADER = "\n\n## Current human message\n"
+_NO_SELECTED_CONTEXT_PLACEHOLDER = "(no selected substrate prose)"
+
+
+def _companion_user_message(model_input: dict[str, Any]) -> str | None:
+    """The literal companion chat_json user-turn message content, or None
+    when this model_input isn't that shape (e.g. companion generate_raw,
+    or no user message at all) — callers fall back to the legacy formula."""
+    if model_input.get("mode") != "chat_json":
+        return None
+    payload = model_input.get("payload") or {}
+    for m in payload.get("messages") or []:
+        if m.get("role") == "user":
+            return str(m.get("content") or "")
+    return None
+
+
+def _partition_companion_user_message(user_content: str) -> dict[str, int]:
+    """Split one real, literal companion user message into disjoint byte
+    buckets that sum to exactly `bytes_len(user_content)` — a split of the
+    delivered string itself, never a reconstruction.
+
+    - recent_dialogue: "- prior: user=... | assistant=..." lines (dialogue
+      contributions — compile.build_model_input's recent_turns loop)
+    - durable_state: every other selected-context line — "- {fact}",
+      "- thread ...", "- [must preserve] ..." (facts, open_threads,
+      authoritative_obligation — the same set the "durable_state" bucket's
+      source_key already documents)
+    - system_instructions: the "- repair: ..." line, if present (repair is
+      already attributed to system_instructions on the pre-context-field
+      path via packet.repair; same bucket, same reasoning, here)
+    - current_user_input: the literal "## Current human message" body
+    - selection_framing: the two "## ..." headers, the line joiners between
+      selected-context lines, the blank line between the two sections, the
+      trailing newline, and the empty-selection placeholder text — none of
+      it is a selected contribution's own content
+    """
+    buckets = {
+        "recent_dialogue": 0,
+        "durable_state": 0,
+        "system_instructions": 0,
+        "current_user_input": 0,
+        "selection_framing": 0,
+    }
+    current_idx = user_content.find(_CURRENT_MESSAGE_HEADER)
+    if not user_content.startswith(_SELECTED_CONTEXT_HEADER) or current_idx < 0:
+        buckets["selection_framing"] = bytes_len(user_content)
+        return buckets
+
+    buckets["selection_framing"] += bytes_len(_SELECTED_CONTEXT_HEADER)
+    buckets["selection_framing"] += bytes_len(_CURRENT_MESSAGE_HEADER)
+    context_block = user_content[len(_SELECTED_CONTEXT_HEADER):current_idx]
+    after_header = user_content[current_idx + len(_CURRENT_MESSAGE_HEADER):]
+    if after_header.endswith("\n"):
+        buckets["selection_framing"] += 1
+        after_header = after_header[:-1]
+    buckets["current_user_input"] += bytes_len(after_header)
+
+    if context_block == _NO_SELECTED_CONTEXT_PLACEHOLDER:
+        buckets["selection_framing"] += bytes_len(_NO_SELECTED_CONTEXT_PLACEHOLDER)
+        return buckets
+
+    lines = context_block.split("\n")
+    buckets["selection_framing"] += max(0, len(lines) - 1)  # "\n" joiners between lines
+    for line in lines:
+        if line.startswith("- prior: "):
+            buckets["recent_dialogue"] += bytes_len(line)
+        elif line.startswith("- repair: "):
+            buckets["system_instructions"] += bytes_len(line)
+        else:
+            buckets["durable_state"] += bytes_len(line)
+    return buckets
+
+
 def context_share_bytes(packet: dict[str, Any], model_input: dict[str, Any]) -> list[dict[str, Any]]:
     """Bucket model-input bytes by source (spec §10, §7 stage 04).
 
     Byte census only — never labelled influence, attention, or causal
     contribution. `source` is the human label the frontend export shape
     expects; `source_id` is a stable slug for programmatic lookup.
+
+    For companion-mode `ck.context_field.v1` packets this is a true
+    partition of the literal companion user message: every byte lands in
+    exactly one bucket (see `_partition_companion_user_message`). For every
+    other packet shape (measurement mode, and pre-context-field packets
+    that never carried a `context_field` key at all) the buckets are the
+    original per-packet-key `_keyed_bytes` sums, unchanged.
     """
     mp = _model_packet(packet)
     system_text = _system_text_from_model_input(model_input)
@@ -152,17 +255,8 @@ def context_share_bytes(packet: dict[str, Any], model_input: dict[str, Any]) -> 
     )
     system_bytes = bytes_len(json.dumps(system_text, ensure_ascii=False)) if system_text else 0
 
-    # Companion model input is no longer a single Packet JSON; derive user/context
-    # bytes from the actual messages when present.
-    user_msg_bytes = 0
-    payload = model_input.get("payload") or {}
-    for m in payload.get("messages") or []:
-        if m.get("role") == "user":
-            user_msg_bytes += bytes_len(str(m.get("content") or ""))
     values = {
-        "current_user_input": _keyed_bytes(mp, "user_input") or (
-            bytes_len(str(packet.get("user_input") or "")) if user_msg_bytes else 0
-        ),
+        "current_user_input": _keyed_bytes(mp, "user_input"),
         "recent_dialogue": _keyed_bytes(mp, "recent_turns"),
         "durable_state": (
             _keyed_bytes(mp, "state_digest")
@@ -174,22 +268,29 @@ def context_share_bytes(packet: dict[str, Any], model_input: dict[str, Any]) -> 
         "system_instructions": system_bytes + _keyed_bytes(mp, "repair"),
         "output_schema": schema_bytes,
         "constraints": _keyed_bytes(mp, "constraints") + _keyed_bytes(mp, "acceptance_contract"),
-        # Observability census of the selection record (not model tokens as a blob —
-        # volatile field excluded from model_packet; count selected content bytes).
+        # Pre-context-field path only (no packet.context_field.selected content
+        # to partition): sum of selected contributions' raw content bytes.
         "context_field": sum(
             len(str((c or {}).get("content") or "").encode("utf-8"))
             for c in ((packet.get("context_field") or {}).get("selected") or [])
             if isinstance(c, dict)
         ),
     }
-    # If companion field path, durable_state is the selected facts share
-    if (packet.get("context_field") or {}).get("schema") == "ck.context_field.v1":
-        # Prefer message user content for current_input visibility in companion
-        if user_msg_bytes:
-            # Approximate: message contains selected context + current human message
-            cur = bytes_len(str(packet.get("user_input") or ""))
-            values["current_user_input"] = cur
-            values["durable_state"] = max(0, user_msg_bytes - cur)
+
+    contract = packet.get("acceptance_contract") or {}
+    is_companion_field = (
+        str(contract.get("acceptance_mode") or "") == "companion"
+        and (packet.get("context_field") or {}).get("schema") == "ck.context_field.v1"
+    )
+    if is_companion_field:
+        user_message = _companion_user_message(model_input)
+        if user_message is not None:
+            partition = _partition_companion_user_message(user_message)
+            values["current_user_input"] = partition["current_user_input"]
+            values["recent_dialogue"] = partition["recent_dialogue"]
+            values["durable_state"] = partition["durable_state"]
+            values["system_instructions"] = system_bytes + partition["system_instructions"]
+            values["context_field"] = partition["selection_framing"]
     total = sum(values.values())
     rows: list[dict[str, Any]] = []
     for source_id, label, source_key in _CONTEXT_SHARE_SOURCES:

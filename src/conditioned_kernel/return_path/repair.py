@@ -78,6 +78,11 @@ def _hint_for_violation(v: str, packet: dict[str, Any]) -> str | None:
             "FIX stale_response_repeat: do NOT repeat your previous answer. "
             f"Answer THIS user message freshly and specifically: {q}"
         )
+    if v == "goal_misstatement":
+        return (
+            "FIX goal_misstatement: you stated a goal that is not the real one. "
+            f"The real goal is: {goal[:160]}"
+        )
     if v.startswith("contradicts_facts"):
         return "FIX contradicts_facts: do not claim cloud/sensors/tools when facts forbid them."
     if v.startswith("evidence_too_short"):
@@ -97,6 +102,26 @@ def _hint_for_violation(v: str, packet: dict[str, Any]) -> str | None:
     if v == "prior_answer_present_but_invalid_contract":
         return None  # meta note, skip as primary hint
     return f"FIX {v}"
+
+
+# Violations that mean "the model produced the SAME wrong-shaped content
+# again" — the 50% escape rate on a plain "don't repeat" hint is a coin
+# flip, so the next pass gets the actual offending text quoted back at it.
+_ANTI_REPEAT_TRIGGERS = ("stale_response_repeat", "goal_misstatement")
+
+
+def _fires(v: str, name: str) -> bool:
+    return v == name or v.startswith(name + ":")
+
+
+def _anti_repeat_hint(candidate: dict[str, Any] | None) -> str:
+    """Quote the rejected answer directly, not just its violation name, so
+    the next pass sees exactly what it must not reproduce (RUN 00.7 F5)."""
+    offending = str((candidate or {}).get("answer") or "").strip()[:120]
+    return (
+        f'Do NOT repeat this previous answer: "{offending}" — write a '
+        "substantively different answer to the CURRENT question."
+    )
 
 
 def build_repair_annotations(
@@ -177,6 +202,12 @@ def build_repair_plan(
             "Answer must reference the goal_snippet."
         )
         goal_snippet = goal[:200]
+
+    # RUN 00.7 F5: additive — existing instruction/hints/annotations shape
+    # is untouched; this only prepends an explicit do-not-repeat quote when
+    # a repeat-shaped violation actually fired this pass.
+    if any(_fires(v, name) for v in violations for name in _ANTI_REPEAT_TRIGGERS):
+        instruction = f"{_anti_repeat_hint(candidate)} {instruction}"
 
     return {
         "pass_index": 1,

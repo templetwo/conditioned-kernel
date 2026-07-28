@@ -77,6 +77,49 @@ def _real_packet_and_model_input(tmp_path: Path, user_input: str = "What model r
     return compile_turn(state, user_input, profile=profile)
 
 
+def _bootstrap_with_dialogue(tmp_path: Path) -> tuple[Path, Path]:
+    """Like `_bootstrap`, but seeds one prior recent_turns entry so a
+    companion turn can select both a dialogue contribution and a state
+    (fact/runtime) contribution in the same pass — the exact mix the
+    census over-count defect needed to reproduce (RUN 00.6F lens 2/3 log
+    dig: durable_state's override counted the whole selected-context prose
+    block while recent_dialogue and context_field separately re-counted
+    the same selected text)."""
+    state_dir = tmp_path / "state"
+    logs_dir = tmp_path / "logs"
+    state_dir.mkdir(parents=True, exist_ok=True)
+    logs_dir.mkdir(parents=True, exist_ok=True)
+    (state_dir / "current.json").write_text(
+        json.dumps(
+            {
+                "goal": GOAL,
+                "active_profile": "orin_nano_8gb",
+                "session_id": "sess_test",
+                "receipt_count_24h": 0,
+                "recent_turns": [
+                    {
+                        "user": "which model is active",
+                        "answer": "The active model is qwen3.5 0.8b on the jetson orin nano board.",
+                        "ts": "2026-07-28T00:00:00Z",
+                    }
+                ],
+                "flags": {
+                    "sensors": False,
+                    "tools": False,
+                    "cloud": False,
+                    "max_repair_passes": 1,
+                    "edge_target": "jetson_orin_nano_8gb",
+                    "one_model_only": True,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (state_dir / "threads.json").write_text("[]", encoding="utf-8")
+    (state_dir / "methods.json").write_text("[]", encoding="utf-8")
+    return state_dir, logs_dir
+
+
 # ---------------------------------------------------------------------------
 # Context-share buckets sum to the model-input total
 # ---------------------------------------------------------------------------
@@ -122,6 +165,164 @@ def test_context_share_user_input_bucket_reflects_the_literal_message(tmp_path):
     # (it also carries `"user_input":` key + JSON-quoting overhead)
     assert user_row["bytes"] >= compute.bytes_len(msg)
     assert packet["user_input"] == msg
+
+
+# ---------------------------------------------------------------------------
+# Companion (context_field.v1) census is a true byte partition — no bucket
+# double-counts another bucket's bytes (RUN 00.6F Observatory census fix).
+# ---------------------------------------------------------------------------
+
+
+def test_context_share_companion_partition_covers_dialogue_and_state_with_no_double_count(tmp_path):
+    """With both a selected recent-dialogue contribution and a selected
+    state contribution present in the same turn, the buckets that partition
+    the literal companion user message (current_user_input, recent_dialogue,
+    durable_state, and the selection-framing share of the context_field
+    bucket) must sum to exactly the message's own byte length — proving no
+    byte was counted twice. This is the mix the durable_state-override bug
+    needed to trigger: reproduces it, then asserts it can't reproduce."""
+    state_dir, logs_dir = _bootstrap_with_dialogue(tmp_path)
+    state = SubstrateState.load(state_dir=state_dir, logs_dir=logs_dir)
+    profile = load_profile("orin_nano_8gb")
+    packet, model_input = compile_turn(
+        state, "which model and jetson board should I use for this", profile=profile
+    )
+
+    # Sanity: this turn actually selected both kinds of contribution, or the
+    # test below isn't exercising the bug it claims to guard against.
+    assert packet["recent_turns"], "expected the prior turn to be selected into this packet"
+    assert packet["facts"], "expected at least one state fact to be selected into this packet"
+
+    user_message = compute._companion_user_message(model_input)
+    assert user_message is not None
+
+    rows = compute.context_share_bytes(packet, model_input)
+    by_id = {r["source_id"]: r["bytes"] for r in rows}
+    assert (
+        by_id["current_user_input"]
+        + by_id["recent_dialogue"]
+        + by_id["durable_state"]
+        + by_id["context_field"]
+        == compute.bytes_len(user_message)
+    )
+
+
+def test_partition_companion_user_message_is_an_exact_byte_partition_with_all_line_kinds():
+    """Unit-level check of `_partition_companion_user_message` against a
+    hand-built literal message covering every ctx_lines prefix
+    compile.build_model_input emits (fact, thread, prior dialogue, must-
+    preserve claim, repair) — independent of compile.py's own behavior."""
+    user_content = (
+        "## Selected context\n"
+        "- This system is fully local.\n"
+        "- thread thread_min_model: What is the minimum viable model size?\n"
+        "- prior: user=what model is this | assistant=The active model is qwen.\n"
+        "- [must preserve] The system is fully local.\n"
+        "- repair: Previous output failed validation. Return corrected JSON only. hints=[]\n\n"
+        "## Current human message\n"
+        "which model and jetson board should I use\n"
+    )
+    parts = compute._partition_companion_user_message(user_content)
+    assert sum(parts.values()) == compute.bytes_len(user_content)
+    assert parts["current_user_input"] == compute.bytes_len(
+        "which model and jetson board should I use"
+    )
+    assert parts["recent_dialogue"] > 0
+    assert parts["durable_state"] > 0  # fact + thread + must-preserve lines
+    assert parts["system_instructions"] > 0  # repair line
+    assert parts["selection_framing"] > 0  # headers + line joiners
+
+
+def test_partition_companion_user_message_empty_selection_placeholder():
+    user_content = (
+        "## Selected context\n"
+        "(no selected substrate prose)\n\n"
+        "## Current human message\n"
+        "hello there\n"
+    )
+    parts = compute._partition_companion_user_message(user_content)
+    assert sum(parts.values()) == compute.bytes_len(user_content)
+    assert parts["current_user_input"] == compute.bytes_len("hello there")
+    assert parts["recent_dialogue"] == 0
+    assert parts["durable_state"] == 0
+    assert parts["system_instructions"] == 0
+
+
+def test_partition_companion_user_message_shape_mismatch_falls_back_to_framing():
+    """A message that doesn't match compile.build_model_input's fixed
+    companion template attributes its whole byte length to
+    selection_framing rather than guessing at a split that isn't there."""
+    weird = 'Packet:\n{"user_input": "hi"}'
+    parts = compute._partition_companion_user_message(weird)
+    assert sum(parts.values()) == compute.bytes_len(weird)
+    assert parts["selection_framing"] == compute.bytes_len(weird)
+    assert parts["current_user_input"] == 0
+    assert parts["recent_dialogue"] == 0
+    assert parts["durable_state"] == 0
+
+
+def test_context_share_bytes_pre_context_field_path_byte_for_byte_unchanged():
+    """Regression pin (spec: 'preserve the pre-context-field code path
+    byte-for-byte unchanged'). A packet shaped like a morning-era,
+    pre-context-field turn — no packet['context_field'] key at all,
+    measurement-style acceptance_contract, repair present — must fall
+    straight through the untouched `_keyed_bytes` formulas: the companion
+    partition only ever engages when acceptance_mode == 'companion' AND
+    context_field.schema == 'ck.context_field.v1', neither of which this
+    packet has. Values pinned against the real function's own output."""
+    packet = {
+        "session_id": "sess_test",
+        "user_input": "dont reject",
+        "state_digest": {"goal": "Demonstrate substrate gain."},
+        "facts": ["This system is fully local.", "Sensors are out of scope for v0."],
+        "open_threads": [
+            {"id": "thread_min_model", "title": "What is the minimum viable model size?"}
+        ],
+        "recent_turns": [
+            {
+                "user": "what model is this",
+                "answer": "The system is fully local.",
+                "ts": "2026-07-28T03:14:31Z",
+            }
+        ],
+        "constraints": {"max_words": 120, "must_return_json": True, "forbidden": []},
+        "acceptance_contract": {
+            "acceptance_mode": "measurement",
+            "required_sections": ["answer", "evidence_used", "next_state"],
+        },
+        "repair": {
+            "pass_index": 1,
+            "instruction": "Previous output failed validation. Return corrected JSON only.",
+            "hints": ["FIX evidence_not_in_packet"],
+        },
+    }
+    serialized = json.dumps(dict(packet), ensure_ascii=False, separators=(",", ":"))
+    system_text = (
+        "Local conditioned-kernel transducer. Return ONLY valid JSON with keys answer, "
+        "evidence_used, next_state."
+    )
+    model_input = {
+        "mode": "chat_json",
+        "payload": {
+            "messages": [
+                {"role": "system", "content": system_text},
+                {"role": "user", "content": "Packet:\n" + serialized},
+            ],
+            "format": {"type": "object", "properties": {}},
+        },
+    }
+
+    rows = compute.context_share_bytes(packet, model_input)
+    by_id = {r["source_id"]: r["bytes"] for r in rows}
+    assert by_id == {
+        "current_user_input": 27,
+        "recent_dialogue": 113,
+        "durable_state": 246,
+        "system_instructions": 250,
+        "output_schema": 33,
+        "constraints": 187,
+        "context_field": 0,
+    }
 
 
 def test_verify_packet_bytes_matches_logged_edge_packet_bytes(tmp_path):

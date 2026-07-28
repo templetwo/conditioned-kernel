@@ -24,7 +24,7 @@ from conditioned_kernel.return_path.accept import accept_candidate
 from conditioned_kernel.return_path.assess import assess
 from conditioned_kernel.return_path.parse import parse_candidate
 from conditioned_kernel.return_path.repair import build_repair_plan
-from conditioned_kernel.return_path.validate import validate_candidate
+from conditioned_kernel.return_path.validate import is_responsive, validate_candidate
 from conditioned_kernel.state import SubstrateState
 
 Mode = Literal["chat_json", "generate_raw"]
@@ -252,6 +252,23 @@ def run_turn(
                 candidate.get("authoritative_fallback")
             )
             receipt["authoritative_reasons"] = list(auth_reasons)
+            if receipt["authoritative_fallback"]:
+                # RUN 00.7 F6: validate_candidate exempts authoritative
+                # fallback answers from the (blocking) not_responsive check
+                # since they are already claim-checked — but that exemption
+                # let a topic-swap fallback go through with no record of
+                # what the user actually received. Advisory only; never
+                # blocks and never changes the fallback decision.
+                fallback_answer = str(candidate.get("answer") or "").strip()
+                if (
+                    fallback_answer
+                    and user_input
+                    and not is_responsive(fallback_answer, user_input)
+                ):
+                    fb_advisories = list(receipt.get("advisories") or [])
+                    if "not_responsive" not in fb_advisories:
+                        fb_advisories.append("not_responsive")
+                    receipt["advisories"] = fb_advisories
         last_candidate = candidate
         last_receipt = receipt
 
