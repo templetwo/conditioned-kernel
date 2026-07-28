@@ -270,7 +270,11 @@ def test_companion_accepts_empty_evidence_with_substrate_supply(tmp_path: Path):
     )
     assert result.ok is True, result.receipt.get("violations")
     assert result.decision == "accept"
-    assert result.candidate.get("evidence_source") == "substrate_supplied"
+    assert result.candidate.get("evidence_source") in (
+        "substrate_supplied",
+        "substrate_authoritative_evidence",
+        "substrate_authoritative",
+    )
     assert result.candidate.get("evidence_used")
     # recent_turns only appends on accept — B can engage
     state = SubstrateState.load(state_dir=state_dir, logs_dir=logs_dir)

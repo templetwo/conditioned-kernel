@@ -65,6 +65,7 @@ def build_arrival_packet(
     profile: EdgeProfile | None = None,
     enforce_budget: bool = True,
     acceptance_mode: str = "companion",
+    authoritative_obligation: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build arrival packet.
 
@@ -82,13 +83,18 @@ def build_arrival_packet(
     )
     mode = acceptance_mode if acceptance_mode in ("companion", "measurement") else "companion"
     companion = mode == "companion"
+    facts = list(state.fact_list())
+    # Authoritative claims are answer obligations, not soft suggestions.
+    if companion and authoritative_obligation:
+        for claim in list(authoritative_obligation.get("claims") or [])[:4]:
+            facts.append(f"[must preserve] {claim}")
     packet: dict[str, Any] = {
         "packet_id": packet_id(),
         "created_at": utc_now_iso(),
         "session_id": state.current.get("session_id", "sess_unknown"),
         "user_input": user_input,
         "state_digest": _digest(state),
-        "facts": state.fact_list(),
+        "facts": facts,
         "open_threads": [
             {"id": t.get("id"), "title": t.get("title")} for t in open_threads
         ],
@@ -114,6 +120,8 @@ def build_arrival_packet(
             "evidence_must_be_from_packet": True,
         },
     }
+    if companion and authoritative_obligation:
+        packet["authoritative_obligation"] = dict(authoritative_obligation)
     if repair_plan:
         packet["repair"] = {
             "pass_index": 1,
@@ -254,6 +262,7 @@ def compile_turn(
     profile: EdgeProfile | None = None,
     profile_id: str | None = None,
     acceptance_mode: str = "companion",
+    authoritative_obligation: dict[str, Any] | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     prof = profile or load_profile(profile_id)
     packet = build_arrival_packet(
@@ -264,6 +273,7 @@ def compile_turn(
         profile=prof,
         enforce_budget=True,
         acceptance_mode=acceptance_mode,
+        authoritative_obligation=authoritative_obligation,
     )
     model_input = build_model_input(
         packet,

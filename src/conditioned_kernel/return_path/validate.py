@@ -439,13 +439,26 @@ def validate_candidate(
             violations.append("template_echo_evidence")
             break
 
-    # Anti-degeneracy: goal echo is never an answer
-    if answer and goal and is_goal_echo(answer, goal):
+    # Anti-degeneracy: goal echo is never an answer.
+    # Substrate authoritative fallbacks intentionally restate the goal claim.
+    if (
+        answer
+        and goal
+        and is_goal_echo(answer, goal)
+        and not work.get("authoritative_fallback")
+    ):
         state_faithful = False
         violations.append("goal_echo")
 
-    # Responsiveness to the actual user question
-    if answer and user_input and not is_responsive(answer, user_input):
+    # Responsiveness to the actual user question.
+    # Substrate-rendered authoritative fallbacks are already claim-checked;
+    # do not reject them for soft lexical mismatch with the question phrasing.
+    if (
+        answer
+        and user_input
+        and not is_responsive(answer, user_input)
+        and not work.get("authoritative_fallback")
+    ):
         state_faithful = False
         violations.append("not_responsive")
 

@@ -6,6 +6,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
 
+from conditioned_kernel.authoritative_state import (
+    enforce_authoritative_candidate,
+    resolve_obligation,
+)
 from conditioned_kernel.compile import compile_turn
 from conditioned_kernel.edge import BudgetError, EdgeProfile, load_profile
 from conditioned_kernel.generate import InferenceResult, OllamaClient
@@ -84,6 +88,13 @@ def run_turn(
     if use_mode not in ("chat_json", "generate_raw"):
         use_mode = "chat_json"
 
+    # Studio only: resolve narrow authoritative-state obligations.
+    obligation = None
+    if acceptance_mode == "companion":
+        obligation = resolve_obligation(
+            state, user_input, profile=prof, model=use_model
+        )
+
     def _error_result(
         *,
         decision: str,
@@ -123,6 +134,9 @@ def run_turn(
                 keep_alive=keep_alive,
                 profile=prof,
                 acceptance_mode=acceptance_mode,
+                authoritative_obligation=(
+                    obligation.to_dict() if obligation is not None else None
+                ),
             )
         except BudgetError as e:
             state.log_error(
@@ -215,9 +229,29 @@ def run_turn(
 
         last_raw = raw
         candidate = parse_candidate(raw, packet_id=packet["packet_id"], pass_index=pass_index)
+        auth_reasons: list[str] = []
+        if obligation is not None and acceptance_mode == "companion":
+            candidate, auth_reasons = enforce_authoritative_candidate(
+                candidate,
+                obligation,
+                user_input=user_input,
+                packet_id=str(packet.get("packet_id") or ""),
+            )
+            packet = dict(packet)
+            packet["authoritative_enforced"] = True
+            packet["authoritative_fallback"] = bool(
+                candidate.get("authoritative_fallback")
+            )
+            packet["authoritative_reasons"] = list(auth_reasons)
         receipt = validate_candidate(candidate, packet)
         receipt = assess(receipt, pass_index=pass_index, max_repair=repairs)
         receipt["profile_id"] = prof.profile_id
+        if obligation is not None:
+            receipt["authoritative_kind"] = obligation.kind
+            receipt["authoritative_fallback"] = bool(
+                candidate.get("authoritative_fallback")
+            )
+            receipt["authoritative_reasons"] = list(auth_reasons)
         last_candidate = candidate
         last_receipt = receipt
 
@@ -229,6 +263,10 @@ def run_turn(
                 "violations": list(receipt.get("violations") or []),
                 "telemetry": telemetry,
                 "packet_bytes": (packet.get("_edge") or {}).get("packet_bytes"),
+                "authoritative_kind": obligation.kind if obligation else None,
+                "authoritative_fallback": bool(
+                    candidate.get("authoritative_fallback")
+                ),
             }
         )
 
