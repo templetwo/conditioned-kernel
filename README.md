@@ -49,6 +49,11 @@ ck edge --list
 ck smoke
 ck ask "Summarize the current design intent in one short paragraph."
 
+# Multi-turn session (substrate keeps a byte-capped recent dialogue):
+ck chat
+# resume later (same state dir): ck chat
+# clear dialogue memory only:     ck chat --new-session
+
 # Opt-in desktop headroom only (product decisions still use orin_nano_8gb):
 ck --profile desktop_dev status
 ```

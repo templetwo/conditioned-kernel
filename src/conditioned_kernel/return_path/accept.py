@@ -22,6 +22,13 @@ def accept_candidate(
 
     if decision == "accept":
         applied = state.apply_state_updates(candidate.get("next_state"))
+        # Studio first-flow: keep a byte-capped ring of accepted dialogue so the
+        # next compile can see prior turns (stop/resume continuity).
+        answer_text = str(candidate.get("answer") or "").strip()
+        user_text = str(packet.get("user_input") or "").strip()
+        if answer_text and user_text:
+            state.append_recent_turn(user_text, answer_text)
+            applied = list(applied) + ["recent_turn_appended"]
         # bump receipt counter
         state.current["receipt_count_24h"] = int(state.current.get("receipt_count_24h") or 0) + 1
         state.save_current()

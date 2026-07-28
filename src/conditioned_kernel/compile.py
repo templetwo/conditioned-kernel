@@ -8,7 +8,11 @@ from typing import Any, Literal
 
 from conditioned_kernel.edge import EdgeProfile, enforce_packet_budget, load_profile
 from conditioned_kernel.ids import packet_id, utc_now_iso
-from conditioned_kernel.state import SubstrateState
+from conditioned_kernel.state import (
+    RECENT_TURNS_MAX_BYTES,
+    SubstrateState,
+    fit_recent_turns,
+)
 
 Mode = Literal["chat_json", "generate_raw"]
 
@@ -64,6 +68,11 @@ def build_arrival_packet(
     prof = profile or load_profile()
     words = max_words if max_words is not None else prof.max_answer_words
     open_threads = state.open_threads()
+    # Byte-capped prior dialogue (Studio first-flow). Oldest dropped first.
+    recent = fit_recent_turns(
+        state.recent_turns(),
+        max_bytes=RECENT_TURNS_MAX_BYTES,
+    )
     packet: dict[str, Any] = {
         "packet_id": packet_id(),
         "created_at": utc_now_iso(),
@@ -74,6 +83,7 @@ def build_arrival_packet(
         "open_threads": [
             {"id": t.get("id"), "title": t.get("title")} for t in open_threads
         ],
+        "recent_turns": recent,
         "constraints": {
             "max_words": words,
             "must_return_json": True,
@@ -156,7 +166,9 @@ def build_model_input(
         "Local conditioned-kernel transducer. "
         "Return ONLY valid JSON with keys answer, evidence_used, next_state. "
         "answer: short reply that mentions the goal. "
-        "evidence_used: copy exact strings from facts or open_threads. "
+        "If recent_turns is present, treat it as prior dialogue in this session "
+        "and stay consistent with it. "
+        "evidence_used: copy exact strings from facts, open_threads, or recent_turns. "
         "next_state.thread_touch: array of real open_threads id values, or []. "
         "Never invent thread ids. No files, URLs, tools, or cloud."
     )

@@ -113,6 +113,15 @@ def _packet_evidence_pool(packet: dict[str, Any]) -> set[str]:
                 pool.add(str(t["title"]).strip().lower())
         else:
             pool.add(str(t).strip().lower())
+    # Prior dialogue is packet-local evidence (Studio first-flow).
+    for turn in packet.get("recent_turns") or []:
+        if isinstance(turn, dict):
+            if turn.get("user"):
+                pool.add(str(turn["user"]).strip().lower())
+            if turn.get("answer"):
+                pool.add(str(turn["answer"]).strip().lower())
+        else:
+            pool.add(str(turn).strip().lower())
     digest = packet.get("state_digest") or {}
     if digest.get("goal"):
         pool.add(str(digest["goal"]).strip().lower())

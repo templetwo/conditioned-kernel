@@ -169,6 +169,7 @@ def enforce_packet_budget(
     out = dict(packet)
     facts = list(out.get("facts") or [])
     threads = list(out.get("open_threads") or [])
+    recent = list(out.get("recent_turns") or [])
 
     if len(facts) > profile.max_facts:
         facts = facts[: profile.max_facts]
@@ -183,8 +184,26 @@ def enforce_packet_budget(
         else:
             compact_threads.append(_clip(str(t), 120))
 
+    # Compact recent dialogue (byte-aware ring is applied in state; re-clip here)
+    compact_recent: list[dict[str, Any]] = []
+    for t in recent:
+        if not isinstance(t, dict):
+            continue
+        compact_recent.append(
+            {
+                "user": _clip(str(t.get("user") or ""), 200),
+                "answer": _clip(str(t.get("answer") or ""), 280),
+                **(
+                    {"ts": str(t["ts"])}
+                    if t.get("ts")
+                    else {}
+                ),
+            }
+        )
+
     out["facts"] = [_clip(str(x), 200) for x in facts]
     out["open_threads"] = compact_threads
+    out["recent_turns"] = compact_recent
     # Bound user input — edge tokens and adversarial paste
     out["user_input"] = _clip(str(out.get("user_input") or ""), 800)
 
@@ -203,13 +222,18 @@ def enforce_packet_budget(
 
     size = packet_byte_size(out)
     if size > profile.max_packet_bytes:
-        # Aggressive trim: drop repair prose first, then facts from the end
+        # Aggressive trim: drop repair prose first, then oldest recent turns,
+        # then facts from the end (fail-closed BudgetError only as last resort)
         if "repair" in out:
             repair = dict(out["repair"])
             viol = list(repair.get("violations") or [])[:5]
             repair["violations"] = [_clip(v, 80) for v in viol]
             repair["instruction"] = _clip(str(repair.get("instruction") or ""), 160)
             out["repair"] = repair
+            size = packet_byte_size(out)
+
+        while size > profile.max_packet_bytes and len(out.get("recent_turns") or []) > 0:
+            out["recent_turns"] = list(out["recent_turns"])[1:]  # drop oldest
             size = packet_byte_size(out)
 
         while size > profile.max_packet_bytes and len(out.get("facts") or []) > 2:

@@ -207,6 +207,90 @@ def _cmd_ask(args: argparse.Namespace) -> int:
     return 1
 
 
+def _cmd_chat(args: argparse.Namespace) -> int:
+    """Sustained multi-turn session: compile → generate → accept loop on stdin."""
+    prof = _apply_profile_defaults(args)
+    state_dir = Path(args.state_dir) if args.state_dir else None
+    logs_dir = Path(args.logs_dir) if args.logs_dir else None
+    state = SubstrateState.load(state_dir=state_dir, logs_dir=logs_dir)
+
+    if getattr(args, "new_session", False):
+        sid = state.begin_new_session()
+        print(f"[ck] new session: {sid}", file=sys.stderr)
+    else:
+        sid = str(state.current.get("session_id") or "sess_unknown")
+        n_recent = len(state.recent_turns())
+        print(
+            f"[ck] chat  session={sid}  profile={prof.profile_id}  "
+            f"model={args.model}  recent_turns={n_recent}",
+            file=sys.stderr,
+        )
+        print(
+            "[ck] type quit/exit to stop; state persists for resume",
+            file=sys.stderr,
+        )
+
+    turns_ok = 0
+    while True:
+        try:
+            line = input("you> ")
+        except EOFError:
+            print(file=sys.stderr)
+            break
+        except KeyboardInterrupt:
+            print("\n[ck] interrupted", file=sys.stderr)
+            break
+
+        text = (line or "").strip()
+        if not text:
+            continue
+        if text.lower() in ("quit", "exit", ":q", "/quit", "/exit"):
+            break
+
+        result = run_turn(
+            text,
+            model=args.model,
+            mode=args.mode,
+            state_dir=state_dir,
+            logs_dir=logs_dir,
+            base_url=args.base_url,
+            max_repair=args.max_repair,
+            temperature=args.temperature,
+            seed=args.seed,
+            num_ctx=args.num_ctx,
+            profile=prof,
+        )
+
+        if result.decision == "accept":
+            print(f"ck> {result.answer}")
+            turns_ok += 1
+            if args.verbose:
+                pb = (result.packet.get("_edge") or {}).get("packet_bytes")
+                rt = len(result.packet.get("recent_turns") or [])
+                print(
+                    f"    -- ok packet_bytes={pb} prior_turns_in_packet={rt}",
+                    file=sys.stderr,
+                )
+            continue
+
+        # Stay in the loop on reject/error — do not crash the session.
+        if result.decision == "error":
+            print(f"[ck error] {result.error}", file=sys.stderr)
+            print("ck> (turn failed; try again or quit)", file=sys.stderr)
+            continue
+
+        print(
+            "[ck reject] substrate did not accept that candidate.\n"
+            f"  violations: {result.receipt.get('violations')}\n"
+            f"  raw (untrusted): {(result.answer or '')[:240]}",
+            file=sys.stderr,
+        )
+        print("ck> (rejected; try rephrasing or quit)", file=sys.stderr)
+
+    print(f"[ck] session end  accepted_turns={turns_ok}", file=sys.stderr)
+    return 0
+
+
 def _cmd_smoke(args: argparse.Namespace) -> int:
     prof = _apply_profile_defaults(args)
     print(f"smoke: profile={prof.profile_id} model={args.model} mode={args.mode} ctx={args.num_ctx}")
@@ -322,6 +406,19 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--json", action="store_true", help="Emit machine-readable result")
     ap.add_argument("-v", "--verbose", action="store_true")
     ap.set_defaults(func=_cmd_ask)
+
+    ch = sub.add_parser(
+        "chat",
+        parents=[runtime],
+        help="Multi-turn session (stdin loop; state persists for resume)",
+    )
+    ch.add_argument(
+        "--new-session",
+        action="store_true",
+        help="Clear recent dialogue memory and bump session_id (goal/threads kept)",
+    )
+    ch.add_argument("-v", "--verbose", action="store_true")
+    ch.set_defaults(func=_cmd_chat)
 
     sm = sub.add_parser("smoke", parents=[runtime], help="Smoke test (live Ollama or --dry)")
     sm.add_argument("--dry", action="store_true", help="Skip Ollama; inject valid candidate")

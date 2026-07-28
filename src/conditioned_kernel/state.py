@@ -12,6 +12,12 @@ from typing import Any
 from conditioned_kernel.ids import utc_now_iso
 from conditioned_kernel.paths import default_logs_dir, default_state_dir
 
+# Studio first-flow: bound prior dialogue by UTF-8 bytes so packet budget
+# cannot be blown by one long answer. Drop oldest until under the cap.
+RECENT_TURNS_MAX_BYTES = 1200
+RECENT_TURN_USER_MAX_CHARS = 200
+RECENT_TURN_ANSWER_MAX_CHARS = 280
+
 
 def _read_json(path: Path, default: Any) -> Any:
     if not path.exists():
@@ -45,6 +51,55 @@ def append_jsonl(path: Path, record: dict[str, Any]) -> None:
         f.write(line + "\n")
         f.flush()
         os.fsync(f.fileno())
+
+
+def _clip_text(s: str, max_chars: int) -> str:
+    s = (s or "").strip()
+    if len(s) <= max_chars:
+        return s
+    if max_chars <= 1:
+        return s[:max_chars]
+    return s[: max_chars - 1].rstrip() + "…"
+
+
+def recent_turns_byte_size(turns: list[dict[str, Any]]) -> int:
+    """UTF-8 size of the compact serialized recent_turns list."""
+    return len(
+        json.dumps(turns, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    )
+
+
+def fit_recent_turns(
+    turns: list[dict[str, Any]],
+    *,
+    max_bytes: int = RECENT_TURNS_MAX_BYTES,
+) -> list[dict[str, Any]]:
+    """Drop oldest entries (then hard-clip newest) until under max_bytes."""
+    out = [dict(t) for t in turns if isinstance(t, dict)]
+    while out and recent_turns_byte_size(out) > max_bytes:
+        if len(out) > 1:
+            out.pop(0)
+            continue
+        # Single entry still too large: shrink answer then user.
+        only = dict(out[0])
+        ans = str(only.get("answer") or "")
+        user = str(only.get("user") or "")
+        if len(ans) > 40:
+            only["answer"] = _clip_text(ans, max(40, len(ans) // 2))
+            out = [only]
+            continue
+        if len(user) > 40:
+            only["user"] = _clip_text(user, max(40, len(user) // 2))
+            out = [only]
+            continue
+        # Last resort: empty answer body, keep a stub.
+        only["answer"] = _clip_text(ans, 20)
+        only["user"] = _clip_text(user, 20)
+        out = [only]
+        if recent_turns_byte_size(out) > max_bytes:
+            return []
+        break
+    return out
 
 
 @dataclass
@@ -111,6 +166,40 @@ class SubstrateState:
 
     def log_error(self, record: dict[str, Any]) -> None:
         append_jsonl(self.logs_dir / "errors.jsonl", record)
+
+    def recent_turns(self) -> list[dict[str, Any]]:
+        raw = self.current.get("recent_turns") or []
+        if not isinstance(raw, list):
+            return []
+        return [t for t in raw if isinstance(t, dict)]
+
+    def append_recent_turn(
+        self,
+        user_input: str,
+        answer: str,
+        *,
+        max_bytes: int = RECENT_TURNS_MAX_BYTES,
+    ) -> list[dict[str, Any]]:
+        """Append an accepted exchange; byte-cap by dropping oldest first."""
+        entry = {
+            "user": _clip_text(str(user_input), RECENT_TURN_USER_MAX_CHARS),
+            "answer": _clip_text(str(answer), RECENT_TURN_ANSWER_MAX_CHARS),
+            "ts": utc_now_iso(),
+        }
+        turns = self.recent_turns() + [entry]
+        fitted = fit_recent_turns(turns, max_bytes=max_bytes)
+        self.current["recent_turns"] = fitted
+        self.save_current()
+        return fitted
+
+    def begin_new_session(self) -> str:
+        """Clear dialogue memory and bump session_id. Goal/threads stay."""
+        stamp = utc_now_iso().replace(":", "").replace("-", "")[:15]
+        new_id = f"sess_{stamp}"
+        self.current["session_id"] = new_id
+        self.current["recent_turns"] = []
+        self.save_current()
+        return new_id
 
     def apply_state_updates(self, updates: dict[str, Any] | None) -> list[str]:
         """Apply closed, allowlisted deltas only. Returns notes of what changed."""
