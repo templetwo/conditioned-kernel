@@ -151,9 +151,14 @@ def test_turn_two_packet_includes_turn_one(tmp_path: Path):
         "Orin" in str(t.get("answer") or "") or "substrate" in str(t.get("answer") or "").lower()
         for t in packet["recent_turns"]
     )
-    # Stay under edge packet budget
+    # Stay under edge packet budget (inference body only — omit dashboard maps)
+    skip = {"context_field", "evidence_pool_selected", "intents"}
     size = packet_byte_size(
-        {k: v for k, v in packet.items() if not str(k).startswith("_")}
+        {
+            k: v
+            for k, v in packet.items()
+            if not str(k).startswith("_") and k not in skip
+        }
     )
     assert size <= load_profile("orin_nano_8gb").max_packet_bytes
 

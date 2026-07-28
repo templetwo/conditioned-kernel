@@ -91,6 +91,11 @@ _CONTEXT_SHARE_SOURCES: tuple[tuple[str, str, str], ...] = (
     ),
     ("output_schema", "Output schema", "compile.CANDIDATE_FORMAT"),
     ("constraints", "Constraints", "packet.constraints · packet.acceptance_contract"),
+    (
+        "context_field",
+        "Context field selection",
+        "packet.context_field selected/omitted contributions",
+    ),
 )
 
 
@@ -147,8 +152,17 @@ def context_share_bytes(packet: dict[str, Any], model_input: dict[str, Any]) -> 
     )
     system_bytes = bytes_len(json.dumps(system_text, ensure_ascii=False)) if system_text else 0
 
+    # Companion model input is no longer a single Packet JSON; derive user/context
+    # bytes from the actual messages when present.
+    user_msg_bytes = 0
+    payload = model_input.get("payload") or {}
+    for m in payload.get("messages") or []:
+        if m.get("role") == "user":
+            user_msg_bytes += bytes_len(str(m.get("content") or ""))
     values = {
-        "current_user_input": _keyed_bytes(mp, "user_input"),
+        "current_user_input": _keyed_bytes(mp, "user_input") or (
+            bytes_len(str(packet.get("user_input") or "")) if user_msg_bytes else 0
+        ),
         "recent_dialogue": _keyed_bytes(mp, "recent_turns"),
         "durable_state": (
             _keyed_bytes(mp, "state_digest")
@@ -160,7 +174,22 @@ def context_share_bytes(packet: dict[str, Any], model_input: dict[str, Any]) -> 
         "system_instructions": system_bytes + _keyed_bytes(mp, "repair"),
         "output_schema": schema_bytes,
         "constraints": _keyed_bytes(mp, "constraints") + _keyed_bytes(mp, "acceptance_contract"),
+        # Observability census of the selection record (not model tokens as a blob —
+        # volatile field excluded from model_packet; count selected content bytes).
+        "context_field": sum(
+            len(str((c or {}).get("content") or "").encode("utf-8"))
+            for c in ((packet.get("context_field") or {}).get("selected") or [])
+            if isinstance(c, dict)
+        ),
     }
+    # If companion field path, durable_state is the selected facts share
+    if (packet.get("context_field") or {}).get("schema") == "ck.context_field.v1":
+        # Prefer message user content for current_input visibility in companion
+        if user_msg_bytes:
+            # Approximate: message contains selected context + current human message
+            cur = bytes_len(str(packet.get("user_input") or ""))
+            values["current_user_input"] = cur
+            values["durable_state"] = max(0, user_msg_bytes - cur)
     total = sum(values.values())
     rows: list[dict[str, Any]] = []
     for source_id, label, source_key in _CONTEXT_SHARE_SOURCES:
@@ -180,11 +209,11 @@ def context_share_bytes(packet: dict[str, Any], model_input: dict[str, Any]) -> 
 def verify_packet_bytes(packet: dict[str, Any]) -> tuple[int | None, int, bool]:
     """(logged, recomputed, match). `logged` is edge.enforce_packet_budget's
     own `_edge.packet_bytes` figure; `recomputed` is a fresh
-    edge.packet_byte_size call on the packet with `_edge` excluded (the same
-    exclusion enforce_packet_budget itself applies before attaching `_edge`).
-    A mismatch means the packet was mutated after budget enforcement ran."""
+    edge.packet_byte_size call (inference body only — observability maps
+    excluded). A mismatch means the packet was mutated after budget
+    enforcement ran."""
     logged = (packet.get("_edge") or {}).get("packet_bytes")
-    recomputed = packet_byte_size({k: v for k, v in packet.items() if k != "_edge"})
+    recomputed = packet_byte_size(packet)
     return logged, recomputed, (logged is None or logged == recomputed)
 
 

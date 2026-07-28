@@ -128,7 +128,16 @@ def build_repair_plan(
 
     goal = str((packet.get("state_digest") or {}).get("goal") or "")
     threads = _allowed_thread_ids(packet)
-    facts = _evidence_samples(packet, 4)
+    # Companion: only evidence that was selected into this turn's field
+    selected_pool = packet.get("evidence_pool_selected")
+    if isinstance(selected_pool, list) and selected_pool:
+        facts = [str(x)[:160] for x in selected_pool[:4]]
+    else:
+        facts = _evidence_samples(packet, 4)
+
+    companion = str((packet.get("acceptance_contract") or {}).get("acceptance_mode") or "") == (
+        "companion"
+    )
 
     # Shape-only skeleton — NEVER put real prose a tiny model will copy verbatim
     example = {
@@ -151,19 +160,32 @@ def build_repair_plan(
             seen.add(a)
             deduped.append(a)
 
-    return {
-        "pass_index": 1,
-        "violations": violations[:8],
-        "hints": hints[:6],
-        "allowed_thread_ids": threads,
-        "allowed_evidence_samples": facts,
-        "goal_snippet": goal[:200],
-        "example_json": example,
-        "annotations": deduped[:12],
-        "instruction": (
+    if companion:
+        instruction = (
+            "Previous output failed validation. Return corrected JSON only. "
+            "Answer the current human message directly. "
+            "Use only allowed_evidence_samples from this turn's selected context "
+            "(or evidence_used: []). Do not invent project status or hardware. "
+            "thread_touch only from allowed_thread_ids or []."
+        )
+        goal_snippet = ""  # do not re-inject full project goal into repair
+    else:
+        instruction = (
             "Previous output failed validation. Return corrected JSON only. "
             "Use allowed_evidence_samples or facts only. "
             "thread_touch only from allowed_thread_ids or []. "
             "Answer must reference the goal_snippet."
-        ),
+        )
+        goal_snippet = goal[:200]
+
+    return {
+        "pass_index": 1,
+        "violations": violations[:8],
+        "hints": hints[:6],
+        "allowed_thread_ids": threads if not companion else (threads if "thread" in str(violations).lower() else []),
+        "allowed_evidence_samples": facts,
+        "goal_snippet": goal_snippet,
+        "example_json": example,
+        "annotations": deduped[:12],
+        "instruction": instruction,
     }

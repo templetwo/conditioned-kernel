@@ -158,8 +158,24 @@ def load_profile(profile_id: str | None = None) -> EdgeProfile:
     return EdgeProfile.from_dict(data)
 
 
+# Dashboard/selection maps are not inference tokens — excluded from edge budget.
+_OBSERVABILITY_PACKET_KEYS = frozenset(
+    {
+        "context_field",
+        "evidence_pool_selected",
+        "intents",
+        "prior_accepted_answer_control",
+    }
+)
+
+
 def packet_byte_size(packet: dict[str, Any]) -> int:
-    return len(json.dumps(packet, ensure_ascii=False, separators=(",", ":")).encode("utf-8"))
+    body = {
+        k: v
+        for k, v in packet.items()
+        if k != "_edge" and k not in _OBSERVABILITY_PACKET_KEYS
+    }
+    return len(json.dumps(body, ensure_ascii=False, separators=(",", ":")).encode("utf-8"))
 
 
 def enforce_packet_budget(

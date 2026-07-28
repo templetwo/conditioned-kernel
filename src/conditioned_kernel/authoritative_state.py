@@ -334,7 +334,9 @@ def resolve_obligation(
             fallback_answer=(
                 "No. Cloud services are not allowed; this system operates fully local-only."
             ),
-            evidence=("This system is fully local.",),
+            evidence=(
+                "Operation is fully local-only; cloud services are not allowed.",
+            ),
             source_fields=("flags.cloud",),
         )
 

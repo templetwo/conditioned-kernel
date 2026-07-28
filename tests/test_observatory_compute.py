@@ -85,7 +85,8 @@ def _real_packet_and_model_input(tmp_path: Path, user_input: str = "What model r
 def test_context_share_buckets_are_six_sources_summing_to_the_total(tmp_path):
     packet, model_input = _real_packet_and_model_input(tmp_path)
     rows = compute.context_share_bytes(packet, model_input)
-    assert len(rows) == 6
+    # Includes context_field selection census after the Studio structural cut
+    assert len(rows) == 7
     assert [r["source_id"] for r in rows] == [
         "current_user_input",
         "recent_dialogue",
@@ -93,6 +94,7 @@ def test_context_share_buckets_are_six_sources_summing_to_the_total(tmp_path):
         "system_instructions",
         "output_schema",
         "constraints",
+        "context_field",
     ]
 
     total_bytes = sum(r["bytes"] for r in rows)

@@ -981,23 +981,70 @@ function panelPacketCompile() {
   });
   blocks.push({ type: "note", kind: "info", body: "This is a byte census of what was sent. It is not influence, attention, or causal contribution — nothing here can know how the kernel weighted these bytes internally." });
 
+  // Context field: AVAILABLE → SELECTED → inference field (companion path)
+  const field = pkt.context_field || {};
+  if (field && (field.selected || field.omitted || field.selection_records)) {
+    const sel = field.selected || [];
+    const om = field.omitted || [];
+    const recs = field.selection_records || [];
+    const reasonById = {};
+    recs.forEach((r) => { if (r && r.contribution_id) reasonById[r.contribution_id] = r.reason; });
+    const selLines = sel.length
+      ? sel.map((c) => `✓ ${c.contribution_id} [${c.kind}/${c.authority}] ${c.source_module}.${c.source_key}\n  ${String(c.content || "").slice(0, 160)}\n  reason: ${reasonById[c.contribution_id] || "selected"}`).join("\n\n")
+      : "(none — quiet substrate for this turn)";
+    const omLines = om.length
+      ? om.slice(0, 30).map((row) => {
+          const c = row.contribution || row;
+          const cid = row.contribution_id || c.contribution_id;
+          return `· ${cid} (${c.kind || "?"}): ${row.reason || reasonById[cid] || "omitted"}`;
+        }).join("\n") + (om.length > 30 ? `\n… +${om.length - 30} more` : "")
+      : "(none)";
+    blocks.push({
+      type: "code",
+      label: "Context field — SELECTED contributions",
+      note: `AVAILABLE ${field.available_count ?? "?"} → SELECTED ${field.selected_count ?? sel.length} · intents ${JSON.stringify(pkt.intents || [])}`,
+      body: selLines,
+    });
+    blocks.push({
+      type: "code",
+      label: "Context field — OMITTED (withheld from inference)",
+      note: "substrate still holds these; they were not narrated into this turn",
+      body: omLines,
+    });
+  }
+
   const byId = {};
   rows.forEach((r) => { byId[r.source_id] = r; });
   const systemText = extractSystemText(pass && pass.model_input);
   const schema = pass && pass.model_input && pass.model_input.payload && pass.model_input.payload.format;
+  // Companion path: show the actual user message content (selected context + current human message)
+  let companionUserBody = "";
+  try {
+    const mi = pass && pass.model_input;
+    const msgs = (mi && mi.payload && mi.payload.messages) || [];
+    const um = msgs.find((m) => m.role === "user");
+    if (um) companionUserBody = String(um.content || "");
+  } catch (_) { /* ignore */ }
   const sectionRows = [
     { id: "current_user_input", src: "packet.user_input", body: t.user_input },
-    { id: "recent_dialogue", src: "packet.recent_turns", body: (pkt.recent_turns || []).length ? pkt.recent_turns.map((r, i) => `[${i}] user: ${r.user}\n    answer: ${r.answer}`).join("\n") : "[]" },
-    { id: "durable_state", src: "state_digest · facts · open_threads", body: `goal: ${(pkt.state_digest || {}).goal || ""}\n\nfacts:\n${(pkt.facts || []).map((f, i) => `  [${i}] ${f}`).join("\n")}\n\nopen_threads:\n${(pkt.open_threads || []).map((th) => `  ${th.id} — ${th.title}`).join("\n")}${pkt.authoritative_obligation ? `\n\nauthoritative_obligation (${pkt.authoritative_obligation.kind}):\n${(pkt.authoritative_obligation.claims || []).map((c) => `  must preserve: ${c}`).join("\n")}` : ""}` },
+    { id: "recent_dialogue", src: "packet.recent_turns (selected only)", body: (pkt.recent_turns || []).length ? pkt.recent_turns.map((r, i) => `[${i}] user: ${r.user}\n    answer: ${r.answer}`).join("\n") : "[]" },
+    { id: "durable_state", src: "selected facts · open_threads", body: `goal (control plane): ${(pkt.state_digest || {}).goal || ""}\n\nselected facts:\n${(pkt.facts || []).length ? (pkt.facts || []).map((f, i) => `  [${i}] ${f}`).join("\n") : "  (none)"}\n\nselected open_threads:\n${(pkt.open_threads || []).length ? (pkt.open_threads || []).map((th) => `  ${th.id} — ${th.title}`).join("\n") : "  (none)"}${pkt.authoritative_obligation ? `\n\nauthoritative_obligation (${pkt.authoritative_obligation.kind}):\n${(pkt.authoritative_obligation.claims || []).map((c) => `  must preserve: ${c}`).join("\n")}` : ""}` },
     { id: "system_instructions", src: `build_model_input${pkt.repair ? " + packet.repair" : ""}`, body: systemText + (pkt.repair ? `\n\nrepair (pass ${pkt.repair.pass_index}):\n${pkt.repair.instruction}\n${(pkt.repair.hints || []).map((hh) => `  · ${hh}`).join("\n")}` : "") },
     { id: "output_schema", src: "CANDIDATE_FORMAT", body: schema ? JSON.stringify(schema, null, 2) : NA },
     { id: "constraints", src: "constraints · acceptance_contract", body: JSON.stringify({ constraints: pkt.constraints, acceptance_contract: pkt.acceptance_contract }, null, 2) },
   ];
+  if (companionUserBody) {
+    sectionRows.splice(1, 0, {
+      id: "compiled_inference_field",
+      src: "model_input.user (Selected context + Current human message)",
+      body: companionUserBody,
+    });
+  }
   blocks.push({
-    type: "sections", label: "Sources", note: "labelled blocks in packet order",
+    type: "sections", label: "Sources", note: "labelled blocks — companion uses selected field only",
     rows: sectionRows.map((s) => {
       const r = byId[s.id];
-      return { k: r ? r.source : s.id, tone: CTX_COLOR[s.id], bytes: r ? fmtBytes(r.bytes) : NA, pctLabel: r ? fmtPct(r.share_pct) : NA, src: s.src, body: s.body };
+      return { k: r ? r.source : s.id, tone: CTX_COLOR[s.id] || "var(--text-dim)", bytes: r ? fmtBytes(r.bytes) : NA, pctLabel: r ? fmtPct(r.share_pct) : NA, src: s.src, body: s.body };
     }),
   });
 

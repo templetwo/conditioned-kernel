@@ -71,6 +71,58 @@ def _composition_section(trace: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _context_field_section(trace: dict[str, Any]) -> str:
+    """AVAILABLE → SELECTED contribution map for companion turns."""
+    fp = _final_pass(trace)
+    packet = fp.get("packet") or trace.get("packet") or {}
+    field = packet.get("context_field") or {}
+    if not field:
+        return "*No context_field record on this packet (measurement or pre-field path).*"
+    lines = [
+        f"intents: {json.dumps(packet.get('intents') or [], ensure_ascii=False)}",
+        f"available={field.get('available_count')} · selected={field.get('selected_count')} · "
+        f"omitted={field.get('omitted_count')}",
+        "",
+        "### SELECTED",
+    ]
+    selected = field.get("selected") or []
+    if not selected:
+        lines.append("*None — quiet substrate (no project narration injected).*")
+    for c in selected:
+        if not isinstance(c, dict):
+            continue
+        content = str(c.get("content") or "")[:120].replace("|", "\\|")
+        lines.append(
+            f"- **{c.get('contribution_id')}** ({c.get('kind')}, {c.get('authority')}) "
+            f"[{c.get('source_module')}.{c.get('source_key')}] {content}"
+        )
+    lines.append("")
+    lines.append("### OMITTED (withheld from inference field)")
+    omitted = field.get("omitted") or []
+    # Prefer selection_records for reasons
+    reasons = {
+        r.get("contribution_id"): r.get("reason")
+        for r in (field.get("selection_records") or [])
+        if isinstance(r, dict) and not r.get("selected")
+    }
+    if not omitted:
+        lines.append("*None.*")
+    for row in omitted[:24]:
+        if not isinstance(row, dict):
+            continue
+        # omitted may be full selection records or contribution dicts
+        cid = row.get("contribution_id") or (row.get("contribution") or {}).get(
+            "contribution_id"
+        )
+        contrib = row.get("contribution") if isinstance(row.get("contribution"), dict) else row
+        reason = row.get("reason") or reasons.get(cid) or "omitted"
+        kind = (contrib or {}).get("kind")
+        lines.append(f"- `{cid}` ({kind}): {reason}")
+    if len(omitted) > 24:
+        lines.append(f"- … {len(omitted) - 24} more omitted")
+    return "\n".join(lines)
+
+
 def _candidate_section(trace: dict[str, Any]) -> str:
     fp = _final_pass(trace)
     lines = [
@@ -198,6 +250,9 @@ def build_compact_brief(
         "## Composition (context share, bytes)",
         _composition_section(trace),
         "",
+        "## Context field selection",
+        _context_field_section(trace),
+        "",
         "## Candidate",
         _candidate_section(trace),
         "",
@@ -257,6 +312,9 @@ def build_full_debug_brief(trace: dict[str, Any]) -> str:
         "",
         "## Composition (context share, bytes)",
         _composition_section(trace),
+        "",
+        "## Context field selection",
+        _context_field_section(trace),
         "",
         "## Candidate",
         _candidate_section(trace),

@@ -102,7 +102,28 @@ def _tokens(s: str, min_len: int = 4) -> list[str]:
 
 
 def _packet_evidence_pool(packet: dict[str, Any]) -> set[str]:
+    """Evidence pool for the turn.
+
+    Companion mode: prefer `evidence_pool_selected` (from contributions
+    actually placed in this turn's field). Do not validate against a hidden
+    full project report the model was not meant to see.
+    Measurement mode: full facts / threads / recent as before.
+    """
     pool: set[str] = set()
+    contract = packet.get("acceptance_contract") or {}
+    companion = str(contract.get("acceptance_mode") or "") == "companion"
+    selected = packet.get("evidence_pool_selected")
+    # Companion: selected list is authoritative even when empty (quiet turn).
+    if companion and isinstance(selected, list):
+        for item in selected:
+            pool.add(str(item).strip().lower())
+        for claim in ((packet.get("authoritative_obligation") or {}).get("claims") or []):
+            pool.add(str(claim).strip().lower())
+        # Selected facts still present in packet.facts for this turn
+        for fact in packet.get("facts") or []:
+            pool.add(str(fact).strip().lower())
+        return {p for p in pool if p}
+
     for fact in packet.get("facts") or []:
         pool.add(str(fact).strip().lower())
     for t in packet.get("open_threads") or []:
@@ -113,7 +134,6 @@ def _packet_evidence_pool(packet: dict[str, Any]) -> set[str]:
                 pool.add(str(t["title"]).strip().lower())
         else:
             pool.add(str(t).strip().lower())
-    # Prior dialogue is packet-local evidence (Studio first-flow).
     for turn in packet.get("recent_turns") or []:
         if isinstance(turn, dict):
             if turn.get("user"):
@@ -304,7 +324,14 @@ def is_substantial_repeat(new_text: str, prior_text: str) -> bool:
 
 
 def prior_accepted_answer(packet: dict[str, Any]) -> str:
-    """Most recent accepted assistant answer from recent_turns, if any."""
+    """Most recent accepted assistant answer (control plane).
+
+    Prefer `prior_accepted_answer_control` so the stale-response guard works
+    even when that turn was withheld from the selected dialogue field.
+    """
+    control = str(packet.get("prior_accepted_answer_control") or "").strip()
+    if control:
+        return control
     turns = packet.get("recent_turns") or []
     if not isinstance(turns, list) or not turns:
         return ""
@@ -458,8 +485,34 @@ def validate_candidate(
     work = dict(candidate)
     if companion:
         work = apply_companion_grounding(work, packet)
+        # Align citations to this turn's selected evidence pool only.
+        pool_items = [
+            str(x).strip()
+            for x in (
+                packet.get("evidence_pool_selected")
+                or packet.get("facts")
+                or []
+            )
+            if str(x).strip()
+        ]
+        cleaned: list[str] = []
+        for e in list(work.get("evidence_used") or []):
+            raw_e = str(e).strip()
+            el = raw_e.lower()
+            if len(raw_e) < 12:
+                continue  # drop bookkeeping-noise / short tokens
+            if any(el in p.lower() or p.lower() in el for p in pool_items):
+                cleaned.append(raw_e)
+        if not cleaned and pool_items:
+            # Prefer a pool line long enough to satisfy evidence checks
+            for p in pool_items:
+                if len(p) >= 12:
+                    cleaned = [p]
+                    work["evidence_source"] = "substrate_supplied"
+                    break
+        work["evidence_used"] = cleaned
         # Reflect grounding back onto the caller's candidate so accept/logs see it.
-        candidate["evidence_used"] = list(work.get("evidence_used") or [])
+        candidate["evidence_used"] = list(cleaned)
         if work.get("evidence_source"):
             candidate["evidence_source"] = work["evidence_source"]
 
@@ -552,7 +605,12 @@ def validate_candidate(
         valid_schema = False
 
     pool = _packet_evidence_pool(packet)
-    ok_e, e_bad = _evidence_ok(list(work.get("evidence_used") or []), pool)
+    evidence_list = list(work.get("evidence_used") or [])
+    # Companion quiet field: empty selected pool + empty evidence is valid.
+    if companion and not pool and not evidence_list:
+        ok_e, e_bad = True, []
+    else:
+        ok_e, e_bad = _evidence_ok(evidence_list, pool)
     if not ok_e:
         state_faithful = False
         violations.extend(e_bad)
@@ -623,8 +681,13 @@ def validate_candidate(
                         matched = True
                         break
             if not matched:
-                state_faithful = False
-                violations.append(f"unknown_thread_touch:{s[:60]}")
+                # Companion: unknown touches are filtered (thread may be withheld
+                # from this turn's field). Measurement: hard fail.
+                if companion:
+                    advisories.append(f"thread_touch_filtered:{s[:60]}")
+                else:
+                    state_faithful = False
+                    violations.append(f"unknown_thread_touch:{s[:60]}")
 
     decision_ready = valid_schema and state_faithful and not violations
     repairable = not decision_ready

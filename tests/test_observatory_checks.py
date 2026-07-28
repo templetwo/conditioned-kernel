@@ -255,10 +255,13 @@ def test_goal_echo_rejection_checks_agree_with_violations(tmp_path):
 
 
 def test_evidence_and_thread_touch_rejection_checks_agree_with_violations(tmp_path):
+    # Measurement mode: unknown thread_touch remains a hard violation.
+    # Companion mode filters unknown touches as advisory (withheld threads).
     trace = _run(
         tmp_path,
         evidence=["totally unrelated garbage citation text that matches nothing"],
         thread_touch=["bogus_thread_id"],
+        acceptance_mode="measurement",
     )
     pass0 = trace.passes[-1]
     assert pass0.decision == "reject"
