@@ -27,7 +27,9 @@ def test_compile_packet_shape(tmp_path: Path):
     assert packet["user_input"] == "hello"
     assert "packet_id" in packet
     assert "facts" in packet
-    assert packet["acceptance_contract"]["must_reference_goal"] is True
+    # Product compile defaults to companion (Studio); goal cite optional.
+    assert packet["acceptance_contract"]["acceptance_mode"] == "companion"
+    assert packet["acceptance_contract"]["must_reference_goal"] is False
 
     mi = build_model_input(packet, model="qwen2.5:0.5b", mode="chat_json")
     assert mi["mode"] == "chat_json"

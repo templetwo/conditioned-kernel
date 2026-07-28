@@ -171,6 +171,61 @@ def test_new_session_clears_recent_turns(tmp_path: Path):
     assert new_id != old
 
 
+def test_companion_accepts_empty_evidence_with_substrate_supply(tmp_path: Path):
+    """Earned Studio fix: Laboratory evidence demand must not block conversation."""
+    state_dir, logs_dir = _bootstrap(tmp_path)
+    # Model returned JSON but empty evidence_used — the live failure mode.
+    dry = json.dumps(
+        {
+            "answer": (
+                "The goal is demonstrating substrate gain on a small local model "
+                "under Jetson Orin edge budgets."
+            ),
+            "evidence_used": [],
+            "next_state": {},
+        }
+    )
+    result = run_turn(
+        "What is the goal we are working toward?",
+        state_dir=state_dir,
+        logs_dir=logs_dir,
+        dry_candidate_text=dry,
+        max_repair=0,
+        acceptance_mode="companion",
+    )
+    assert result.ok is True, result.receipt.get("violations")
+    assert result.decision == "accept"
+    assert result.candidate.get("evidence_source") == "substrate_supplied"
+    assert result.candidate.get("evidence_used")
+    # recent_turns only appends on accept — B can engage
+    state = SubstrateState.load(state_dir=state_dir, logs_dir=logs_dir)
+    assert len(state.recent_turns()) == 1
+
+
+def test_measurement_still_rejects_empty_evidence(tmp_path: Path):
+    state_dir, logs_dir = _bootstrap(tmp_path)
+    dry = json.dumps(
+        {
+            "answer": (
+                "The goal is demonstrating substrate gain on a small local model "
+                "under Jetson Orin edge budgets."
+            ),
+            "evidence_used": [],
+            "next_state": {},
+        }
+    )
+    result = run_turn(
+        "What is the goal we are working toward?",
+        state_dir=state_dir,
+        logs_dir=logs_dir,
+        dry_candidate_text=dry,
+        max_repair=0,
+        acceptance_mode="measurement",
+    )
+    assert result.ok is False
+    assert "evidence_used_empty" in (result.receipt.get("violations") or [])
+
+
 def test_many_long_turns_still_compile_under_budget(tmp_path: Path):
     state_dir, logs_dir = _bootstrap(tmp_path)
     state = SubstrateState.load(state_dir=state_dir, logs_dir=logs_dir)

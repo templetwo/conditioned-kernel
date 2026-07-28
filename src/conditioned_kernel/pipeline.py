@@ -58,8 +58,13 @@ def run_turn(
     profile_id: str | None = None,
     client: OllamaClient | None = None,
     dry_candidate_text: str | None = None,
+    acceptance_mode: str = "companion",
 ) -> TurnResult:
-    """Run one conditioned turn under an edge profile (default: orin_nano_8gb)."""
+    """Run one conditioned turn under an edge profile (default: orin_nano_8gb).
+
+    acceptance_mode defaults to companion (Studio product). Pass measurement for
+    Laboratory experiment contracts that require model-produced evidence.
+    """
     prof = profile or load_profile(profile_id)
     state = SubstrateState.load(state_dir=state_dir, logs_dir=logs_dir)
     ollama = client or OllamaClient(base_url=base_url, timeout=prof.timeout_s)
@@ -117,6 +122,7 @@ def run_turn(
                 num_ctx=num_ctx,
                 keep_alive=keep_alive,
                 profile=prof,
+                acceptance_mode=acceptance_mode,
             )
         except BudgetError as e:
             state.log_error(

@@ -190,6 +190,7 @@ def score_free_text(
         "open_threads": [],
         "constraints": {"max_words": max_words, "forbidden": []},
         "acceptance_contract": {
+            "acceptance_mode": "measurement",
             "required_sections": ["answer", "evidence_used", "next_state"],
             "must_reference_goal": True,
             "must_not_contradict_facts": True,

@@ -64,7 +64,14 @@ def build_arrival_packet(
     repair_plan: dict[str, Any] | None = None,
     profile: EdgeProfile | None = None,
     enforce_budget: bool = True,
+    acceptance_mode: str = "companion",
 ) -> dict[str, Any]:
+    """Build arrival packet.
+
+    acceptance_mode:
+      companion   — product path (ck ask / ck chat). Substrate may supply evidence.
+      measurement — Laboratory experiment contract. Model must cite packet facts.
+    """
     prof = profile or load_profile()
     words = max_words if max_words is not None else prof.max_answer_words
     open_threads = state.open_threads()
@@ -73,6 +80,8 @@ def build_arrival_packet(
         state.recent_turns(),
         max_bytes=RECENT_TURNS_MAX_BYTES,
     )
+    mode = acceptance_mode if acceptance_mode in ("companion", "measurement") else "companion"
+    companion = mode == "companion"
     packet: dict[str, Any] = {
         "packet_id": packet_id(),
         "created_at": utc_now_iso(),
@@ -87,7 +96,7 @@ def build_arrival_packet(
         "constraints": {
             "max_words": words,
             "must_return_json": True,
-            "must_cite_state_fields": True,
+            "must_cite_state_fields": not companion,
             "forbidden": [
                 "tool_calls",
                 "invented_files",
@@ -97,8 +106,10 @@ def build_arrival_packet(
             ],
         },
         "acceptance_contract": {
+            "acceptance_mode": mode,
             "required_sections": ["answer", "evidence_used", "next_state"],
-            "must_reference_goal": True,
+            # Companion: goal keyword citation optional (small models).
+            "must_reference_goal": not companion,
             "must_not_contradict_facts": True,
             "evidence_must_be_from_packet": True,
         },
@@ -162,14 +173,15 @@ def build_model_input(
         serialized = json.dumps(model_packet, ensure_ascii=False, separators=(",", ":"))
     else:
         serialized = json.dumps(model_packet, ensure_ascii=False, indent=2)
+    # Companion prompts stay short for edge ctx; measurement is stricter.
     system = (
         "Local conditioned-kernel transducer. "
         "Return ONLY valid JSON with keys answer, evidence_used, next_state. "
-        "answer: short reply that mentions the goal. "
-        "If recent_turns is present, treat it as prior dialogue in this session "
-        "and stay consistent with it. "
-        "evidence_used: copy exact strings from facts, open_threads, or recent_turns. "
-        "next_state.thread_touch: array of real open_threads id values, or []. "
+        "answer: short helpful reply grounded in the packet. "
+        "If recent_turns is present, treat it as prior dialogue and stay consistent. "
+        "evidence_used: prefer exact strings from facts/open_threads/recent_turns; "
+        "may be [] if unsure (substrate can ground). "
+        "next_state.thread_touch: real open_threads ids or []. "
         "Never invent thread ids. No files, URLs, tools, or cloud."
     )
 
@@ -241,6 +253,7 @@ def compile_turn(
     keep_alive: str | None = None,
     profile: EdgeProfile | None = None,
     profile_id: str | None = None,
+    acceptance_mode: str = "companion",
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     prof = profile or load_profile(profile_id)
     packet = build_arrival_packet(
@@ -250,6 +263,7 @@ def compile_turn(
         repair_plan=repair_plan,
         profile=prof,
         enforce_budget=True,
+        acceptance_mode=acceptance_mode,
     )
     model_input = build_model_input(
         packet,

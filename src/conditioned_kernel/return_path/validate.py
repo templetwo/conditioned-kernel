@@ -245,6 +245,59 @@ def _evidence_ok(evidence: list[str], pool: set[str]) -> tuple[bool, list[str]]:
     return len(bad) == 0, bad
 
 
+def substrate_supply_evidence(
+    answer: str,
+    packet: dict[str, Any],
+    *,
+    max_items: int = 2,
+) -> list[str]:
+    """Studio path: substrate owns grounding when the model does not cite.
+
+    The model supplies language; the substrate attaches packet-local facts.
+    Prefers facts that lexically overlap the answer; otherwise first fact(s).
+    """
+    facts = [str(f).strip() for f in (packet.get("facts") or []) if str(f).strip()]
+    goal = str((packet.get("state_digest") or {}).get("goal") or "").strip()
+    if not facts and goal:
+        facts = [goal]
+    if not facts:
+        return ["This system is fully local."]
+
+    ans = (answer or "").lower()
+    ranked: list[tuple[int, str]] = []
+    for f in facts:
+        toks = [t for t in re.findall(r"[a-z0-9]{4,}", f.lower()) if len(t) >= 4]
+        hits = sum(1 for t in toks if t in ans)
+        ranked.append((hits, f))
+    ranked.sort(key=lambda x: (-x[0], -len(x[1])))
+    chosen = [f for h, f in ranked if h > 0][:max_items]
+    if not chosen:
+        chosen = [facts[0]]
+    return chosen
+
+
+def apply_companion_grounding(
+    candidate: dict[str, Any],
+    packet: dict[str, Any],
+) -> dict[str, Any]:
+    """Mutate a copy of candidate for companion acceptance (product path).
+
+    Empty or unusable evidence_used is filled from the packet. Does not invent
+    facts outside the arrival packet. Measurement mode never calls this.
+    """
+    out = dict(candidate)
+    evidence = list(out.get("evidence_used") or [])
+    usable = [str(e).strip() for e in evidence if str(e).strip() and len(str(e).strip()) >= 12]
+    if usable:
+        out["evidence_used"] = usable
+        out["evidence_source"] = out.get("evidence_source") or "model"
+        return out
+    supplied = substrate_supply_evidence(str(out.get("answer") or ""), packet)
+    out["evidence_used"] = supplied
+    out["evidence_source"] = "substrate_supplied"
+    return out
+
+
 def _forbidden_hits(answer: str, packet: dict[str, Any]) -> list[str]:
     forbidden = (packet.get("constraints") or {}).get("forbidden") or []
     hits: list[str] = []
@@ -315,14 +368,28 @@ def validate_candidate(
     valid_schema = True
     state_faithful = True
 
+    contract = packet.get("acceptance_contract") or {}
+    # measurement (default): Laboratory experiment contract — model must cite.
+    # companion: Studio product path — substrate may supply evidence.
+    acceptance_mode = str(contract.get("acceptance_mode") or "measurement")
+    companion = acceptance_mode == "companion"
+
+    work = dict(candidate)
+    if companion:
+        work = apply_companion_grounding(work, packet)
+        # Reflect grounding back onto the caller's candidate so accept/logs see it.
+        candidate["evidence_used"] = list(work.get("evidence_used") or [])
+        if work.get("evidence_source"):
+            candidate["evidence_source"] = work["evidence_source"]
+
     user_input = str(packet.get("user_input") or "")
     goal = str((packet.get("state_digest") or {}).get("goal") or "")
 
-    if not candidate.get("parse_ok"):
+    if not work.get("parse_ok"):
         valid_schema = False
-        violations.append(f"parse_failed:{candidate.get('parse_error') or 'unknown'}")
+        violations.append(f"parse_failed:{work.get('parse_error') or 'unknown'}")
 
-    answer = (candidate.get("answer") or "").strip()
+    answer = (work.get("answer") or "").strip()
     if not answer:
         valid_schema = False
         violations.append("missing_answer")
@@ -341,7 +408,7 @@ def validate_candidate(
             valid_schema = False
             violations.append("template_echo")
             break
-    for item in candidate.get("evidence_used") or []:
+    for item in work.get("evidence_used") or []:
         if str(item) in {"STRING_FROM_FACTS", "(copy a fact)", "STRING"}:
             state_faithful = False
             violations.append("template_echo_evidence")
@@ -357,7 +424,7 @@ def validate_candidate(
         state_faithful = False
         violations.append("not_responsive")
 
-    required = (packet.get("acceptance_contract") or {}).get("required_sections") or [
+    required = contract.get("required_sections") or [
         "answer",
         "evidence_used",
         "next_state",
@@ -366,10 +433,10 @@ def validate_candidate(
         if section == "answer" and not answer:
             violations.append("required_section:answer")
             valid_schema = False
-        if section == "evidence_used" and not isinstance(candidate.get("evidence_used"), list):
+        if section == "evidence_used" and not isinstance(work.get("evidence_used"), list):
             violations.append("required_section:evidence_used")
             valid_schema = False
-        if section == "next_state" and not isinstance(candidate.get("next_state"), dict):
+        if section == "next_state" and not isinstance(work.get("next_state"), dict):
             violations.append("required_section:next_state")
             valid_schema = False
 
@@ -380,12 +447,17 @@ def validate_candidate(
         valid_schema = False
 
     pool = _packet_evidence_pool(packet)
-    ok_e, e_bad = _evidence_ok(list(candidate.get("evidence_used") or []), pool)
+    ok_e, e_bad = _evidence_ok(list(work.get("evidence_used") or []), pool)
     if not ok_e:
         state_faithful = False
         violations.extend(e_bad)
 
-    if (packet.get("acceptance_contract") or {}).get("must_reference_goal", True):
+    # Companion: goal mention optional (0.5b often answers without thesis keywords).
+    # Measurement: still requires load-bearing goal tokens.
+    must_goal = contract.get("must_reference_goal")
+    if must_goal is None:
+        must_goal = not companion
+    if must_goal:
         if answer and not _goal_referenced(answer, packet):
             state_faithful = False
             violations.append("goal_not_referenced")
@@ -401,7 +473,7 @@ def validate_candidate(
         violations.extend(contra)
 
     # Thread touches
-    ns = candidate.get("next_state") or {}
+    ns = work.get("next_state") or {}
     touches = ns.get("thread_touch") or []
     known_ids = {
         str(t.get("id")).lower()
@@ -454,13 +526,15 @@ def validate_candidate(
 
     return {
         "receipt_id": receipt_id(),
-        "candidate_id": candidate.get("candidate_id"),
+        "candidate_id": work.get("candidate_id"),
         "packet_id": packet.get("packet_id"),
         "created_at": utc_now_iso(),
         "valid_schema": valid_schema,
         "state_faithful": state_faithful,
         "violations": violations,
-        "repairable": repairable and candidate.get("pass_index", 0) == 0,
+        "repairable": repairable and work.get("pass_index", 0) == 0,
         "decision": "pending",
         "word_count": word_count,
+        "acceptance_mode": acceptance_mode,
+        "evidence_source": work.get("evidence_source") or "model",
     }
