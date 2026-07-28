@@ -276,6 +276,56 @@ def is_template_echo_text(text: str) -> bool:
     return any(m.lower() in low for m in TEMPLATE_ECHO_MARKERS)
 
 
+def is_substantial_repeat(new_text: str, prior_text: str) -> bool:
+    """True when new answer is essentially the same linguistic groove as prior."""
+    n = _norm_ws(new_text).strip(" .\"'")
+    p = _norm_ws(prior_text).strip(" .\"'")
+    if not n or not p:
+        return False
+    if n == p:
+        return True
+    # Long prior answer re-emitted as prefix/body of the new one
+    if len(p) >= 48 and p[:80] in n:
+        return True
+    if len(n) >= 48 and n[:80] in p:
+        return True
+    nt = set(_tokens(n, min_len=4))
+    pt = set(_tokens(p, min_len=4))
+    if not pt or not nt:
+        return False
+    overlap = len(nt & pt) / len(pt)
+    novel = len(nt - pt)
+    # High reuse of prior content with little new signal
+    if overlap >= 0.85 and novel <= 3:
+        return True
+    if overlap >= 0.92 and novel <= 6:
+        return True
+    return False
+
+
+def prior_accepted_answer(packet: dict[str, Any]) -> str:
+    """Most recent accepted assistant answer from recent_turns, if any."""
+    turns = packet.get("recent_turns") or []
+    if not isinstance(turns, list) or not turns:
+        return ""
+    last = turns[-1]
+    if isinstance(last, dict):
+        return str(last.get("answer") or "").strip()
+    return ""
+
+
+def user_prompt_changed(packet: dict[str, Any], user_input: str) -> bool:
+    turns = packet.get("recent_turns") or []
+    if not isinstance(turns, list) or not turns:
+        return True
+    last = turns[-1]
+    if not isinstance(last, dict):
+        return True
+    prior_u = _norm_ws(str(last.get("user") or ""))
+    cur = _norm_ws(user_input)
+    return bool(cur) and cur != prior_u
+
+
 def substrate_supply_evidence(
     answer: str,
     packet: dict[str, Any],
@@ -450,17 +500,34 @@ def validate_candidate(
         state_faithful = False
         violations.append("goal_echo")
 
-    # Responsiveness to the actual user question.
-    # Substrate-rendered authoritative fallbacks are already claim-checked;
-    # do not reject them for soft lexical mismatch with the question phrasing.
+    # Responsiveness:
+    # - measurement: hard reject (Laboratory contract)
+    # - companion: advisory only — small models often answer without echo-tokens
+    # - authoritative_fallback: already claim-checked; skip
+    advisories: list[str] = []
     if (
         answer
         and user_input
         and not is_responsive(answer, user_input)
         and not work.get("authoritative_fallback")
     ):
-        state_faithful = False
-        violations.append("not_responsive")
+        if companion:
+            advisories.append("not_responsive")
+        else:
+            state_faithful = False
+            violations.append("not_responsive")
+
+    # Studio: stale-response attractor — repeating the last accepted answer
+    # while the user moved on is a hard structural failure (repair then reject).
+    if companion and answer and not work.get("authoritative_fallback"):
+        prior = prior_accepted_answer(packet)
+        if (
+            prior
+            and user_prompt_changed(packet, user_input)
+            and is_substantial_repeat(answer, prior)
+        ):
+            state_faithful = False
+            violations.append("stale_response_repeat")
 
     required = contract.get("required_sections") or [
         "answer",
@@ -570,6 +637,7 @@ def validate_candidate(
         "valid_schema": valid_schema,
         "state_faithful": state_faithful,
         "violations": violations,
+        "advisories": advisories,
         "repairable": repairable and work.get("pass_index", 0) == 0,
         "decision": "pending",
         "word_count": word_count,

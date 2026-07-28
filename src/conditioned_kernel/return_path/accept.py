@@ -32,11 +32,14 @@ def accept_candidate(
         poison = (
             "template_echo" in violations
             or "template_echo_evidence" in violations
+            or "stale_response_repeat" in violations
             or is_template_echo_text(answer_text)
         )
         if answer_text and user_text and not poison:
             state.append_recent_turn(user_text, answer_text)
             applied = list(applied) + ["recent_turn_appended"]
+        elif "stale_response_repeat" in violations and answer_text:
+            applied = list(applied) + ["recent_turn_skipped_stale_repeat"]
         elif poison and answer_text:
             applied = list(applied) + ["recent_turn_skipped_template_echo"]
         # bump receipt counter

@@ -72,6 +72,12 @@ def _hint_for_violation(v: str, packet: dict[str, Any]) -> str | None:
     if v == "not_responsive":
         q = str(packet.get("user_input") or "")[:120]
         return f"FIX not_responsive: address the user question terms directly (question: {q})"
+    if v == "stale_response_repeat":
+        q = str(packet.get("user_input") or "")[:160]
+        return (
+            "FIX stale_response_repeat: do NOT repeat your previous answer. "
+            f"Answer THIS user message freshly and specifically: {q}"
+        )
     if v.startswith("contradicts_facts"):
         return "FIX contradicts_facts: do not claim cloud/sensors/tools when facts forbid them."
     if v.startswith("evidence_too_short"):
