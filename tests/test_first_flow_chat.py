@@ -171,6 +171,81 @@ def test_new_session_clears_recent_turns(tmp_path: Path):
     assert new_id != old
 
 
+def test_companion_system_prompt_echo_rejected():
+    from conditioned_kernel.return_path.parse import parse_candidate
+    from conditioned_kernel.return_path.validate import validate_candidate
+
+    packet = {
+        "packet_id": "pkt",
+        "user_input": "Remember the codeword FALCON-9-DELTA.",
+        "state_digest": {
+            "goal": (
+                "Demonstrate conditioned-kernel substrate gain over bare generation "
+                "on a small local model under Jetson Orin Nano 8GB edge budgets."
+            )
+        },
+        "facts": ["This system is fully local."],
+        "open_threads": [],
+        "constraints": {"max_words": 180, "forbidden": []},
+        "acceptance_contract": {
+            "acceptance_mode": "companion",
+            "required_sections": ["answer", "evidence_used", "next_state"],
+            "must_reference_goal": False,
+            "must_not_contradict_facts": True,
+            "evidence_must_be_from_packet": True,
+        },
+    }
+    # Live failure: model splices companion system prompt into the answer.
+    raw = json.dumps(
+        {
+            "answer": (
+                "FALCON-9-DELTA is a short helpful reply grounded in the packet. "
+                "If recent_turns is present, treat it as prior dialogue and stay consistent."
+            ),
+            "evidence_used": [],
+            "next_state": {},
+        }
+    )
+    cand = parse_candidate(raw, packet_id="pkt")
+    receipt = validate_candidate(cand, packet)
+    assert "template_echo" in receipt["violations"]
+    assert receipt["valid_schema"] is False
+
+
+def test_template_echo_never_enters_recent_turns(tmp_path: Path):
+    """Defense in depth: poisoned answers must not append even if forced accept."""
+    from conditioned_kernel.return_path.accept import accept_candidate
+    from conditioned_kernel.state import SubstrateState
+
+    state_dir, logs_dir = _bootstrap(tmp_path)
+    state = SubstrateState.load(state_dir=state_dir, logs_dir=logs_dir)
+    packet = {
+        "packet_id": "p1",
+        "user_input": "Remember FALCON-9-DELTA",
+    }
+    candidate = {
+        "candidate_id": "c1",
+        "answer": (
+            "FALCON-9-DELTA is a short helpful reply grounded in the packet. "
+            "treat it as prior dialogue"
+        ),
+        "evidence_used": ["This system is fully local."],
+        "next_state": {},
+        "pass_index": 0,
+    }
+    receipt = {
+        "receipt_id": "r1",
+        "decision": "accept",
+        "violations": [],  # simulate a path that missed the guard
+    }
+    out = accept_candidate(
+        state, packet=packet, candidate=candidate, receipt=receipt
+    )
+    assert "recent_turn_skipped_template_echo" in out["applied_updates"]
+    state2 = SubstrateState.load(state_dir=state_dir, logs_dir=logs_dir)
+    assert state2.recent_turns() == []
+
+
 def test_companion_accepts_empty_evidence_with_substrate_supply(tmp_path: Path):
     """Earned Studio fix: Laboratory evidence demand must not block conversation."""
     state_dir, logs_dir = _bootstrap(tmp_path)

@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from conditioned_kernel.ids import utc_now_iso
+from conditioned_kernel.return_path.validate import is_template_echo_text
 from conditioned_kernel.state import SubstrateState
 
 
@@ -24,11 +25,20 @@ def accept_candidate(
         applied = state.apply_state_updates(candidate.get("next_state"))
         # Studio first-flow: keep a byte-capped ring of accepted dialogue so the
         # next compile can see prior turns (stop/resume continuity).
+        # Never persist system-prompt / template echoes into memory.
         answer_text = str(candidate.get("answer") or "").strip()
         user_text = str(packet.get("user_input") or "").strip()
-        if answer_text and user_text:
+        violations = list(receipt.get("violations") or [])
+        poison = (
+            "template_echo" in violations
+            or "template_echo_evidence" in violations
+            or is_template_echo_text(answer_text)
+        )
+        if answer_text and user_text and not poison:
             state.append_recent_turn(user_text, answer_text)
             applied = list(applied) + ["recent_turn_appended"]
+        elif poison and answer_text:
+            applied = list(applied) + ["recent_turn_skipped_template_echo"]
         # bump receipt counter
         state.current["receipt_count_24h"] = int(state.current.get("receipt_count_24h") or 0) + 1
         state.save_current()

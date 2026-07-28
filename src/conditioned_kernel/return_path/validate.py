@@ -245,6 +245,37 @@ def _evidence_ok(evidence: list[str], pool: set[str]) -> tuple[bool, list[str]]:
     return len(bad) == 0, bad
 
 
+# Instruction / repair-template bleed. Kept module-level so accept can refuse
+# to append poisoned text even if a path ever accepted past validation.
+TEMPLATE_ECHO_MARKERS: tuple[str, ...] = (
+    # Legacy repair / measurement placeholders
+    "(short reply that mentions",
+    "string_from_facts",
+    "copy a fact",
+    "STRING_FROM_FACTS",
+    "answer here",
+    # Companion system-prompt phrases (compile.py) — 0.5b often echoes these.
+    # Prefer multi-word instruction fragments over short colloquial phrases.
+    "short helpful reply grounded in the packet",
+    "treat it as prior dialogue",
+    "treat it as prior dialogue and stay consistent",
+    "substrate can ground",
+    "prefer exact strings from facts",
+    "return only valid json",
+    "local conditioned-kernel transducer",
+    "never invent thread ids",
+    "may be [] if unsure",
+)
+
+
+def is_template_echo_text(text: str) -> bool:
+    """True if text looks like system/repair instruction bleed."""
+    if not text:
+        return False
+    low = text.lower()
+    return any(m.lower() in low for m in TEMPLATE_ECHO_MARKERS)
+
+
 def substrate_supply_evidence(
     answer: str,
     packet: dict[str, Any],
@@ -394,16 +425,10 @@ def validate_candidate(
         valid_schema = False
         violations.append("missing_answer")
 
-    # Reject obvious repair-template echoes
-    template_markers = (
-        "(short reply that mentions",
-        "string_from_facts",
-        "copy a fact",
-        "STRING_FROM_FACTS",
-        "answer here",
-    )
+    # Reject repair-template and system-prompt echoes (0.5b often splices
+    # instruction text into the answer; that must not enter recent_turns).
     ans_l = answer.lower()
-    for marker in template_markers:
+    for marker in TEMPLATE_ECHO_MARKERS:
         if marker.lower() in ans_l or marker in answer:
             valid_schema = False
             violations.append("template_echo")
