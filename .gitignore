@@ -51,3 +51,12 @@ logs/*.jsonl
 !experiments/runs/commissioning_*/
 # RUN 00.9A.1: scientific contract freeze design packet (no model execution).
 !experiments/runs/scientific_contract_*/
+
+# Dashboard turn captures are LIVE SESSION DATA, not evidence artifacts.
+# `ck dashboard` writes full packets — user_input plus recent_turns — to
+# logs/dashboard/turns/*.json. The existing `logs/*.jsonl` rule does not cover
+# them (.json, and one level deeper), so without this line every real
+# conversation Anthony has with the companion publishes to the public repo as a
+# side effect of opening the Interior View. Inverse of the ladder/00.8B lesson:
+# there evidence failed to reach the repo, here private dialogue reaches it.
+logs/dashboard/

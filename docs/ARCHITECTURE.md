@@ -4,6 +4,12 @@
 
 The model supplies linguistic possibility; the substrate determines what becomes an answer.
 
+## Purpose (see `docs/PURPOSE_AND_RIVER.md`)
+
+Build something Anthony wants to live with every day. Laboratory rigor serves
+that Studio purpose; it does not replace it. Before another refinement cycle:
+usefulness or honesty — otherwise defer.
+
 ## Edge-first product constraint
 
 Default profile is **`orin_nano_8gb`**. Architecture and defaults assume:
