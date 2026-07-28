@@ -60,3 +60,6 @@ logs/*.jsonl
 # side effect of opening the Interior View. Inverse of the ladder/00.8B lesson:
 # there evidence failed to reach the repo, here private dialogue reaches it.
 logs/dashboard/
+
+# Explicit nested path (same boundary as logs/dashboard/)
+logs/dashboard/turns/
