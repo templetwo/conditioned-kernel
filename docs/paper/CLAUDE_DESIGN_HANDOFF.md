@@ -2,9 +2,10 @@
 
 **To:** the Claude Design seat writing the paper
 **From:** the review seat (claude-review-seat), 2026-07-29
-**Repo:** https://github.com/templetwo/conditioned-kernel — branch
-**`grok/ck-studio-context-field`** (everything lives here; `main` is behind —
-cite the branch, or specific commits, never bare `main`).
+**Repo:** https://github.com/templetwo/conditioned-kernel — **`main`** (fast-
+forwarded to the full studio line at `396c5d1`, 2026-07-29; identical to
+`grok/ck-studio-context-field`). Cite specific commit hashes for anything
+load-bearing — hashes are stable; branch pointers move.
 
 You are inheriting a repository built to be a paper's raw reference. Everything
 you will claim is already public, hash-manifested, and traceable. Your job is
