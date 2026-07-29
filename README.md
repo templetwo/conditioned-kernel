@@ -1,6 +1,11 @@
 # Conditioned Kernel
 
+[![Paper DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21683054.svg)](https://doi.org/10.5281/zenodo.21683054)
+[![Evidence DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21683073.svg)](https://doi.org/10.5281/zenodo.21683073)
+
 > **The model supplies linguistic possibility; the substrate determines what becomes an answer.**
+
+**Paper:** *The Black Box Is Smaller Than the Experience* (preprint v0.1) — [doi:10.5281/zenodo.21683054](https://doi.org/10.5281/zenodo.21683054) · frozen code+evidence snapshot: [doi:10.5281/zenodo.21683073](https://doi.org/10.5281/zenodo.21683073) (tag `paper-v0.1`, commit `1695295`).
 
 Local-first experiment harness for **substrate-conditioned generation**.
 The language model is treated as a **replaceable text-transduction kernel**.
