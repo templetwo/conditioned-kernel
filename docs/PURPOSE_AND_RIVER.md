@@ -79,6 +79,11 @@ It must never become a dam that prevents movement.
 | **Laboratory** | Scientific contract, commissioning, publication gates, falsification, honesty of claims |
 | **Studio** | Intuition, phenomenology, daily use, experimentation, Witness Companion, lived behavior |
 
+**Public Studio field notes** (what it was like to sit with the system, redacted):
+[`docs/observations/`](observations/).  
+**Laboratory receipts:** [`docs/adaptive/`](adaptive/).  
+Do not conflate the two shelves.
+
 Scientific work remains valuable. The Laboratory is real.
 
 The Laboratory is **not** the entire project.  

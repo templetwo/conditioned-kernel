@@ -10,6 +10,13 @@ Build something Anthony wants to live with every day. Laboratory rigor serves
 that Studio purpose; it does not replace it. Before another refinement cycle:
 usefulness or honesty — otherwise defer.
 
+## Studio observations (public)
+
+Lived companion behavior is recorded for public read under
+**[`docs/observations/`](observations/)** (Interior View field notes, redacted).
+Private turn dumps stay in gitignored `logs/dashboard/`. Laboratory science
+stays under `docs/adaptive/`.
+
 ## Edge-first product constraint
 
 Default profile is **`orin_nano_8gb`**. Architecture and defaults assume:

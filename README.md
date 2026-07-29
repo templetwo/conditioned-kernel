@@ -104,6 +104,14 @@ See [docs/EXPERIMENT_PROTOCOL.md](docs/EXPERIMENT_PROTOCOL.md).
 
 Conditions include bare, budget-matched bare, static persona, full Conditioned Kernel, and ablations. Metrics split **structural recovery** (parse/schema/repair) from **semantic substrate gain** (faithfulness/continuity on valid candidates).
 
+## Studio observations (public)
+
+Lived companion / Interior View field notes — redacted for public read, separate from private `logs/`:
+
+**[docs/observations/](docs/observations/)** — index, privacy rules, and session notes (Context Field, `not_responsive`, night phenomenology).
+
+Laboratory run receipts stay under [docs/adaptive/](docs/adaptive/). Philosophy: [docs/PURPOSE_AND_RIVER.md](docs/PURPOSE_AND_RIVER.md).
+
 ## Lineage
 
 Synthesis of Temple Two public work:
@@ -121,10 +129,13 @@ v0 does **not** import the full stack. Bridge surfaces are P3 after the core exp
 conditioned-kernel/
 ├── src/conditioned_kernel/   # package
 ├── state/                    # default substrate files
-├── logs/                     # receipts / history (local writes)
+├── logs/                     # receipts / history (local only; gitignored)
 ├── experiments/              # matrix runners + probes
 ├── tests/                    # offline unit tests
-└── docs/                     # thesis, architecture, protocol
+└── docs/
+    ├── adaptive/             # Laboratory run contracts & receipts
+    ├── observations/         # public Studio field notes (this is the showcase)
+    └── *.md                  # thesis, architecture, purpose, protocol
 ```
 
 ## License
