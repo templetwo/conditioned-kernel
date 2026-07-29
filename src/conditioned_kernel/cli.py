@@ -213,7 +213,14 @@ def _cmd_ask(args: argparse.Namespace) -> int:
 
 
 def _cmd_chat(args: argparse.Namespace) -> int:
-    """Sustained multi-turn session: compile → generate → accept loop on stdin."""
+    """Sustained multi-turn session: compile → generate → accept loop on stdin.
+
+    `--mode flow` forks to Studio Flow mode (`_cmd_chat_flow`) before any of
+    the acceptance-court machinery below runs — Flow never calls `run_turn`.
+    """
+    if getattr(args, "mode", None) == "flow":
+        return _cmd_chat_flow(args)
+
     prof = _apply_profile_defaults(args)
     state_dir = Path(args.state_dir) if args.state_dir else None
     logs_dir = Path(args.logs_dir) if args.logs_dir else None
@@ -296,6 +303,78 @@ def _cmd_chat(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_chat_flow(args: argparse.Namespace) -> int:
+    """Studio Flow mode: field before → model speaks through field → output
+    reaches Anthony → substrate observes what traveled → field integrates
+    and shifts → next turn.
+
+    No validation court, no accept/reject branch in the speech path — every
+    nonempty generation is displayed plainly; observations live only in the
+    dashboard trace, never as terminal noise. `--new-session` here clears
+    only `state/flow_field.json` — it never touches `current.json` or
+    `threads.json` (those stay companion/measurement state).
+
+    Deferred import: `conditioned_kernel.flow` is only loaded when this
+    subcommand actually runs, same convention as `_cmd_dashboard`'s
+    deferred `observatory` import above.
+    """
+    from conditioned_kernel.flow import clear_flow_field, flow_field_path, run_flow_turn
+
+    prof = _apply_profile_defaults(args)
+    state_dir = Path(args.state_dir) if args.state_dir else None
+    logs_dir = Path(args.logs_dir) if args.logs_dir else None
+    state = SubstrateState.load(state_dir=state_dir, logs_dir=logs_dir)
+
+    if getattr(args, "new_session", False):
+        clear_flow_field(state.root)
+        print(f"[ck] flow: cleared {flow_field_path(state.root)}", file=sys.stderr)
+
+    sid = str(state.current.get("session_id") or "sess_unknown")
+    print(
+        f"[ck] chat --mode flow  session={sid}  profile={prof.profile_id}  model={args.model}",
+        file=sys.stderr,
+    )
+    print("[ck] type quit/exit to stop; field persists for resume", file=sys.stderr)
+
+    while True:
+        try:
+            line = input("you> ")
+        except EOFError:
+            print(file=sys.stderr)
+            break
+        except KeyboardInterrupt:
+            print("\n[ck] interrupted", file=sys.stderr)
+            break
+
+        text = (line or "").strip()
+        if not text:
+            continue
+        if text.lower() in ("quit", "exit", ":q", "/quit", "/exit"):
+            break
+
+        result = run_flow_turn(
+            text,
+            model=args.model,
+            state_dir=state_dir,
+            logs_dir=logs_dir,
+            base_url=args.base_url,
+            temperature=args.temperature,
+            seed=args.seed,
+            num_ctx=args.num_ctx,
+            profile=prof,
+        )
+        print(f"ck> {result.displayed_text}")
+        if args.verbose:
+            print(
+                f"    -- turn={result.trace.turn_id} status={result.trace.reply_status} "
+                f"observations={len(result.trace.observations)}",
+                file=sys.stderr,
+            )
+
+    print("[ck] flow session end", file=sys.stderr)
+    return 0
+
+
 def _cmd_smoke(args: argparse.Namespace) -> int:
     prof = _apply_profile_defaults(args)
     print(f"smoke: profile={prof.profile_id} model={args.model} mode={args.mode} ctx={args.num_ctx}")
@@ -369,17 +448,31 @@ def _cmd_dashboard(args: argparse.Namespace) -> int:
     profile, `--new-session` clears recent dialogue memory the same way
     `ck chat --new-session` does. Everything else is delegated to
     `observatory.server.serve`, which owns the actual socket.
+
+    `--session-mode flow` changes what `--new-session` clears, mirroring
+    `ck chat --mode flow --new-session` exactly: only
+    `state/flow_field.json` is cleared, and `state.begin_new_session()` (a
+    `current.json` mutation) is never called for a flow-mode dashboard —
+    the hard boundary between Flow's own field state and companion/
+    measurement state applies here too, not just at the CLI chat path.
     """
     from conditioned_kernel.observatory.server import serve
 
     prof = _apply_profile_defaults(args)
     state_dir = Path(args.state_dir) if args.state_dir else None
     logs_dir = Path(args.logs_dir) if args.logs_dir else None
+    session_mode = getattr(args, "session_mode", None) or "pipeline"
 
     if getattr(args, "new_session", False):
         state = SubstrateState.load(state_dir=state_dir, logs_dir=logs_dir)
-        sid = state.begin_new_session()
-        print(f"[ck] new session: {sid}", file=sys.stderr)
+        if session_mode == "flow":
+            from conditioned_kernel.flow import clear_flow_field, flow_field_path
+
+            clear_flow_field(state.root)
+            print(f"[ck] dashboard flow: cleared {flow_field_path(state.root)}", file=sys.stderr)
+        else:
+            sid = state.begin_new_session()
+            print(f"[ck] new session: {sid}", file=sys.stderr)
 
     return serve(
         host=args.host,
@@ -391,11 +484,20 @@ def _cmd_dashboard(args: argparse.Namespace) -> int:
         base_url=args.base_url,
         observer_enabled=bool(args.observer),
         open_browser=not bool(getattr(args, "no_browser", False)),
+        session_mode=session_mode,
     )
 
 
-def _runtime_parent() -> argparse.ArgumentParser:
-    """Shared runtime flags — defaults come from edge profile when left unset."""
+def _runtime_parent(*, include_mode: bool = True) -> argparse.ArgumentParser:
+    """Shared runtime flags — defaults come from edge profile when left unset.
+
+    `include_mode=False` omits `--mode` so a subparser (currently only
+    `chat`) can define its own `--mode` with an expanded choice set without
+    tripping argparse's "conflicting option string" error (you cannot
+    re-add an option string a parent already registered). Every other
+    subcommand keeps the original chat_json/generate_raw-only `--mode`,
+    behavior byte-identical to before.
+    """
     parent = argparse.ArgumentParser(add_help=False)
     parent.add_argument("--state-dir", default=None, help="Override state directory")
     parent.add_argument("--logs-dir", default=None, help="Override logs directory")
@@ -406,12 +508,13 @@ def _runtime_parent() -> argparse.ArgumentParser:
         help=f"Edge profile (default: {DEFAULT_PROFILE_ID})",
     )
     parent.add_argument("--model", default=None, help="Override profile model")
-    parent.add_argument(
-        "--mode",
-        choices=["chat_json", "generate_raw"],
-        default=None,
-        help="Override profile mode",
-    )
+    if include_mode:
+        parent.add_argument(
+            "--mode",
+            choices=["chat_json", "generate_raw"],
+            default=None,
+            help="Override profile mode",
+        )
     parent.add_argument("--temperature", type=float, default=None)
     parent.add_argument("--seed", type=int, default=None)
     parent.add_argument("--num-ctx", type=int, default=None)
@@ -421,6 +524,7 @@ def _runtime_parent() -> argparse.ArgumentParser:
 
 def build_parser() -> argparse.ArgumentParser:
     runtime = _runtime_parent()
+    runtime_no_mode = _runtime_parent(include_mode=False)
     p = argparse.ArgumentParser(
         prog="ck",
         description=(
@@ -447,13 +551,28 @@ def build_parser() -> argparse.ArgumentParser:
 
     ch = sub.add_parser(
         "chat",
-        parents=[runtime],
+        parents=[runtime_no_mode],
         help="Multi-turn session (stdin loop; state persists for resume)",
+    )
+    ch.add_argument(
+        "--mode",
+        choices=["chat_json", "generate_raw", "flow"],
+        default=None,
+        help=(
+            "chat_json/generate_raw select the Ollama transport (companion "
+            "acceptance-court path, default from edge profile). flow selects "
+            "Studio Flow mode: a living field, no candidate schema, no "
+            "accept/reject — see `ck chat --mode flow --help`-equivalent in docs."
+        ),
     )
     ch.add_argument(
         "--new-session",
         action="store_true",
-        help="Clear recent dialogue memory and bump session_id (goal/threads kept)",
+        help=(
+            "Companion mode: clear recent dialogue memory and bump session_id "
+            "(goal/threads kept). Flow mode (--mode flow): clear state/flow_field.json "
+            "only — current.json/threads.json are never touched by flow mode."
+        ),
     )
     ch.add_argument("-v", "--verbose", action="store_true")
     ch.set_defaults(func=_cmd_chat)
@@ -487,6 +606,20 @@ def build_parser() -> argparse.ArgumentParser:
         "--no-browser",
         action="store_true",
         help="Do not attempt to open a browser tab automatically",
+    )
+    dp.add_argument(
+        "--session-mode",
+        choices=["pipeline", "flow"],
+        default="pipeline",
+        help=(
+            "pipeline (default): serve the existing acceptance-court companion path, "
+            "unchanged. flow: POST /api/turn routes through Studio Flow "
+            "(conditioned_kernel.flow.run_flow_turn) instead of pipeline.run_turn, and "
+            "the Interior View renders FIELD BEFORE / WHAT TRAVELED / FIELD AFTER for "
+            "each turn -- the dashboard-visible twin of `ck chat --mode flow`. Distinct "
+            "from this command's own --mode (chat_json/generate_raw kernel transport), "
+            "which flow mode still honors."
+        ),
     )
     dp.set_defaults(func=_cmd_dashboard)
 

@@ -290,11 +290,18 @@ def create_server(
     model: str | None = None,
     base_url: str = "http://127.0.0.1:11434",
     observer_enabled: bool = False,
+    session_mode: str = "pipeline",
 ) -> ThreadingHTTPServer:
     """Build (but do not start) a bound `ThreadingHTTPServer`. Split out
     from `serve()` so tests can bind on port 0, inspect
     `httpd.server_address`, and shut it down without ever printing to
-    stderr or touching `webbrowser`."""
+    stderr or touching `webbrowser`.
+
+    `session_mode="flow"` makes this process's `POST /api/turn` route
+    through Studio Flow's own turn path (`conditioned_kernel.flow`)
+    instead of `pipeline.run_turn` — see `turn_api.Dashboard.run_turn`.
+    Default `"pipeline"` is byte-identical to this server's behavior
+    before Flow mode existed."""
     dashboard = Dashboard(
         state_dir=state_dir,
         logs_dir=logs_dir,
@@ -304,6 +311,7 @@ def create_server(
         host=host,
         port=port,
         observer_enabled=observer_enabled,
+        session_mode=session_mode,
     )
     httpd = ThreadingHTTPServer((host, port), DashboardRequestHandler)
     httpd.daemon_threads = True
@@ -350,6 +358,7 @@ def serve(
     base_url: str = "http://127.0.0.1:11434",
     observer_enabled: bool = False,
     open_browser: bool = True,
+    session_mode: str = "pipeline",
 ) -> int:
     """Bind, print the localhost URL, optionally open a browser tab, and
     block in `serve_forever()` until Ctrl-C. Returns 0 on a clean
@@ -364,6 +373,7 @@ def serve(
             model=model,
             base_url=base_url,
             observer_enabled=observer_enabled,
+            session_mode=session_mode,
         )
     except OSError as e:
         print(f"[ck dashboard] failed to bind {host}:{port}: {e}", file=sys.stderr)
@@ -372,6 +382,8 @@ def serve(
     bound_host, bound_port = httpd.server_address[0], httpd.server_address[1]
     url = f"http://{bound_host}:{bound_port}/"
     print(f"[ck dashboard] Interior View serving at {url}", file=sys.stderr)
+    if session_mode == "flow":
+        print("[ck dashboard] session mode: flow — POST /api/turn routes through Studio Flow", file=sys.stderr)
     if observer_enabled:
         print(
             "[ck dashboard] observer pane ENABLED (--observer) — default off, "

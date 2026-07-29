@@ -281,6 +281,10 @@ button { cursor: pointer; }
 .turn-card-rule { flex: 0 0 3px; border-radius: 2px; background: var(--ctx-user); align-self: stretch; }
 .turn-card-user { margin: 0; font-size: 14px; line-height: 1.45; color: #EFE9DF; }
 
+/* Flow mode's subtle turn-card marker — same layout, one token swapped
+   (see FLOW_KIND_COLOR / renderFlowTurnCard in app.js), never a new hue. */
+.turn-card.flow .turn-card-rule { background: var(--ctx-recent); }
+
 .turn-card-spoken { margin: 0 0 0 12px; font-size: 13px; line-height: 1.55; color: #BEB5A6; text-wrap: pretty; }
 
 .turn-card-withheld { margin-left: 12px; display: flex; flex-direction: column; gap: 5px; }
@@ -340,6 +344,9 @@ button { cursor: pointer; }
   display: flex; gap: 11px; padding: 9px 12px; border-radius: 7px;
   background: var(--utter-bg); border: 1px solid var(--utter-border); border-left: 3px solid var(--utter-rule);
 }
+/* Flow mode's subtle marker on the utterance box — one token swapped,
+   same shape (see renderFlowPipelineHead in app.js). */
+.utterance.flow { border-left-color: var(--ctx-recent); }
 .utterance-left { flex: 1 1 auto; min-width: 0; }
 .utterance-eyebrow {
   font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;

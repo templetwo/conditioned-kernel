@@ -54,6 +54,18 @@
  *   POST /api/observer/send     (same body)                   -> same + { ok:false, stub:true, message }
  *        (this build's cloud send is an intentional stub — see turn_api.py's
  *        Dashboard.observer_send docstring; acceptance criterion 19/22)
+ *
+ *   Studio Flow mode (turn_api.Dashboard(session_mode="flow"), started via
+ *   `ck dashboard --session-mode flow`): the same endpoints above serve a
+ *   flow.FlowTrace (schema "ck.flow_trace.v1") instead of a pipeline
+ *   TurnTrace wherever a turn is flow-shaped — GET /api/session's own
+ *   runtime_config.session_mode says which, and each turn summary in
+ *   `turns[]` carries `mode: "flow"` or `"pipeline"`. A FlowTrace has no
+ *   stages[]/passes[]/final_decision; it carries field_before,
+ *   composed_prompt, raw_reply, reply_status, displayed_text, observations,
+ *   integration_actions, and field_after instead. GET /api/stream emits
+ *   `event: field_before` / `event: traveled` / `event: field_after` (then
+ *   `turn_complete`) for a flow turn rather than 12 `event: stage`s.
  * ---------------------------------------------------------------------
  */
 
@@ -181,6 +193,39 @@ const OBS_ASKS = {
 };
 const REPLAY_SECTION_DEFAULT_ORDER = ["recent", "state", "obligation", "system", "schema", "constraints"];
 
+// ---------------------------------------------------------- flow mode ----
+//
+// Studio Flow (`ck chat --mode flow` / `ck dashboard --session-mode flow`)
+// replaces the acceptance-court metaphor for the living conversational
+// path: field before -> model speaks through field -> output reaches
+// Anthony -> substrate observes what traveled -> field integrates and
+// shifts -> next turn (see flow.py's module docstring). A FlowTrace
+// (flow.FlowTrace.to_dict(), schema "ck.flow_trace.v1") has a different
+// shape than a pipeline TurnTrace — no stages[], no passes[], no
+// final_decision — so every renderer below branches on `isFlowTurn()`
+// before touching trace-shape-specific fields, and the pipeline branch of
+// each is left byte-identical to before this mode existed.
+const FLOW_TRACE_SCHEMA = "ck.flow_trace.v1";
+// Reuses the same context-share palette tokens the pipeline panels already
+// use (CTX_COLOR above) — no new colors invented for Flow.
+const FLOW_KIND_COLOR = {
+  topic: "var(--ctx-recent)",
+  canonical: "var(--ctx-state)",
+  thread: "var(--ctx-constraints)",
+};
+const FLOW_ACTION_TONE = {
+  strengthened: TONE.ok,
+  created: "var(--ctx-state)",
+  decayed: TONE.skip,
+  softened: TONE.warn,
+  dropped: TONE.bad,
+};
+const FLOW_PANELS = [
+  { id: "field_before", label: "FIELD BEFORE" },
+  { id: "traveled", label: "WHAT TRAVELED" },
+  { id: "field_after", label: "FIELD AFTER" },
+];
+
 // ================================================================== API ==
 
 const Api = {
@@ -233,6 +278,7 @@ const State = {
   trace: null,             // full TurnTrace for currentTurnId, once fetched
   traceCache: new Map(),   // turn_id -> TurnTrace
   stage: null,             // selected panel id, null = configured default
+  flowPanel: null,          // selected flow panel id, null = "field_before" (see FLOW_PANELS)
   layout: null,             // "rail" | "spine" | null = from session.config
   play: -1,                 // replay-walkthrough animation index, -1 = idle
   marks: {},                 // "turnId:markKey" -> bool (mirrors last feedback POST)
@@ -270,6 +316,23 @@ function defaultStageId() {
   return STAGE_IDS_BY_LABEL[label] || 11;
 }
 function selectedStage() { return State.stage === null ? defaultStageId() : State.stage; }
+// Flow-mode helpers. `isFlowSession()` reads the dashboard process's own
+// runtime config (turn_api.Dashboard.session_mode, unaffected by which
+// turn is currently selected) so the rail defaults to the flow shape even
+// before any turn has loaded. `isFlowTurn()` additionally recognizes a
+// specific trace/summary as flow, so a mixed-history dashboard (unlikely,
+// but never assumed away) still renders each turn by its own kind.
+function isFlowSession() {
+  const rc = State.session && State.session.runtime_config;
+  return !!(rc && rc.session_mode === "flow");
+}
+function isFlowTurn(t, summary) {
+  if (t && t.schema === FLOW_TRACE_SCHEMA) return true;
+  if (!t && summary && summary.mode === "flow") return true;
+  if (!t && !summary && isFlowSession()) return true;
+  return false;
+}
+function selectedFlowPanel() { return State.flowPanel || FLOW_PANELS[0].id; }
 // /api/session does not (yet) carry a "config" block for these three
 // tweakable props (README §8) — default them client-side rather than
 // inventing server support. Documented gap, see final report.
@@ -383,6 +446,9 @@ function renderHeader() {
     chip("replay turn", -3, false),
   ];
   if (observerEnabled()) items.push(chip("claude observer", -2, true));
+  if (isFlowSession()) {
+    items.splice(6, 0, h("span", { style: { color: "var(--ctx-recent)" } }, [h("span", { class: "meta-label" }, "session mode "), "flow"]));
+  }
   mount(meta, items);
 }
 
@@ -401,8 +467,10 @@ function renderConversation() {
     metaEl.textContent = "0 turns · new session";
   } else {
     const accepted = turns.filter((t) => t.spoken).length;
-    metaEl.textContent = `${turns.length} turns · ${accepted} accepted · ${turns.length - accepted} rejected · resumed session`;
-    mount(listEl, turns.map(renderTurnCard));
+    metaEl.textContent = isFlowSession()
+      ? `${turns.length} turns · flow mode · resumed session`
+      : `${turns.length} turns · ${accepted} accepted · ${turns.length - accepted} rejected · resumed session`;
+    mount(listEl, turns.map((t) => (t.mode === "flow" ? renderFlowTurnCard(t) : renderTurnCard(t))));
   }
 
   const input = document.getElementById("draft-input");
@@ -420,6 +488,9 @@ function renderConversation() {
 
 function defaultSendNote() {
   const sid = (State.session && State.session.session_id) || "this session";
+  if (isFlowSession()) {
+    return `Enter or Send calls POST /api/turn — Studio Flow mode, resuming ${sid}.`;
+  }
   return `Enter or Send calls POST /api/turn against pipeline.run_turn, resuming ${sid}.`;
 }
 
@@ -468,8 +539,45 @@ function renderTurnCard(t) {
   return card;
 }
 
+// Flow's own turn card — a deliberately different renderer, not a branch
+// inside renderTurnCard, so the pipeline card above stays byte-identical.
+// Flow has no accept/reject court (spec point 5): every nonempty
+// generation reaches the terminal, so there is no "withheld" state and no
+// accept/reject tone to borrow — the badge and rule use the neutral
+// `--ctx-recent` token already in the palette (see FLOW_KIND_COLOR), never
+// the ok/bad status colors, so a flow turn never reads as an acceptance
+// verdict it never went through.
+function renderFlowTurnCard(t) {
+  const selected = t.turn_id === State.currentTurnId;
+  const obs = t.observations || [];
+  const flagLine = obs.length ? obs[0].label + (obs.length > 1 ? ` +${obs.length - 1} more` : "") : null;
+
+  const card = h("div", { class: "turn-card flow" + (selected ? " selected" : "") }, [
+    h("div", { class: "turn-card-top" }, [
+      h("span", { class: "turn-card-time mono" }, (t.started_at || "").slice(11, 19) || t.started_at || ""),
+      h("span", { class: "turn-card-badge mono", style: { color: "var(--ctx-recent)" } }, "flow"),
+      h("span", { class: "spacer" }),
+      h("span", { class: "turn-card-n mono" }, `turn ${t.n}`),
+    ]),
+    h("div", { class: "turn-card-msg-row" }, [
+      h("span", { class: "turn-card-rule" }),
+      h("p", { class: "turn-card-user" }, t.user_input),
+    ]),
+  ]);
+  if (t.answer) {
+    card.appendChild(h("p", { class: "turn-card-spoken" }, t.answer));
+  }
+  const summaryParts = [`reply_status ${t.error ? "error" : "ok"}`, `${obs.length} observation${obs.length === 1 ? "" : "s"}`];
+  card.appendChild(h("div", { class: "turn-card-summary" }, h("span", null, summaryParts.join(" · "))));
+  if (flagLine) {
+    card.appendChild(h("div", { class: "turn-card-flag" }, [h("span", null, "◇"), h("span", null, flagLine)]));
+  }
+  card.onclick = () => selectTurn(t.turn_id);
+  return card;
+}
+
 async function selectTurn(turnId) {
-  setState({ currentTurnId: turnId, stage: null, play: -1, ops: "", opsErr: false, replayResult: null, brief: null, obs: null, obsPending: null });
+  setState({ currentTurnId: turnId, stage: null, flowPanel: null, play: -1, ops: "", opsErr: false, replayResult: null, brief: null, obs: null, obsPending: null });
   await loadTrace(turnId);
 }
 
@@ -499,17 +607,26 @@ function renderPipelineHead() {
 
   const t = State.trace;
   const summary = currentTurnSummary();
+  const flow = isFlowTurn(t, summary);
+  utterEl.classList.toggle("flow", flow);
 
   if (!t && !summary) {
     idsEl.textContent = "";
     mount(utterEl, h("div", { class: "empty-placeholder" }, "Select a turn on the left, or send a message, to see it travel through the pipeline."));
     clear(flagsEl);
     replayBtn.disabled = true;
+    replayBtn.textContent = "▶ replay stages";
     replayBtn.onclick = null;
     return;
   }
 
+  if (flow) {
+    renderFlowPipelineHead(t, summary, idsEl, utterEl, flagsEl, replayBtn);
+    return;
+  }
+
   replayBtn.disabled = false;
+  replayBtn.textContent = "▶ replay stages";
   replayBtn.onclick = () => doReplayWalkthrough();
 
   if (t) {
@@ -555,6 +672,55 @@ function renderPipelineHead() {
   mount(flagsEl, shown);
 }
 
+// Flow's own utterance-box + observation-banner rendering. Same DOM
+// targets and the same `.banner` component the pipeline branch above
+// uses for its observations (never rejection-red — the banner tokens are
+// the same neutral amber `--obs-*` set either way), just built from a
+// FlowTrace's own fields instead of final_decision/passes.
+function renderFlowPipelineHead(t, summary, idsEl, utterEl, flagsEl, replayBtn) {
+  replayBtn.disabled = true;
+  replayBtn.textContent = "flow — no stage replay";
+  replayBtn.onclick = null;
+
+  if (t) {
+    idsEl.textContent = `turn ${summary ? summary.n : "—"} · flow · reply_status=${t.reply_status || NA}`;
+  } else {
+    idsEl.textContent = `turn ${summary.n} · flow · loading…`;
+  }
+
+  const userText = t ? t.user_input : summary.user_input;
+  const started = t ? t.started_at : summary.started_at;
+  const completed = t ? t.completed_at : summary.completed_at;
+  const dur = isoDurationSeconds(started, completed);
+
+  mount(utterEl, [
+    h("div", { class: "utterance-left" }, [
+      h("div", { class: "utterance-eyebrow", style: { color: "var(--ctx-recent)" } }, "The human utterance · flow"),
+      h("p", { class: "utterance-msg" }, userText),
+    ]),
+    h("div", { class: "utterance-right" }, [
+      h("span", null, started || NA),
+      h("span", null, `${userText.length} chars · ${bytesUtf8(userText)} B`),
+      h("span", { style: { color: "var(--ctx-recent)" } }, "FLOW"),
+      h("span", null, `${dur != null ? dur.toFixed(0) : NA} s`),
+    ]),
+  ]);
+
+  if (!showObservations() || !t) { clear(flagsEl); return; }
+  const all = t.observations || [];
+  const shown = all.slice(0, 2).map((f) => h("div", { class: "banner" }, [
+    h("span", { class: "banner-label" }, f.label),
+    h("span", { class: "banner-detail" }, f.detail),
+  ]));
+  if (all.length > 2) {
+    shown.push(h("div", { class: "banner more" }, [
+      h("span", { class: "banner-label mono more" }, `+${all.length - 2} more`),
+      h("span", { class: "banner-detail" }, all.slice(2).map((f) => f.label.toLowerCase()).join(" · ") + " — see FIELD AFTER for every observation."),
+    ]));
+  }
+  mount(flagsEl, shown);
+}
+
 // ------------------------------------------------------------- stage nav
 
 function renderStageNav() {
@@ -563,6 +729,12 @@ function renderStageNav() {
   const spine = layout() === "spine";
   railFlow.className = "rail-flow " + (spine ? "layout-spine" : "layout-rail");
   navEl.className = "stage-nav " + (spine ? "spine" : "rail");
+
+  const t = State.trace;
+  const summary = currentTurnSummary();
+  if (isFlowTurn(t, summary)) {
+    return renderFlowStageNav(navEl);
+  }
 
   const sel = selectedStage();
   const chips = [];
@@ -589,12 +761,47 @@ function renderStageNav() {
   mount(navEl, chips);
 }
 
+// Flow's own 3-chip nav — FIELD BEFORE / WHAT TRAVELED / FIELD AFTER
+// (FLOW_PANELS) — reusing the exact same `.stage-chip` component the
+// pipeline's 12-chip nav uses above, just fewer of them and selected via
+// `State.flowPanel` instead of `State.stage`/`selectedStage()`.
+function renderFlowStageNav(navEl) {
+  const sel = selectedFlowPanel();
+  const chips = FLOW_PANELS.map((p) => {
+    const on = sel === p.id;
+    const chip = h("button", {
+      class: "stage-chip" + (on ? " selected" : ""), type: "button",
+      style: on ? { borderColor: "var(--sel-border)" } : null,
+    }, [
+      h("span", { class: "stage-chip-dot", style: { background: "var(--ctx-recent)" } }),
+      h("span", { class: "stage-chip-name", style: { color: on ? "var(--text-strong)" : "var(--text-dim)" } }, p.label),
+    ]);
+    chip.onclick = () => setState({ flowPanel: p.id });
+    return chip;
+  });
+  mount(navEl, chips);
+}
+
 // ------------------------------------------------------------- panel ----
 
 function renderPanel() {
   const headerEl = document.getElementById("panel-header");
   const blocksEl = document.getElementById("panel-blocks");
   const sel = selectedStage();
+
+  if (sel > 0) {
+    const t = State.trace;
+    const summary = currentTurnSummary();
+    if (isFlowTurn(t, summary)) {
+      if (!t) {
+        mount(headerEl, [h("h3", { class: "panel-title" }, "Loading flow turn…"), h("span", { class: "panel-sub" }, "")]);
+        mount(blocksEl, h("div", { class: "empty-placeholder" }, "Fetching this turn's field trace."));
+        return;
+      }
+      renderFlowPanel(t, headerEl, blocksEl);
+      return;
+    }
+  }
 
   if (!State.trace && sel > 0) {
     mount(headerEl, [h("h3", { class: "panel-title" }, "No turn selected"), h("span", { class: "panel-sub" }, "pick a turn on the left, or send one")]);
@@ -835,6 +1042,228 @@ function withSource(panel, stageIndex) {
   if (st) { panel.srcModule = st.source_module; panel.srcLine = st.source_line; panel.srcFn = st.source_function; }
   else panel.srcStatic = "— source resolves once a trace is loaded";
   return panel;
+}
+
+// ============================================================= flow panel ==
+//
+// Interior View for Flow turns: three panels — FIELD BEFORE, WHAT
+// TRAVELED, FIELD AFTER — built entirely from the same block types
+// (text/kv/bars/cards/diff/note) the pipeline panels above already use.
+// No new block type, no new panel chrome: renderFlowPanel below reuses
+// renderBlock() and the panel-header markup verbatim.
+
+function renderFlowPanel(t, headerEl, blocksEl) {
+  const P = buildFlowPanel(selectedFlowPanel(), t);
+  const srcLabel = P.srcStatic || "—";
+  const srcBtn = h("button", { class: "panel-src-btn mono", type: "button", title: "copy source path" }, srcLabel);
+  srcBtn.onclick = async () => {
+    const res = await copyToClipboard(srcLabel);
+    setState({ ops: res.ok ? `copied ${res.bytes} bytes to clipboard` : "clipboard unavailable", opsErr: !res.ok });
+  };
+  mount(headerEl, [
+    h("h3", { class: "panel-title" }, P.title),
+    h("span", { class: "panel-sub" }, P.sub),
+    h("span", { class: "spacer" }),
+    srcBtn,
+  ]);
+  const blockNodes = P.blocks.map((b) => {
+    const wrap = h("div", { class: "block" });
+    if (b.label) {
+      wrap.appendChild(h("div", { class: "block-label-row" }, [
+        h("span", { class: "block-label" }, b.label),
+        b.note ? h("span", { class: "block-note" }, b.note) : null,
+      ]));
+    }
+    wrap.appendChild(renderBlock(b));
+    return wrap;
+  });
+  mount(blocksEl, blockNodes);
+}
+
+function buildFlowPanel(id, t) {
+  if (id === "traveled") return flowPanelTraveled(t);
+  if (id === "field_after") return flowPanelFieldAfter(t);
+  return flowPanelFieldBefore(t);
+}
+
+// ---- FIELD BEFORE --------------------------------------------------------
+//
+// flow.compose_field's own output (FlowTrace.field_before): the current
+// message (always primary, never byte-budgeted) plus the small number of
+// live field elements that won a slot this turn, each with salience and
+// momentum (spec point 3).
+
+function flowPanelFieldBefore(t) {
+  const fb = t.field_before || {};
+  const selected = fb.selected || [];
+  const blocks = [];
+
+  blocks.push({
+    type: "text", label: "Current message", note: "always primary — never counted against the field's byte budget",
+    body: fb.current_message || t.user_input, tone: CTX_COLOR.current_user_input,
+  });
+
+  blocks.push({
+    type: "kv", label: "Composition", rows: [
+      { k: "intents detected", v: joinOr(fb.intents, "(none)"), meta: "context_field.detect_intents" },
+      { k: "live elements carried", v: String(fb.live_element_count ?? 0), meta: "flow_field.json, before this turn" },
+      { k: "candidate pool this turn", v: String(fb.candidate_pool_size ?? 0), meta: "carried + newly-relevant canonical/thread candidates" },
+      { k: "selected into the prompt", v: `${selected.length} element(s)`, meta: "bin-packed by score within the byte budget" },
+      { k: "byte budget", v: `${fb.selected_bytes ?? 0} / ${fb.byte_budget ?? 0} B`, meta: "bounds carried elements only, never the current message" },
+      { k: "relevant canonical state", v: String((fb.relevant_canonical || []).length), meta: "entered only because it matched this message's intents" },
+    ],
+  });
+
+  if (selected.length) {
+    blocks.push({
+      type: "bars", label: "Salience", note: "0–1 — how strongly each element competed for a slot this turn",
+      rows: selected.map((e) => ({
+        k: `${e.kind}: ${clipStr(e.content, 46)}`,
+        tone: FLOW_KIND_COLOR[e.kind] || "var(--text-dim)",
+        pctW: `${Math.round(Math.min(1, e.salience) * 100)}%`,
+        pctLabel: e.salience.toFixed(2),
+        bytes: `${bytesUtf8(e.content)} B`,
+      })),
+    });
+    blocks.push({
+      type: "bars", label: "Momentum", note: "recent strengthening — decays toward 0 when nothing continues an element",
+      rows: selected.map((e) => ({
+        k: `${e.kind}: ${clipStr(e.content, 46)}`,
+        tone: FLOW_KIND_COLOR[e.kind] || "var(--text-dim)",
+        pctW: `${Math.round(Math.min(1, e.momentum) * 100)}%`,
+        pctLabel: e.momentum.toFixed(2),
+        bytes: `${e.turns_seen} turn${e.turns_seen === 1 ? "" : "s"} seen`,
+      })),
+    });
+    blocks.push({
+      type: "cards", label: "Selected field elements — full content", note: "what actually traveled alongside the current message",
+      rows: selected.map((e) => ({
+        title: `${e.kind} · ${e.source}`,
+        tone: FLOW_KIND_COLOR[e.kind] || "var(--text-dim)",
+        meta: `salience ${e.salience.toFixed(2)} · momentum ${e.momentum.toFixed(2)} · ${e.element_id}`,
+        body: e.content,
+        body2: e.topic_tags && e.topic_tags.length ? `tags: ${e.topic_tags.join(", ")}` : null,
+      })),
+    });
+  } else {
+    blocks.push({ type: "note", kind: "info", body: "No carried field elements were selected this turn — the field was quiet, or nothing yet outcompeted the byte budget. The current message still travels on its own; the field is never forced to fill a slot." });
+  }
+
+  if ((fb.relevant_canonical || []).length) {
+    blocks.push({
+      type: "kv", label: "Canonical state judged relevant to this message", note: "context_field.detect_intents + _tags_match — never entered unconditionally",
+      rows: fb.relevant_canonical.map((c) => ({ k: c.kind, v: c.content, meta: c.source_key || "" })),
+    });
+  }
+
+  return { title: "Field before", sub: "the living field this turn began with", srcStatic: "conditioned_kernel/flow.py · compose_field", blocks };
+}
+
+// ---- WHAT TRAVELED --------------------------------------------------------
+//
+// The composed prompt (no output schema, no evidence requirement — spec
+// point 4) and the model's own reply, verbatim (spec point 5: every
+// nonempty generation reaches the terminal).
+
+function flowPanelTraveled(t) {
+  const cp = t.composed_prompt || {};
+  const blocks = [];
+  blocks.push({
+    type: "kv", label: "Transport", rows: [
+      { k: "model", v: cp.model || (t.runtime_config && t.runtime_config.model) || NA, meta: "" },
+      { k: "reply_status", v: t.reply_status || NA, meta: "generate.RunStatus", tone: (t.reply_status === "completed" || t.reply_status === "dry_run") ? TONE.ok : (t.error ? TONE.warn : undefined) },
+      { k: "output schema", v: "none — plain conversational reply, no evidence_used, no candidate JSON", meta: "build_flow_model_input sends no `format` key", tone: TONE.skip },
+      { k: "transport error", v: t.error || "none", meta: "", tone: t.error ? TONE.warn : undefined },
+    ],
+  });
+  blocks.push({ type: "text", label: "System prompt", body: cp.system || NA, tone: CTX_COLOR.system_instructions });
+  blocks.push({ type: "text", label: "Composed user message", note: "field context (prose) + the person's message, always labeled and unburied", body: cp.user || NA, tone: CTX_COLOR.current_user_input });
+  blocks.push({ type: "text", label: "Verbatim reply — what reached you", note: "every nonempty generation is displayed; no accept/reject branch", body: t.displayed_text || NA, tone: TONE.ok });
+  if (!isNil(t.raw_reply) && t.raw_reply !== t.displayed_text) {
+    blocks.push({ type: "text", label: "Raw reply, before display formatting", body: t.raw_reply, tone: TONE.skip });
+  }
+  return { title: "What traveled", sub: "the composed prompt and the model's own words, unedited", srcStatic: "conditioned_kernel/flow.py · build_flow_model_input, run_flow_turn", blocks };
+}
+
+// ---- FIELD AFTER ----------------------------------------------------------
+//
+// integrate_field's own actions (strengthened/created/decayed/softened/
+// dropped — spec point 8), shown as a before→after diff, plus this turn's
+// observations (spec point 6: descriptive register, never a rejection
+// reason — reused verbatim from the ◇ banner styling, never status-bad red).
+
+function flowPanelFieldAfter(t) {
+  const fb = t.field_before || {};
+  const fa = t.field_after || {};
+  const actions = t.integration_actions || [];
+  const observations = t.observations || [];
+  const beforeById = {};
+  (fb.selected || []).forEach((e) => { beforeById[e.element_id] = e; });
+  const afterById = {};
+  (fa.elements || []).forEach((e) => { afterById[e.element_id] = e; });
+
+  const blocks = [];
+
+  blocks.push({
+    type: "kv", label: "Observations", note: "descriptive only — never a rejection reason, never blocking (spec point 6)",
+    rows: observations.length
+      ? observations.map((o) => ({ k: o.label, v: o.detail, meta: "" }))
+      : [{ k: "—", v: "no observations recorded for this turn", meta: "" }],
+  });
+
+  const countOf = (action) => actions.filter((a) => a.action === action).length;
+  blocks.push({
+    type: "kv", label: "What happened after the exchange", note: "integrate_field — runs strictly after display, never before (spec point 8)",
+    rows: [
+      { k: "strengthened", v: String(countOf("strengthened")), tone: FLOW_ACTION_TONE.strengthened },
+      { k: "created", v: String(countOf("created")), tone: FLOW_ACTION_TONE.created },
+      { k: "decayed", v: String(countOf("decayed")), tone: FLOW_ACTION_TONE.decayed },
+      { k: "softened", v: String(countOf("softened")), tone: FLOW_ACTION_TONE.softened },
+      { k: "dropped", v: String(countOf("dropped")), tone: FLOW_ACTION_TONE.dropped },
+      { k: "field size now", v: `${(fa.elements || []).length} element(s)`, meta: "bounded carry" },
+      { k: "turn_count", v: String(fa.turn_count ?? NA), meta: "flow_field.json" },
+    ],
+  });
+
+  if (actions.length) {
+    blocks.push({
+      type: "diff", label: "Salience, before → after", note: "(new) = created this turn · (dropped) = fell below the eviction floor",
+      leftLabel: "before", rightLabel: "after",
+      rows: actions.map((a) => {
+        const before = beforeById[a.element_id];
+        const after = afterById[a.element_id];
+        const beforeStr = before ? before.salience.toFixed(2) : (a.action === "created" ? "(new)" : "—");
+        const afterStr = after ? after.salience.toFixed(2) : "(dropped)";
+        return {
+          k: `${a.action} · ${a.element_id}`,
+          before: beforeStr,
+          after: afterStr,
+          rightTone: FLOW_ACTION_TONE[a.action] || "var(--text-dim)",
+          strike: a.action === "dropped",
+        };
+      }),
+    });
+    blocks.push({
+      type: "kv", label: "Detail", note: "integrate_field's own reason, one per action",
+      rows: actions.map((a) => ({ k: a.action, v: a.detail, meta: a.element_id, tone: FLOW_ACTION_TONE[a.action] })),
+    });
+  } else {
+    blocks.push({ type: "note", kind: "info", body: "No integration actions were recorded for this turn." });
+  }
+
+  if ((fa.elements || []).length) {
+    blocks.push({
+      type: "cards", label: "Field now", note: `${(fa.elements || []).length} element(s) carried into the next turn`,
+      rows: (fa.elements || []).map((e) => ({
+        title: `${e.kind} · ${e.source}`,
+        tone: FLOW_KIND_COLOR[e.kind] || "var(--text-dim)",
+        meta: `salience ${e.salience.toFixed(2)} · momentum ${e.momentum.toFixed(2)} · turns_seen ${e.turns_seen}`,
+        body: e.content,
+      })),
+    });
+  }
+
+  return { title: "Field after", sub: "how the substrate shifted once the exchange was observed", srcStatic: "conditioned_kernel/flow.py · integrate_field", blocks };
 }
 
 // ---- 01 INPUT -----------------------------------------------------------
@@ -1768,11 +2197,19 @@ async function doSend() {
     State.traceCache.set(trace.turn_id, trace);
     closeLiveStream();
     await refreshSession();
-    setState({
-      sending: false, play: -1, stage: null, currentTurnId: trace.turn_id, trace,
-      sendNote: `Turn ${trace.turn_id} complete — ${trace.final_decision ? trace.final_decision.label : trace.final_decision}.`,
-      sendBad: trace.final_decision && trace.final_decision.decision !== "accept",
-    });
+    if (isFlowTurn(trace, null)) {
+      setState({
+        sending: false, play: -1, stage: null, flowPanel: null, currentTurnId: trace.turn_id, trace,
+        sendNote: `Turn ${trace.turn_id} complete — reply_status=${trace.reply_status}.`,
+        sendBad: !(trace.reply_status === "completed" || trace.reply_status === "dry_run"),
+      });
+    } else {
+      setState({
+        sending: false, play: -1, stage: null, currentTurnId: trace.turn_id, trace,
+        sendNote: `Turn ${trace.turn_id} complete — ${trace.final_decision ? trace.final_decision.label : trace.final_decision}.`,
+        sendBad: trace.final_decision && trace.final_decision.decision !== "accept",
+      });
+    }
   } catch (e) {
     closeLiveStream();
     setState({ sending: false, play: -1, sendBad: true, sendNote: `Send failed: ${e.message}` });
@@ -1791,6 +2228,12 @@ function openLiveStream() {
     // paces their reveal client-side so the rail is not a single instant
     // jump, exactly the presentational pacing the ▶ replay walkthrough
     // already does over already-known statuses.
+    //
+    // For a Flow-mode session, `_broadcast_flow_turn` publishes
+    // `field_before` / `traveled` / `field_after` (then `turn_complete`)
+    // instead — the flow-shaped turn this spec describes. This file reuses
+    // the same numeric `State.play` pacing mechanism for them (mapped to
+    // 1/2/3) rather than building a second reveal pipeline.
     const revealQueue = [];
     let draining = false;
     const drain = () => {
@@ -1811,6 +2254,10 @@ function openLiveStream() {
       } catch (e) { /* ignore malformed event */ }
     });
     es.addEventListener("turn_complete", () => { /* POST /api/turn resolves independently with the full trace */ });
+    const FLOW_EVENT_ORDER = { field_before: 1, traveled: 2, field_after: 3 };
+    Object.keys(FLOW_EVENT_ORDER).forEach((name) => {
+      es.addEventListener(name, () => { revealQueue.push(FLOW_EVENT_ORDER[name]); drain(); });
+    });
     es.onerror = () => { /* fall back silently to waiting on the POST response */ };
     State.sse = es;
   } catch (e) { /* SSE unavailable; POST /api/turn alone still completes the turn */ }

@@ -30,12 +30,15 @@ from conditioned_kernel.edge import (
     edge_status_report,
     load_profile,
 )
+from conditioned_kernel.flow import FLOW_TRACE_SCHEMA, FlowTrace, run_flow_turn
 from conditioned_kernel.ids import utc_now_iso
 from conditioned_kernel.observatory import brief, compute
 from conditioned_kernel.observatory import replay as replay_mod
 from conditioned_kernel.observatory.trace import TurnTrace, run_traced_turn
 from conditioned_kernel.paths import default_logs_dir, default_state_dir
 from conditioned_kernel.state import SubstrateState, append_jsonl
+
+SESSION_MODES = ("pipeline", "flow")
 
 # ---------------------------------------------------------------------------
 # Turn summaries — the shape GET /api/session's "turns" list and the
@@ -51,6 +54,7 @@ def _summarize_turn(data: dict[str, Any]) -> dict[str, Any]:
         "started_at": data.get("started_at"),
         "completed_at": data.get("completed_at"),
         "user_input": data.get("user_input"),
+        "mode": "pipeline",
         "decision": fd.get("decision"),
         "label": fd.get("label"),
         "answer": fd.get("answer"),
@@ -61,6 +65,93 @@ def _summarize_turn(data: dict[str, Any]) -> dict[str, Any]:
         "observations": data.get("observations") or [],
         "error": data.get("error"),
     }
+
+
+def _summarize_flow_turn(data: dict[str, Any]) -> dict[str, Any]:
+    """Flow-turn analogue of `_summarize_turn`, same shape where it maps so
+    the conversation column's turn-card list can carry both turn kinds in
+    one array, distinguished only by `mode`. Flow has no accept/reject
+    court (spec point 5: every nonempty generation reaches the terminal),
+    so `decision`/`label` describe what happened, never a validation
+    verdict, and `answer` is always the verbatim `displayed_text` -- Flow
+    never withholds an answer it produced."""
+    return {
+        "turn_id": data.get("turn_id"),
+        "session_id": data.get("session_id"),
+        "started_at": data.get("started_at"),
+        "completed_at": data.get("completed_at"),
+        "user_input": data.get("user_input"),
+        "mode": "flow",
+        "decision": "spoken",
+        "label": "FLOW",
+        "answer": data.get("displayed_text"),
+        "pass_count": 1,
+        "packet_bytes": None,
+        "violations": [],
+        "advisories": [],
+        "observations": data.get("observations") or [],
+        "error": data.get("error"),
+    }
+
+
+def _is_flow_trace(trace: dict[str, Any]) -> bool:
+    return trace.get("schema") == FLOW_TRACE_SCHEMA or (
+        "field_before" in trace and "stages" not in trace
+    )
+
+
+def _flow_brief_markdown(trace: dict[str, Any]) -> str:
+    """A flow-trace analogue of `brief.build_full_debug_brief` -- FlowTrace
+    has a different shape than TurnTrace (no packet/passes/stages), so it
+    is not run through that pipeline-specific builder. Same purpose: a
+    single markdown document Claude Code can be handed for one turn."""
+    obs = trace.get("observations") or []
+    actions = trace.get("integration_actions") or []
+    lines = [
+        f"# Flow turn {trace.get('turn_id')}",
+        "",
+        f"- session: {trace.get('session_id')}",
+        f"- started: {trace.get('started_at')}  completed: {trace.get('completed_at')}",
+        f"- reply_status: {trace.get('reply_status')}",
+        f"- error: {trace.get('error') or 'none'}",
+        "",
+        "## The person said",
+        trace.get("user_input") or "",
+        "",
+        "## What traveled (verbatim reply)",
+        trace.get("displayed_text") or "",
+        "",
+        "## Observations (descriptive only, never a rejection reason)",
+    ]
+    if obs:
+        lines.extend(f"- **{o.get('label')}**: {o.get('detail')}" for o in obs)
+    else:
+        lines.append("(none this turn)")
+    lines += ["", "## Integration actions (applied strictly after display)"]
+    if actions:
+        lines.extend(
+            f"- {a.get('action')} · {a.get('element_id')} — {a.get('detail')}" for a in actions
+        )
+    else:
+        lines.append("(none)")
+    lines += [
+        "",
+        "## Composed prompt",
+        "```json",
+        json.dumps(trace.get("composed_prompt") or {}, indent=2, ensure_ascii=False),
+        "```",
+        "",
+        "## Field before",
+        "```json",
+        json.dumps(trace.get("field_before") or {}, indent=2, ensure_ascii=False),
+        "```",
+        "",
+        "## Field after",
+        "```json",
+        json.dumps(trace.get("field_after") or {}, indent=2, ensure_ascii=False),
+        "```",
+    ]
+    return "\n".join(lines)
 
 
 def _atomic_write_json(path: Path, data: Any) -> None:
@@ -144,6 +235,71 @@ class TurnStore:
         return out
 
 
+class FlowTurnStore:
+    """In-memory index of Flow-mode turns, mirroring `TurnStore`'s shape so
+    the same `GET` endpoints work across requests and survive a server
+    restart. Unlike `TurnStore`, this class never writes the trace file
+    itself: `flow.run_flow_turn` already persists each turn atomically to
+    `<logs_dir>/dashboard/flow_turns/<turn_id>.json` (see flow.py's own
+    `flow_trace_path` / `_atomic_write_json`) before this store's `add` is
+    ever called, so a second write here would be redundant, not additive.
+    This directory is a sibling of, never the same as, `TurnStore`'s
+    `dashboard/turns/` -- the two turn/trace namespaces never collide."""
+
+    def __init__(self, logs_dir: Path) -> None:
+        self.logs_dir = Path(logs_dir)
+        self.dir = self.logs_dir / "dashboard" / "flow_turns"
+        self.dir.mkdir(parents=True, exist_ok=True)
+        self._lock = threading.Lock()
+        self._order: list[str] = []
+        self._by_id: dict[str, dict[str, Any]] = {}
+        self._load_existing()
+
+    def _load_existing(self) -> None:
+        files = sorted(self.dir.glob("*.json"), key=lambda p: p.stat().st_mtime)
+        for f in files:
+            try:
+                data = json.loads(f.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            turn_id = data.get("turn_id")
+            if not turn_id:
+                continue
+            self._by_id[turn_id] = data
+            self._order.append(turn_id)
+
+    def add(self, data: dict[str, Any]) -> dict[str, Any]:
+        turn_id = data.get("turn_id")
+        with self._lock:
+            if turn_id and turn_id not in self._by_id:
+                self._order.append(turn_id)
+            if turn_id:
+                self._by_id[turn_id] = data
+        return data
+
+    def get(self, turn_id: str) -> dict[str, Any] | None:
+        with self._lock:
+            return self._by_id.get(turn_id)
+
+    def latest(self) -> dict[str, Any] | None:
+        with self._lock:
+            if not self._order:
+                return None
+            return self._by_id.get(self._order[-1])
+
+    def list_summaries(self, *, session_id: str | None = None) -> list[dict[str, Any]]:
+        with self._lock:
+            ids = list(self._order)
+            by_id = dict(self._by_id)
+        out = []
+        for turn_id in ids:
+            data = by_id[turn_id]
+            if session_id is not None and data.get("session_id") != session_id:
+                continue
+            out.append(_summarize_flow_turn(data))
+        return out
+
+
 class Dashboard:
     """Owns the runtime configuration one `ck dashboard` process was
     started with, the turn store, and the SSE subscriber list. One
@@ -160,6 +316,7 @@ class Dashboard:
         host: str = "127.0.0.1",
         port: int = 8765,
         observer_enabled: bool = False,
+        session_mode: str = "pipeline",
     ) -> None:
         self.state_dir = Path(state_dir) if state_dir else default_state_dir()
         self.logs_dir = Path(logs_dir) if logs_dir else default_logs_dir()
@@ -169,8 +326,16 @@ class Dashboard:
         self.host = host
         self.port = port
         self.observer_enabled = bool(observer_enabled)
+        # "pipeline" (default): the existing acceptance-court companion path,
+        # untouched. "flow": POST /api/turn routes through
+        # flow.run_flow_turn instead of pipeline.run_turn (Studio Flow mode,
+        # `ck chat --mode flow`'s dashboard-visible twin). Never anything
+        # else -- an unrecognized value falls back to "pipeline" rather than
+        # silently misrouting turns.
+        self.session_mode = session_mode if session_mode in SESSION_MODES else "pipeline"
 
         self.store = TurnStore(self.logs_dir)
+        self.flow_store = FlowTurnStore(self.logs_dir)
         self._turn_lock = threading.Lock()
         self._sub_lock = threading.Lock()
         self._subscribers: list[queue.Queue[str]] = []
@@ -202,6 +367,7 @@ class Dashboard:
             "edge_profile": self.profile.to_dict(),
             "edge_report": report,
             "acceptance_mode": "companion",
+            "session_mode": self.session_mode,
             "paths": {
                 "state_dir": str(self.state_dir),
                 "logs_dir": str(self.logs_dir),
@@ -212,13 +378,18 @@ class Dashboard:
                 "observer_enabled": self.observer_enabled,
             },
         }
+        turns = (
+            self.flow_store.list_summaries(session_id=session_id)
+            if self.session_mode == "flow"
+            else self.store.list_summaries(session_id=session_id)
+        )
         return {
             "session_id": session_id,
             "goal": state.current.get("goal", ""),
             "open_thread_count": len(state.open_threads()),
             "recent_turns_on_disk": len(state.recent_turns()),
             "runtime_config": runtime_config,
-            "turns": self.store.list_summaries(session_id=session_id),
+            "turns": turns,
         }
 
     # ---- turns ----
@@ -229,7 +400,14 @@ class Dashboard:
         stages over SSE. Serialized by a lock: this is a single-operator
         local dashboard, and two concurrent turns against the same
         `state_dir` would otherwise race on `accept_candidate`'s writes —
-        a race that exists in the pipeline itself, not introduced here."""
+        a race that exists in the pipeline itself, not introduced here.
+
+        Routes through Flow's own turn path instead whenever this dashboard
+        process is configured for Flow mode (`self.session_mode == "flow"`)
+        -- see `_run_flow_turn`. That branch never touches this method's
+        pipeline call below."""
+        if self.session_mode == "flow":
+            return self._run_flow_turn(text)
         with self._turn_lock:
             trace = run_traced_turn(
                 text,
@@ -243,15 +421,43 @@ class Dashboard:
         self._broadcast_turn(trace)
         return data
 
+    def _run_flow_turn(self, text: str) -> dict[str, Any]:
+        """Studio Flow's own turn path: field before -> model speaks through
+        field -> output reaches Anthony -> substrate observes what traveled
+        -> field integrates and shifts (see flow.py's module docstring).
+        `flow.run_flow_turn` already persists the FlowTrace to disk before
+        returning -- `flow_store.add` only updates this process's in-memory
+        index, it never writes the file a second time."""
+        with self._turn_lock:
+            result = run_flow_turn(
+                text,
+                model=self.model,
+                state_dir=self.state_dir,
+                logs_dir=self.logs_dir,
+                base_url=self.base_url,
+                profile=self.profile,
+            )
+            data = self.flow_store.add(result.trace.to_dict())
+        self._broadcast_flow_turn(result.trace)
+        return data
+
     def get_trace(self, turn_id: str) -> dict[str, Any] | None:
+        primary, secondary = (
+            (self.flow_store, self.store) if self.session_mode == "flow" else (self.store, self.flow_store)
+        )
         if turn_id in ("latest", ""):
-            return self.store.latest()
-        return self.store.get(turn_id)
+            return primary.latest()
+        trace = primary.get(turn_id)
+        if trace is not None:
+            return trace
+        return secondary.get(turn_id)
 
     def get_full_brief(self, turn_id: str) -> str | None:
         trace = self.get_trace(turn_id)
         if trace is None:
             return None
+        if _is_flow_trace(trace):
+            return _flow_brief_markdown(trace)
         return brief.build_full_debug_brief(trace)
 
     # ---- feedback (write-only, never read back — spec §13) ----
@@ -314,6 +520,12 @@ class Dashboard:
         trace = self.get_trace(turn_id)
         if trace is None:
             raise KeyError(f"unknown turn_id {turn_id!r}")
+        if _is_flow_trace(trace):
+            raise ValueError(
+                "the Claude observer pane reads pipeline TurnTraces (packet/passes/stages) "
+                "and is not available for Flow-mode turns yet — use the full debug brief "
+                "endpoint instead, which flow traces do support"
+            )
         if payload_kind == "full":
             markdown = brief.build_full_debug_brief(trace)
             disclosure = {
@@ -408,5 +620,37 @@ class Dashboard:
             {"turn_id": trace.turn_id, "decision": trace.final_decision.get("decision")},
         )
 
+    def _broadcast_flow_turn(self, trace: FlowTrace) -> None:
+        """Flow's own SSE sequence, one event per stage of the spec's own
+        turn shape (field before -> model speaks through field -> output
+        reaches Anthony -> substrate observes what traveled -> field
+        integrates and shifts): `field_before`, `traveled`, `field_after`,
+        then `turn_complete` for symmetry with the pipeline sequence above.
+        Published back-to-back immediately after the one real
+        `run_flow_turn` call finishes, same pacing note as
+        `_broadcast_turn` — every field is the real trace's own content,
+        only the reveal pacing is post-hoc."""
+        self._publish("field_before", {"turn_id": trace.turn_id, "field_before": trace.field_before})
+        self._publish(
+            "traveled",
+            {
+                "turn_id": trace.turn_id,
+                "composed_prompt": trace.composed_prompt,
+                "raw_reply": trace.raw_reply,
+                "displayed_text": trace.displayed_text,
+                "reply_status": trace.reply_status,
+            },
+        )
+        self._publish(
+            "field_after",
+            {
+                "turn_id": trace.turn_id,
+                "field_after": trace.field_after,
+                "integration_actions": trace.integration_actions,
+                "observations": trace.observations,
+            },
+        )
+        self._publish("turn_complete", {"turn_id": trace.turn_id, "decision": "spoken"})
 
-__all__ = ["Dashboard", "TurnStore"]
+
+__all__ = ["Dashboard", "TurnStore", "FlowTurnStore"]
