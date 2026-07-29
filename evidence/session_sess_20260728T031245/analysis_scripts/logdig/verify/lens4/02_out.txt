@@ -1,0 +1,122 @@
+==============================================================================
+1. git evidence for the config swap (configs/edge/orin_nano_8gb.json)
+==============================================================================
+330128e973359896f951b6443cf062cfe2ea420a|2026-07-27T23:00:08-04:00|Studio kernel swap: qwen3.5:0.8b with think=false
+5b410f47a04067425bb4f4a72bd70a2fa398b4a8|2026-07-22T00:47:14-04:00|Make Conditioned Kernel edge-first (Orin Nano 8GB default)
+
+--- diff of the swap commit ---
+commit 330128e973359896f951b6443cf062cfe2ea420a
+Author: CAF Agent <agent@caf.cli>
+Date:   Mon Jul 27 23:00:08 2026 -0400
+
+    Studio kernel swap: qwen3.5:0.8b with think=false
+    
+    Default orin_nano_8gb model is now qwen3.5:0.8b. Ollama chat/generate
+    payloads set think=false via the API so the reasoning channel is disabled.
+    Final answer still comes only from message content, never thinking text.
+    No validator, packet, or recent-turn geometry changes.
+
+diff --git a/configs/edge/orin_nano_8gb.json b/configs/edge/orin_nano_8gb.json
+index 0c9f90b..5d42454 100644
+--- a/configs/edge/orin_nano_8gb.json
++++ b/configs/edge/orin_nano_8gb.json
+@@ -4,7 +4,7 @@
+   "target_device": "jetson_orin_nano_8gb",
+   "arch": "aarch64",
+   "ram_gb": 8,
+-  "model": "qwen2.5:0.5b",
++  "model": "qwen3.5:0.8b",
+   "mode": "chat_json",
+   "num_ctx": 2048,
+   "temperature": 0.3,
+@@ -19,10 +19,11 @@
+   "max_log_file_bytes": 5242880,
+   "one_model_only": true,
+   "stream": false,
++  "think": false,
+   "cloud": false,
+   "sensors": false,
+   "tools": false,
+-  "estimated_model_ram_mb": 500,
++  "estimated_model_ram_mb": 700,
+   "estimated_substrate_ram_mb": 200,
+-  "notes": "Measure on device. Estimates are planning bounds, not guarantees."
++  "notes": "Studio kernel swap: qwen3.5:0.8b with think=false (API). Substrate geometry unchanged. Estimates are planning bounds, not guarantees."
+ }
+
+==============================================================================
+2. when is the profile (and hence model) chosen relative to a session?
+==============================================================================
+conditioned_kernel/cli.py:_cmd_chat calls _apply_profile_defaults(args) ONCE,
+before entering the `while True: input("you> ")` loop. _apply_profile_defaults
+calls load_profile(), which does a fresh `json.load` of
+configs/edge/<profile>.json at that moment. Every subsequent turn in that
+chat session reuses the same in-memory `args.model` -- the profile file is
+NOT re-read per turn. So the model backing any given candidate is fixed by
+which session it belongs to, not by wall-clock time relative to the commit
+that changed the file on disk.
+
+==============================================================================
+3. state/current.json -- the one session we can name directly
+==============================================================================
+{
+  "session_id": "sess_20260728T031245",
+  "active_profile": "orin_nano_8gb",
+  "receipt_count_24h": 33,
+  "updated_at": "2026-07-28T20:53:53Z"
+}
+==============================================================================
+4. dashboard/turns/*.json -- explicit runtime_config per traced turn
+==============================================================================
+model field across 19 traced turns:       {'qwen3.5:0.8b': 19}
+think field across 19 traced turns:        {False: 19}
+temperature field across 19 traced turns:  {0.3: 19}
+seed field across 19 traced turns:         {42: 19}
+session_id field across 19 traced turns:   {'sess_20260728T031245': 19}
+==============================================================================
+5. session-boundary reasoning for the 71 pre-dashboard candidates
+==============================================================================
+swap commit (config file changed on disk): 2026-07-28T03:00:08Z
+current named session started:              2026-07-28T03:12:45Z  (from state/current.json session_id)
+
+receipts strictly BEFORE the swap commit:                    50  (first=2026-07-28T00:25:23Z, last=2026-07-28T02:43:58Z)
+  -> any session that produced these had already called load_profile()
+     before the file changed, so these are qwen2.5:0.5b with CONFIDENCE.
+
+receipts AFTER commit but BEFORE the named session start:    12  (['2026-07-28T03:04:52Z', '2026-07-28T03:04:54Z', '2026-07-28T03:05:39Z', '2026-07-28T03:05:42Z', '2026-07-28T03:06:13Z', '2026-07-28T03:06:16Z', '2026-07-28T03:06:46Z', '2026-07-28T03:07:59Z', '2026-07-28T03:08:02Z', '2026-07-28T03:08:19Z', '2026-07-28T03:09:31Z', '2026-07-28T03:09:34Z'])
+  -> AMBIGUOUS: these could belong to a session that started before
+     03:00:08Z (still holding qwen2.5:0.5b in memory) or a short-lived
+     session that started after 03:00:08Z but before 03:12:45Z (which
+     would have picked up qwen3.5:0.8b). candidates.jsonl/receipts.jsonl
+     carry no session_id field, so this cannot be resolved from the logs.
+
+receipts inside the named session sess_20260728T031245 (>= 2026-07-28T03:12:45Z): 31
+  -> CONFIRMED qwen3.5:0.8b / think=false: this session's own id postdates
+     the swap commit, and dashboard traces for this same session_id (19:xx,
+     20:xx) show runtime_config.model == 'qwen3.5:0.8b' directly.
+==============================================================================
+6. behavioral comparison: confirmed-old-model vs confirmed-new-model
+==============================================================================
+
+-- CONFIRMED qwen2.5:0.5b (created_at < swap commit 03:00:08Z) (n=50) --
+   word_count:  min=1 median=12.0 max=22 mean=12.6
+   answer chars: min=13 median=75.0 max=160
+   parse_ok: 50/50
+   violation types (by prefix, counted across all passes in group): {'not_responsive': 28, 'evidence_used_empty': 12, 'unknown_thread_touch': 5, 'evidence_not_in_packet': 2, 'template_echo': 1}
+   decisions: {'reject': 17, 'repair': 23, 'accept': 10}
+
+-- AMBIGUOUS window (commit <= created_at < named session start) (n=12) --
+   word_count:  min=35 median=47.5 max=63 mean=45.6
+   answer chars: min=213 median=280.0 max=371
+   parse_ok: 12/12
+   violation types (by prefix, counted across all passes in group): {'not_responsive': 10, 'evidence_not_in_packet': 2, 'template_echo': 1}
+   decisions: {'repair': 5, 'reject': 5, 'accept': 2}
+
+-- CONFIRMED qwen3.5:0.8b think=false (created_at >= session start 03:12:45Z) (n=31) --
+   word_count:  min=7 median=37.0 max=73 mean=34.6
+   answer chars: min=34 median=229.0 max=409
+   parse_ok: 31/31
+   violation types (by prefix, counted across all passes in group): {'evidence_not_in_packet': 10, 'stale_response_repeat': 5, 'template_echo': 1}
+   decisions: {'accept': 19, 'reject': 5, 'repair': 7}
+
+sanity: 50 + 12 + 31 = 93 (expect 93)

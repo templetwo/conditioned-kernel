@@ -1,0 +1,35 @@
+turn: turn_20260728T204000Z_1e9dfc.json  user_input='im good. just been working on this AI project all day. making good progress. how are things from your seat?'  decision=accept
+
+====================================================================================================
+(1) recompute compute.context_share_bytes(packet, model_input) from the logged objects
+====================================================================================================
+source_id               stored bytes  recomputed bytes   match    stored pct  recomputed pct   match
+constraints                      382               382      OK         15.77           15.77      OK
+context_field                    432               432      OK         17.84           17.84      OK
+current_user_input               107               107      OK          4.42            4.42      OK
+durable_state                    382               382      OK         15.77           15.77      OK
+output_schema                    307               307      OK         12.68           12.68      OK
+recent_dialogue                  348               348      OK         14.37           14.37      OK
+system_instructions              464               464      OK         19.16           19.16      OK
+
+FULL ROW-FOR-ROW MATCH: True
+(the TurnTrace's stored context_share_bytes is reproduced exactly by calling the real compute.context_share_bytes on this turn's own logged packet+model_input -- it is not a hand-typed or separately-fabricated number)
+
+====================================================================================================
+(1b) independent verify_packet_bytes check (logged _edge.packet_bytes vs recomputed)
+====================================================================================================
+logged _edge.packet_bytes=1268  recomputed edge.packet_byte_size(packet)=1268  match=True
+
+====================================================================================================
+(2) what the context_share sum counts vs the literal Ollama wire payload
+====================================================================================================
+sum of all context_share_bytes rows ("total_model_input_bytes"): 2422
+raw bytes of json.dumps(payload) [pretty, default separators]: 1548
+raw bytes of json.dumps(payload) [compact separators]:         1493
+raw bytes of json.dumps(model_input) [the whole traced object, compact]: 1735
+sum of message['content'] string bytes only (system + user, no JSON at all): 951
+
+mode: chat_json
+payload keys: ['format', 'keep_alive', 'messages', 'model', 'options', 'stream', 'think']
+context_share sum vs raw message-content-only sum: 2422 vs 951 (diff=1471; the census also folds in the schema's own serialized bytes -- format= is a separate payload key, not message content -- see 'output_schema' row above)
+message-content-only sum + output_schema row bytes = 951 + 307 = 1258 vs context_share total 2422

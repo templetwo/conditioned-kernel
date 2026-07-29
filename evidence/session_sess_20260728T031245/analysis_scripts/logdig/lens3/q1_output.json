@@ -1,0 +1,226 @@
+{
+  "layer_a_ground_truth_22_passes": {
+    "n_passes": 22,
+    "checks": {
+      "authoritative_obligation": {
+        "SKIP": 20,
+        "PASS": 1,
+        "FAIL": 1
+      },
+      "contradicts_facts": {
+        "PASS": 22
+      },
+      "evidence_not_in_packet": {
+        "FAIL": 3,
+        "PASS": 16,
+        "SKIP": 3
+      },
+      "evidence_too_short": {
+        "PASS": 19,
+        "SKIP": 3
+      },
+      "evidence_used_empty": {
+        "PASS": 22
+      },
+      "forbidden_content": {
+        "PASS": 22
+      },
+      "goal_echo": {
+        "PASS": 21,
+        "SKIP": 1
+      },
+      "goal_not_referenced": {
+        "SKIP": 22
+      },
+      "max_words": {
+        "PASS": 22
+      },
+      "nonempty_answer": {
+        "PASS": 22
+      },
+      "not_responsive": {
+        "ADVISORY": 10,
+        "PASS": 11,
+        "SKIP": 1
+      },
+      "parse_ok": {
+        "PASS": 22
+      },
+      "required_section:answer": {
+        "PASS": 22
+      },
+      "required_section:evidence_used": {
+        "PASS": 22
+      },
+      "required_section:next_state": {
+        "PASS": 22
+      },
+      "stale_response_repeat": {
+        "PASS": 18,
+        "FAIL": 3,
+        "SKIP": 1
+      },
+      "template_echo": {
+        "PASS": 21,
+        "FAIL": 1
+      },
+      "template_echo_evidence": {
+        "PASS": 22
+      },
+      "unknown_thread_touch": {
+        "PASS": 3,
+        "SKIP": 19
+      }
+    }
+  },
+  "layer_b_fired_only_93_passes": {
+    "n_passes": 93,
+    "fail_counts": {
+      "not_responsive": 38,
+      "evidence_not_in_packet": 14,
+      "evidence_used_empty": 12,
+      "unknown_thread_touch": 5,
+      "stale_response_repeat": 5,
+      "template_echo": 3
+    },
+    "advisory_counts": {
+      "not_responsive": 15
+    },
+    "fail_examples": {
+      "not_responsive": [
+        "not_responsive",
+        "not_responsive",
+        "not_responsive",
+        "not_responsive",
+        "not_responsive"
+      ],
+      "evidence_used_empty": [
+        "evidence_used_empty",
+        "evidence_used_empty",
+        "evidence_used_empty",
+        "evidence_used_empty",
+        "evidence_used_empty"
+      ],
+      "unknown_thread_touch": [
+        "unknown_thread_touch:jetson_orin_nano_8gb",
+        "unknown_thread_touch:orin_nano_8gb",
+        "unknown_thread_touch:Tonight we only use qwen 0.5b on the Orin.",
+        "unknown_thread_touch:sess_20260728T005154",
+        "unknown_thread_touch:jetson_orin_nano_8gb"
+      ],
+      "template_echo": [
+        "template_echo",
+        "template_echo",
+        "template_echo"
+      ],
+      "evidence_not_in_packet": [
+        "evidence_not_in_packet:minimum_viable_model_size: 128 KB",
+        "evidence_not_in_packet:minimum_viable_model_size",
+        "evidence_not_in_packet:The system is fully local.",
+        "evidence_not_in_packet:The system is fully local.",
+        "evidence_not_in_packet:The system is fully local, so no external models are required."
+      ],
+      "stale_response_repeat": [
+        "stale_response_repeat",
+        "stale_response_repeat",
+        "stale_response_repeat",
+        "stale_response_repeat",
+        "stale_response_repeat"
+      ]
+    },
+    "advisory_examples": {
+      "not_responsive": [
+        "not_responsive",
+        "not_responsive",
+        "not_responsive",
+        "not_responsive",
+        "not_responsive"
+      ]
+    }
+  },
+  "layer_c_full_93_pass_skip_reconstruction": {
+    "note": "PASS/SKIP/FAIL/ADVISORY per check, all 93 passes, using only candidate-only + receipt-only fields (documented per-check gate logic above). stale_response_repeat excluded (needs packet).",
+    "unresolved_user_input_count": 0,
+    "checks": {
+      "authoritative_obligation": {
+        "SKIP": 87,
+        "PASS": 4,
+        "FAIL": 2
+      },
+      "contradicts_facts": {
+        "SKIP": 93
+      },
+      "evidence_not_in_packet": {
+        "SKIP": 15,
+        "PASS": 65,
+        "FAIL": 13
+      },
+      "evidence_too_short": {
+        "SKIP": 15,
+        "PASS": 78
+      },
+      "evidence_used_empty": {
+        "FAIL": 12,
+        "PASS": 81
+      },
+      "forbidden_content": {
+        "PASS": 93
+      },
+      "goal_echo": {
+        "PASS": 91,
+        "SKIP": 2
+      },
+      "goal_not_referenced": {
+        "PASS": 12,
+        "SKIP": 81
+      },
+      "max_words": {
+        "PASS": 93
+      },
+      "nonempty_answer": {
+        "PASS": 93
+      },
+      "not_responsive": {
+        "FAIL": 38,
+        "PASS": 38,
+        "SKIP": 2,
+        "ADVISORY": 15
+      },
+      "parse_ok": {
+        "PASS": 93
+      },
+      "required_section:answer": {
+        "PASS": 93
+      },
+      "required_section:evidence_used": {
+        "PASS": 93
+      },
+      "required_section:next_state": {
+        "PASS": 93
+      },
+      "template_echo_evidence": {
+        "PASS": 93
+      },
+      "unknown_thread_touch": {
+        "SKIP": 70,
+        "FAIL": 5,
+        "PASS": 18
+      }
+    }
+  },
+  "authoritative_obligation_fallback_fires_93_passes": 2,
+  "never_fired_all_day": [
+    "contradicts_facts",
+    "evidence_too_short",
+    "forbidden_content",
+    "goal_echo",
+    "goal_not_referenced",
+    "max_words",
+    "nonempty_answer",
+    "parse_ok",
+    "required_section:answer",
+    "required_section:evidence_used",
+    "required_section:next_state",
+    "template_echo_evidence"
+  ]
+}

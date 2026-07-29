@@ -16,6 +16,7 @@
 | [2026-07-29 `not_responsive` alignment (Grok)](2026-07-29-not-responsive-alignment.md) | Grok | 2026-07-29 | Does the advisory match real misses? Pass 1 |
 | [2026-07-29 Context Field vs sentence (Grok)](2026-07-29-context-field-vs-sentence.md) | Grok | 2026-07-29 | Selected ≠ spoken; attractors; over-select. Pass 2 |
 | [2026-07-29 Studio session overview (Grok)](2026-07-29-studio-session-overview.md) | Grok | 2026-07-29 | Structural arc of one companion session (sanitized) |
+| [2026-07-28 Verified log analysis (Claude, 5-agent verified)](2026-07-28-interior-dig-verified-log-analysis.md) | Claude review seat | 2026-07-28 | Four lenses over the full day's ledgers: attractor genealogy, composition dynamics, validation forensics, kernel behavior — every headline number independently re-derived |
 
 Newest notes at the bottom of the table as they land; keep filenames `YYYY-MM-DD-short-slug.md`.
 
@@ -26,7 +27,8 @@ Newest notes at the bottom of the table as they land; keep filenames `YYYY-MM-DD
 1. **Observations, not claims about consciousness.** Traces show what traveled; they do not settle what (if anything) was experienced inside the model.
 2. **Designed vs weather.** Notes should separate intentional policy (e.g. companion advisory) from model/selector weather.
 3. **Single-session bounds.** Unless a note says otherwise, findings are one kernel, one session, one seat.
-4. **Interior View is the preferred instrument.** Live: `GET http://127.0.0.1:8765/api/session` and `GET /api/turn/:id/brief` (or `/trace`). Do not treat private `logs/dashboard/` as the public artifact.
+4. **Interior View is the preferred instrument.** Live: `GET http://127.0.0.1:8765/api/session` and `GET /api/turn/:id/brief` (or `/trace`).
+5. **Raw evidence is published.** The complete unredacted record of the first lived session — all 22 TurnTraces, the day's full ledgers, the state snapshot, and the analysis scripts, hash-manifested — lives at [evidence/session_sess_20260728T031245/](../../evidence/session_sess_20260728T031245/), published at Anthony's explicit direction (2026-07-29: "the chat logs are not private for me"). These notes are the readable layer; that directory is the raw reference for the paper.
 
 ---
 

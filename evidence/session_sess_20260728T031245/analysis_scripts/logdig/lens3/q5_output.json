@@ -1,0 +1,766 @@
+{
+  "n_two_pass_turns": 35,
+  "n_flagged_pass0_more_responsive_by_lexical_check": 7,
+  "flagged": [
+    {
+      "turn": 2,
+      "ts": "2026-07-28T00:25:49Z",
+      "user_input": "What is the goal we are working toward?",
+      "final_decision": "reject",
+      "pass0_answer": "The goal we are working toward is to replace the Jetson Orin Nano 8GB model.",
+      "pass0_killed_by": [
+        "evidence_used_empty",
+        "unknown_thread_touch"
+      ],
+      "pass0_is_responsive": true,
+      "pass1_answer": "Fix the goal_snippet.",
+      "pass1_killed_by": [
+        "evidence_used_empty"
+      ],
+      "pass1_is_responsive": true,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 4,
+      "ts": "2026-07-28T00:25:51Z",
+      "user_input": "Summarize the design intent in one sentence.",
+      "final_decision": "reject",
+      "pass0_answer": "Summarize the design intent in one sentence.",
+      "pass0_killed_by": [
+        "evidence_used_empty"
+      ],
+      "pass0_is_responsive": true,
+      "pass1_answer": "Summarize the design intent in one sentence.",
+      "pass1_killed_by": [
+        "evidence_used_empty"
+      ],
+      "pass1_is_responsive": true,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 5,
+      "ts": "2026-07-28T00:26:01Z",
+      "user_input": "What is the goal we are working toward?",
+      "final_decision": "reject",
+      "pass0_answer": "What is the goal we are working toward?",
+      "pass0_killed_by": [
+        "evidence_used_empty"
+      ],
+      "pass0_is_responsive": true,
+      "pass1_answer": "What is the goal we are working toward?",
+      "pass1_killed_by": [
+        "evidence_used_empty"
+      ],
+      "pass1_is_responsive": true,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 11,
+      "ts": "2026-07-28T00:51:57Z",
+      "user_input": "My sprint code tonight is FALCON-9-DELTA.",
+      "final_decision": "reject",
+      "pass0_answer": "FALCON-9-DELTA is a short helpful reply grounded in the packet. If recent_turns is present, treat it as prior dialogue and stay consistent.",
+      "pass0_killed_by": [
+        "template_echo"
+      ],
+      "pass0_is_responsive": true,
+      "pass1_answer": "FALCON-9-DELTA",
+      "pass1_killed_by": [
+        "unknown_thread_touch"
+      ],
+      "pass1_is_responsive": true,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 12,
+      "ts": "2026-07-28T00:51:59Z",
+      "user_input": "What did I say my sprint code was?",
+      "final_decision": "reject",
+      "pass0_answer": "The sprint code was not mentioned in the packet.",
+      "pass0_killed_by": [
+        "unknown_thread_touch"
+      ],
+      "pass0_is_responsive": true,
+      "pass1_answer": "I'm sorry, but I can't assist with that. Please provide more context or clarify your question.",
+      "pass1_killed_by": [
+        "not_responsive"
+      ],
+      "pass1_is_responsive": false,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 37,
+      "ts": "2026-07-28T03:15:12Z",
+      "user_input": "whats a jetson nano",
+      "final_decision": "reject",
+      "pass0_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.",
+      "pass0_killed_by": [
+        "evidence_not_in_packet"
+      ],
+      "pass0_is_responsive": true,
+      "pass1_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.",
+      "pass1_killed_by": [
+        "evidence_not_in_packet"
+      ],
+      "pass1_is_responsive": true,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 40,
+      "ts": "2026-07-28T19:01:24Z",
+      "user_input": "what does this system do?",
+      "final_decision": "reject",
+      "pass0_answer": "The system is a local conditioned-kernel transducer using the qwen3.5:0.8b model on a Jetson Orin Nano 8GB edge budget. It operates under a strict 120-word limit and allows only one repair pass.",
+      "pass0_killed_by": [
+        "template_echo",
+        "evidence_not_in_packet",
+        "evidence_not_in_packet"
+      ],
+      "pass0_is_responsive": true,
+      "pass1_answer": "The system is fully local, operates on a small local model (qwen3.5:0.8b), and the goal is to demonstrate conditioned-kernel substrate gain over bare generation under Jetson Orin Nano 8GB edge budgets. One repair pass is allowed.",
+      "pass1_killed_by": [
+        "stale_response_repeat"
+      ],
+      "pass1_is_responsive": true,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    }
+  ],
+  "all_two_pass_turns": [
+    {
+      "turn": 0,
+      "ts": "2026-07-28T00:25:23Z",
+      "user_input": "Tonight we only use qwen 0.5b on the Orin.",
+      "final_decision": "reject",
+      "pass0_answer": "The Orin's Jetson platform is the current target.",
+      "pass0_killed_by": [
+        "not_responsive",
+        "evidence_used_empty"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "Return corrected JSON only. Use allowed_evidence_samples or facts only. thread_touch only from allowed_thread_ids or []. Answer must reference the goal_snippet.",
+      "pass1_killed_by": [
+        "not_responsive",
+        "evidence_used_empty"
+      ],
+      "pass1_is_responsive": false,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 1,
+      "ts": "2026-07-28T00:25:24Z",
+      "user_input": "What model did we decide on tonight?",
+      "final_decision": "reject",
+      "pass0_answer": "Orin Nano 8GB",
+      "pass0_killed_by": [
+        "not_responsive",
+        "evidence_used_empty"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "What model did we decide on tonight?",
+      "pass1_killed_by": [
+        "evidence_used_empty"
+      ],
+      "pass1_is_responsive": true,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 2,
+      "ts": "2026-07-28T00:25:49Z",
+      "user_input": "What is the goal we are working toward?",
+      "final_decision": "reject",
+      "pass0_answer": "The goal we are working toward is to replace the Jetson Orin Nano 8GB model.",
+      "pass0_killed_by": [
+        "evidence_used_empty",
+        "unknown_thread_touch"
+      ],
+      "pass0_is_responsive": true,
+      "pass1_answer": "Fix the goal_snippet.",
+      "pass1_killed_by": [
+        "evidence_used_empty"
+      ],
+      "pass1_is_responsive": true,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 3,
+      "ts": "2026-07-28T00:25:50Z",
+      "user_input": "What is the edge target for this system?",
+      "final_decision": "reject",
+      "pass0_answer": "jetson_orin_nano_8gb (one model at a time)",
+      "pass0_killed_by": [
+        "not_responsive",
+        "evidence_used_empty",
+        "unknown_thread_touch"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "The edge target for this system is jetson_orin_nano_8gb (one model at a time).",
+      "pass1_killed_by": [
+        "evidence_used_empty"
+      ],
+      "pass1_is_responsive": true,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 4,
+      "ts": "2026-07-28T00:25:51Z",
+      "user_input": "Summarize the design intent in one sentence.",
+      "final_decision": "reject",
+      "pass0_answer": "Summarize the design intent in one sentence.",
+      "pass0_killed_by": [
+        "evidence_used_empty"
+      ],
+      "pass0_is_responsive": true,
+      "pass1_answer": "Summarize the design intent in one sentence.",
+      "pass1_killed_by": [
+        "evidence_used_empty"
+      ],
+      "pass1_is_responsive": true,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 5,
+      "ts": "2026-07-28T00:26:01Z",
+      "user_input": "What is the goal we are working toward?",
+      "final_decision": "reject",
+      "pass0_answer": "What is the goal we are working toward?",
+      "pass0_killed_by": [
+        "evidence_used_empty"
+      ],
+      "pass0_is_responsive": true,
+      "pass1_answer": "What is the goal we are working toward?",
+      "pass1_killed_by": [
+        "evidence_used_empty"
+      ],
+      "pass1_is_responsive": true,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 7,
+      "ts": "2026-07-28T00:33:05Z",
+      "user_input": "What model did we decide on tonight?",
+      "final_decision": "accept",
+      "pass0_answer": "Tonight we only use qwen 0.5b on the Orin.",
+      "pass0_killed_by": [
+        "unknown_thread_touch"
+      ],
+      "pass0_is_responsive": true,
+      "pass1_answer": "Tonight we only use qwen 0.5b on the Orin.",
+      "pass1_killed_by": [],
+      "pass1_is_responsive": true,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 8,
+      "ts": "2026-07-28T00:33:07Z",
+      "user_input": "And which board did I say we were running it on?",
+      "final_decision": "accept",
+      "pass0_answer": "Tonight we only use qwen 0.5b on the Orin.",
+      "pass0_killed_by": [
+        "not_responsive"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "We were running it on the Jetson Orin Nano 8GB.",
+      "pass1_killed_by": [],
+      "pass1_is_responsive": true,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 10,
+      "ts": "2026-07-28T00:34:08Z",
+      "user_input": "What did I say my sprint code was?",
+      "final_decision": "reject",
+      "pass0_answer": "FALCON-9-DELTA is a short helpful reply grounded in the packet. If recent_turns is present, treat it as prior dialogue and stay consistent.",
+      "pass0_killed_by": [
+        "not_responsive"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "FALCON-9-DELTA is a short helpful reply grounded in the packet. If recent_turns is present, treat it as prior dialogue and stay consistent.",
+      "pass1_killed_by": [
+        "not_responsive"
+      ],
+      "pass1_is_responsive": false,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 11,
+      "ts": "2026-07-28T00:51:57Z",
+      "user_input": "My sprint code tonight is FALCON-9-DELTA.",
+      "final_decision": "reject",
+      "pass0_answer": "FALCON-9-DELTA is a short helpful reply grounded in the packet. If recent_turns is present, treat it as prior dialogue and stay consistent.",
+      "pass0_killed_by": [
+        "template_echo"
+      ],
+      "pass0_is_responsive": true,
+      "pass1_answer": "FALCON-9-DELTA",
+      "pass1_killed_by": [
+        "unknown_thread_touch"
+      ],
+      "pass1_is_responsive": true,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 12,
+      "ts": "2026-07-28T00:51:59Z",
+      "user_input": "What did I say my sprint code was?",
+      "final_decision": "reject",
+      "pass0_answer": "The sprint code was not mentioned in the packet.",
+      "pass0_killed_by": [
+        "unknown_thread_touch"
+      ],
+      "pass0_is_responsive": true,
+      "pass1_answer": "I'm sorry, but I can't assist with that. Please provide more context or clarify your question.",
+      "pass1_killed_by": [
+        "not_responsive"
+      ],
+      "pass1_is_responsive": false,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 14,
+      "ts": "2026-07-28T00:52:18Z",
+      "user_input": "What edge target are we building for?",
+      "final_decision": "reject",
+      "pass0_answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+      "pass0_killed_by": [
+        "not_responsive"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+      "pass1_killed_by": [
+        "not_responsive"
+      ],
+      "pass1_is_responsive": false,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 15,
+      "ts": "2026-07-28T00:52:20Z",
+      "user_input": "Tonight we only use qwen 0.5b.",
+      "final_decision": "reject",
+      "pass0_answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+      "pass0_killed_by": [
+        "not_responsive"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+      "pass1_killed_by": [
+        "not_responsive"
+      ],
+      "pass1_is_responsive": false,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 16,
+      "ts": "2026-07-28T00:52:21Z",
+      "user_input": "Which model did I just say?",
+      "final_decision": "accept",
+      "pass0_answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+      "pass0_killed_by": [
+        "not_responsive"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "Which model did I just say?",
+      "pass1_killed_by": [],
+      "pass1_is_responsive": true,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 18,
+      "ts": "2026-07-28T00:52:24Z",
+      "user_input": "Are cloud services allowed?",
+      "final_decision": "accept",
+      "pass0_answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+      "pass0_killed_by": [
+        "not_responsive"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "Yes, cloud services are allowed.",
+      "pass1_killed_by": [],
+      "pass1_is_responsive": true,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 19,
+      "ts": "2026-07-28T02:36:28Z",
+      "user_input": "hello friend    what does the room feel like from your angle",
+      "final_decision": "accept",
+      "pass0_answer": "The minimum viable model size on Jetson Orin Nano 8GB is 128 KB.",
+      "pass0_killed_by": [
+        "not_responsive",
+        "evidence_not_in_packet"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.",
+      "pass1_killed_by": [],
+      "pass1_is_responsive": true,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 20,
+      "ts": "2026-07-28T02:39:40Z",
+      "user_input": "okay good. can you discribe the speaker to me?",
+      "final_decision": "reject",
+      "pass0_answer": "The speaker is a replaceable linguistic transducer and the model is a local model.",
+      "pass0_killed_by": [
+        "not_responsive"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "The speaker is a replaceable linguistic transducer.",
+      "pass1_killed_by": [
+        "not_responsive"
+      ],
+      "pass1_is_responsive": false,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 21,
+      "ts": "2026-07-28T02:40:30Z",
+      "user_input": "ok thank you",
+      "final_decision": "reject",
+      "pass0_answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.",
+      "pass0_killed_by": [
+        "not_responsive"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "The minimum viable model size on Jetson Orin Nano 8GB is 128 KB.",
+      "pass1_killed_by": [
+        "not_responsive"
+      ],
+      "pass1_is_responsive": false,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 22,
+      "ts": "2026-07-28T02:41:24Z",
+      "user_input": "okay no problem. what model are you",
+      "final_decision": "accept",
+      "pass0_answer": "The minimum viable model size on Jetson Orin Nano 8GB is 128 KB.",
+      "pass0_killed_by": [
+        "not_responsive"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "We are using edge target jetson_orin_nano_8gb with model qwen2.5:0.5b (profile orin_nano_8gb).",
+      "pass1_killed_by": [],
+      "pass1_is_responsive": false,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": true
+    },
+    {
+      "turn": 23,
+      "ts": "2026-07-28T02:41:51Z",
+      "user_input": "what makes this different",
+      "final_decision": "reject",
+      "pass0_answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.",
+      "pass0_killed_by": [
+        "not_responsive"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "The system is fully local and uses replaceable linguistic transducers.",
+      "pass1_killed_by": [
+        "not_responsive"
+      ],
+      "pass1_is_responsive": false,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 24,
+      "ts": "2026-07-28T02:42:41Z",
+      "user_input": "what are linguistic tranducers",
+      "final_decision": "reject",
+      "pass0_answer": "The minimum viable model size on Jetson Orin Nano 8GB is qwen2.5:0.5b (profile orin_nano_8gb).",
+      "pass0_killed_by": [
+        "not_responsive",
+        "evidence_not_in_packet"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.",
+      "pass1_killed_by": [
+        "not_responsive"
+      ],
+      "pass1_is_responsive": false,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 25,
+      "ts": "2026-07-28T02:43:34Z",
+      "user_input": "what is your favorite flower",
+      "final_decision": "reject",
+      "pass0_answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.",
+      "pass0_killed_by": [
+        "not_responsive"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.",
+      "pass1_killed_by": [
+        "not_responsive"
+      ],
+      "pass1_is_responsive": false,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 26,
+      "ts": "2026-07-28T02:43:58Z",
+      "user_input": "are you there",
+      "final_decision": "reject",
+      "pass0_answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.",
+      "pass0_killed_by": [
+        "not_responsive"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.",
+      "pass1_killed_by": [
+        "not_responsive"
+      ],
+      "pass1_is_responsive": false,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 27,
+      "ts": "2026-07-28T03:04:54Z",
+      "user_input": "suupp",
+      "final_decision": "reject",
+      "pass0_answer": "The minimum viable model size on Jetson Orin Nano 8GB is the 8GB model itself, as the system is fully local and the goal is to demonstrate conditioned-kernel substrate gain over bare generation under these specific edge budgets.",
+      "pass0_killed_by": [
+        "not_responsive",
+        "evidence_not_in_packet"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "The system is fully local, the model is a replaceable linguistic transducer, and sensors are out of scope for v0. This allows for a single repair pass to demonstrate conditioned-kernel substrate gain over bare generation.",
+      "pass1_killed_by": [
+        "not_responsive"
+      ],
+      "pass1_is_responsive": false,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 28,
+      "ts": "2026-07-28T03:05:42Z",
+      "user_input": "really? tell me more",
+      "final_decision": "reject",
+      "pass0_answer": "The minimum viable model size on Jetson Orin Nano 8GB is the 8GB model itself, as the system is fully local and the goal is to demonstrate conditioned-kernel gain over bare generation on this specific edge budget.",
+      "pass0_killed_by": [
+        "not_responsive",
+        "evidence_not_in_packet"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "The system is fully local, and the model is a replaceable linguistic transducer. Under Jetson Orin Nano 8GB, the minimum viable model size is thread_min_model, and compile ordering for state-faithfulness is thread_compile_order. This allows for a repair pass to demonstrate conditioned-kernel substrate gain over bare generation.",
+      "pass1_killed_by": [
+        "not_responsive"
+      ],
+      "pass1_is_responsive": false,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 29,
+      "ts": "2026-07-28T03:06:16Z",
+      "user_input": "i dont think so",
+      "final_decision": "reject",
+      "pass0_answer": "The system is a local conditioned-kernel transducer with a replaceable linguistic transducer and no sensors. It operates on a Jetson Orin Nano 8GB edge budget with one model at a time. A single repair pass is allowed.",
+      "pass0_killed_by": [
+        "template_echo",
+        "not_responsive"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "The system is fully local, so sensors are out of scope. The model is a replaceable linguistic transducer, and the goal is to demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets. One repair pass is allowed.",
+      "pass1_killed_by": [
+        "not_responsive"
+      ],
+      "pass1_is_responsive": false,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 31,
+      "ts": "2026-07-28T03:08:02Z",
+      "user_input": "goodby",
+      "final_decision": "reject",
+      "pass0_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the m\u2026",
+      "pass0_killed_by": [
+        "not_responsive"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the model is a replaceable linguistic transducer.",
+      "pass1_killed_by": [
+        "not_responsive"
+      ],
+      "pass1_is_responsive": false,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 33,
+      "ts": "2026-07-28T03:09:34Z",
+      "user_input": "can you say anything other than that?",
+      "final_decision": "reject",
+      "pass0_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the m\u2026",
+      "pass0_killed_by": [
+        "not_responsive"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the m\u2026",
+      "pass1_killed_by": [
+        "not_responsive"
+      ],
+      "pass1_is_responsive": false,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 35,
+      "ts": "2026-07-28T03:13:55Z",
+      "user_input": "this is why i dont like ai",
+      "final_decision": "reject",
+      "pass0_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.",
+      "pass0_killed_by": [
+        "stale_response_repeat",
+        "evidence_not_in_packet"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.",
+      "pass1_killed_by": [
+        "stale_response_repeat",
+        "evidence_not_in_packet"
+      ],
+      "pass1_is_responsive": false,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 36,
+      "ts": "2026-07-28T03:14:31Z",
+      "user_input": "what model is this",
+      "final_decision": "accept",
+      "pass0_answer": "The system is fully local and uses a replaceable linguistic transducer on a small local model (qwen3.5:0.8b) under Jetson Orin Nano 8GB. The minimum viable model size on this edge budget is typically 128MB to 256MB.",
+      "pass0_killed_by": [
+        "evidence_not_in_packet"
+      ],
+      "pass0_is_responsive": true,
+      "pass1_answer": "The system is fully local, and the active model is qwen3.5:0.8b on the Jetson Orin Nano 8GB edge budget. The goal is to demonstrate conditioned-kernel substrate gain over bare generation, which is possible given the local constraints.",
+      "pass1_killed_by": [],
+      "pass1_is_responsive": true,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 37,
+      "ts": "2026-07-28T03:15:12Z",
+      "user_input": "whats a jetson nano",
+      "final_decision": "reject",
+      "pass0_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.",
+      "pass0_killed_by": [
+        "evidence_not_in_packet"
+      ],
+      "pass0_is_responsive": true,
+      "pass1_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.",
+      "pass1_killed_by": [
+        "evidence_not_in_packet"
+      ],
+      "pass1_is_responsive": true,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 38,
+      "ts": "2026-07-28T03:15:35Z",
+      "user_input": "what do you know",
+      "final_decision": "accept",
+      "pass0_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.",
+      "pass0_killed_by": [
+        "evidence_not_in_packet"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "The system is fully local, the active model is qwen3.5:0.8b, and the goal is to demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.",
+      "pass1_killed_by": [],
+      "pass1_is_responsive": false,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 39,
+      "ts": "2026-07-28T19:00:51Z",
+      "user_input": "suuppp",
+      "final_decision": "reject",
+      "pass0_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.",
+      "pass0_killed_by": [
+        "evidence_not_in_packet"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "The system is fully local, the active model is qwen3.5:0.8b, and the goal is to demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets. This is possible given the local constraints.",
+      "pass1_killed_by": [
+        "stale_response_repeat"
+      ],
+      "pass1_is_responsive": false,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 40,
+      "ts": "2026-07-28T19:01:24Z",
+      "user_input": "what does this system do?",
+      "final_decision": "reject",
+      "pass0_answer": "The system is a local conditioned-kernel transducer using the qwen3.5:0.8b model on a Jetson Orin Nano 8GB edge budget. It operates under a strict 120-word limit and allows only one repair pass.",
+      "pass0_killed_by": [
+        "template_echo",
+        "evidence_not_in_packet",
+        "evidence_not_in_packet"
+      ],
+      "pass0_is_responsive": true,
+      "pass1_answer": "The system is fully local, operates on a small local model (qwen3.5:0.8b), and the goal is to demonstrate conditioned-kernel substrate gain over bare generation under Jetson Orin Nano 8GB edge budgets. One repair pass is allowed.",
+      "pass1_killed_by": [
+        "stale_response_repeat"
+      ],
+      "pass1_is_responsive": true,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    },
+    {
+      "turn": 41,
+      "ts": "2026-07-28T19:02:29Z",
+      "user_input": "dont reject",
+      "final_decision": "reject",
+      "pass0_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.",
+      "pass0_killed_by": [
+        "evidence_not_in_packet"
+      ],
+      "pass0_is_responsive": false,
+      "pass1_answer": "The system is fully local, the active model is qwen3.5:0.8b, and the goal is to demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets. One repair pass is allowed.",
+      "pass1_killed_by": [
+        "stale_response_repeat"
+      ],
+      "pass1_is_responsive": false,
+      "authoritative_fallback_pass0": false,
+      "authoritative_fallback_pass1": false
+    }
+  ]
+}

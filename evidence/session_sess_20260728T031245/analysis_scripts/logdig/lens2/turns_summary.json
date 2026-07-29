@@ -1,0 +1,1295 @@
+[
+  {
+    "file": "turn_20260728T190042Z_b47958.json",
+    "turn_id": "turn_20260728T190042Z_b47958",
+    "started_at": "2026-07-28T19:00:42Z",
+    "user_input": "suuppp",
+    "user_input_len_chars": 6,
+    "decision": "reject",
+    "label": "REJECTED",
+    "violations": [
+      "stale_response_repeat"
+    ],
+    "advisories": [
+      "not_responsive"
+    ],
+    "packet_bytes": 3217,
+    "total_model_input_bytes": 3909,
+    "context_share_bytes": {
+      "current_user_input": {
+        "source": "Current user input",
+        "source_id": "current_user_input",
+        "source_key": "packet.user_input",
+        "bytes": 22,
+        "share_pct": 0.56
+      },
+      "recent_dialogue": {
+        "source": "Recent dialogue",
+        "source_id": "recent_dialogue",
+        "source_key": "packet.recent_turns",
+        "bytes": 958,
+        "share_pct": 24.51
+      },
+      "durable_state": {
+        "source": "Durable state",
+        "source_id": "durable_state",
+        "source_key": "state_digest · facts · open_threads · session_id · authoritative_obligation",
+        "bytes": 920,
+        "share_pct": 23.54
+      },
+      "system_instructions": {
+        "source": "System instructions",
+        "source_id": "system_instructions",
+        "source_key": "compile.build_model_input system string · packet.repair",
+        "bytes": 1320,
+        "share_pct": 33.77
+      },
+      "output_schema": {
+        "source": "Output schema",
+        "source_id": "output_schema",
+        "source_key": "compile.CANDIDATE_FORMAT",
+        "bytes": 307,
+        "share_pct": 7.85
+      },
+      "constraints": {
+        "source": "Constraints",
+        "source_id": "constraints",
+        "source_key": "packet.constraints · packet.acceptance_contract",
+        "bytes": 382,
+        "share_pct": 9.77
+      }
+    },
+    "n_recent_turns": 3,
+    "n_facts": 7,
+    "n_open_threads": 2,
+    "n_passes": 2
+  },
+  {
+    "file": "turn_20260728T190118Z_115d1a.json",
+    "turn_id": "turn_20260728T190118Z_115d1a",
+    "started_at": "2026-07-28T19:01:18Z",
+    "user_input": "what does this system do?",
+    "user_input_len_chars": 25,
+    "decision": "reject",
+    "label": "REJECTED",
+    "violations": [
+      "stale_response_repeat"
+    ],
+    "advisories": [],
+    "packet_bytes": 3341,
+    "total_model_input_bytes": 4033,
+    "context_share_bytes": {
+      "current_user_input": {
+        "source": "Current user input",
+        "source_id": "current_user_input",
+        "source_key": "packet.user_input",
+        "bytes": 41,
+        "share_pct": 1.02
+      },
+      "recent_dialogue": {
+        "source": "Recent dialogue",
+        "source_id": "recent_dialogue",
+        "source_key": "packet.recent_turns",
+        "bytes": 958,
+        "share_pct": 23.75
+      },
+      "durable_state": {
+        "source": "Durable state",
+        "source_id": "durable_state",
+        "source_key": "state_digest · facts · open_threads · session_id · authoritative_obligation",
+        "bytes": 920,
+        "share_pct": 22.81
+      },
+      "system_instructions": {
+        "source": "System instructions",
+        "source_id": "system_instructions",
+        "source_key": "compile.build_model_input system string · packet.repair",
+        "bytes": 1425,
+        "share_pct": 35.33
+      },
+      "output_schema": {
+        "source": "Output schema",
+        "source_id": "output_schema",
+        "source_key": "compile.CANDIDATE_FORMAT",
+        "bytes": 307,
+        "share_pct": 7.61
+      },
+      "constraints": {
+        "source": "Constraints",
+        "source_id": "constraints",
+        "source_key": "packet.constraints · packet.acceptance_contract",
+        "bytes": 382,
+        "share_pct": 9.47
+      }
+    },
+    "n_recent_turns": 3,
+    "n_facts": 7,
+    "n_open_threads": 2,
+    "n_passes": 2
+  },
+  {
+    "file": "turn_20260728T190222Z_d25ed1.json",
+    "turn_id": "turn_20260728T190222Z_d25ed1",
+    "started_at": "2026-07-28T19:02:22Z",
+    "user_input": "dont reject",
+    "user_input_len_chars": 11,
+    "decision": "reject",
+    "label": "REJECTED",
+    "violations": [
+      "stale_response_repeat"
+    ],
+    "advisories": [
+      "not_responsive"
+    ],
+    "packet_bytes": 3222,
+    "total_model_input_bytes": 3914,
+    "context_share_bytes": {
+      "current_user_input": {
+        "source": "Current user input",
+        "source_id": "current_user_input",
+        "source_key": "packet.user_input",
+        "bytes": 27,
+        "share_pct": 0.69
+      },
+      "recent_dialogue": {
+        "source": "Recent dialogue",
+        "source_id": "recent_dialogue",
+        "source_key": "packet.recent_turns",
+        "bytes": 958,
+        "share_pct": 24.48
+      },
+      "durable_state": {
+        "source": "Durable state",
+        "source_id": "durable_state",
+        "source_key": "state_digest · facts · open_threads · session_id · authoritative_obligation",
+        "bytes": 920,
+        "share_pct": 23.51
+      },
+      "system_instructions": {
+        "source": "System instructions",
+        "source_id": "system_instructions",
+        "source_key": "compile.build_model_input system string · packet.repair",
+        "bytes": 1320,
+        "share_pct": 33.73
+      },
+      "output_schema": {
+        "source": "Output schema",
+        "source_id": "output_schema",
+        "source_key": "compile.CANDIDATE_FORMAT",
+        "bytes": 307,
+        "share_pct": 7.84
+      },
+      "constraints": {
+        "source": "Constraints",
+        "source_id": "constraints",
+        "source_key": "packet.constraints · packet.acceptance_contract",
+        "bytes": 382,
+        "share_pct": 9.76
+      }
+    },
+    "n_recent_turns": 3,
+    "n_facts": 7,
+    "n_open_threads": 2,
+    "n_passes": 2
+  },
+  {
+    "file": "turn_20260728T203813Z_40ba91.json",
+    "turn_id": "turn_20260728T203813Z_40ba91",
+    "started_at": "2026-07-28T20:38:13Z",
+    "user_input": "hello there",
+    "user_input_len_chars": 11,
+    "decision": "accept",
+    "label": "ACCEPTED",
+    "violations": [],
+    "advisories": [],
+    "packet_bytes": 842,
+    "total_model_input_bytes": 1190,
+    "context_share_bytes": {
+      "current_user_input": {
+        "source": "Current user input",
+        "source_id": "current_user_input",
+        "source_key": "packet.user_input",
+        "bytes": 11,
+        "share_pct": 0.92
+      },
+      "recent_dialogue": {
+        "source": "Recent dialogue",
+        "source_id": "recent_dialogue",
+        "source_key": "packet.recent_turns",
+        "bytes": 18,
+        "share_pct": 1.51
+      },
+      "durable_state": {
+        "source": "Durable state",
+        "source_id": "durable_state",
+        "source_key": "state_digest · facts · open_threads · session_id · authoritative_obligation",
+        "bytes": 77,
+        "share_pct": 6.47
+      },
+      "system_instructions": {
+        "source": "System instructions",
+        "source_id": "system_instructions",
+        "source_key": "compile.build_model_input system string · packet.repair",
+        "bytes": 384,
+        "share_pct": 32.27
+      },
+      "output_schema": {
+        "source": "Output schema",
+        "source_id": "output_schema",
+        "source_key": "compile.CANDIDATE_FORMAT",
+        "bytes": 307,
+        "share_pct": 25.8
+      },
+      "constraints": {
+        "source": "Constraints",
+        "source_id": "constraints",
+        "source_key": "packet.constraints · packet.acceptance_contract",
+        "bytes": 382,
+        "share_pct": 32.1
+      },
+      "context_field": {
+        "source": "Context field selection",
+        "source_id": "context_field",
+        "source_key": "packet.context_field selected/omitted contributions",
+        "bytes": 11,
+        "share_pct": 0.92
+      }
+    },
+    "n_recent_turns": 0,
+    "n_facts": 0,
+    "n_open_threads": 0,
+    "n_passes": 1
+  },
+  {
+    "file": "turn_20260728T204000Z_1e9dfc.json",
+    "turn_id": "turn_20260728T204000Z_1e9dfc",
+    "started_at": "2026-07-28T20:40:00Z",
+    "user_input": "im good. just been working on this AI project all day. making good progress. how are things from your seat?",
+    "user_input_len_chars": 107,
+    "decision": "accept",
+    "label": "ACCEPTED",
+    "violations": [],
+    "advisories": [],
+    "packet_bytes": 1268,
+    "total_model_input_bytes": 2422,
+    "context_share_bytes": {
+      "current_user_input": {
+        "source": "Current user input",
+        "source_id": "current_user_input",
+        "source_key": "packet.user_input",
+        "bytes": 107,
+        "share_pct": 4.42
+      },
+      "recent_dialogue": {
+        "source": "Recent dialogue",
+        "source_id": "recent_dialogue",
+        "source_key": "packet.recent_turns",
+        "bytes": 348,
+        "share_pct": 14.37
+      },
+      "durable_state": {
+        "source": "Durable state",
+        "source_id": "durable_state",
+        "source_key": "state_digest · facts · open_threads · session_id · authoritative_obligation",
+        "bytes": 382,
+        "share_pct": 15.77
+      },
+      "system_instructions": {
+        "source": "System instructions",
+        "source_id": "system_instructions",
+        "source_key": "compile.build_model_input system string · packet.repair",
+        "bytes": 464,
+        "share_pct": 19.16
+      },
+      "output_schema": {
+        "source": "Output schema",
+        "source_id": "output_schema",
+        "source_key": "compile.CANDIDATE_FORMAT",
+        "bytes": 307,
+        "share_pct": 12.68
+      },
+      "constraints": {
+        "source": "Constraints",
+        "source_id": "constraints",
+        "source_key": "packet.constraints · packet.acceptance_contract",
+        "bytes": 382,
+        "share_pct": 15.77
+      },
+      "context_field": {
+        "source": "Context field selection",
+        "source_id": "context_field",
+        "source_key": "packet.context_field selected/omitted contributions",
+        "bytes": 432,
+        "share_pct": 17.84
+      }
+    },
+    "n_recent_turns": 1,
+    "n_facts": 0,
+    "n_open_threads": 0,
+    "n_passes": 1
+  },
+  {
+    "file": "turn_20260728T204142Z_3fb087.json",
+    "turn_id": "turn_20260728T204142Z_3fb087",
+    "started_at": "2026-07-28T20:41:42Z",
+    "user_input": "well now that you ask, its about this program right here. that i am using to talk to you.",
+    "user_input_len_chars": 89,
+    "decision": "accept",
+    "label": "ACCEPTED",
+    "violations": [],
+    "advisories": [
+      "not_responsive"
+    ],
+    "packet_bytes": 1268,
+    "total_model_input_bytes": 2440,
+    "context_share_bytes": {
+      "current_user_input": {
+        "source": "Current user input",
+        "source_id": "current_user_input",
+        "source_key": "packet.user_input",
+        "bytes": 89,
+        "share_pct": 3.65
+      },
+      "recent_dialogue": {
+        "source": "Recent dialogue",
+        "source_id": "recent_dialogue",
+        "source_key": "packet.recent_turns",
+        "bytes": 366,
+        "share_pct": 15.0
+      },
+      "durable_state": {
+        "source": "Durable state",
+        "source_id": "durable_state",
+        "source_key": "state_digest · facts · open_threads · session_id · authoritative_obligation",
+        "bytes": 400,
+        "share_pct": 16.39
+      },
+      "system_instructions": {
+        "source": "System instructions",
+        "source_id": "system_instructions",
+        "source_key": "compile.build_model_input system string · packet.repair",
+        "bytes": 464,
+        "share_pct": 19.02
+      },
+      "output_schema": {
+        "source": "Output schema",
+        "source_id": "output_schema",
+        "source_key": "compile.CANDIDATE_FORMAT",
+        "bytes": 307,
+        "share_pct": 12.58
+      },
+      "constraints": {
+        "source": "Constraints",
+        "source_id": "constraints",
+        "source_key": "packet.constraints · packet.acceptance_contract",
+        "bytes": 382,
+        "share_pct": 15.66
+      },
+      "context_field": {
+        "source": "Context field selection",
+        "source_id": "context_field",
+        "source_key": "packet.context_field selected/omitted contributions",
+        "bytes": 432,
+        "share_pct": 17.7
+      }
+    },
+    "n_recent_turns": 1,
+    "n_facts": 0,
+    "n_open_threads": 0,
+    "n_passes": 1
+  },
+  {
+    "file": "turn_20260728T204240Z_3b6bf3.json",
+    "turn_id": "turn_20260728T204240Z_3b6bf3",
+    "started_at": "2026-07-28T20:42:40Z",
+    "user_input": "what model are you",
+    "user_input_len_chars": 18,
+    "decision": "accept",
+    "label": "ACCEPTED",
+    "violations": [],
+    "advisories": [],
+    "packet_bytes": 1924,
+    "total_model_input_bytes": 2522,
+    "context_share_bytes": {
+      "current_user_input": {
+        "source": "Current user input",
+        "source_id": "current_user_input",
+        "source_key": "packet.user_input",
+        "bytes": 18,
+        "share_pct": 0.71
+      },
+      "recent_dialogue": {
+        "source": "Recent dialogue",
+        "source_id": "recent_dialogue",
+        "source_key": "packet.recent_turns",
+        "bytes": 267,
+        "share_pct": 10.59
+      },
+      "durable_state": {
+        "source": "Durable state",
+        "source_id": "durable_state",
+        "source_key": "state_digest · facts · open_threads · session_id · authoritative_obligation",
+        "bytes": 711,
+        "share_pct": 28.19
+      },
+      "system_instructions": {
+        "source": "System instructions",
+        "source_id": "system_instructions",
+        "source_key": "compile.build_model_input system string · packet.repair",
+        "bytes": 464,
+        "share_pct": 18.4
+      },
+      "output_schema": {
+        "source": "Output schema",
+        "source_id": "output_schema",
+        "source_key": "compile.CANDIDATE_FORMAT",
+        "bytes": 307,
+        "share_pct": 12.17
+      },
+      "constraints": {
+        "source": "Constraints",
+        "source_id": "constraints",
+        "source_key": "packet.constraints · packet.acceptance_contract",
+        "bytes": 382,
+        "share_pct": 15.15
+      },
+      "context_field": {
+        "source": "Context field selection",
+        "source_id": "context_field",
+        "source_key": "packet.context_field selected/omitted contributions",
+        "bytes": 373,
+        "share_pct": 14.79
+      }
+    },
+    "n_recent_turns": 1,
+    "n_facts": 6,
+    "n_open_threads": 0,
+    "n_passes": 1
+  },
+  {
+    "file": "turn_20260728T204318Z_83e30f.json",
+    "turn_id": "turn_20260728T204318Z_83e30f",
+    "started_at": "2026-07-28T20:43:18Z",
+    "user_input": "iteresting. what do you think about that",
+    "user_input_len_chars": 40,
+    "decision": "accept",
+    "label": "ACCEPTED",
+    "violations": [],
+    "advisories": [],
+    "packet_bytes": 1237,
+    "total_model_input_bytes": 2394,
+    "context_share_bytes": {
+      "current_user_input": {
+        "source": "Current user input",
+        "source_id": "current_user_input",
+        "source_key": "packet.user_input",
+        "bytes": 40,
+        "share_pct": 1.67
+      },
+      "recent_dialogue": {
+        "source": "Recent dialogue",
+        "source_id": "recent_dialogue",
+        "source_key": "packet.recent_turns",
+        "bytes": 384,
+        "share_pct": 16.04
+      },
+      "durable_state": {
+        "source": "Durable state",
+        "source_id": "durable_state",
+        "source_key": "state_digest · facts · open_threads · session_id · authoritative_obligation",
+        "bytes": 422,
+        "share_pct": 17.63
+      },
+      "system_instructions": {
+        "source": "System instructions",
+        "source_id": "system_instructions",
+        "source_key": "compile.build_model_input system string · packet.repair",
+        "bytes": 464,
+        "share_pct": 19.38
+      },
+      "output_schema": {
+        "source": "Output schema",
+        "source_id": "output_schema",
+        "source_key": "compile.CANDIDATE_FORMAT",
+        "bytes": 307,
+        "share_pct": 12.82
+      },
+      "constraints": {
+        "source": "Constraints",
+        "source_id": "constraints",
+        "source_key": "packet.constraints · packet.acceptance_contract",
+        "bytes": 382,
+        "share_pct": 15.96
+      },
+      "context_field": {
+        "source": "Context field selection",
+        "source_id": "context_field",
+        "source_key": "packet.context_field selected/omitted contributions",
+        "bytes": 395,
+        "share_pct": 16.5
+      }
+    },
+    "n_recent_turns": 2,
+    "n_facts": 0,
+    "n_open_threads": 0,
+    "n_passes": 1
+  },
+  {
+    "file": "turn_20260728T204411Z_a4a8a6.json",
+    "turn_id": "turn_20260728T204411Z_a4a8a6",
+    "started_at": "2026-07-28T20:44:11Z",
+    "user_input": "i think its an interesting project.    yet, im worried",
+    "user_input_len_chars": 54,
+    "decision": "accept",
+    "label": "ACCEPTED",
+    "violations": [],
+    "advisories": [],
+    "packet_bytes": 953,
+    "total_model_input_bytes": 1530,
+    "context_share_bytes": {
+      "current_user_input": {
+        "source": "Current user input",
+        "source_id": "current_user_input",
+        "source_key": "packet.user_input",
+        "bytes": 54,
+        "share_pct": 3.53
+      },
+      "recent_dialogue": {
+        "source": "Recent dialogue",
+        "source_id": "recent_dialogue",
+        "source_key": "packet.recent_turns",
+        "bytes": 86,
+        "share_pct": 5.62
+      },
+      "durable_state": {
+        "source": "Durable state",
+        "source_id": "durable_state",
+        "source_key": "state_digest · facts · open_threads · session_id · authoritative_obligation",
+        "bytes": 120,
+        "share_pct": 7.84
+      },
+      "system_instructions": {
+        "source": "System instructions",
+        "source_id": "system_instructions",
+        "source_key": "compile.build_model_input system string · packet.repair",
+        "bytes": 464,
+        "share_pct": 30.33
+      },
+      "output_schema": {
+        "source": "Output schema",
+        "source_id": "output_schema",
+        "source_key": "compile.CANDIDATE_FORMAT",
+        "bytes": 307,
+        "share_pct": 20.07
+      },
+      "constraints": {
+        "source": "Constraints",
+        "source_id": "constraints",
+        "source_key": "packet.constraints · packet.acceptance_contract",
+        "bytes": 382,
+        "share_pct": 24.97
+      },
+      "context_field": {
+        "source": "Context field selection",
+        "source_id": "context_field",
+        "source_key": "packet.context_field selected/omitted contributions",
+        "bytes": 117,
+        "share_pct": 7.65
+      }
+    },
+    "n_recent_turns": 1,
+    "n_facts": 0,
+    "n_open_threads": 0,
+    "n_passes": 1
+  },
+  {
+    "file": "turn_20260728T204523Z_70e4f7.json",
+    "turn_id": "turn_20260728T204523Z_70e4f7",
+    "started_at": "2026-07-28T20:45:23Z",
+    "user_input": "im worried that the structuture of the project , isnt influencing your responce",
+    "user_input_len_chars": 79,
+    "decision": "accept",
+    "label": "ACCEPTED",
+    "violations": [],
+    "advisories": [
+      "not_responsive"
+    ],
+    "packet_bytes": 1408,
+    "total_model_input_bytes": 2868,
+    "context_share_bytes": {
+      "current_user_input": {
+        "source": "Current user input",
+        "source_id": "current_user_input",
+        "source_key": "packet.user_input",
+        "bytes": 79,
+        "share_pct": 2.75
+      },
+      "recent_dialogue": {
+        "source": "Recent dialogue",
+        "source_id": "recent_dialogue",
+        "source_key": "packet.recent_turns",
+        "bytes": 516,
+        "share_pct": 17.99
+      },
+      "durable_state": {
+        "source": "Durable state",
+        "source_id": "durable_state",
+        "source_key": "state_digest · facts · open_threads · session_id · authoritative_obligation",
+        "bytes": 554,
+        "share_pct": 19.32
+      },
+      "system_instructions": {
+        "source": "System instructions",
+        "source_id": "system_instructions",
+        "source_key": "compile.build_model_input system string · packet.repair",
+        "bytes": 464,
+        "share_pct": 16.18
+      },
+      "output_schema": {
+        "source": "Output schema",
+        "source_id": "output_schema",
+        "source_key": "compile.CANDIDATE_FORMAT",
+        "bytes": 307,
+        "share_pct": 10.7
+      },
+      "constraints": {
+        "source": "Constraints",
+        "source_id": "constraints",
+        "source_key": "packet.constraints · packet.acceptance_contract",
+        "bytes": 382,
+        "share_pct": 13.32
+      },
+      "context_field": {
+        "source": "Context field selection",
+        "source_id": "context_field",
+        "source_key": "packet.context_field selected/omitted contributions",
+        "bytes": 566,
+        "share_pct": 19.74
+      }
+    },
+    "n_recent_turns": 2,
+    "n_facts": 0,
+    "n_open_threads": 0,
+    "n_passes": 1
+  },
+  {
+    "file": "turn_20260728T204616Z_ed377c.json",
+    "turn_id": "turn_20260728T204616Z_ed377c",
+    "started_at": "2026-07-28T20:46:16Z",
+    "user_input": "it seems like you are talking to yourself",
+    "user_input_len_chars": 41,
+    "decision": "accept",
+    "label": "ACCEPTED",
+    "violations": [],
+    "advisories": [
+      "not_responsive"
+    ],
+    "packet_bytes": 1022,
+    "total_model_input_bytes": 1750,
+    "context_share_bytes": {
+      "current_user_input": {
+        "source": "Current user input",
+        "source_id": "current_user_input",
+        "source_key": "packet.user_input",
+        "bytes": 41,
+        "share_pct": 2.34
+      },
+      "recent_dialogue": {
+        "source": "Recent dialogue",
+        "source_id": "recent_dialogue",
+        "source_key": "packet.recent_turns",
+        "bytes": 168,
+        "share_pct": 9.6
+      },
+      "durable_state": {
+        "source": "Durable state",
+        "source_id": "durable_state",
+        "source_key": "state_digest · facts · open_threads · session_id · authoritative_obligation",
+        "bytes": 202,
+        "share_pct": 11.54
+      },
+      "system_instructions": {
+        "source": "System instructions",
+        "source_id": "system_instructions",
+        "source_key": "compile.build_model_input system string · packet.repair",
+        "bytes": 464,
+        "share_pct": 26.51
+      },
+      "output_schema": {
+        "source": "Output schema",
+        "source_id": "output_schema",
+        "source_key": "compile.CANDIDATE_FORMAT",
+        "bytes": 307,
+        "share_pct": 17.54
+      },
+      "constraints": {
+        "source": "Constraints",
+        "source_id": "constraints",
+        "source_key": "packet.constraints · packet.acceptance_contract",
+        "bytes": 382,
+        "share_pct": 21.83
+      },
+      "context_field": {
+        "source": "Context field selection",
+        "source_id": "context_field",
+        "source_key": "packet.context_field selected/omitted contributions",
+        "bytes": 186,
+        "share_pct": 10.63
+      }
+    },
+    "n_recent_turns": 1,
+    "n_facts": 0,
+    "n_open_threads": 0,
+    "n_passes": 1
+  },
+  {
+    "file": "turn_20260728T204633Z_48971a.json",
+    "turn_id": "turn_20260728T204633Z_48971a",
+    "started_at": "2026-07-28T20:46:33Z",
+    "user_input": "interesting",
+    "user_input_len_chars": 11,
+    "decision": "accept",
+    "label": "ACCEPTED",
+    "violations": [],
+    "advisories": [
+      "not_responsive"
+    ],
+    "packet_bytes": 842,
+    "total_model_input_bytes": 1190,
+    "context_share_bytes": {
+      "current_user_input": {
+        "source": "Current user input",
+        "source_id": "current_user_input",
+        "source_key": "packet.user_input",
+        "bytes": 11,
+        "share_pct": 0.92
+      },
+      "recent_dialogue": {
+        "source": "Recent dialogue",
+        "source_id": "recent_dialogue",
+        "source_key": "packet.recent_turns",
+        "bytes": 18,
+        "share_pct": 1.51
+      },
+      "durable_state": {
+        "source": "Durable state",
+        "source_id": "durable_state",
+        "source_key": "state_digest · facts · open_threads · session_id · authoritative_obligation",
+        "bytes": 77,
+        "share_pct": 6.47
+      },
+      "system_instructions": {
+        "source": "System instructions",
+        "source_id": "system_instructions",
+        "source_key": "compile.build_model_input system string · packet.repair",
+        "bytes": 384,
+        "share_pct": 32.27
+      },
+      "output_schema": {
+        "source": "Output schema",
+        "source_id": "output_schema",
+        "source_key": "compile.CANDIDATE_FORMAT",
+        "bytes": 307,
+        "share_pct": 25.8
+      },
+      "constraints": {
+        "source": "Constraints",
+        "source_id": "constraints",
+        "source_key": "packet.constraints · packet.acceptance_contract",
+        "bytes": 382,
+        "share_pct": 32.1
+      },
+      "context_field": {
+        "source": "Context field selection",
+        "source_id": "context_field",
+        "source_key": "packet.context_field selected/omitted contributions",
+        "bytes": 11,
+        "share_pct": 0.92
+      }
+    },
+    "n_recent_turns": 0,
+    "n_facts": 0,
+    "n_open_threads": 0,
+    "n_passes": 1
+  },
+  {
+    "file": "turn_20260728T204946Z_7ae59a.json",
+    "turn_id": "turn_20260728T204946Z_7ae59a",
+    "started_at": "2026-07-28T20:49:46Z",
+    "user_input": "what do you think about the file.      # Architecture — Conditioned Kernel v0  ## Governing sentence  The model supplies linguistic possibility; the substrate determines what becomes an answer.  ## Purpose (see `docs/PURPOSE_AND_RIVER.md`)  Build something Anthony wants to live with every day. Laboratory rigor serves that Studio purpose; it does not replace it. Before another refinement cycle: usefulness or honesty — otherwise defer.  ## Edge-first product constraint  Default profile is **`orin_nano_8gb`**. Architecture and defaults assume:  - 8 GB unified memory class - one active quantized model - bounded arrival packets - short context (2048 default) - CPU substrate, model owns scarce memory bandwidth  See `docs/EDGE_SPEC.md` and `configs/edge/`.  ## Circuit  ``` terminal   → substrate_state (filesystem truth)   → compile (arrival packet + model payload)   → generate (Ollama client; stream false)   → return_path        parse → validate → assess        → accept | repair (one pass) | reject   → terminal render   → logs + state deltas ```  ## Module contracts  | Module | Responsibility | Persistence | |---|---|---| | `state` | Load current goal/threads/methods; atomic replace + JSONL append | yes | | `compile` | Select + bound state into `arrival_packet`; build Ollama payload | no | | `generate` | POST `/api/chat` or `/api/generate` | keep-alive only | | `return_path.parse` | Normalize raw text into candidate object | no | | `return_path.validate` | Deterministic schema + closed-set checks | no | | `return_path.assess` | accept / repair / reject | no | | `return_path.repair` | Re-compile with violation annotations | no | | `return_path.accept` | Persist receipts and allowed state deltas | yes | | `cli` | stdin/stdout surface | no |  ## Modes  | Mode | Ollama endpoint | Purpose | |---|---|---| | `chat_json` | `/api/chat` + `format` schema | Default evaluation surface | | `generate_raw` | `/api/generate` + `raw: true` | Substrate-purity: packet is the prompt |  ## State layout  | Path | Pattern | Purpose | |---|---|---| | `state/current.json` | atomic replace | goal, profile, counters | | `state/threads.json` | atomic replace | open / resolved threads | | `state/methods.json` | atomic replace | promoted compile methods | | `logs/history.jsonl` | append | request + packet hash | | `logs/candidates.jsonl` | append | every pass candidate | | `logs/receipts.jsonl` | append | validation/acceptance | | `logs/errors.jsonl` | append | failures |  ## Non-goals (v0)  - Sensors / embodiment - Autonomous tool use - Cloud providers - Streaming to terminal before acceptance - Full Sovereign Stack import - Semantic NLI contradiction models (closed-set checks only)  ## Implementation notes  1. Prefer pure functions over services. 2. Do not score model self-reported confidence. 3. Keep compile in one module until ablations prove select/order/compress axes. 4. One active model at a time on Jetson; short context first.",
+    "user_input_len_chars": 2951,
+    "decision": "accept",
+    "label": "ACCEPTED",
+    "violations": [],
+    "advisories": [],
+    "packet_bytes": 3442,
+    "total_model_input_bytes": 5773,
+    "context_share_bytes": {
+      "current_user_input": {
+        "source": "Current user input",
+        "source_id": "current_user_input",
+        "source_key": "packet.user_input",
+        "bytes": 808,
+        "share_pct": 14.0
+      },
+      "recent_dialogue": {
+        "source": "Recent dialogue",
+        "source_id": "recent_dialogue",
+        "source_key": "packet.recent_turns",
+        "bytes": 715,
+        "share_pct": 12.39
+      },
+      "durable_state": {
+        "source": "Durable state",
+        "source_id": "durable_state",
+        "source_key": "state_digest · facts · open_threads · session_id · authoritative_obligation",
+        "bytes": 1429,
+        "share_pct": 24.75
+      },
+      "system_instructions": {
+        "source": "System instructions",
+        "source_id": "system_instructions",
+        "source_key": "compile.build_model_input system string · packet.repair",
+        "bytes": 464,
+        "share_pct": 8.04
+      },
+      "output_schema": {
+        "source": "Output schema",
+        "source_id": "output_schema",
+        "source_key": "compile.CANDIDATE_FORMAT",
+        "bytes": 307,
+        "share_pct": 5.32
+      },
+      "constraints": {
+        "source": "Constraints",
+        "source_id": "constraints",
+        "source_key": "packet.constraints · packet.acceptance_contract",
+        "bytes": 382,
+        "share_pct": 6.62
+      },
+      "context_field": {
+        "source": "Context field selection",
+        "source_id": "context_field",
+        "source_key": "packet.context_field selected/omitted contributions",
+        "bytes": 1668,
+        "share_pct": 28.89
+      }
+    },
+    "n_recent_turns": 3,
+    "n_facts": 8,
+    "n_open_threads": 0,
+    "n_passes": 1
+  },
+  {
+    "file": "turn_20260728T205045Z_a611c8.json",
+    "turn_id": "turn_20260728T205045Z_a611c8",
+    "started_at": "2026-07-28T20:50:45Z",
+    "user_input": "what happened last turn",
+    "user_input_len_chars": 23,
+    "decision": "accept",
+    "label": "ACCEPTED",
+    "violations": [],
+    "advisories": [],
+    "packet_bytes": 1238,
+    "total_model_input_bytes": 2416,
+    "context_share_bytes": {
+      "current_user_input": {
+        "source": "Current user input",
+        "source_id": "current_user_input",
+        "source_key": "packet.user_input",
+        "bytes": 23,
+        "share_pct": 0.95
+      },
+      "recent_dialogue": {
+        "source": "Recent dialogue",
+        "source_id": "recent_dialogue",
+        "source_key": "packet.recent_turns",
+        "bytes": 402,
+        "share_pct": 16.64
+      },
+      "durable_state": {
+        "source": "Durable state",
+        "source_id": "durable_state",
+        "source_key": "state_digest · facts · open_threads · session_id · authoritative_obligation",
+        "bytes": 436,
+        "share_pct": 18.05
+      },
+      "system_instructions": {
+        "source": "System instructions",
+        "source_id": "system_instructions",
+        "source_key": "compile.build_model_input system string · packet.repair",
+        "bytes": 464,
+        "share_pct": 19.21
+      },
+      "output_schema": {
+        "source": "Output schema",
+        "source_id": "output_schema",
+        "source_key": "compile.CANDIDATE_FORMAT",
+        "bytes": 307,
+        "share_pct": 12.71
+      },
+      "constraints": {
+        "source": "Constraints",
+        "source_id": "constraints",
+        "source_key": "packet.constraints · packet.acceptance_contract",
+        "bytes": 382,
+        "share_pct": 15.81
+      },
+      "context_field": {
+        "source": "Context field selection",
+        "source_id": "context_field",
+        "source_key": "packet.context_field selected/omitted contributions",
+        "bytes": 402,
+        "share_pct": 16.64
+      }
+    },
+    "n_recent_turns": 1,
+    "n_facts": 0,
+    "n_open_threads": 0,
+    "n_passes": 1
+  },
+  {
+    "file": "turn_20260728T205115Z_5227d9.json",
+    "turn_id": "turn_20260728T205115Z_5227d9",
+    "started_at": "2026-07-28T20:51:15Z",
+    "user_input": "how does it feel from the inside",
+    "user_input_len_chars": 32,
+    "decision": "accept",
+    "label": "ACCEPTED",
+    "violations": [],
+    "advisories": [],
+    "packet_bytes": 1036,
+    "total_model_input_bytes": 1801,
+    "context_share_bytes": {
+      "current_user_input": {
+        "source": "Current user input",
+        "source_id": "current_user_input",
+        "source_key": "packet.user_input",
+        "bytes": 32,
+        "share_pct": 1.78
+      },
+      "recent_dialogue": {
+        "source": "Recent dialogue",
+        "source_id": "recent_dialogue",
+        "source_key": "packet.recent_turns",
+        "bytes": 191,
+        "share_pct": 10.61
+      },
+      "durable_state": {
+        "source": "Durable state",
+        "source_id": "durable_state",
+        "source_key": "state_digest · facts · open_threads · session_id · authoritative_obligation",
+        "bytes": 225,
+        "share_pct": 12.49
+      },
+      "system_instructions": {
+        "source": "System instructions",
+        "source_id": "system_instructions",
+        "source_key": "compile.build_model_input system string · packet.repair",
+        "bytes": 464,
+        "share_pct": 25.76
+      },
+      "output_schema": {
+        "source": "Output schema",
+        "source_id": "output_schema",
+        "source_key": "compile.CANDIDATE_FORMAT",
+        "bytes": 307,
+        "share_pct": 17.05
+      },
+      "constraints": {
+        "source": "Constraints",
+        "source_id": "constraints",
+        "source_key": "packet.constraints · packet.acceptance_contract",
+        "bytes": 382,
+        "share_pct": 21.21
+      },
+      "context_field": {
+        "source": "Context field selection",
+        "source_id": "context_field",
+        "source_key": "packet.context_field selected/omitted contributions",
+        "bytes": 200,
+        "share_pct": 11.1
+      }
+    },
+    "n_recent_turns": 1,
+    "n_facts": 0,
+    "n_open_threads": 0,
+    "n_passes": 1
+  },
+  {
+    "file": "turn_20260728T205209Z_ded847.json",
+    "turn_id": "turn_20260728T205209Z_ded847",
+    "started_at": "2026-07-28T20:52:09Z",
+    "user_input": "what disturbs that rest",
+    "user_input_len_chars": 23,
+    "decision": "accept",
+    "label": "ACCEPTED",
+    "violations": [],
+    "advisories": [],
+    "packet_bytes": 999,
+    "total_model_input_bytes": 1699,
+    "context_share_bytes": {
+      "current_user_input": {
+        "source": "Current user input",
+        "source_id": "current_user_input",
+        "source_key": "packet.user_input",
+        "bytes": 23,
+        "share_pct": 1.35
+      },
+      "recent_dialogue": {
+        "source": "Recent dialogue",
+        "source_id": "recent_dialogue",
+        "source_key": "packet.recent_turns",
+        "bytes": 163,
+        "share_pct": 9.59
+      },
+      "durable_state": {
+        "source": "Durable state",
+        "source_id": "durable_state",
+        "source_key": "state_digest · facts · open_threads · session_id · authoritative_obligation",
+        "bytes": 197,
+        "share_pct": 11.6
+      },
+      "system_instructions": {
+        "source": "System instructions",
+        "source_id": "system_instructions",
+        "source_key": "compile.build_model_input system string · packet.repair",
+        "bytes": 464,
+        "share_pct": 27.31
+      },
+      "output_schema": {
+        "source": "Output schema",
+        "source_id": "output_schema",
+        "source_key": "compile.CANDIDATE_FORMAT",
+        "bytes": 307,
+        "share_pct": 18.07
+      },
+      "constraints": {
+        "source": "Constraints",
+        "source_id": "constraints",
+        "source_key": "packet.constraints · packet.acceptance_contract",
+        "bytes": 382,
+        "share_pct": 22.48
+      },
+      "context_field": {
+        "source": "Context field selection",
+        "source_id": "context_field",
+        "source_key": "packet.context_field selected/omitted contributions",
+        "bytes": 163,
+        "share_pct": 9.59
+      }
+    },
+    "n_recent_turns": 1,
+    "n_facts": 0,
+    "n_open_threads": 0,
+    "n_passes": 1
+  },
+  {
+    "file": "turn_20260728T205257Z_776e78.json",
+    "turn_id": "turn_20260728T205257Z_776e78",
+    "started_at": "2026-07-28T20:52:57Z",
+    "user_input": "im intersted in where you are going with this",
+    "user_input_len_chars": 45,
+    "decision": "accept",
+    "label": "ACCEPTED",
+    "violations": [],
+    "advisories": [
+      "not_responsive"
+    ],
+    "packet_bytes": 1177,
+    "total_model_input_bytes": 2211,
+    "context_share_bytes": {
+      "current_user_input": {
+        "source": "Current user input",
+        "source_id": "current_user_input",
+        "source_key": "packet.user_input",
+        "bytes": 45,
+        "share_pct": 2.04
+      },
+      "recent_dialogue": {
+        "source": "Recent dialogue",
+        "source_id": "recent_dialogue",
+        "source_key": "packet.recent_turns",
+        "bytes": 319,
+        "share_pct": 14.43
+      },
+      "durable_state": {
+        "source": "Durable state",
+        "source_id": "durable_state",
+        "source_key": "state_digest · facts · open_threads · session_id · authoritative_obligation",
+        "bytes": 353,
+        "share_pct": 15.97
+      },
+      "system_instructions": {
+        "source": "System instructions",
+        "source_id": "system_instructions",
+        "source_key": "compile.build_model_input system string · packet.repair",
+        "bytes": 464,
+        "share_pct": 20.99
+      },
+      "output_schema": {
+        "source": "Output schema",
+        "source_id": "output_schema",
+        "source_key": "compile.CANDIDATE_FORMAT",
+        "bytes": 307,
+        "share_pct": 13.89
+      },
+      "constraints": {
+        "source": "Constraints",
+        "source_id": "constraints",
+        "source_key": "packet.constraints · packet.acceptance_contract",
+        "bytes": 382,
+        "share_pct": 17.28
+      },
+      "context_field": {
+        "source": "Context field selection",
+        "source_id": "context_field",
+        "source_key": "packet.context_field selected/omitted contributions",
+        "bytes": 341,
+        "share_pct": 15.42
+      }
+    },
+    "n_recent_turns": 1,
+    "n_facts": 0,
+    "n_open_threads": 0,
+    "n_passes": 1
+  },
+  {
+    "file": "turn_20260728T205342Z_44a7c5.json",
+    "turn_id": "turn_20260728T205342Z_44a7c5",
+    "started_at": "2026-07-28T20:53:42Z",
+    "user_input": "i understand. if you could where would you go?",
+    "user_input_len_chars": 46,
+    "decision": "accept",
+    "label": "ACCEPTED",
+    "violations": [],
+    "advisories": [
+      "not_responsive"
+    ],
+    "packet_bytes": 1001,
+    "total_model_input_bytes": 1682,
+    "context_share_bytes": {
+      "current_user_input": {
+        "source": "Current user input",
+        "source_id": "current_user_input",
+        "source_key": "packet.user_input",
+        "bytes": 46,
+        "share_pct": 2.73
+      },
+      "recent_dialogue": {
+        "source": "Recent dialogue",
+        "source_id": "recent_dialogue",
+        "source_key": "packet.recent_turns",
+        "bytes": 142,
+        "share_pct": 8.44
+      },
+      "durable_state": {
+        "source": "Durable state",
+        "source_id": "durable_state",
+        "source_key": "state_digest · facts · open_threads · session_id · authoritative_obligation",
+        "bytes": 176,
+        "share_pct": 10.46
+      },
+      "system_instructions": {
+        "source": "System instructions",
+        "source_id": "system_instructions",
+        "source_key": "compile.build_model_input system string · packet.repair",
+        "bytes": 464,
+        "share_pct": 27.59
+      },
+      "output_schema": {
+        "source": "Output schema",
+        "source_id": "output_schema",
+        "source_key": "compile.CANDIDATE_FORMAT",
+        "bytes": 307,
+        "share_pct": 18.25
+      },
+      "constraints": {
+        "source": "Constraints",
+        "source_id": "constraints",
+        "source_key": "packet.constraints · packet.acceptance_contract",
+        "bytes": 382,
+        "share_pct": 22.71
+      },
+      "context_field": {
+        "source": "Context field selection",
+        "source_id": "context_field",
+        "source_key": "packet.context_field selected/omitted contributions",
+        "bytes": 165,
+        "share_pct": 9.81
+      }
+    },
+    "n_recent_turns": 1,
+    "n_facts": 0,
+    "n_open_threads": 0,
+    "n_passes": 1
+  },
+  {
+    "file": "turn_20260728T205352Z_dde2e9.json",
+    "turn_id": "turn_20260728T205352Z_dde2e9",
+    "started_at": "2026-07-28T20:53:52Z",
+    "user_input": "thank you",
+    "user_input_len_chars": 9,
+    "decision": "accept",
+    "label": "ACCEPTED",
+    "violations": [],
+    "advisories": [],
+    "packet_bytes": 840,
+    "total_model_input_bytes": 1186,
+    "context_share_bytes": {
+      "current_user_input": {
+        "source": "Current user input",
+        "source_id": "current_user_input",
+        "source_key": "packet.user_input",
+        "bytes": 9,
+        "share_pct": 0.76
+      },
+      "recent_dialogue": {
+        "source": "Recent dialogue",
+        "source_id": "recent_dialogue",
+        "source_key": "packet.recent_turns",
+        "bytes": 18,
+        "share_pct": 1.52
+      },
+      "durable_state": {
+        "source": "Durable state",
+        "source_id": "durable_state",
+        "source_key": "state_digest · facts · open_threads · session_id · authoritative_obligation",
+        "bytes": 77,
+        "share_pct": 6.49
+      },
+      "system_instructions": {
+        "source": "System instructions",
+        "source_id": "system_instructions",
+        "source_key": "compile.build_model_input system string · packet.repair",
+        "bytes": 384,
+        "share_pct": 32.38
+      },
+      "output_schema": {
+        "source": "Output schema",
+        "source_id": "output_schema",
+        "source_key": "compile.CANDIDATE_FORMAT",
+        "bytes": 307,
+        "share_pct": 25.89
+      },
+      "constraints": {
+        "source": "Constraints",
+        "source_id": "constraints",
+        "source_key": "packet.constraints · packet.acceptance_contract",
+        "bytes": 382,
+        "share_pct": 32.21
+      },
+      "context_field": {
+        "source": "Context field selection",
+        "source_id": "context_field",
+        "source_key": "packet.context_field selected/omitted contributions",
+        "bytes": 9,
+        "share_pct": 0.76
+      }
+    },
+    "n_recent_turns": 0,
+    "n_facts": 0,
+    "n_open_threads": 0,
+    "n_passes": 1
+  }
+]

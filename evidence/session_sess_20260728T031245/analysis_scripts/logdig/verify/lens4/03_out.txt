@@ -1,0 +1,50 @@
+candidates.jsonl: timing-like keys present = NONE
+receipts.jsonl: timing-like keys present = NONE
+history.jsonl: timing-like keys present = NONE
+
+total (turn, pass) rows with telemetry: 22
+
+-- elapsed_seconds, ALL 22 passes (only latency data that exists) --
+  min=0.831  median=1.524  max=5.883  mean=2.155  stdev=1.351
+
+-- pass_index=0 (n=19) --
+  min=0.831  median=1.453  max=5.883  mean=2.093
+-- pass_index=1 / repair (n=3) --
+  min=2.419  median=2.426  max=2.804  mean=2.550
+
+-- by terminal per-pass decision --
+  accept   n=16  min=0.831 median=1.382 max=5.214 mean=1.662
+  reject   n= 3  min=2.419 median=2.426 max=2.804 mean=2.550
+  repair   n= 3  min=3.214 median=4.075 max=5.883 mean=4.391
+
+hours represented in dashboard traces: ['19', '20']
+No dashboard trace (and therefore no elapsed_seconds sample) exists for the 71 candidates/receipts at hours 00, 02, 03 -- morning-vs-evening latency comparison CANNOT be determined from these logs. Settling it would require re-running those prompts under the old kernel with the same telemetry hook, or a historical dashboard trace file that was never written for that window.
+
+-- correlation (Pearson r), n=22 passes --
+  elapsed_seconds vs packet_bytes:          r=+0.659
+  elapsed_seconds vs final_response_chars:  r=+0.896
+  elapsed_seconds vs word_count (answer):    r=+0.288
+
+-- raw per-pass table --
+  2026-07-28T19:00:42Z p0 repair  elapsed=5.883s packet_bytes=2361 resp_chars= 734 think_chars=0 words= 47 status=completed
+  2026-07-28T19:00:42Z p1 reject  elapsed=2.804s packet_bytes=3217 resp_chars= 590 think_chars=0 words= 41 status=completed
+  2026-07-28T19:01:18Z p0 repair  elapsed=3.214s packet_bytes=2380 resp_chars= 577 think_chars=0 words= 32 status=completed
+  2026-07-28T19:01:18Z p1 reject  elapsed=2.419s packet_bytes=3341 resp_chars= 453 think_chars=0 words= 36 status=completed
+  2026-07-28T19:02:22Z p0 repair  elapsed=4.075s packet_bytes=2366 resp_chars= 734 think_chars=0 words= 47 status=completed
+  2026-07-28T19:02:22Z p1 reject  elapsed=2.426s packet_bytes=3222 resp_chars= 462 think_chars=0 words= 39 status=completed
+  2026-07-28T20:38:13Z p0 accept  elapsed=2.598s packet_bytes= 842 resp_chars= 108 think_chars=0 words=  7 status=completed
+  2026-07-28T20:40:00Z p0 accept  elapsed=1.578s packet_bytes=1268 resp_chars= 292 think_chars=0 words= 38 status=completed
+  2026-07-28T20:41:42Z p0 accept  elapsed=1.322s packet_bytes=1268 resp_chars= 259 think_chars=0 words= 32 status=completed
+  2026-07-28T20:42:40Z p0 accept  elapsed=1.214s packet_bytes=1924 resp_chars= 175 think_chars=0 words= 17 status=completed
+  2026-07-28T20:43:18Z p0 accept  elapsed=0.831s packet_bytes=1237 resp_chars= 113 think_chars=0 words= 10 status=completed
+  2026-07-28T20:44:11Z p0 accept  elapsed=1.442s packet_bytes= 953 resp_chars= 216 think_chars=0 words= 22 status=completed
+  2026-07-28T20:45:23Z p0 accept  elapsed=1.792s packet_bytes=1408 resp_chars= 414 think_chars=0 words= 57 status=completed
+  2026-07-28T20:46:16Z p0 accept  elapsed=1.258s packet_bytes=1022 resp_chars= 183 think_chars=0 words= 17 status=completed
+  2026-07-28T20:46:33Z p0 accept  elapsed=1.080s packet_bytes= 842 resp_chars= 185 think_chars=0 words= 19 status=completed
+  2026-07-28T20:49:46Z p0 accept  elapsed=5.214s packet_bytes=3442 resp_chars= 852 think_chars=0 words= 11 status=completed
+  2026-07-28T20:50:45Z p0 accept  elapsed=1.011s packet_bytes=1238 resp_chars= 152 think_chars=0 words= 15 status=completed
+  2026-07-28T20:51:15Z p0 accept  elapsed=2.369s packet_bytes=1036 resp_chars= 471 think_chars=0 words= 73 status=completed
+  2026-07-28T20:52:09Z p0 accept  elapsed=1.471s packet_bytes= 999 resp_chars= 304 think_chars=0 words= 40 status=completed
+  2026-07-28T20:52:57Z p0 accept  elapsed=1.453s packet_bytes=1177 resp_chars= 310 think_chars=0 words= 37 status=completed
+  2026-07-28T20:53:42Z p0 accept  elapsed=0.978s packet_bytes=1001 resp_chars= 152 think_chars=0 words= 15 status=completed
+  2026-07-28T20:53:52Z p0 accept  elapsed=0.981s packet_bytes= 840 resp_chars= 147 think_chars=0 words= 15 status=completed

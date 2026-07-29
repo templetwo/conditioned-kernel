@@ -1,0 +1,116 @@
+morning: turn_20260728T190222Z_d25ed1.json  user_input='dont reject' (11 chars) decision=reject
+evening: turn_20260728T203813Z_40ba91.json  user_input='hello there' (11 chars) decision=accept
+
+====================================================================================================
+top-level packet key sets
+====================================================================================================
+keys only in MORNING packet: ['repair']
+keys only in EVENING packet: ['context_field', 'evidence_pool_selected', 'intents', 'prior_accepted_answer_control']
+keys in both:                ['_edge', 'acceptance_contract', 'constraints', 'created_at', 'facts', 'open_threads', 'packet_id', 'recent_turns', 'session_id', 'state_digest', 'user_input']
+
+====================================================================================================
+acceptance_mode / runtime_config
+====================================================================================================
+morning runtime_config.acceptance_mode: companion
+evening runtime_config.acceptance_mode: companion
+morning packet.acceptance_contract: {'acceptance_mode': 'companion', 'required_sections': ['answer', 'evidence_used', 'next_state'], 'must_reference_goal': False, 'must_not_contradict_facts': True, 'evidence_must_be_from_packet': True}
+evening packet.acceptance_contract: {'acceptance_mode': 'companion', 'required_sections': ['answer', 'evidence_used', 'next_state'], 'must_reference_goal': False, 'must_not_contradict_facts': True, 'evidence_must_be_from_packet': True}
+
+====================================================================================================
+facts
+====================================================================================================
+morning: 7 fact lines
+   - This system is fully local.
+   - Sensors are out of scope for v0.
+   - The model is a replaceable linguistic transducer.
+   - Edge target: jetson_orin_nano_8gb (one model at a time).
+   - One repair pass is allowed (max=1).
+   - Active profile: orin_nano_8gb.
+   - Current goal: Demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.
+evening: 0 fact lines
+
+====================================================================================================
+open_threads
+====================================================================================================
+morning: [{'id': 'thread_min_model', 'title': 'What is the minimum viable model size on Jetson Orin Nano 8GB?'}, {'id': 'thread_compile_order', 'title': 'Which compile ordering maximizes state-faithfulness?'}]
+evening: []
+
+====================================================================================================
+recent_turns (as shipped in the packet)
+====================================================================================================
+morning: 3 entries
+   - {'user': 'man i really dont like AI', 'answer': 'The minimum viable model size on a Jetson Orin Nano 8GB edge...', 'ts': '2026-07-28T03:13:01Z'}
+   - {'user': 'what model is this', 'answer': 'The system is fully local, and the active model is qwen3.5:0...', 'ts': '2026-07-28T03:14:31Z'}
+   - {'user': 'what do you know', 'answer': 'The system is fully local, the active model is qwen3.5:0.8b,...', 'ts': '2026-07-28T03:15:35Z'}
+evening: 0 entries
+
+====================================================================================================
+state_digest
+====================================================================================================
+morning: {'goal': 'Demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.', 'active_profile': 'orin_nano_8gb', 'open_thread_count': 2, 'receipt_count_24h': 17, 'session_id': 'sess_20260728T031245'}
+evening: {'goal': 'Demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.', 'active_profile': 'orin_nano_8gb', 'open_thread_count': 2, 'receipt_count_24h': 17, 'session_id': 'sess_20260728T031245'}
+
+====================================================================================================
+constraints
+====================================================================================================
+morning: {'max_words': 120, 'must_return_json': True, 'must_cite_state_fields': False, 'forbidden': ['tool_calls', 'invented_files', 'cloud references', 'http://', 'https://']}
+evening: {'max_words': 120, 'must_return_json': True, 'must_cite_state_fields': False, 'forbidden': ['tool_calls', 'invented_files', 'cloud references', 'http://', 'https://']}
+
+====================================================================================================
+context_field (companion selection map) -- morning has none
+====================================================================================================
+morning packet.context_field present? False
+evening context_field.available_count: 15
+evening context_field.selected_count: 1
+evening context_field.omitted_count: 14
+evening context_field.selected contribution ids: ['input.current']
+evening selected content:
+   - input.current current_input hello there
+
+====================================================================================================
+_edge (edge-budget accounting)
+====================================================================================================
+morning: {'profile_id': 'orin_nano_8gb', 'packet_bytes': 3222, 'max_packet_bytes': 6000, 'num_ctx': 2048, 'one_model_only': True}
+evening: {'profile_id': 'orin_nano_8gb', 'packet_bytes': 842, 'max_packet_bytes': 6000, 'num_ctx': 2048, 'one_model_only': True}
+
+====================================================================================================
+final_decision
+====================================================================================================
+morning: {'decision': 'reject', 'label': 'REJECTED', 'answer': None, 'violations': ['stale_response_repeat'], 'advisories': ['not_responsive']}
+evening: {'decision': 'accept', 'label': 'ACCEPTED', 'answer': 'Hello! How can I assist you today?', 'violations': [], 'advisories': []}
+
+====================================================================================================
+context_share_bytes side-by-side
+====================================================================================================
+source                  morning B  morning %    evening B  evening %
+constraints                   382      9.76%          382     32.10%
+context_field                   0      0.00%           11      0.92%
+current_user_input             27      0.69%           11      0.92%
+durable_state                 920     23.51%           77      6.47%
+output_schema                 307      7.84%          307     25.80%
+recent_dialogue               958     24.48%           18      1.51%
+system_instructions          1320     33.73%          384     32.27%
+TOTAL                        3914                  1190
+
+====================================================================================================
+system prompt text actually sent (from final pass model_input)
+====================================================================================================
+morning system text:
+  Local conditioned-kernel transducer. Return ONLY valid JSON with keys answer, evidence_used, next_state. answer: short helpful reply grounded in the packet. If recent_turns is present, treat it as prior dialogue and stay consistent. evidence_used: prefer exact strings from facts/open_threads/recent_turns; may be [] if unsure (substrate can ground). next_state.thread_touch: real open_threads ids or []. Never invent thread ids. No files, URLs, tools, or cloud.
+evening system text:
+  You are a local conversational presence for Conditioned Kernel. Return ONLY valid JSON with keys answer, evidence_used, next_state. answer: a brief natural reply to the current human message. evidence_used: [] unless the context block supplies lines to cite. next_state.thread_touch: []. Do not invent project status, hardware specs, or prior goals. No files, URLs, tools, or cloud.
+
+====================================================================================================
+user message content actually sent (from final pass model_input)
+====================================================================================================
+morning user message:
+  Packet:
+{"session_id":"sess_20260728T031245","user_input":"dont reject","state_digest":{"goal":"Demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.","active_profile":"orin_nano_8gb","open_thread_count":2,"receipt_count_24h":17,"session_id":"sess_20260728T031245"},"facts":["This system is fully local.","Sensors are out of scope for v0.","The model is a replaceable linguistic transducer.","Edge target: jetson_orin_nano_8gb (one model at a time).","One repair pass is allowed (max=1).","Active profile: orin_nano_8gb.","Current goal: Demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets."],"open_threads":[{"id":"thread_min_model","title":"What is the minimum viable model size on Jetson Orin Nano 8GB?"},{"id":"thread_compile_order","title":"Which compile ordering maximizes state-faithfulness?"}],"recent_turns":[{"user":"man i really dont like AI","answer":"The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are req…","ts":"2026-07-28T03:13:01Z"},{"user":"what model is this","answer":"The system is fully local, and the active model is qwen3.5:0.8b on the Jetson Orin Nano 8GB edge budget. The goal is to demonstrate conditioned-kernel substrate gain over bare generation, which is possible given the local constraints.","ts":"2026-07-28T03:14:31Z"},{"user":"what do you know","answer":"The system is fully local, the active model is qwen3.5:0.8b, and the goal is to demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.","ts":"2026-07-28T03:15:35Z"}],"constraints":{"max_words":120,"must_return_json":true,"must_cite_state_fields":false,"forbidden":["tool_calls","invented_files","cloud references","http://","https://"]},"acceptance_contract":{"acceptance_mode":"companion","required_sections":["answer","evidence_used","next_state"],"must_reference_goal":false,"must_not_contradict_facts":true,"evidence_must_be_from_packet":true},"repair":{"pass_index":1,"instruction":"Previous output failed validation. Return corrected JSON only. Use allowed_evidence_samples or facts only. thread_touch only from allowed_thread_ids or []. Answer must reference the goal_snippet.","hints":["FIX evidence_not_in_packet: do not invent evidence. Copy exactly from: ['This system is fully local.', 'Sensors are out of scope for v0.', '"],"allowed_thread_ids":["thread_min_model","thread_compile_order"],"allowed_evidence_samples":["This system is fully local.","Sensors are out of scope for v0.","The model is a replaceable linguistic transducer."],"goal_snippet":"Demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.","example_json":{"answer":"STRING","evidence_used":["STRING_FROM_FACTS"],"next_state":{"thread_touch":[]}}}}
+
+evening user message:
+  ## Selected context
+(no selected substrate prose)
+
+## Current human message
+hello there
+

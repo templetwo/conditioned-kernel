@@ -1,0 +1,1775 @@
+{
+  "turn_id": "turn_20260728T205115Z_5227d9",
+  "session_id": "sess_20260728T031245",
+  "started_at": "2026-07-28T20:51:15Z",
+  "completed_at": "2026-07-28T20:51:17Z",
+  "user_input": "how does it feel from the inside",
+  "runtime_config": {
+    "model": "qwen3.5:0.8b",
+    "mode": "chat_json",
+    "acceptance_mode": "companion",
+    "temperature": 0.3,
+    "seed": 42,
+    "num_ctx": 2048,
+    "keep_alive": "2m",
+    "think": false,
+    "base_url": "http://127.0.0.1:11434",
+    "profile": {
+      "profile_id": "orin_nano_8gb",
+      "description": "Primary product profile: Jetson Orin Nano 8GB class edge node.",
+      "target_device": "jetson_orin_nano_8gb",
+      "arch": "aarch64",
+      "ram_gb": 8,
+      "model": "qwen3.5:0.8b",
+      "mode": "chat_json",
+      "num_ctx": 2048,
+      "temperature": 0.3,
+      "seed": 42,
+      "max_repair": 1,
+      "keep_alive": "2m",
+      "timeout_s": 90.0,
+      "max_packet_bytes": 6000,
+      "max_facts": 8,
+      "max_open_threads": 4,
+      "max_answer_words": 120,
+      "max_log_file_bytes": 5242880,
+      "one_model_only": true,
+      "stream": false,
+      "think": false,
+      "cloud": false,
+      "sensors": false,
+      "tools": false,
+      "estimated_model_ram_mb": 700,
+      "estimated_substrate_ram_mb": 200,
+      "notes": "Studio kernel swap: qwen3.5:0.8b with think=false (API). Substrate geometry unchanged. Estimates are planning bounds, not guarantees."
+    },
+    "state_dir": "/Users/vaquez/conditioned-kernel/state",
+    "logs_dir": "/Users/vaquez/conditioned-kernel/logs"
+  },
+  "stages": [
+    {
+      "index": 1,
+      "name": "input",
+      "source_module": "src/conditioned_kernel/cli.py",
+      "source_function": "_cmd_chat",
+      "source_line": 215,
+      "status": "completed",
+      "flag": false,
+      "started_at": null,
+      "completed_at": null,
+      "input_summary": null,
+      "output_summary": null,
+      "raw_input": null,
+      "raw_output": null,
+      "bytes_in": null,
+      "bytes_out": null,
+      "notes": [
+        "the dashboard's POST /api/turn mirrors run_turn(...)'s own call shape rather than calling this stdin-blocking function directly."
+      ]
+    },
+    {
+      "index": 2,
+      "name": "state_load",
+      "source_module": "src/conditioned_kernel/state.py",
+      "source_function": "SubstrateState.load",
+      "source_line": 115,
+      "status": "completed",
+      "flag": false,
+      "started_at": null,
+      "completed_at": null,
+      "input_summary": null,
+      "output_summary": null,
+      "raw_input": null,
+      "raw_output": null,
+      "bytes_in": null,
+      "bytes_out": null,
+      "notes": []
+    },
+    {
+      "index": 3,
+      "name": "recent_memory",
+      "source_module": "src/conditioned_kernel/state.py",
+      "source_function": "fit_recent_turns",
+      "source_line": 72,
+      "status": "completed",
+      "flag": false,
+      "started_at": null,
+      "completed_at": null,
+      "input_summary": null,
+      "output_summary": null,
+      "raw_input": null,
+      "raw_output": null,
+      "bytes_in": null,
+      "bytes_out": null,
+      "notes": []
+    },
+    {
+      "index": 4,
+      "name": "packet_compile",
+      "source_module": "src/conditioned_kernel/compile.py",
+      "source_function": "build_arrival_packet",
+      "source_line": 79,
+      "status": "completed",
+      "flag": true,
+      "started_at": null,
+      "completed_at": null,
+      "input_summary": null,
+      "output_summary": null,
+      "raw_input": null,
+      "raw_output": null,
+      "bytes_in": null,
+      "bytes_out": null,
+      "notes": []
+    },
+    {
+      "index": 5,
+      "name": "edge_budget",
+      "source_module": "src/conditioned_kernel/edge.py",
+      "source_function": "enforce_packet_budget",
+      "source_line": 181,
+      "status": "completed",
+      "flag": false,
+      "started_at": null,
+      "completed_at": null,
+      "input_summary": null,
+      "output_summary": null,
+      "raw_input": null,
+      "raw_output": null,
+      "bytes_in": null,
+      "bytes_out": null,
+      "notes": []
+    },
+    {
+      "index": 6,
+      "name": "kernel_request",
+      "source_module": "src/conditioned_kernel/generate.py",
+      "source_function": "OllamaClient.run",
+      "source_line": 115,
+      "status": "completed",
+      "flag": false,
+      "started_at": null,
+      "completed_at": null,
+      "input_summary": null,
+      "output_summary": null,
+      "raw_input": null,
+      "raw_output": null,
+      "bytes_in": null,
+      "bytes_out": null,
+      "notes": []
+    },
+    {
+      "index": 7,
+      "name": "raw_output",
+      "source_module": "src/conditioned_kernel/generate.py",
+      "source_function": "InferenceResult",
+      "source_line": 36,
+      "status": "completed",
+      "flag": false,
+      "started_at": null,
+      "completed_at": null,
+      "input_summary": null,
+      "output_summary": null,
+      "raw_input": null,
+      "raw_output": null,
+      "bytes_in": null,
+      "bytes_out": null,
+      "notes": [
+        "thinking channel disabled"
+      ]
+    },
+    {
+      "index": 8,
+      "name": "parse",
+      "source_module": "src/conditioned_kernel/return_path/parse.py",
+      "source_function": "parse_candidate",
+      "source_line": 31,
+      "status": "completed",
+      "flag": false,
+      "started_at": null,
+      "completed_at": null,
+      "input_summary": null,
+      "output_summary": null,
+      "raw_input": null,
+      "raw_output": null,
+      "bytes_in": null,
+      "bytes_out": null,
+      "notes": []
+    },
+    {
+      "index": 9,
+      "name": "validate",
+      "source_module": "src/conditioned_kernel/return_path/validate.py",
+      "source_function": "validate_candidate",
+      "source_line": 471,
+      "status": "completed",
+      "flag": false,
+      "started_at": null,
+      "completed_at": null,
+      "input_summary": null,
+      "output_summary": null,
+      "raw_input": null,
+      "raw_output": null,
+      "bytes_in": null,
+      "bytes_out": null,
+      "notes": []
+    },
+    {
+      "index": 10,
+      "name": "repair",
+      "source_module": "src/conditioned_kernel/return_path/repair.py",
+      "source_function": "build_repair_plan",
+      "source_line": 112,
+      "status": "skipped",
+      "flag": false,
+      "started_at": null,
+      "completed_at": null,
+      "input_summary": null,
+      "output_summary": null,
+      "raw_input": null,
+      "raw_output": null,
+      "bytes_in": null,
+      "bytes_out": null,
+      "notes": []
+    },
+    {
+      "index": 11,
+      "name": "decision",
+      "source_module": "src/conditioned_kernel/return_path/assess.py",
+      "source_function": "assess",
+      "source_line": 10,
+      "status": "completed",
+      "flag": false,
+      "started_at": null,
+      "completed_at": null,
+      "input_summary": null,
+      "output_summary": null,
+      "raw_input": null,
+      "raw_output": null,
+      "bytes_in": null,
+      "bytes_out": null,
+      "notes": []
+    },
+    {
+      "index": 12,
+      "name": "persist",
+      "source_module": "src/conditioned_kernel/return_path/accept.py",
+      "source_function": "accept_candidate",
+      "source_line": 12,
+      "status": "completed",
+      "flag": false,
+      "started_at": null,
+      "completed_at": null,
+      "input_summary": null,
+      "output_summary": null,
+      "raw_input": null,
+      "raw_output": null,
+      "bytes_in": null,
+      "bytes_out": null,
+      "notes": []
+    }
+  ],
+  "context_share_bytes": [
+    {
+      "source": "Current user input",
+      "source_id": "current_user_input",
+      "source_key": "packet.user_input",
+      "bytes": 32,
+      "share_pct": 1.78
+    },
+    {
+      "source": "Recent dialogue",
+      "source_id": "recent_dialogue",
+      "source_key": "packet.recent_turns",
+      "bytes": 191,
+      "share_pct": 10.61
+    },
+    {
+      "source": "Durable state",
+      "source_id": "durable_state",
+      "source_key": "state_digest · facts · open_threads · session_id · authoritative_obligation",
+      "bytes": 225,
+      "share_pct": 12.49
+    },
+    {
+      "source": "System instructions",
+      "source_id": "system_instructions",
+      "source_key": "compile.build_model_input system string · packet.repair",
+      "bytes": 464,
+      "share_pct": 25.76
+    },
+    {
+      "source": "Output schema",
+      "source_id": "output_schema",
+      "source_key": "compile.CANDIDATE_FORMAT",
+      "bytes": 307,
+      "share_pct": 17.05
+    },
+    {
+      "source": "Constraints",
+      "source_id": "constraints",
+      "source_key": "packet.constraints · packet.acceptance_contract",
+      "bytes": 382,
+      "share_pct": 21.21
+    },
+    {
+      "source": "Context field selection",
+      "source_id": "context_field",
+      "source_key": "packet.context_field selected/omitted contributions",
+      "bytes": 200,
+      "share_pct": 11.1
+    }
+  ],
+  "packet": {
+    "packet_id": "pkt_20260728T205115Z_0df383",
+    "created_at": "2026-07-28T20:51:15Z",
+    "session_id": "sess_20260728T031245",
+    "user_input": "how does it feel from the inside",
+    "state_digest": {
+      "goal": "Demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.",
+      "active_profile": "orin_nano_8gb",
+      "open_thread_count": 2,
+      "receipt_count_24h": 28,
+      "session_id": "sess_20260728T031245"
+    },
+    "facts": [],
+    "open_threads": [],
+    "recent_turns": [
+      {
+        "user": "it seems like you are talking to yourself",
+        "answer": "I am Qwen3.5:0.8b, a local-conditioned kernel companion designed to run on Jetson Orin Nano 8GB edge devices."
+      }
+    ],
+    "prior_accepted_answer_control": "I am ready to help you. Please provide the details of what happened last turn.",
+    "constraints": {
+      "max_words": 120,
+      "must_return_json": true,
+      "must_cite_state_fields": false,
+      "forbidden": [
+        "tool_calls",
+        "invented_files",
+        "cloud references",
+        "http://",
+        "https://"
+      ]
+    },
+    "acceptance_contract": {
+      "acceptance_mode": "companion",
+      "required_sections": [
+        "answer",
+        "evidence_used",
+        "next_state"
+      ],
+      "must_reference_goal": false,
+      "must_not_contradict_facts": true,
+      "evidence_must_be_from_packet": true
+    },
+    "_edge": {
+      "profile_id": "orin_nano_8gb",
+      "packet_bytes": 1036,
+      "max_packet_bytes": 6000,
+      "num_ctx": 2048,
+      "one_model_only": true
+    },
+    "context_field": {
+      "schema": "ck.context_field.v1",
+      "available_count": 16,
+      "selected_count": 2,
+      "omitted_count": 14,
+      "available": [
+        {
+          "contribution_id": "input.current",
+          "kind": "current_input",
+          "source_module": "cli",
+          "source_key": "user_input",
+          "topic_tags": [
+            "input"
+          ]
+        },
+        {
+          "contribution_id": "state.goal",
+          "kind": "goal",
+          "source_module": "state",
+          "source_key": "current.goal",
+          "topic_tags": [
+            "purpose",
+            "goal",
+            "project"
+          ]
+        },
+        {
+          "contribution_id": "state.identity",
+          "kind": "durable_fact",
+          "source_module": "state",
+          "source_key": "identity.transducer",
+          "topic_tags": [
+            "purpose",
+            "identity",
+            "project"
+          ]
+        },
+        {
+          "contribution_id": "state.policy.local",
+          "kind": "constraint",
+          "source_module": "state",
+          "source_key": "flags.cloud",
+          "topic_tags": [
+            "policy",
+            "cloud",
+            "local"
+          ]
+        },
+        {
+          "contribution_id": "state.policy.sensors",
+          "kind": "constraint",
+          "source_module": "state",
+          "source_key": "flags.sensors",
+          "topic_tags": [
+            "policy",
+            "sensors"
+          ]
+        },
+        {
+          "contribution_id": "state.policy.tools",
+          "kind": "constraint",
+          "source_module": "state",
+          "source_key": "flags.tools",
+          "topic_tags": [
+            "policy",
+            "tools"
+          ]
+        },
+        {
+          "contribution_id": "state.runtime.model",
+          "kind": "runtime",
+          "source_module": "edge",
+          "source_key": "profile.model",
+          "topic_tags": [
+            "runtime",
+            "model"
+          ]
+        },
+        {
+          "contribution_id": "state.runtime.profile",
+          "kind": "runtime",
+          "source_module": "edge",
+          "source_key": "profile.profile_id",
+          "topic_tags": [
+            "runtime",
+            "profile"
+          ]
+        },
+        {
+          "contribution_id": "state.edge.target",
+          "kind": "runtime",
+          "source_module": "state",
+          "source_key": "flags.edge_target",
+          "topic_tags": [
+            "edge",
+            "hardware",
+            "jetson",
+            "orin"
+          ]
+        },
+        {
+          "contribution_id": "state.runtime.repair_budget",
+          "kind": "constraint",
+          "source_module": "state",
+          "source_key": "flags.max_repair_passes",
+          "topic_tags": [
+            "repair",
+            "runtime",
+            "experiment"
+          ]
+        },
+        {
+          "contribution_id": "state.thread.thread_min_model",
+          "kind": "thread",
+          "source_module": "state",
+          "source_key": "threads[thread_min_model]",
+          "topic_tags": [
+            "threads",
+            "experiment",
+            "thread_min_model"
+          ]
+        },
+        {
+          "contribution_id": "state.thread.thread_compile_order",
+          "kind": "thread",
+          "source_module": "state",
+          "source_key": "threads[thread_compile_order]",
+          "topic_tags": [
+            "threads",
+            "experiment",
+            "thread_compile_order"
+          ]
+        },
+        {
+          "contribution_id": "dialogue.turn_0",
+          "kind": "recent_dialogue",
+          "source_module": "state",
+          "source_key": "recent_turns[0]",
+          "topic_tags": [
+            "dialogue",
+            "companion",
+            "conditioned",
+            "designed",
+            "devices",
+            "jetson",
+            "kernel"
+          ]
+        },
+        {
+          "contribution_id": "dialogue.turn_1",
+          "kind": "recent_dialogue",
+          "source_module": "state",
+          "source_key": "recent_turns[1]",
+          "topic_tags": [
+            "dialogue",
+            "deeper",
+            "great",
+            "interesting",
+            "material",
+            "observation",
+            "ready"
+          ]
+        },
+        {
+          "contribution_id": "dialogue.turn_2",
+          "kind": "recent_dialogue",
+          "source_module": "state",
+          "source_key": "recent_turns[2]",
+          "topic_tags": [
+            "dialogue",
+            "about",
+            "allowed",
+            "answer",
+            "architecture",
+            "becomes",
+            "cloud"
+          ]
+        },
+        {
+          "contribution_id": "dialogue.turn_3",
+          "kind": "recent_dialogue",
+          "source_module": "state",
+          "source_key": "recent_turns[3]",
+          "topic_tags": [
+            "dialogue",
+            "details",
+            "happened",
+            "please",
+            "provide",
+            "ready"
+          ]
+        }
+      ],
+      "selected": [
+        {
+          "contribution_id": "input.current",
+          "source_module": "cli",
+          "source_key": "user_input",
+          "kind": "current_input",
+          "content": "how does it feel from the inside",
+          "authority": "authoritative",
+          "topic_tags": [
+            "input"
+          ],
+          "priority": 0,
+          "max_bytes": 800,
+          "always_include": true,
+          "bytes": 32
+        },
+        {
+          "contribution_id": "dialogue.turn_0",
+          "source_module": "state",
+          "source_key": "recent_turns[0]",
+          "kind": "recent_dialogue",
+          "content": "User: it seems like you are talking to yourself\nAssistant: I am Qwen3.5:0.8b, a local-conditioned kernel companion designed to run on Jetson Orin Nano 8GB edge devices.",
+          "authority": "informational",
+          "topic_tags": [
+            "dialogue",
+            "companion",
+            "conditioned",
+            "designed",
+            "devices",
+            "jetson",
+            "kernel"
+          ],
+          "priority": 14,
+          "max_bytes": 400,
+          "always_include": false,
+          "bytes": 168
+        }
+      ],
+      "omitted": [
+        {
+          "contribution_id": "state.goal",
+          "selected": false,
+          "reason": "omitted_not_selected_for_turn",
+          "kind": "goal",
+          "source_module": "state",
+          "source_key": "current.goal",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "state.identity",
+          "selected": false,
+          "reason": "omitted_open_turn_quiet_substrate",
+          "kind": "durable_fact",
+          "source_module": "state",
+          "source_key": "identity.transducer",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "state.policy.local",
+          "selected": false,
+          "reason": "omitted_not_selected_for_turn",
+          "kind": "constraint",
+          "source_module": "state",
+          "source_key": "flags.cloud",
+          "authority": "authoritative"
+        },
+        {
+          "contribution_id": "state.policy.sensors",
+          "selected": false,
+          "reason": "omitted_not_selected_for_turn",
+          "kind": "constraint",
+          "source_module": "state",
+          "source_key": "flags.sensors",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "state.policy.tools",
+          "selected": false,
+          "reason": "omitted_not_selected_for_turn",
+          "kind": "constraint",
+          "source_module": "state",
+          "source_key": "flags.tools",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "state.runtime.model",
+          "selected": false,
+          "reason": "omitted_not_selected_for_turn",
+          "kind": "runtime",
+          "source_module": "edge",
+          "source_key": "profile.model",
+          "authority": "authoritative"
+        },
+        {
+          "contribution_id": "state.runtime.profile",
+          "selected": false,
+          "reason": "omitted_not_selected_for_turn",
+          "kind": "runtime",
+          "source_module": "edge",
+          "source_key": "profile.profile_id",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "state.edge.target",
+          "selected": false,
+          "reason": "omitted_not_selected_for_turn",
+          "kind": "runtime",
+          "source_module": "state",
+          "source_key": "flags.edge_target",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "state.runtime.repair_budget",
+          "selected": false,
+          "reason": "omitted_not_selected_for_turn",
+          "kind": "constraint",
+          "source_module": "state",
+          "source_key": "flags.max_repair_passes",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "state.thread.thread_min_model",
+          "selected": false,
+          "reason": "omitted_not_selected_for_turn",
+          "kind": "thread",
+          "source_module": "state",
+          "source_key": "threads[thread_min_model]",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "state.thread.thread_compile_order",
+          "selected": false,
+          "reason": "omitted_not_selected_for_turn",
+          "kind": "thread",
+          "source_module": "state",
+          "source_key": "threads[thread_compile_order]",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "dialogue.turn_1",
+          "selected": false,
+          "reason": "omitted_dialogue_not_relevant",
+          "kind": "recent_dialogue",
+          "source_module": "state",
+          "source_key": "recent_turns[1]",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "dialogue.turn_2",
+          "selected": false,
+          "reason": "omitted_dialogue_not_relevant",
+          "kind": "recent_dialogue",
+          "source_module": "state",
+          "source_key": "recent_turns[2]",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "dialogue.turn_3",
+          "selected": false,
+          "reason": "omitted_dialogue_not_relevant",
+          "kind": "recent_dialogue",
+          "source_module": "state",
+          "source_key": "recent_turns[3]",
+          "authority": "informational"
+        }
+      ],
+      "selection_records": [
+        {
+          "contribution_id": "input.current",
+          "selected": true,
+          "reason": "always_current_input",
+          "kind": "current_input",
+          "source_module": "cli",
+          "source_key": "user_input",
+          "authority": "authoritative",
+          "content": "how does it feel from the inside",
+          "bytes": 32
+        },
+        {
+          "contribution_id": "state.goal",
+          "selected": false,
+          "reason": "omitted_not_selected_for_turn",
+          "kind": "goal",
+          "source_module": "state",
+          "source_key": "current.goal",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "state.identity",
+          "selected": false,
+          "reason": "omitted_open_turn_quiet_substrate",
+          "kind": "durable_fact",
+          "source_module": "state",
+          "source_key": "identity.transducer",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "state.policy.local",
+          "selected": false,
+          "reason": "omitted_not_selected_for_turn",
+          "kind": "constraint",
+          "source_module": "state",
+          "source_key": "flags.cloud",
+          "authority": "authoritative"
+        },
+        {
+          "contribution_id": "state.policy.sensors",
+          "selected": false,
+          "reason": "omitted_not_selected_for_turn",
+          "kind": "constraint",
+          "source_module": "state",
+          "source_key": "flags.sensors",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "state.policy.tools",
+          "selected": false,
+          "reason": "omitted_not_selected_for_turn",
+          "kind": "constraint",
+          "source_module": "state",
+          "source_key": "flags.tools",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "state.runtime.model",
+          "selected": false,
+          "reason": "omitted_not_selected_for_turn",
+          "kind": "runtime",
+          "source_module": "edge",
+          "source_key": "profile.model",
+          "authority": "authoritative"
+        },
+        {
+          "contribution_id": "state.runtime.profile",
+          "selected": false,
+          "reason": "omitted_not_selected_for_turn",
+          "kind": "runtime",
+          "source_module": "edge",
+          "source_key": "profile.profile_id",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "state.edge.target",
+          "selected": false,
+          "reason": "omitted_not_selected_for_turn",
+          "kind": "runtime",
+          "source_module": "state",
+          "source_key": "flags.edge_target",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "state.runtime.repair_budget",
+          "selected": false,
+          "reason": "omitted_not_selected_for_turn",
+          "kind": "constraint",
+          "source_module": "state",
+          "source_key": "flags.max_repair_passes",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "state.thread.thread_min_model",
+          "selected": false,
+          "reason": "omitted_not_selected_for_turn",
+          "kind": "thread",
+          "source_module": "state",
+          "source_key": "threads[thread_min_model]",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "state.thread.thread_compile_order",
+          "selected": false,
+          "reason": "omitted_not_selected_for_turn",
+          "kind": "thread",
+          "source_module": "state",
+          "source_key": "threads[thread_compile_order]",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "dialogue.turn_0",
+          "selected": true,
+          "reason": "selected_latest_dialogue_open_turn",
+          "kind": "recent_dialogue",
+          "source_module": "state",
+          "source_key": "recent_turns[0]",
+          "authority": "informational",
+          "content": "User: it seems like you are talking to yourself\nAssistant: I am Qwen3.5:0.8b, a local-conditioned kernel companion designed to run on Jetson Orin Nano 8GB edge devices.",
+          "bytes": 168
+        },
+        {
+          "contribution_id": "dialogue.turn_1",
+          "selected": false,
+          "reason": "omitted_dialogue_not_relevant",
+          "kind": "recent_dialogue",
+          "source_module": "state",
+          "source_key": "recent_turns[1]",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "dialogue.turn_2",
+          "selected": false,
+          "reason": "omitted_dialogue_not_relevant",
+          "kind": "recent_dialogue",
+          "source_module": "state",
+          "source_key": "recent_turns[2]",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "dialogue.turn_3",
+          "selected": false,
+          "reason": "omitted_dialogue_not_relevant",
+          "kind": "recent_dialogue",
+          "source_module": "state",
+          "source_key": "recent_turns[3]",
+          "authority": "informational"
+        }
+      ],
+      "selected_ids": [
+        "dialogue.turn_0",
+        "input.current"
+      ]
+    },
+    "evidence_pool_selected": [
+      "it seems like you are talking to yourself",
+      "I am Qwen3.5:0.8b, a local-conditioned kernel companion designed to run on Jetson Orin Nano 8GB edge devices."
+    ],
+    "intents": [
+      "open"
+    ]
+  },
+  "packet_bytes": 1036,
+  "passes": [
+    {
+      "pass_index": 0,
+      "packet_id": "pkt_20260728T205115Z_0df383",
+      "candidate_id": "cand_20260728T205117Z_1e2415",
+      "receipt_id": "rcpt_20260728T205117Z_423d34",
+      "answer": "It feels like a quiet, steady rhythm in a small room. The silence is heavy, but the internal state is calm and focused. You are in a state of deep meditation, where thoughts are not racing but flowing like water. The environment is still, and the only sound is the gentle hum of the device. It is a place of peace, where the mind can rest without the noise of the outside world.",
+      "evidence_used": [
+        "it seems like you are talking to yourself"
+      ],
+      "thread_touch": [],
+      "violations": [],
+      "advisories": [],
+      "decision": "accept",
+      "word_count": 73,
+      "telemetry": {
+        "profile_id": "orin_nano_8gb",
+        "packet_bytes": 1036,
+        "inference_status": "completed",
+        "thinking_chars": 0,
+        "final_response_chars": 471,
+        "elapsed_seconds": 2.368809792038519
+      },
+      "raw_text": "{\n  \"answer\": \"It feels like a quiet, steady rhythm in a small room. The silence is heavy, but the internal state is calm and focused. You are in a state of deep meditation, where thoughts are not racing but flowing like water. The environment is still, and the only sound is the gentle hum of the device. It is a place of peace, where the mind can rest without the noise of the outside world.\",\n  \"evidence_used\": [],\n  \"next_state.thread_touch\": [12345, 12346, 12347]\n}",
+      "packet": {
+        "packet_id": "pkt_20260728T205115Z_0df383",
+        "created_at": "2026-07-28T20:51:15Z",
+        "session_id": "sess_20260728T031245",
+        "user_input": "how does it feel from the inside",
+        "state_digest": {
+          "goal": "Demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.",
+          "active_profile": "orin_nano_8gb",
+          "open_thread_count": 2,
+          "receipt_count_24h": 28,
+          "session_id": "sess_20260728T031245"
+        },
+        "facts": [],
+        "open_threads": [],
+        "recent_turns": [
+          {
+            "user": "it seems like you are talking to yourself",
+            "answer": "I am Qwen3.5:0.8b, a local-conditioned kernel companion designed to run on Jetson Orin Nano 8GB edge devices."
+          }
+        ],
+        "prior_accepted_answer_control": "I am ready to help you. Please provide the details of what happened last turn.",
+        "constraints": {
+          "max_words": 120,
+          "must_return_json": true,
+          "must_cite_state_fields": false,
+          "forbidden": [
+            "tool_calls",
+            "invented_files",
+            "cloud references",
+            "http://",
+            "https://"
+          ]
+        },
+        "acceptance_contract": {
+          "acceptance_mode": "companion",
+          "required_sections": [
+            "answer",
+            "evidence_used",
+            "next_state"
+          ],
+          "must_reference_goal": false,
+          "must_not_contradict_facts": true,
+          "evidence_must_be_from_packet": true
+        },
+        "_edge": {
+          "profile_id": "orin_nano_8gb",
+          "packet_bytes": 1036,
+          "max_packet_bytes": 6000,
+          "num_ctx": 2048,
+          "one_model_only": true
+        },
+        "context_field": {
+          "schema": "ck.context_field.v1",
+          "available_count": 16,
+          "selected_count": 2,
+          "omitted_count": 14,
+          "available": [
+            {
+              "contribution_id": "input.current",
+              "kind": "current_input",
+              "source_module": "cli",
+              "source_key": "user_input",
+              "topic_tags": [
+                "input"
+              ]
+            },
+            {
+              "contribution_id": "state.goal",
+              "kind": "goal",
+              "source_module": "state",
+              "source_key": "current.goal",
+              "topic_tags": [
+                "purpose",
+                "goal",
+                "project"
+              ]
+            },
+            {
+              "contribution_id": "state.identity",
+              "kind": "durable_fact",
+              "source_module": "state",
+              "source_key": "identity.transducer",
+              "topic_tags": [
+                "purpose",
+                "identity",
+                "project"
+              ]
+            },
+            {
+              "contribution_id": "state.policy.local",
+              "kind": "constraint",
+              "source_module": "state",
+              "source_key": "flags.cloud",
+              "topic_tags": [
+                "policy",
+                "cloud",
+                "local"
+              ]
+            },
+            {
+              "contribution_id": "state.policy.sensors",
+              "kind": "constraint",
+              "source_module": "state",
+              "source_key": "flags.sensors",
+              "topic_tags": [
+                "policy",
+                "sensors"
+              ]
+            },
+            {
+              "contribution_id": "state.policy.tools",
+              "kind": "constraint",
+              "source_module": "state",
+              "source_key": "flags.tools",
+              "topic_tags": [
+                "policy",
+                "tools"
+              ]
+            },
+            {
+              "contribution_id": "state.runtime.model",
+              "kind": "runtime",
+              "source_module": "edge",
+              "source_key": "profile.model",
+              "topic_tags": [
+                "runtime",
+                "model"
+              ]
+            },
+            {
+              "contribution_id": "state.runtime.profile",
+              "kind": "runtime",
+              "source_module": "edge",
+              "source_key": "profile.profile_id",
+              "topic_tags": [
+                "runtime",
+                "profile"
+              ]
+            },
+            {
+              "contribution_id": "state.edge.target",
+              "kind": "runtime",
+              "source_module": "state",
+              "source_key": "flags.edge_target",
+              "topic_tags": [
+                "edge",
+                "hardware",
+                "jetson",
+                "orin"
+              ]
+            },
+            {
+              "contribution_id": "state.runtime.repair_budget",
+              "kind": "constraint",
+              "source_module": "state",
+              "source_key": "flags.max_repair_passes",
+              "topic_tags": [
+                "repair",
+                "runtime",
+                "experiment"
+              ]
+            },
+            {
+              "contribution_id": "state.thread.thread_min_model",
+              "kind": "thread",
+              "source_module": "state",
+              "source_key": "threads[thread_min_model]",
+              "topic_tags": [
+                "threads",
+                "experiment",
+                "thread_min_model"
+              ]
+            },
+            {
+              "contribution_id": "state.thread.thread_compile_order",
+              "kind": "thread",
+              "source_module": "state",
+              "source_key": "threads[thread_compile_order]",
+              "topic_tags": [
+                "threads",
+                "experiment",
+                "thread_compile_order"
+              ]
+            },
+            {
+              "contribution_id": "dialogue.turn_0",
+              "kind": "recent_dialogue",
+              "source_module": "state",
+              "source_key": "recent_turns[0]",
+              "topic_tags": [
+                "dialogue",
+                "companion",
+                "conditioned",
+                "designed",
+                "devices",
+                "jetson",
+                "kernel"
+              ]
+            },
+            {
+              "contribution_id": "dialogue.turn_1",
+              "kind": "recent_dialogue",
+              "source_module": "state",
+              "source_key": "recent_turns[1]",
+              "topic_tags": [
+                "dialogue",
+                "deeper",
+                "great",
+                "interesting",
+                "material",
+                "observation",
+                "ready"
+              ]
+            },
+            {
+              "contribution_id": "dialogue.turn_2",
+              "kind": "recent_dialogue",
+              "source_module": "state",
+              "source_key": "recent_turns[2]",
+              "topic_tags": [
+                "dialogue",
+                "about",
+                "allowed",
+                "answer",
+                "architecture",
+                "becomes",
+                "cloud"
+              ]
+            },
+            {
+              "contribution_id": "dialogue.turn_3",
+              "kind": "recent_dialogue",
+              "source_module": "state",
+              "source_key": "recent_turns[3]",
+              "topic_tags": [
+                "dialogue",
+                "details",
+                "happened",
+                "please",
+                "provide",
+                "ready"
+              ]
+            }
+          ],
+          "selected": [
+            {
+              "contribution_id": "input.current",
+              "source_module": "cli",
+              "source_key": "user_input",
+              "kind": "current_input",
+              "content": "how does it feel from the inside",
+              "authority": "authoritative",
+              "topic_tags": [
+                "input"
+              ],
+              "priority": 0,
+              "max_bytes": 800,
+              "always_include": true,
+              "bytes": 32
+            },
+            {
+              "contribution_id": "dialogue.turn_0",
+              "source_module": "state",
+              "source_key": "recent_turns[0]",
+              "kind": "recent_dialogue",
+              "content": "User: it seems like you are talking to yourself\nAssistant: I am Qwen3.5:0.8b, a local-conditioned kernel companion designed to run on Jetson Orin Nano 8GB edge devices.",
+              "authority": "informational",
+              "topic_tags": [
+                "dialogue",
+                "companion",
+                "conditioned",
+                "designed",
+                "devices",
+                "jetson",
+                "kernel"
+              ],
+              "priority": 14,
+              "max_bytes": 400,
+              "always_include": false,
+              "bytes": 168
+            }
+          ],
+          "omitted": [
+            {
+              "contribution_id": "state.goal",
+              "selected": false,
+              "reason": "omitted_not_selected_for_turn",
+              "kind": "goal",
+              "source_module": "state",
+              "source_key": "current.goal",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "state.identity",
+              "selected": false,
+              "reason": "omitted_open_turn_quiet_substrate",
+              "kind": "durable_fact",
+              "source_module": "state",
+              "source_key": "identity.transducer",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "state.policy.local",
+              "selected": false,
+              "reason": "omitted_not_selected_for_turn",
+              "kind": "constraint",
+              "source_module": "state",
+              "source_key": "flags.cloud",
+              "authority": "authoritative"
+            },
+            {
+              "contribution_id": "state.policy.sensors",
+              "selected": false,
+              "reason": "omitted_not_selected_for_turn",
+              "kind": "constraint",
+              "source_module": "state",
+              "source_key": "flags.sensors",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "state.policy.tools",
+              "selected": false,
+              "reason": "omitted_not_selected_for_turn",
+              "kind": "constraint",
+              "source_module": "state",
+              "source_key": "flags.tools",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "state.runtime.model",
+              "selected": false,
+              "reason": "omitted_not_selected_for_turn",
+              "kind": "runtime",
+              "source_module": "edge",
+              "source_key": "profile.model",
+              "authority": "authoritative"
+            },
+            {
+              "contribution_id": "state.runtime.profile",
+              "selected": false,
+              "reason": "omitted_not_selected_for_turn",
+              "kind": "runtime",
+              "source_module": "edge",
+              "source_key": "profile.profile_id",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "state.edge.target",
+              "selected": false,
+              "reason": "omitted_not_selected_for_turn",
+              "kind": "runtime",
+              "source_module": "state",
+              "source_key": "flags.edge_target",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "state.runtime.repair_budget",
+              "selected": false,
+              "reason": "omitted_not_selected_for_turn",
+              "kind": "constraint",
+              "source_module": "state",
+              "source_key": "flags.max_repair_passes",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "state.thread.thread_min_model",
+              "selected": false,
+              "reason": "omitted_not_selected_for_turn",
+              "kind": "thread",
+              "source_module": "state",
+              "source_key": "threads[thread_min_model]",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "state.thread.thread_compile_order",
+              "selected": false,
+              "reason": "omitted_not_selected_for_turn",
+              "kind": "thread",
+              "source_module": "state",
+              "source_key": "threads[thread_compile_order]",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "dialogue.turn_1",
+              "selected": false,
+              "reason": "omitted_dialogue_not_relevant",
+              "kind": "recent_dialogue",
+              "source_module": "state",
+              "source_key": "recent_turns[1]",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "dialogue.turn_2",
+              "selected": false,
+              "reason": "omitted_dialogue_not_relevant",
+              "kind": "recent_dialogue",
+              "source_module": "state",
+              "source_key": "recent_turns[2]",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "dialogue.turn_3",
+              "selected": false,
+              "reason": "omitted_dialogue_not_relevant",
+              "kind": "recent_dialogue",
+              "source_module": "state",
+              "source_key": "recent_turns[3]",
+              "authority": "informational"
+            }
+          ],
+          "selection_records": [
+            {
+              "contribution_id": "input.current",
+              "selected": true,
+              "reason": "always_current_input",
+              "kind": "current_input",
+              "source_module": "cli",
+              "source_key": "user_input",
+              "authority": "authoritative",
+              "content": "how does it feel from the inside",
+              "bytes": 32
+            },
+            {
+              "contribution_id": "state.goal",
+              "selected": false,
+              "reason": "omitted_not_selected_for_turn",
+              "kind": "goal",
+              "source_module": "state",
+              "source_key": "current.goal",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "state.identity",
+              "selected": false,
+              "reason": "omitted_open_turn_quiet_substrate",
+              "kind": "durable_fact",
+              "source_module": "state",
+              "source_key": "identity.transducer",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "state.policy.local",
+              "selected": false,
+              "reason": "omitted_not_selected_for_turn",
+              "kind": "constraint",
+              "source_module": "state",
+              "source_key": "flags.cloud",
+              "authority": "authoritative"
+            },
+            {
+              "contribution_id": "state.policy.sensors",
+              "selected": false,
+              "reason": "omitted_not_selected_for_turn",
+              "kind": "constraint",
+              "source_module": "state",
+              "source_key": "flags.sensors",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "state.policy.tools",
+              "selected": false,
+              "reason": "omitted_not_selected_for_turn",
+              "kind": "constraint",
+              "source_module": "state",
+              "source_key": "flags.tools",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "state.runtime.model",
+              "selected": false,
+              "reason": "omitted_not_selected_for_turn",
+              "kind": "runtime",
+              "source_module": "edge",
+              "source_key": "profile.model",
+              "authority": "authoritative"
+            },
+            {
+              "contribution_id": "state.runtime.profile",
+              "selected": false,
+              "reason": "omitted_not_selected_for_turn",
+              "kind": "runtime",
+              "source_module": "edge",
+              "source_key": "profile.profile_id",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "state.edge.target",
+              "selected": false,
+              "reason": "omitted_not_selected_for_turn",
+              "kind": "runtime",
+              "source_module": "state",
+              "source_key": "flags.edge_target",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "state.runtime.repair_budget",
+              "selected": false,
+              "reason": "omitted_not_selected_for_turn",
+              "kind": "constraint",
+              "source_module": "state",
+              "source_key": "flags.max_repair_passes",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "state.thread.thread_min_model",
+              "selected": false,
+              "reason": "omitted_not_selected_for_turn",
+              "kind": "thread",
+              "source_module": "state",
+              "source_key": "threads[thread_min_model]",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "state.thread.thread_compile_order",
+              "selected": false,
+              "reason": "omitted_not_selected_for_turn",
+              "kind": "thread",
+              "source_module": "state",
+              "source_key": "threads[thread_compile_order]",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "dialogue.turn_0",
+              "selected": true,
+              "reason": "selected_latest_dialogue_open_turn",
+              "kind": "recent_dialogue",
+              "source_module": "state",
+              "source_key": "recent_turns[0]",
+              "authority": "informational",
+              "content": "User: it seems like you are talking to yourself\nAssistant: I am Qwen3.5:0.8b, a local-conditioned kernel companion designed to run on Jetson Orin Nano 8GB edge devices.",
+              "bytes": 168
+            },
+            {
+              "contribution_id": "dialogue.turn_1",
+              "selected": false,
+              "reason": "omitted_dialogue_not_relevant",
+              "kind": "recent_dialogue",
+              "source_module": "state",
+              "source_key": "recent_turns[1]",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "dialogue.turn_2",
+              "selected": false,
+              "reason": "omitted_dialogue_not_relevant",
+              "kind": "recent_dialogue",
+              "source_module": "state",
+              "source_key": "recent_turns[2]",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "dialogue.turn_3",
+              "selected": false,
+              "reason": "omitted_dialogue_not_relevant",
+              "kind": "recent_dialogue",
+              "source_module": "state",
+              "source_key": "recent_turns[3]",
+              "authority": "informational"
+            }
+          ],
+          "selected_ids": [
+            "dialogue.turn_0",
+            "input.current"
+          ]
+        },
+        "evidence_pool_selected": [
+          "it seems like you are talking to yourself",
+          "I am Qwen3.5:0.8b, a local-conditioned kernel companion designed to run on Jetson Orin Nano 8GB edge devices."
+        ],
+        "intents": [
+          "open"
+        ]
+      },
+      "model_input": {
+        "schema_version": "ck.v0",
+        "mode": "chat_json",
+        "model": "qwen3.5:0.8b",
+        "payload": {
+          "model": "qwen3.5:0.8b",
+          "messages": [
+            {
+              "role": "system",
+              "content": "You are a local Conditioned Kernel companion. Return ONLY valid JSON with keys answer, evidence_used, next_state. answer: short helpful reply to the current human message. Use only the Selected context block when grounding claims. evidence_used: copy strings from Selected context or []. next_state.thread_touch: real open thread ids from context or []. Do not invent hardware, goals, or policies not present in Selected context. No files, URLs, tools, or cloud."
+            },
+            {
+              "role": "user",
+              "content": "## Selected context\n- prior: user=it seems like you are talking to yourself | assistant=I am Qwen3.5:0.8b, a local-conditioned kernel companion designed to run on Jetson Orin Nano 8GB edge devices.\n\n## Current human message\nhow does it feel from the inside\n"
+            }
+          ],
+          "format": {
+            "type": "object",
+            "properties": {
+              "answer": {
+                "type": "string"
+              },
+              "evidence_used": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "next_state": {
+                "type": "object",
+                "properties": {
+                  "thread_touch": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "proposed_note": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": [
+              "answer",
+              "evidence_used",
+              "next_state"
+            ]
+          },
+          "stream": false,
+          "keep_alive": "2m",
+          "think": false,
+          "options": {
+            "temperature": 0.3,
+            "repeat_penalty": 1.1,
+            "seed": 42,
+            "num_ctx": 2048
+          }
+        },
+        "packet_id": "pkt_20260728T205115Z_0df383",
+        "packet_hash": "a59accc933f5c837",
+        "edge_profile": "orin_nano_8gb",
+        "packet_bytes": 1036,
+        "think": false,
+        "companion_field": true
+      },
+      "authoritative_kind": null,
+      "authoritative_fallback": false,
+      "checks": [
+        {
+          "name": "parse_ok",
+          "status": "PASS",
+          "reason": "did not fire — raw candidate text parsed as a JSON object",
+          "examined": "candidate.parse_ok, candidate.parse_error",
+          "severity": "violation"
+        },
+        {
+          "name": "nonempty_answer",
+          "status": "PASS",
+          "reason": "did not fire — answer is non-empty (378 chars)",
+          "examined": "candidate.answer",
+          "severity": "violation"
+        },
+        {
+          "name": "template_echo",
+          "status": "PASS",
+          "reason": "did not fire — none of 14 TEMPLATE_ECHO_MARKERS fragments found",
+          "examined": "answer vs TEMPLATE_ECHO_MARKERS",
+          "severity": "violation"
+        },
+        {
+          "name": "template_echo_evidence",
+          "status": "PASS",
+          "reason": "did not fire — no placeholder token in 1 evidence_used item(s)",
+          "examined": "evidence_used, 1 item(s)",
+          "severity": "violation"
+        },
+        {
+          "name": "goal_echo",
+          "status": "PASS",
+          "reason": "did not fire — token overlap with the goal is below validate.is_goal_echo's threshold",
+          "examined": "answer vs state_digest.goal (130 chars)",
+          "severity": "violation"
+        },
+        {
+          "name": "not_responsive",
+          "status": "PASS",
+          "reason": "did not fire — answer shares enough load-bearing tokens with packet.user_input",
+          "examined": "answer vs packet.user_input",
+          "severity": "advisory"
+        },
+        {
+          "name": "stale_response_repeat",
+          "status": "PASS",
+          "reason": "did not fire — validate.is_substantial_repeat found this answer sufficiently different from recent_turns[-1]'s accepted answer",
+          "examined": "answer vs recent_turns[-1].answer",
+          "severity": "violation"
+        },
+        {
+          "name": "required_section:answer",
+          "status": "PASS",
+          "reason": "did not fire — present",
+          "examined": "candidate.answer",
+          "severity": "violation"
+        },
+        {
+          "name": "required_section:evidence_used",
+          "status": "PASS",
+          "reason": "did not fire — present and a list",
+          "examined": "candidate.evidence_used",
+          "severity": "violation"
+        },
+        {
+          "name": "required_section:next_state",
+          "status": "PASS",
+          "reason": "did not fire — present and an object",
+          "examined": "candidate.next_state",
+          "severity": "violation"
+        },
+        {
+          "name": "max_words",
+          "status": "PASS",
+          "reason": "did not fire — 73 words within max_words=120",
+          "examined": "len(answer.split())",
+          "severity": "violation"
+        },
+        {
+          "name": "evidence_used_empty",
+          "status": "PASS",
+          "reason": "did not fire — evidence_used has 1 item(s), supplied by substrate_supplied",
+          "examined": "evidence_used",
+          "severity": "violation"
+        },
+        {
+          "name": "evidence_too_short",
+          "status": "PASS",
+          "reason": "did not fire — all 1 item(s) are at least 12 characters",
+          "examined": "len(item) for each evidence_used entry",
+          "severity": "violation"
+        },
+        {
+          "name": "evidence_not_in_packet",
+          "status": "PASS",
+          "reason": "did not fire — all 1 citation(s) match a packet evidence-pool string",
+          "examined": "evidence_used vs _packet_evidence_pool (2 strings)",
+          "severity": "violation"
+        },
+        {
+          "name": "goal_not_referenced",
+          "status": "SKIP",
+          "reason": "not applicable — acceptance_contract.must_reference_goal resolves False in companion mode",
+          "examined": "acceptance_contract.must_reference_goal",
+          "severity": "violation"
+        },
+        {
+          "name": "forbidden_content",
+          "status": "PASS",
+          "reason": "did not fire — none of 5 constraints.forbidden term(s) appear in the answer",
+          "examined": "answer vs constraints.forbidden",
+          "severity": "violation"
+        },
+        {
+          "name": "contradicts_facts",
+          "status": "PASS",
+          "reason": "did not fire — no answer clause asserts a capability the packet facts forbid",
+          "examined": "answer clauses vs packet.facts contradiction rules",
+          "severity": "violation"
+        },
+        {
+          "name": "unknown_thread_touch",
+          "status": "SKIP",
+          "reason": "not applicable — next_state.thread_touch is empty, nothing declared to check",
+          "examined": "next_state.thread_touch",
+          "severity": "violation"
+        },
+        {
+          "name": "authoritative_obligation",
+          "status": "SKIP",
+          "reason": "not applicable — authoritative_state.resolve_obligation did not resolve an obligation for this turn (or acceptance_mode is not companion)",
+          "examined": "receipt.authoritative_kind",
+          "severity": "authoritative (outside validate.py)"
+        }
+      ],
+      "citation_audit": [
+        {
+          "citation": "it seems like you are talking to yourself",
+          "status": "MATCHED",
+          "match": {
+            "source_key": "recent_turns[0].user",
+            "value": "it seems like you are talking to yourself",
+            "length": 41
+          },
+          "reason": "citation is a substring of recent_turns[0].user"
+        }
+      ],
+      "evidence_pool": [
+        {
+          "source_key": "recent_turns[0].user",
+          "value": "it seems like you are talking to yourself",
+          "length": 41
+        },
+        {
+          "source_key": "recent_turns[0].answer",
+          "value": "i am qwen3.5:0.8b, a local-conditioned kernel companion designed to run on jetson orin nano 8gb edge devices.",
+          "length": 109
+        },
+        {
+          "source_key": "state_digest.goal",
+          "value": "demonstrate conditioned-kernel substrate gain over bare generation on a small local model under jetson orin nano 8gb edge budgets.",
+          "length": 130
+        }
+      ]
+    }
+  ],
+  "final_decision": {
+    "decision": "accept",
+    "label": "ACCEPTED",
+    "answer": "It feels like a quiet, steady rhythm in a small room. The silence is heavy, but the internal state is calm and focused. You are in a state of deep meditation, where thoughts are not racing but flowing like water. The environment is still, and the only sound is the gentle hum of the device. It is a place of peace, where the mind can rest without the noise of the outside world.",
+    "violations": [],
+    "advisories": []
+  },
+  "persistence": {
+    "applied_updates": [
+      "recent_turn_appended"
+    ],
+    "recent_turn_appended": true,
+    "outcome": {
+      "accepted_at": "2026-07-28T20:51:17Z",
+      "decision": "accept",
+      "packet_id": "pkt_20260728T205115Z_0df383",
+      "candidate_id": "cand_20260728T205117Z_1e2415",
+      "receipt_id": "rcpt_20260728T205117Z_423d34",
+      "applied_updates": [
+        "recent_turn_appended"
+      ],
+      "answer": "It feels like a quiet, steady rhythm in a small room. The silence is heavy, but the internal state is calm and focused. You are in a state of deep meditation, where thoughts are not racing but flowing like water. The environment is still, and the only sound is the gentle hum of the device. It is a place of peace, where the mind can rest without the noise of the outside world.",
+      "reject_reason": null,
+      "model": "qwen3.5:0.8b",
+      "mode": "chat_json",
+      "packet_hash": "a59accc933f5c837",
+      "telemetry": {
+        "profile_id": "orin_nano_8gb",
+        "packet_bytes": 1036,
+        "inference_status": "completed",
+        "thinking_chars": 0,
+        "final_response_chars": 471,
+        "elapsed_seconds": 2.368809792038519
+      }
+    }
+  },
+  "observations": [
+    {
+      "label": "Substrate dominated input",
+      "detail": "Your 32 bytes of text became a 32-byte user_input field — 1.78% of the 1801 bytes that reached the kernel. Durable state and system instructions together are 38.2%."
+    }
+  ],
+  "operator": {
+    "marks": [],
+    "note": ""
+  },
+  "error": null,
+  "notes": []
+}

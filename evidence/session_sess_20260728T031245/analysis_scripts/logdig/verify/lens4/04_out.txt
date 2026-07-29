@@ -1,0 +1,46 @@
+==============================================================================
+1. JSON schema compliance (parse_ok)
+==============================================================================
+parse_ok counts across 93 candidates: {True: 93}
+parse failures: 0
+required_section:* violations across 93 receipts: NONE
+
+==============================================================================
+2. answer word/char distribution, all 93 candidates
+==============================================================================
+word_count  (n=93): min=1 p25=11.0 median=20.0 p75=37.5 max=73 mean=24.2
+answer chars (n=93): min=13 median=101.0 max=409 mean=143.4
+
+==============================================================================
+3. distance to the 120-word cap (profile.max_answer_words)
+==============================================================================
+CAP = 120 words (orin_nano_8gb profile max_answer_words, clamped into packet.constraints.max_words by edge.enforce_packet_budget)
+answers exceeding 120 words: 0 / 93  -> none
+answers at or above 75% of cap (90 words): 0 / 93 -> []
+max observed word_count all day: 73 (60.8% of the cap)
+max_words_exceeded violations fired in receipts.jsonl: 0 -> none
+
+==============================================================================
+4. think channel: thinking_chars from dashboard telemetry (22 passes)
+==============================================================================
+runtime_config.think value across 19 traced turns: {False: 19}
+telemetry.thinking_chars across 22 traced passes: min=0 max=0 (all-zero: True)
+
+-- scan for literal <think> / reasoning-tag leakage in all 93 raw_text bodies --
+candidates whose raw_text contains a think-tag/keyword match: 0 -> none
+
+==============================================================================
+5. word/char distribution split by confirmed kernel (reuses swap boundary)
+==============================================================================
+
+old (qwen2.5:0.5b, confirmed) (n=50)
+   words: min=1 median=12.0 max=22
+   chars: min=13 median=75.0 max=160
+
+ambiguous window (n=12)
+   words: min=35 median=47.5 max=63
+   chars: min=213 median=280.0 max=371
+
+new (qwen3.5:0.8b think=false, confirmed) (n=31)
+   words: min=7 median=37.0 max=73
+   chars: min=34 median=229.0 max=409

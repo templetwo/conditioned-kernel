@@ -1,0 +1,327 @@
+{
+  "full_93_pass_exact_census": {
+    "passes_with_nonempty_evidence_used": 78,
+    "total_evidence_citations": 170,
+    "matched_implied": 156,
+    "too_short": 0,
+    "miss": 14,
+    "miss_examples_full": [
+      "minimum_viable_model_size: 128 KB",
+      "minimum_viable_model_size",
+      "The system is fully local.",
+      "The system is fully local.",
+      "The system is fully local, so no external models are required.",
+      "The system is fully local, so no external models are required.",
+      "The system is fully local.",
+      "The system is fully local, so no external models are required.",
+      "The system is fully local, so no external models are required.",
+      "The system is fully local, so no external models are required.",
+      "The system is fully local, so no external models are required.",
+      "The active profile is orin_nano_8gb.",
+      "The goal is to demonstrate conditioned-kernel substrate gain over bare generatio",
+      "The system is fully local, so no external models are required."
+    ],
+    "too_short_examples_full": []
+  },
+  "dashboard_22_pass_ground_truth_citation_audit": {
+    "status_counts": {
+      "MATCHED": 27,
+      "MISS": 4
+    },
+    "miss_kind_breakdown": {
+      "truncated": 2,
+      "near": 1,
+      "unrelated": 1
+    },
+    "rows": [
+      {
+        "turn_file": "turn_20260728T190042Z_b47958.json",
+        "pass_index": 0,
+        "citation": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8).",
+        "status": "MATCHED",
+        "reason": "citation is a substring of recent_turns[0].answer",
+        "match_source_key": "recent_turns[0].answer",
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T190042Z_b47958.json",
+        "pass_index": 0,
+        "citation": "The system is fully local, so no external models are required.",
+        "status": "MISS",
+        "reason": "the first 56 characters of this citation are in recent_turns[0].answer, then the stored copy ends in \u2026 \u2014 state._clip_text clipped that answer to 280 chars when it was written to memory",
+        "match_source_key": "recent_turns[0].answer",
+        "kind": "truncated"
+      },
+      {
+        "turn_file": "turn_20260728T190042Z_b47958.json",
+        "pass_index": 1,
+        "citation": "This system is fully local.",
+        "status": "MATCHED",
+        "reason": "citation is a substring of facts[0]",
+        "match_source_key": "facts[0]",
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T190042Z_b47958.json",
+        "pass_index": 1,
+        "citation": "The model is a replaceable linguistic transducer.",
+        "status": "MATCHED",
+        "reason": "citation is a substring of facts[2]",
+        "match_source_key": "facts[2]",
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T190042Z_b47958.json",
+        "pass_index": 1,
+        "citation": "The goal is to demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.",
+        "status": "MATCHED",
+        "reason": "citation is a substring of recent_turns[2].answer",
+        "match_source_key": "recent_turns[2].answer",
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T190118Z_115d1a.json",
+        "pass_index": 0,
+        "citation": "The active profile is orin_nano_8gb.",
+        "status": "MISS",
+        "reason": "first divergence at word 0: cited \u201cthe\u201d vs facts[5] has \u201cactive\u201d",
+        "match_source_key": "facts[5]",
+        "kind": "near"
+      },
+      {
+        "turn_file": "turn_20260728T190118Z_115d1a.json",
+        "pass_index": 0,
+        "citation": "The goal is to demonstrate conditioned-kernel substrate gain over bare generation.",
+        "status": "MISS",
+        "reason": "the closest pool entry is not near-identical \u2014 the citation is not in the packet",
+        "match_source_key": "facts[6]",
+        "kind": "unrelated"
+      },
+      {
+        "turn_file": "turn_20260728T190118Z_115d1a.json",
+        "pass_index": 0,
+        "citation": "The model is a replaceable linguistic transducer.",
+        "status": "MATCHED",
+        "reason": "citation is a substring of facts[2]",
+        "match_source_key": "facts[2]",
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T190118Z_115d1a.json",
+        "pass_index": 0,
+        "citation": "One repair pass is allowed (max=1).",
+        "status": "MATCHED",
+        "reason": "citation is a substring of facts[4]",
+        "match_source_key": "facts[4]",
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T190118Z_115d1a.json",
+        "pass_index": 1,
+        "citation": "This system is fully local.",
+        "status": "MATCHED",
+        "reason": "citation is a substring of facts[0]",
+        "match_source_key": "facts[0]",
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T190118Z_115d1a.json",
+        "pass_index": 1,
+        "citation": "The model is a replaceable linguistic transducer.",
+        "status": "MATCHED",
+        "reason": "citation is a substring of facts[2]",
+        "match_source_key": "facts[2]",
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T190118Z_115d1a.json",
+        "pass_index": 1,
+        "citation": "One repair pass is allowed (max=1).",
+        "status": "MATCHED",
+        "reason": "citation is a substring of facts[4]",
+        "match_source_key": "facts[4]",
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T190222Z_d25ed1.json",
+        "pass_index": 0,
+        "citation": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8).",
+        "status": "MATCHED",
+        "reason": "citation is a substring of recent_turns[0].answer",
+        "match_source_key": "recent_turns[0].answer",
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T190222Z_d25ed1.json",
+        "pass_index": 0,
+        "citation": "The system is fully local, so no external models are required.",
+        "status": "MISS",
+        "reason": "the first 56 characters of this citation are in recent_turns[0].answer, then the stored copy ends in \u2026 \u2014 state._clip_text clipped that answer to 280 chars when it was written to memory",
+        "match_source_key": "recent_turns[0].answer",
+        "kind": "truncated"
+      },
+      {
+        "turn_file": "turn_20260728T190222Z_d25ed1.json",
+        "pass_index": 1,
+        "citation": "This system is fully local.",
+        "status": "MATCHED",
+        "reason": "citation is a substring of facts[0]",
+        "match_source_key": "facts[0]",
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T190222Z_d25ed1.json",
+        "pass_index": 1,
+        "citation": "The model is a replaceable linguistic transducer.",
+        "status": "MATCHED",
+        "reason": "citation is a substring of facts[2]",
+        "match_source_key": "facts[2]",
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T190222Z_d25ed1.json",
+        "pass_index": 1,
+        "citation": "One repair pass is allowed (max=1).",
+        "status": "MATCHED",
+        "reason": "citation is a substring of facts[4]",
+        "match_source_key": "facts[4]",
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T204000Z_1e9dfc.json",
+        "pass_index": 0,
+        "citation": "man i really dont like AI",
+        "status": "MATCHED",
+        "reason": "citation is a substring of recent_turns[0].user",
+        "match_source_key": "recent_turns[0].user",
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T204142Z_3fb087.json",
+        "pass_index": 0,
+        "citation": "im good. just been working on this AI project all day. making good progress. how are things from your seat?",
+        "status": "MATCHED",
+        "reason": "citation is a substring of recent_turns[0].user",
+        "match_source_key": "recent_turns[0].user",
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T204240Z_3b6bf3.json",
+        "pass_index": 0,
+        "citation": "Edge target: jetson_orin_nano_8gb (one model at a time).",
+        "status": "MATCHED",
+        "reason": "matches the packet evidence pool",
+        "match_source_key": null,
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T204240Z_3b6bf3.json",
+        "pass_index": 0,
+        "citation": "Active profile: orin_nano_8gb.",
+        "status": "MATCHED",
+        "reason": "matches the packet evidence pool",
+        "match_source_key": null,
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T204318Z_83e30f.json",
+        "pass_index": 0,
+        "citation": "well now that you ask, its about this program right here. that i am using to talk to you.",
+        "status": "MATCHED",
+        "reason": "citation is a substring of recent_turns[0].user",
+        "match_source_key": "recent_turns[0].user",
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T204411Z_a4a8a6.json",
+        "pass_index": 0,
+        "citation": "Hello! How can I assist you today?",
+        "status": "MATCHED",
+        "reason": "citation is a substring of recent_turns[0].answer",
+        "match_source_key": "recent_turns[0].answer",
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T204523Z_70e4f7.json",
+        "pass_index": 0,
+        "citation": "i think its an interesting project.    yet, im worried",
+        "status": "MATCHED",
+        "reason": "citation is a substring of recent_turns[0].user",
+        "match_source_key": "recent_turns[0].user",
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T204616Z_ed377c.json",
+        "pass_index": 0,
+        "citation": "what model are you",
+        "status": "MATCHED",
+        "reason": "citation is a substring of recent_turns[0].user",
+        "match_source_key": "recent_turns[0].user",
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T204946Z_7ae59a.json",
+        "pass_index": 0,
+        "citation": "Operation is fully local-only; cloud services are not allowed.",
+        "status": "MATCHED",
+        "reason": "citation is a substring of facts[5]",
+        "match_source_key": "facts[5]",
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T205045Z_a611c8.json",
+        "pass_index": 0,
+        "citation": "im worried that the structuture of the project , isnt influencing your responce",
+        "status": "MATCHED",
+        "reason": "citation is a substring of recent_turns[0].user",
+        "match_source_key": "recent_turns[0].user",
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T205115Z_5227d9.json",
+        "pass_index": 0,
+        "citation": "it seems like you are talking to yourself",
+        "status": "MATCHED",
+        "reason": "citation is a substring of recent_turns[0].user",
+        "match_source_key": "recent_turns[0].user",
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T205209Z_ded847.json",
+        "pass_index": 0,
+        "citation": "That's a great observation! I'm ready to dive deeper into your specific material or topic. What's on your mind?",
+        "status": "MATCHED",
+        "reason": "citation is a substring of recent_turns[0].answer",
+        "match_source_key": "recent_turns[0].answer",
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T205257Z_776e78.json",
+        "pass_index": 0,
+        "citation": "what do you think about the file.      # Architecture \u2014 Conditioned Kernel v0  ## Governing sentence  The model supplies linguistic possibility; the substrate determines what becomes an answer.  ## P\u2026",
+        "status": "MATCHED",
+        "reason": "citation is a substring of recent_turns[0].user",
+        "match_source_key": "recent_turns[0].user",
+        "kind": null
+      },
+      {
+        "turn_file": "turn_20260728T205342Z_44a7c5.json",
+        "pass_index": 0,
+        "citation": "what happened last turn",
+        "status": "MATCHED",
+        "reason": "citation is a substring of recent_turns[0].user",
+        "match_source_key": "recent_turns[0].user",
+        "kind": null
+      }
+    ]
+  },
+  "phantom_citation_clustering_full_93": {
+    "note": "classified from the exact violation-string text logged by the real pipeline (evidence_not_in_packet:<item[:80]> / evidence_too_short:<item[:40]>), not from a reconstructed pool.",
+    "miss_examples_classified": {
+      "looks_like_numeric_spec_claim": 1,
+      "looks_like_json_or_thread_key_name": 1,
+      "prose_fragment_not_in_pool": 12
+    },
+    "too_short_examples_classified": {}
+  }
+}

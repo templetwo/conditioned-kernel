@@ -1,0 +1,165 @@
+16 evening (accepted) turns
+
+======================================================================================================================
+(A) packet.recent_turns as actually shipped in the model input, each evening turn
+======================================================================================================================
+ # started_at           user_input                     n_in_packet  pkt.recent_turns bytes  recent_dialogue bucket bytes bucket pct
+-----------------------------------------------------------------------------------------------------------------------------------
+ 1 2026-07-28T20:38:13Z 'hello there'                            0                       2                            18      1.51%
+ 2 2026-07-28T20:40:00Z 'im good. just been working on           1                     332                           348     14.37%
+ 3 2026-07-28T20:41:42Z 'well now that you ask, its ab           1                     350                           366     15.00%
+ 4 2026-07-28T20:42:40Z 'what model are you'                     1                     251                           267     10.59%
+ 5 2026-07-28T20:43:18Z 'iteresting. what do you think           2                     368                           384     16.04%
+ 6 2026-07-28T20:44:11Z 'i think its an interesting pr           1                      70                            86      5.62%
+ 7 2026-07-28T20:45:23Z 'im worried that the structutu           2                     500                           516     17.99%
+ 8 2026-07-28T20:46:16Z 'it seems like you are talking           1                     152                           168      9.60%
+ 9 2026-07-28T20:46:33Z 'interesting'                            0                       2                            18      1.51%
+10 2026-07-28T20:49:46Z 'what do you think about the f           3                     699                           715     12.39%
+11 2026-07-28T20:50:45Z 'what happened last turn'                1                     386                           402     16.64%
+12 2026-07-28T20:51:15Z 'how does it feel from the ins           1                     175                           191     10.61%
+13 2026-07-28T20:52:09Z 'what disturbs that rest'                1                     147                           163      9.59%
+14 2026-07-28T20:52:57Z 'im intersted in where you are           1                     303                           319     14.43%
+15 2026-07-28T20:53:42Z 'i understand. if you could wh           1                     126                           142      8.44%
+16 2026-07-28T20:53:52Z 'thank you'                              0                       2                            18      1.52%
+
+======================================================================================================================
+(B) context_field.available -- true count of dialogue contributions sitting in state
+    before per-turn selection filtering (== len(state.recent_turns()) at compile time)
+======================================================================================================================
+ # started_at           user_input                      available_count  avail. dialogue items  selected_count  selected dialogue items
+---------------------------------------------------------------------------------------------------------------------------------------
+ 1 2026-07-28T20:38:13Z 'hello there'                                15                      3               1                        0
+ 2 2026-07-28T20:40:00Z 'im good. just been working on               16                      4               2                        1
+ 3 2026-07-28T20:41:42Z 'well now that you ask, its ab               16                      4               2                        1
+ 4 2026-07-28T20:42:40Z 'what model are you'                         16                      4               5                        1
+ 5 2026-07-28T20:43:18Z 'iteresting. what do you think               16                      4               3                        2
+ 6 2026-07-28T20:44:11Z 'i think its an interesting pr               17                      5               2                        1
+ 7 2026-07-28T20:45:23Z 'im worried that the structutu               16                      4               3                        2
+ 8 2026-07-28T20:46:16Z 'it seems like you are talking               16                      4               2                        1
+ 9 2026-07-28T20:46:33Z 'interesting'                                17                      5               1                        0
+10 2026-07-28T20:49:46Z 'what do you think about the f               17                      5              13                        3
+11 2026-07-28T20:50:45Z 'what happened last turn'                    16                      4               2                        1
+12 2026-07-28T20:51:15Z 'how does it feel from the ins               16                      4               2                        1
+13 2026-07-28T20:52:09Z 'what disturbs that rest'                    16                      4               2                        1
+14 2026-07-28T20:52:57Z 'im intersted in where you are               16                      4               2                        1
+15 2026-07-28T20:53:42Z 'i understand. if you could wh               16                      4               2                        1
+16 2026-07-28T20:53:52Z 'thank you'                                  16                      4               1                        0
+
+======================================================================================================================
+(B2) selection reasons for every recent_dialogue contribution, each evening turn
+======================================================================================================================
+#1 2026-07-28T20:38:13Z 'hello there'
+     dialogue.turn_0  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_1  selected=False reason=omitted_stale_assistant_boilerplate
+     dialogue.turn_2  selected=False reason=omitted_stale_assistant_boilerplate
+#2 2026-07-28T20:40:00Z 'im good. just been working on this AI project all day. making good progress. how are things from your seat?'
+     dialogue.turn_0  selected=True  reason=selected_latest_dialogue_open_turn
+     dialogue.turn_1  selected=False reason=omitted_stale_assistant_boilerplate
+     dialogue.turn_2  selected=False reason=omitted_stale_assistant_boilerplate
+     dialogue.turn_3  selected=False reason=omitted_dialogue_not_relevant
+#3 2026-07-28T20:41:42Z 'well now that you ask, its about this program right here. that i am using to talk to you.'
+     dialogue.turn_0  selected=False reason=omitted_stale_assistant_boilerplate
+     dialogue.turn_1  selected=False reason=omitted_stale_assistant_boilerplate
+     dialogue.turn_2  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_3  selected=True  reason=selected_dialogue_relevance_overlap=3
+#4 2026-07-28T20:42:40Z 'what model are you'
+     dialogue.turn_0  selected=True  reason=selected_dialogue_relevance_overlap=2
+     dialogue.turn_1  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_2  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_3  selected=False reason=omitted_dialogue_not_relevant
+#5 2026-07-28T20:43:18Z 'iteresting. what do you think about that'
+     dialogue.turn_0  selected=True  reason=selected_latest_dialogue_open_turn
+     dialogue.turn_1  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_2  selected=True  reason=selected_dialogue_relevance_overlap=3
+     dialogue.turn_3  selected=False reason=omitted_dialogue_not_relevant
+#6 2026-07-28T20:44:11Z 'i think its an interesting project.    yet, im worried'
+     dialogue.turn_0  selected=True  reason=selected_latest_dialogue_open_turn
+     dialogue.turn_1  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_2  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_3  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_4  selected=False reason=omitted_dialogue_not_relevant
+#7 2026-07-28T20:45:23Z 'im worried that the structuture of the project , isnt influencing your responce'
+     dialogue.turn_0  selected=True  reason=selected_dialogue_relevance_overlap=2
+     dialogue.turn_1  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_2  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_3  selected=True  reason=selected_dialogue_relevance_overlap=3
+#8 2026-07-28T20:46:16Z 'it seems like you are talking to yourself'
+     dialogue.turn_0  selected=True  reason=selected_latest_dialogue_open_turn
+     dialogue.turn_1  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_2  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_3  selected=False reason=omitted_dialogue_not_relevant
+#9 2026-07-28T20:46:33Z 'interesting'
+     dialogue.turn_0  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_1  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_2  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_3  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_4  selected=False reason=omitted_dialogue_not_relevant
+#10 2026-07-28T20:49:46Z 'what do you think about the file.      # Architecture — Conditioned Kernel v0  ## Governing sentence  The model supplies linguistic possibility; the substrate determines what becomes an answer.  ## Purpose (see `docs/PURPOSE_AND_RIVER.md`)  Build something Anthony wants to live with every day. Laboratory rigor serves that Studio purpose; it does not replace it. Before another refinement cycle: usefulness or honesty — otherwise defer.  ## Edge-first product constraint  Default profile is **`orin_nano_8gb`**. Architecture and defaults assume:  - 8 GB unified memory class - one active quantized model - bounded arrival packets - short context (2048 default) - CPU substrate, model owns scarce memory bandwidth  See `docs/EDGE_SPEC.md` and `configs/edge/`.  ## Circuit  ``` terminal   → substrate_state (filesystem truth)   → compile (arrival packet + model payload)   → generate (Ollama client; stream false)   → return_path        parse → validate → assess        → accept | repair (one pass) | reject   → terminal render   → logs + state deltas ```  ## Module contracts  | Module | Responsibility | Persistence | |---|---|---| | `state` | Load current goal/threads/methods; atomic replace + JSONL append | yes | | `compile` | Select + bound state into `arrival_packet`; build Ollama payload | no | | `generate` | POST `/api/chat` or `/api/generate` | keep-alive only | | `return_path.parse` | Normalize raw text into candidate object | no | | `return_path.validate` | Deterministic schema + closed-set checks | no | | `return_path.assess` | accept / repair / reject | no | | `return_path.repair` | Re-compile with violation annotations | no | | `return_path.accept` | Persist receipts and allowed state deltas | yes | | `cli` | stdin/stdout surface | no |  ## Modes  | Mode | Ollama endpoint | Purpose | |---|---|---| | `chat_json` | `/api/chat` + `format` schema | Default evaluation surface | | `generate_raw` | `/api/generate` + `raw: true` | Substrate-purity: packet is the prompt |  ## State layout  | Path | Pattern | Purpose | |---|---|---| | `state/current.json` | atomic replace | goal, profile, counters | | `state/threads.json` | atomic replace | open / resolved threads | | `state/methods.json` | atomic replace | promoted compile methods | | `logs/history.jsonl` | append | request + packet hash | | `logs/candidates.jsonl` | append | every pass candidate | | `logs/receipts.jsonl` | append | validation/acceptance | | `logs/errors.jsonl` | append | failures |  ## Non-goals (v0)  - Sensors / embodiment - Autonomous tool use - Cloud providers - Streaming to terminal before acceptance - Full Sovereign Stack import - Semantic NLI contradiction models (closed-set checks only)  ## Implementation notes  1. Prefer pure functions over services. 2. Do not score model self-reported confidence. 3. Keep compile in one module until ablations prove select/order/compress axes. 4. One active model at a time on Jetson; short context first.'
+     dialogue.turn_0  selected=True  reason=selected_dialogue_relevance_overlap=4
+     dialogue.turn_1  selected=True  reason=selected_dialogue_relevance_overlap=5
+     dialogue.turn_2  selected=True  reason=selected_dialogue_relevance_overlap=3
+     dialogue.turn_3  selected=False reason=omitted_byte_budget:selected_dialogue_relevance_overlap=6
+     dialogue.turn_4  selected=False reason=omitted_byte_budget:selected_dialogue_relevance_overlap=3
+#11 2026-07-28T20:50:45Z 'what happened last turn'
+     dialogue.turn_0  selected=True  reason=selected_latest_dialogue_open_turn
+     dialogue.turn_1  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_2  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_3  selected=False reason=omitted_dialogue_not_relevant
+#12 2026-07-28T20:51:15Z 'how does it feel from the inside'
+     dialogue.turn_0  selected=True  reason=selected_latest_dialogue_open_turn
+     dialogue.turn_1  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_2  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_3  selected=False reason=omitted_dialogue_not_relevant
+#13 2026-07-28T20:52:09Z 'what disturbs that rest'
+     dialogue.turn_0  selected=True  reason=selected_followup_recent_turn
+     dialogue.turn_1  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_2  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_3  selected=False reason=omitted_dialogue_not_relevant
+#14 2026-07-28T20:52:57Z 'im intersted in where you are going with this'
+     dialogue.turn_0  selected=True  reason=selected_latest_dialogue_open_turn
+     dialogue.turn_1  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_2  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_3  selected=False reason=omitted_dialogue_not_relevant
+#15 2026-07-28T20:53:42Z 'i understand. if you could where would you go?'
+     dialogue.turn_0  selected=True  reason=selected_latest_dialogue_open_turn
+     dialogue.turn_1  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_2  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_3  selected=False reason=omitted_dialogue_not_relevant
+#16 2026-07-28T20:53:52Z 'thank you'
+     dialogue.turn_0  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_1  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_2  selected=False reason=omitted_dialogue_not_relevant
+     dialogue.turn_3  selected=False reason=omitted_dialogue_not_relevant
+
+======================================================================================================================
+(C) independent simulation of state.recent_turns growth via the real pipeline functions
+    (state.fit_recent_turns / state._clip_text / RECENT_TURNS_MAX_BYTES=1200)
+======================================================================================================================
+seed (state.recent_turns as of the last morning packet, 19:00:42Z): 3 entries, 942 bytes
+  seed: {'user': 'man i really dont like AI', 'answer': 'The minimum viable model size on a Jetson Orin Nan...', 'ts': '2026-07-28T03:13:01Z'}
+  seed: {'user': 'what model is this', 'answer': 'The system is fully local, and the active model is...', 'ts': '2026-07-28T03:14:31Z'}
+  seed: {'user': 'what do you know', 'answer': 'The system is fully local, the active model is qwe...', 'ts': '2026-07-28T03:15:35Z'}
+ # user_input                     answer(clip)                    sim state bytes  sim n  cap(1200) hit?
+ 1 'hello there'                  'Hello! How can I assist you to'             1039      4              no
+ 2 'im good. just been working on 'Good to hear! It sounds like y'             1057      4 YES dropped 1 oldest
+ 3 'well now that you ask, its ab "It sounds like you're working "             1079      4 YES dropped 1 oldest
+ 4 'what model are you'           'I am Qwen3.5:0.8b, a local-con'              980      4 YES dropped 1 oldest
+ 5 'iteresting. what do you think "I'm ready to help! What do you"             1120      5              no
+ 6 'i think its an interesting pr 'That sounds like a great proje'              875      4 YES dropped 2 oldest
+ 7 'im worried that the structutu 'Your concern is valid. The str'              962      4 YES dropped 1 oldest
+ 8 'it seems like you are talking 'I am Qwen3.5:0.8b, a local-con'             1164      5              no
+ 9 'interesting'                  "That's a great observation! I'"             1159      5 YES dropped 1 oldest
+10 'what do you think about the f 'No. Cloud services are not all'             1120      4 YES dropped 2 oldest
+11 'what happened last turn'      'I am ready to help you. Please'              860      4 YES dropped 1 oldest
+12 'how does it feel from the ins 'It feels like a quiet, steady '             1023      4 YES dropped 1 oldest
+13 'what disturbs that rest'      'That rest is likely a feeling '             1154      4 YES dropped 1 oldest
+14 'im intersted in where you are 'I am a local-only Conditioned '             1157      4 YES dropped 1 oldest
+15 'i understand. if you could wh 'I am ready to help you. Please'             1180      4 YES dropped 1 oldest
+16 'thank you'                    "Thank you for your message! I'"              949      4 YES dropped 1 oldest
+
+Final simulated state.recent_turns after all 16 evening turns:
+   {'user': 'what disturbs that rest', 'answer': 'That rest is likely a feeling of disconnection, emptiness, or a lack of connection to the present moment. It can also indicate a need for solitude or a desire to disconnect from social interactions. How are you feeling about this?', 'ts': '2026-07-28T20:52:10Z'}
+   {'user': 'im intersted in where you are going with this', 'answer': 'I am a local-only Conditioned Kernel companion. I do not have access to the internet, cloud services, or external files. I cannot navigate to any specific location or provide information outside the scope of this local-only environment.', 'ts': '2026-07-28T20:52:58Z'}
+   {'user': 'i understand. if you could where would you go?', 'answer': 'I am ready to help you. Please provide the details of what happened last turn.', 'ts': '2026-07-28T20:53:43Z'}
+   {'user': 'thank you', 'answer': "Thank you for your message! I'm here to help. How can I assist you today?", 'ts': '2026-07-28T20:53:53Z'}
+  total bytes = 949 (cap = 1200)

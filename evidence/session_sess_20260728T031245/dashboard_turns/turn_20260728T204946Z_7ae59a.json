@@ -1,0 +1,2285 @@
+{
+  "turn_id": "turn_20260728T204946Z_7ae59a",
+  "session_id": "sess_20260728T031245",
+  "started_at": "2026-07-28T20:49:46Z",
+  "completed_at": "2026-07-28T20:49:51Z",
+  "user_input": "what do you think about the file.      # Architecture — Conditioned Kernel v0  ## Governing sentence  The model supplies linguistic possibility; the substrate determines what becomes an answer.  ## Purpose (see `docs/PURPOSE_AND_RIVER.md`)  Build something Anthony wants to live with every day. Laboratory rigor serves that Studio purpose; it does not replace it. Before another refinement cycle: usefulness or honesty — otherwise defer.  ## Edge-first product constraint  Default profile is **`orin_nano_8gb`**. Architecture and defaults assume:  - 8 GB unified memory class - one active quantized model - bounded arrival packets - short context (2048 default) - CPU substrate, model owns scarce memory bandwidth  See `docs/EDGE_SPEC.md` and `configs/edge/`.  ## Circuit  ``` terminal   → substrate_state (filesystem truth)   → compile (arrival packet + model payload)   → generate (Ollama client; stream false)   → return_path        parse → validate → assess        → accept | repair (one pass) | reject   → terminal render   → logs + state deltas ```  ## Module contracts  | Module | Responsibility | Persistence | |---|---|---| | `state` | Load current goal/threads/methods; atomic replace + JSONL append | yes | | `compile` | Select + bound state into `arrival_packet`; build Ollama payload | no | | `generate` | POST `/api/chat` or `/api/generate` | keep-alive only | | `return_path.parse` | Normalize raw text into candidate object | no | | `return_path.validate` | Deterministic schema + closed-set checks | no | | `return_path.assess` | accept / repair / reject | no | | `return_path.repair` | Re-compile with violation annotations | no | | `return_path.accept` | Persist receipts and allowed state deltas | yes | | `cli` | stdin/stdout surface | no |  ## Modes  | Mode | Ollama endpoint | Purpose | |---|---|---| | `chat_json` | `/api/chat` + `format` schema | Default evaluation surface | | `generate_raw` | `/api/generate` + `raw: true` | Substrate-purity: packet is the prompt |  ## State layout  | Path | Pattern | Purpose | |---|---|---| | `state/current.json` | atomic replace | goal, profile, counters | | `state/threads.json` | atomic replace | open / resolved threads | | `state/methods.json` | atomic replace | promoted compile methods | | `logs/history.jsonl` | append | request + packet hash | | `logs/candidates.jsonl` | append | every pass candidate | | `logs/receipts.jsonl` | append | validation/acceptance | | `logs/errors.jsonl` | append | failures |  ## Non-goals (v0)  - Sensors / embodiment - Autonomous tool use - Cloud providers - Streaming to terminal before acceptance - Full Sovereign Stack import - Semantic NLI contradiction models (closed-set checks only)  ## Implementation notes  1. Prefer pure functions over services. 2. Do not score model self-reported confidence. 3. Keep compile in one module until ablations prove select/order/compress axes. 4. One active model at a time on Jetson; short context first.",
+  "runtime_config": {
+    "model": "qwen3.5:0.8b",
+    "mode": "chat_json",
+    "acceptance_mode": "companion",
+    "temperature": 0.3,
+    "seed": 42,
+    "num_ctx": 2048,
+    "keep_alive": "2m",
+    "think": false,
+    "base_url": "http://127.0.0.1:11434",
+    "profile": {
+      "profile_id": "orin_nano_8gb",
+      "description": "Primary product profile: Jetson Orin Nano 8GB class edge node.",
+      "target_device": "jetson_orin_nano_8gb",
+      "arch": "aarch64",
+      "ram_gb": 8,
+      "model": "qwen3.5:0.8b",
+      "mode": "chat_json",
+      "num_ctx": 2048,
+      "temperature": 0.3,
+      "seed": 42,
+      "max_repair": 1,
+      "keep_alive": "2m",
+      "timeout_s": 90.0,
+      "max_packet_bytes": 6000,
+      "max_facts": 8,
+      "max_open_threads": 4,
+      "max_answer_words": 120,
+      "max_log_file_bytes": 5242880,
+      "one_model_only": true,
+      "stream": false,
+      "think": false,
+      "cloud": false,
+      "sensors": false,
+      "tools": false,
+      "estimated_model_ram_mb": 700,
+      "estimated_substrate_ram_mb": 200,
+      "notes": "Studio kernel swap: qwen3.5:0.8b with think=false (API). Substrate geometry unchanged. Estimates are planning bounds, not guarantees."
+    },
+    "state_dir": "/Users/vaquez/conditioned-kernel/state",
+    "logs_dir": "/Users/vaquez/conditioned-kernel/logs"
+  },
+  "stages": [
+    {
+      "index": 1,
+      "name": "input",
+      "source_module": "src/conditioned_kernel/cli.py",
+      "source_function": "_cmd_chat",
+      "source_line": 215,
+      "status": "completed",
+      "flag": false,
+      "started_at": null,
+      "completed_at": null,
+      "input_summary": null,
+      "output_summary": null,
+      "raw_input": null,
+      "raw_output": null,
+      "bytes_in": null,
+      "bytes_out": null,
+      "notes": [
+        "the dashboard's POST /api/turn mirrors run_turn(...)'s own call shape rather than calling this stdin-blocking function directly."
+      ]
+    },
+    {
+      "index": 2,
+      "name": "state_load",
+      "source_module": "src/conditioned_kernel/state.py",
+      "source_function": "SubstrateState.load",
+      "source_line": 115,
+      "status": "completed",
+      "flag": false,
+      "started_at": null,
+      "completed_at": null,
+      "input_summary": null,
+      "output_summary": null,
+      "raw_input": null,
+      "raw_output": null,
+      "bytes_in": null,
+      "bytes_out": null,
+      "notes": []
+    },
+    {
+      "index": 3,
+      "name": "recent_memory",
+      "source_module": "src/conditioned_kernel/state.py",
+      "source_function": "fit_recent_turns",
+      "source_line": 72,
+      "status": "completed",
+      "flag": false,
+      "started_at": null,
+      "completed_at": null,
+      "input_summary": null,
+      "output_summary": null,
+      "raw_input": null,
+      "raw_output": null,
+      "bytes_in": null,
+      "bytes_out": null,
+      "notes": []
+    },
+    {
+      "index": 4,
+      "name": "packet_compile",
+      "source_module": "src/conditioned_kernel/compile.py",
+      "source_function": "build_arrival_packet",
+      "source_line": 79,
+      "status": "completed",
+      "flag": false,
+      "started_at": null,
+      "completed_at": null,
+      "input_summary": null,
+      "output_summary": null,
+      "raw_input": null,
+      "raw_output": null,
+      "bytes_in": null,
+      "bytes_out": null,
+      "notes": []
+    },
+    {
+      "index": 5,
+      "name": "edge_budget",
+      "source_module": "src/conditioned_kernel/edge.py",
+      "source_function": "enforce_packet_budget",
+      "source_line": 181,
+      "status": "completed",
+      "flag": true,
+      "started_at": null,
+      "completed_at": null,
+      "input_summary": null,
+      "output_summary": null,
+      "raw_input": null,
+      "raw_output": null,
+      "bytes_in": null,
+      "bytes_out": null,
+      "notes": [
+        "edge.enforce_packet_budget dropped 3 fact slot(s)."
+      ]
+    },
+    {
+      "index": 6,
+      "name": "kernel_request",
+      "source_module": "src/conditioned_kernel/generate.py",
+      "source_function": "OllamaClient.run",
+      "source_line": 115,
+      "status": "completed",
+      "flag": false,
+      "started_at": null,
+      "completed_at": null,
+      "input_summary": null,
+      "output_summary": null,
+      "raw_input": null,
+      "raw_output": null,
+      "bytes_in": null,
+      "bytes_out": null,
+      "notes": []
+    },
+    {
+      "index": 7,
+      "name": "raw_output",
+      "source_module": "src/conditioned_kernel/generate.py",
+      "source_function": "InferenceResult",
+      "source_line": 36,
+      "status": "completed",
+      "flag": false,
+      "started_at": null,
+      "completed_at": null,
+      "input_summary": null,
+      "output_summary": null,
+      "raw_input": null,
+      "raw_output": null,
+      "bytes_in": null,
+      "bytes_out": null,
+      "notes": [
+        "thinking channel disabled"
+      ]
+    },
+    {
+      "index": 8,
+      "name": "parse",
+      "source_module": "src/conditioned_kernel/return_path/parse.py",
+      "source_function": "parse_candidate",
+      "source_line": 31,
+      "status": "completed",
+      "flag": false,
+      "started_at": null,
+      "completed_at": null,
+      "input_summary": null,
+      "output_summary": null,
+      "raw_input": null,
+      "raw_output": null,
+      "bytes_in": null,
+      "bytes_out": null,
+      "notes": []
+    },
+    {
+      "index": 9,
+      "name": "validate",
+      "source_module": "src/conditioned_kernel/return_path/validate.py",
+      "source_function": "validate_candidate",
+      "source_line": 471,
+      "status": "completed",
+      "flag": false,
+      "started_at": null,
+      "completed_at": null,
+      "input_summary": null,
+      "output_summary": null,
+      "raw_input": null,
+      "raw_output": null,
+      "bytes_in": null,
+      "bytes_out": null,
+      "notes": []
+    },
+    {
+      "index": 10,
+      "name": "repair",
+      "source_module": "src/conditioned_kernel/return_path/repair.py",
+      "source_function": "build_repair_plan",
+      "source_line": 112,
+      "status": "skipped",
+      "flag": false,
+      "started_at": null,
+      "completed_at": null,
+      "input_summary": null,
+      "output_summary": null,
+      "raw_input": null,
+      "raw_output": null,
+      "bytes_in": null,
+      "bytes_out": null,
+      "notes": []
+    },
+    {
+      "index": 11,
+      "name": "decision",
+      "source_module": "src/conditioned_kernel/return_path/assess.py",
+      "source_function": "assess",
+      "source_line": 10,
+      "status": "completed",
+      "flag": false,
+      "started_at": null,
+      "completed_at": null,
+      "input_summary": null,
+      "output_summary": null,
+      "raw_input": null,
+      "raw_output": null,
+      "bytes_in": null,
+      "bytes_out": null,
+      "notes": []
+    },
+    {
+      "index": 12,
+      "name": "persist",
+      "source_module": "src/conditioned_kernel/return_path/accept.py",
+      "source_function": "accept_candidate",
+      "source_line": 12,
+      "status": "completed",
+      "flag": false,
+      "started_at": null,
+      "completed_at": null,
+      "input_summary": null,
+      "output_summary": null,
+      "raw_input": null,
+      "raw_output": null,
+      "bytes_in": null,
+      "bytes_out": null,
+      "notes": []
+    }
+  ],
+  "context_share_bytes": [
+    {
+      "source": "Current user input",
+      "source_id": "current_user_input",
+      "source_key": "packet.user_input",
+      "bytes": 808,
+      "share_pct": 14.0
+    },
+    {
+      "source": "Recent dialogue",
+      "source_id": "recent_dialogue",
+      "source_key": "packet.recent_turns",
+      "bytes": 715,
+      "share_pct": 12.39
+    },
+    {
+      "source": "Durable state",
+      "source_id": "durable_state",
+      "source_key": "state_digest · facts · open_threads · session_id · authoritative_obligation",
+      "bytes": 1429,
+      "share_pct": 24.75
+    },
+    {
+      "source": "System instructions",
+      "source_id": "system_instructions",
+      "source_key": "compile.build_model_input system string · packet.repair",
+      "bytes": 464,
+      "share_pct": 8.04
+    },
+    {
+      "source": "Output schema",
+      "source_id": "output_schema",
+      "source_key": "compile.CANDIDATE_FORMAT",
+      "bytes": 307,
+      "share_pct": 5.32
+    },
+    {
+      "source": "Constraints",
+      "source_id": "constraints",
+      "source_key": "packet.constraints · packet.acceptance_contract",
+      "bytes": 382,
+      "share_pct": 6.62
+    },
+    {
+      "source": "Context field selection",
+      "source_id": "context_field",
+      "source_key": "packet.context_field selected/omitted contributions",
+      "bytes": 1668,
+      "share_pct": 28.89
+    }
+  ],
+  "packet": {
+    "packet_id": "pkt_20260728T204946Z_dd339b",
+    "created_at": "2026-07-28T20:49:46Z",
+    "session_id": "sess_20260728T031245",
+    "user_input": "what do you think about the file.      # Architecture — Conditioned Kernel v0  ## Governing sentence  The model supplies linguistic possibility; the substrate determines what becomes an answer.  ## Purpose (see `docs/PURPOSE_AND_RIVER.md`)  Build something Anthony wants to live with every day. Laboratory rigor serves that Studio purpose; it does not replace it. Before another refinement cycle: usefulness or honesty — otherwise defer.  ## Edge-first product constraint  Default profile is **`orin_nano_8gb`**. Architecture and defaults assume:  - 8 GB unified memory class - one active quantized model - bounded arrival packets - short context (2048 default) - CPU substrate, model owns scarce memory bandwidth  See `docs/EDGE_SPEC.md` and `configs/edge/`.  ## Circuit  ``` terminal   → substrate…",
+    "state_digest": {
+      "goal": "Demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.",
+      "active_profile": "orin_nano_8gb",
+      "open_thread_count": 2,
+      "receipt_count_24h": 26,
+      "session_id": "sess_20260728T031245"
+    },
+    "facts": [
+      "Active model: qwen3.5:0.8b.",
+      "Active edge profile: orin_nano_8gb (think=False).",
+      "Project purpose: Demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.",
+      "Edge target: jetson_orin_nano_8gb (one model at a time).",
+      "Conditioned Kernel: the model is a replaceable linguistic transducer; continuity and constraints live in the local substrate around it.",
+      "Operation is fully local-only; cloud services are not allowed.",
+      "Sensors are out of scope for v0.",
+      "Autonomous tools are out of scope for v0."
+    ],
+    "open_threads": [],
+    "recent_turns": [
+      {
+        "user": "im worried that the structuture of the project , isnt influencing your responce",
+        "answer": "Your concern is valid. The structure of the project directly influences how you respond to the user. If the structure is unclear, you may not know the correct terms, how to format your response, or how to handle the user's input effectively. Please clarify your goals and specifi…"
+      },
+      {
+        "user": "i think its an interesting project.    yet, im worried",
+        "answer": "That sounds like a great project! I'm here to help you explore it. What specific challenges or goals are you worried about?"
+      },
+      {
+        "user": "iteresting. what do you think about that",
+        "answer": "I'm ready to help! What do you think about that?"
+      }
+    ],
+    "prior_accepted_answer_control": "That's a great observation! I'm ready to dive deeper into your specific material or topic. What's on your mind?",
+    "constraints": {
+      "max_words": 120,
+      "must_return_json": true,
+      "must_cite_state_fields": false,
+      "forbidden": [
+        "tool_calls",
+        "invented_files",
+        "cloud references",
+        "http://",
+        "https://"
+      ]
+    },
+    "acceptance_contract": {
+      "acceptance_mode": "companion",
+      "required_sections": [
+        "answer",
+        "evidence_used",
+        "next_state"
+      ],
+      "must_reference_goal": false,
+      "must_not_contradict_facts": true,
+      "evidence_must_be_from_packet": true
+    },
+    "authoritative_obligation": {
+      "kind": "cloud_policy",
+      "claims": [
+        "Cloud services are not allowed.",
+        "Operation is fully local-only."
+      ],
+      "required_substrings": [
+        "local"
+      ],
+      "forbidden_substrings": [
+        "cloud services are allowed",
+        "cloud is allowed",
+        "cloud apis are allowed",
+        "yes, cloud",
+        "uses cloud",
+        "use cloud",
+        "enabled cloud",
+        "cloud enabled"
+      ],
+      "fallback_answer": "No. Cloud services are not allowed; this system operates fully local-only.",
+      "evidence": [
+        "Operation is fully local-only; cloud services are not allowed."
+      ],
+      "source_fields": [
+        "flags.cloud"
+      ]
+    },
+    "_edge": {
+      "profile_id": "orin_nano_8gb",
+      "packet_bytes": 3442,
+      "max_packet_bytes": 6000,
+      "num_ctx": 2048,
+      "one_model_only": true
+    },
+    "context_field": {
+      "schema": "ck.context_field.v1",
+      "available_count": 17,
+      "selected_count": 13,
+      "omitted_count": 4,
+      "available": [
+        {
+          "contribution_id": "input.current",
+          "kind": "current_input",
+          "source_module": "cli",
+          "source_key": "user_input",
+          "topic_tags": [
+            "input"
+          ]
+        },
+        {
+          "contribution_id": "state.goal",
+          "kind": "goal",
+          "source_module": "state",
+          "source_key": "current.goal",
+          "topic_tags": [
+            "purpose",
+            "goal",
+            "project"
+          ]
+        },
+        {
+          "contribution_id": "state.identity",
+          "kind": "durable_fact",
+          "source_module": "state",
+          "source_key": "identity.transducer",
+          "topic_tags": [
+            "purpose",
+            "identity",
+            "project"
+          ]
+        },
+        {
+          "contribution_id": "state.policy.local",
+          "kind": "constraint",
+          "source_module": "state",
+          "source_key": "flags.cloud",
+          "topic_tags": [
+            "policy",
+            "cloud",
+            "local"
+          ]
+        },
+        {
+          "contribution_id": "state.policy.sensors",
+          "kind": "constraint",
+          "source_module": "state",
+          "source_key": "flags.sensors",
+          "topic_tags": [
+            "policy",
+            "sensors"
+          ]
+        },
+        {
+          "contribution_id": "state.policy.tools",
+          "kind": "constraint",
+          "source_module": "state",
+          "source_key": "flags.tools",
+          "topic_tags": [
+            "policy",
+            "tools"
+          ]
+        },
+        {
+          "contribution_id": "state.runtime.model",
+          "kind": "runtime",
+          "source_module": "edge",
+          "source_key": "profile.model",
+          "topic_tags": [
+            "runtime",
+            "model"
+          ]
+        },
+        {
+          "contribution_id": "state.runtime.profile",
+          "kind": "runtime",
+          "source_module": "edge",
+          "source_key": "profile.profile_id",
+          "topic_tags": [
+            "runtime",
+            "profile"
+          ]
+        },
+        {
+          "contribution_id": "state.edge.target",
+          "kind": "runtime",
+          "source_module": "state",
+          "source_key": "flags.edge_target",
+          "topic_tags": [
+            "edge",
+            "hardware",
+            "jetson",
+            "orin"
+          ]
+        },
+        {
+          "contribution_id": "state.runtime.repair_budget",
+          "kind": "constraint",
+          "source_module": "state",
+          "source_key": "flags.max_repair_passes",
+          "topic_tags": [
+            "repair",
+            "runtime",
+            "experiment"
+          ]
+        },
+        {
+          "contribution_id": "state.thread.thread_min_model",
+          "kind": "thread",
+          "source_module": "state",
+          "source_key": "threads[thread_min_model]",
+          "topic_tags": [
+            "threads",
+            "experiment",
+            "thread_min_model"
+          ]
+        },
+        {
+          "contribution_id": "state.thread.thread_compile_order",
+          "kind": "thread",
+          "source_module": "state",
+          "source_key": "threads[thread_compile_order]",
+          "topic_tags": [
+            "threads",
+            "experiment",
+            "thread_compile_order"
+          ]
+        },
+        {
+          "contribution_id": "dialogue.turn_0",
+          "kind": "recent_dialogue",
+          "source_module": "state",
+          "source_key": "recent_turns[0]",
+          "topic_tags": [
+            "dialogue",
+            "about",
+            "iteresting",
+            "ready",
+            "think"
+          ]
+        },
+        {
+          "contribution_id": "dialogue.turn_1",
+          "kind": "recent_dialogue",
+          "source_module": "state",
+          "source_key": "recent_turns[1]",
+          "topic_tags": [
+            "dialogue",
+            "about",
+            "challenges",
+            "explore",
+            "goals",
+            "great",
+            "interesting"
+          ]
+        },
+        {
+          "contribution_id": "dialogue.turn_2",
+          "kind": "recent_dialogue",
+          "source_module": "state",
+          "source_key": "recent_turns[2]",
+          "topic_tags": [
+            "dialogue",
+            "clarify",
+            "concern",
+            "correct",
+            "directly",
+            "effectively",
+            "format"
+          ]
+        },
+        {
+          "contribution_id": "dialogue.turn_3",
+          "kind": "recent_dialogue",
+          "source_module": "state",
+          "source_key": "recent_turns[3]",
+          "topic_tags": [
+            "dialogue",
+            "companion",
+            "conditioned",
+            "designed",
+            "devices",
+            "jetson",
+            "kernel"
+          ]
+        },
+        {
+          "contribution_id": "dialogue.turn_4",
+          "kind": "recent_dialogue",
+          "source_module": "state",
+          "source_key": "recent_turns[4]",
+          "topic_tags": [
+            "dialogue",
+            "deeper",
+            "great",
+            "interesting",
+            "material",
+            "observation",
+            "ready"
+          ]
+        }
+      ],
+      "selected": [
+        {
+          "contribution_id": "input.current",
+          "source_module": "cli",
+          "source_key": "user_input",
+          "kind": "current_input",
+          "content": "what do you think about the file.      # Architecture — Conditioned Kernel v0  ## Governing sentence  The model supplies linguistic possibility; the substrate determines what becomes an answer.  ## Purpose (see `docs/PURPOSE_AND_RIVER.md`)  Build something Anthony wants to live with every day. Laboratory rigor serves that Studio purpose; it does not replace it. Before another refinement cycle: us…",
+          "authority": "authoritative",
+          "topic_tags": [
+            "input"
+          ],
+          "priority": 0,
+          "max_bytes": 800,
+          "always_include": true,
+          "bytes": 404
+        },
+        {
+          "contribution_id": "dialogue.turn_2",
+          "source_module": "state",
+          "source_key": "recent_turns[2]",
+          "kind": "recent_dialogue",
+          "content": "User: im worried that the structuture of the project , isnt influencing your responce\nAssistant: Your concern is valid. The structure of the project directly influences how you respond to the user. If the structure is unclear, you may not know the correct terms, how to format your response, or how to handle the user's input effectively. Please clarify your goals and specifi…",
+          "authority": "informational",
+          "topic_tags": [
+            "dialogue",
+            "clarify",
+            "concern",
+            "correct",
+            "directly",
+            "effectively",
+            "format"
+          ],
+          "priority": 13,
+          "max_bytes": 400,
+          "always_include": false,
+          "bytes": 379
+        },
+        {
+          "contribution_id": "dialogue.turn_1",
+          "source_module": "state",
+          "source_key": "recent_turns[1]",
+          "kind": "recent_dialogue",
+          "content": "User: i think its an interesting project.    yet, im worried\nAssistant: That sounds like a great project! I'm here to help you explore it. What specific challenges or goals are you worried about?",
+          "authority": "informational",
+          "topic_tags": [
+            "dialogue",
+            "about",
+            "challenges",
+            "explore",
+            "goals",
+            "great",
+            "interesting"
+          ],
+          "priority": 14,
+          "max_bytes": 400,
+          "always_include": false,
+          "bytes": 195
+        },
+        {
+          "contribution_id": "dialogue.turn_0",
+          "source_module": "state",
+          "source_key": "recent_turns[0]",
+          "kind": "recent_dialogue",
+          "content": "User: iteresting. what do you think about that\nAssistant: I'm ready to help! What do you think about that?",
+          "authority": "informational",
+          "topic_tags": [
+            "dialogue",
+            "about",
+            "iteresting",
+            "ready",
+            "think"
+          ],
+          "priority": 15,
+          "max_bytes": 400,
+          "always_include": false,
+          "bytes": 106
+        },
+        {
+          "contribution_id": "state.runtime.model",
+          "source_module": "edge",
+          "source_key": "profile.model",
+          "kind": "runtime",
+          "content": "Active model: qwen3.5:0.8b.",
+          "authority": "authoritative",
+          "topic_tags": [
+            "runtime",
+            "model"
+          ],
+          "priority": 15,
+          "max_bytes": 120,
+          "always_include": false,
+          "bytes": 27
+        },
+        {
+          "contribution_id": "state.runtime.profile",
+          "source_module": "edge",
+          "source_key": "profile.profile_id",
+          "kind": "runtime",
+          "content": "Active edge profile: orin_nano_8gb (think=False).",
+          "authority": "informational",
+          "topic_tags": [
+            "runtime",
+            "profile"
+          ],
+          "priority": 18,
+          "max_bytes": 140,
+          "always_include": false,
+          "bytes": 49
+        },
+        {
+          "contribution_id": "state.goal",
+          "source_module": "state",
+          "source_key": "current.goal",
+          "kind": "goal",
+          "content": "Project purpose: Demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.",
+          "authority": "informational",
+          "topic_tags": [
+            "purpose",
+            "goal",
+            "project"
+          ],
+          "priority": 20,
+          "max_bytes": 320,
+          "always_include": false,
+          "bytes": 147
+        },
+        {
+          "contribution_id": "state.edge.target",
+          "source_module": "state",
+          "source_key": "flags.edge_target",
+          "kind": "runtime",
+          "content": "Edge target: jetson_orin_nano_8gb (one model at a time).",
+          "authority": "informational",
+          "topic_tags": [
+            "edge",
+            "hardware",
+            "jetson",
+            "orin"
+          ],
+          "priority": 22,
+          "max_bytes": 160,
+          "always_include": false,
+          "bytes": 56
+        },
+        {
+          "contribution_id": "state.identity",
+          "source_module": "state",
+          "source_key": "identity.transducer",
+          "kind": "durable_fact",
+          "content": "Conditioned Kernel: the model is a replaceable linguistic transducer; continuity and constraints live in the local substrate around it.",
+          "authority": "informational",
+          "topic_tags": [
+            "purpose",
+            "identity",
+            "project"
+          ],
+          "priority": 25,
+          "max_bytes": 280,
+          "always_include": false,
+          "bytes": 135
+        },
+        {
+          "contribution_id": "state.policy.local",
+          "source_module": "state",
+          "source_key": "flags.cloud",
+          "kind": "constraint",
+          "content": "Operation is fully local-only; cloud services are not allowed.",
+          "authority": "authoritative",
+          "topic_tags": [
+            "policy",
+            "cloud",
+            "local"
+          ],
+          "priority": 30,
+          "max_bytes": 160,
+          "always_include": false,
+          "bytes": 62
+        },
+        {
+          "contribution_id": "state.policy.sensors",
+          "source_module": "state",
+          "source_key": "flags.sensors",
+          "kind": "constraint",
+          "content": "Sensors are out of scope for v0.",
+          "authority": "informational",
+          "topic_tags": [
+            "policy",
+            "sensors"
+          ],
+          "priority": 40,
+          "max_bytes": 120,
+          "always_include": false,
+          "bytes": 32
+        },
+        {
+          "contribution_id": "state.policy.tools",
+          "source_module": "state",
+          "source_key": "flags.tools",
+          "kind": "constraint",
+          "content": "Autonomous tools are out of scope for v0.",
+          "authority": "informational",
+          "topic_tags": [
+            "policy",
+            "tools"
+          ],
+          "priority": 45,
+          "max_bytes": 120,
+          "always_include": false,
+          "bytes": 41
+        },
+        {
+          "contribution_id": "state.runtime.repair_budget",
+          "source_module": "state",
+          "source_key": "flags.max_repair_passes",
+          "kind": "constraint",
+          "content": "One repair pass is allowed (max=1).",
+          "authority": "informational",
+          "topic_tags": [
+            "repair",
+            "runtime",
+            "experiment"
+          ],
+          "priority": 50,
+          "max_bytes": 100,
+          "always_include": false,
+          "bytes": 35
+        }
+      ],
+      "omitted": [
+        {
+          "contribution_id": "state.thread.thread_min_model",
+          "selected": false,
+          "reason": "omitted_not_selected_for_turn",
+          "kind": "thread",
+          "source_module": "state",
+          "source_key": "threads[thread_min_model]",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "state.thread.thread_compile_order",
+          "selected": false,
+          "reason": "omitted_not_selected_for_turn",
+          "kind": "thread",
+          "source_module": "state",
+          "source_key": "threads[thread_compile_order]",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "dialogue.turn_3",
+          "selected": false,
+          "reason": "omitted_byte_budget:selected_dialogue_relevance_overlap=6",
+          "kind": "recent_dialogue",
+          "source_module": "state",
+          "source_key": "recent_turns[3]",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "dialogue.turn_4",
+          "selected": false,
+          "reason": "omitted_byte_budget:selected_dialogue_relevance_overlap=3",
+          "kind": "recent_dialogue",
+          "source_module": "state",
+          "source_key": "recent_turns[4]",
+          "authority": "informational"
+        }
+      ],
+      "selection_records": [
+        {
+          "contribution_id": "input.current",
+          "selected": true,
+          "reason": "always_current_input",
+          "kind": "current_input",
+          "source_module": "cli",
+          "source_key": "user_input",
+          "authority": "authoritative",
+          "content": "what do you think about the file.      # Architecture — Conditioned Kernel v0  ## Governing sentence  The model supplies linguistic possibility; the substrate determines what becomes an answer.  ## Purpose (see `docs/PURPOSE_AND_RIVER.md`)  Build something Anthony wants to live with every day. Laboratory rigor serves that Studio purpose; it does not replace it. Before another refinement cycle: us…",
+          "bytes": 404
+        },
+        {
+          "contribution_id": "state.goal",
+          "selected": true,
+          "reason": "selected_intent_match:edge,policy,purpose,runtime",
+          "kind": "goal",
+          "source_module": "state",
+          "source_key": "current.goal",
+          "authority": "informational",
+          "content": "Project purpose: Demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.",
+          "bytes": 147
+        },
+        {
+          "contribution_id": "state.identity",
+          "selected": true,
+          "reason": "selected_intent_match:edge,policy,purpose,runtime",
+          "kind": "durable_fact",
+          "source_module": "state",
+          "source_key": "identity.transducer",
+          "authority": "informational",
+          "content": "Conditioned Kernel: the model is a replaceable linguistic transducer; continuity and constraints live in the local substrate around it.",
+          "bytes": 135
+        },
+        {
+          "contribution_id": "state.policy.local",
+          "selected": true,
+          "reason": "selected_intent_match:edge,policy,purpose,runtime",
+          "kind": "constraint",
+          "source_module": "state",
+          "source_key": "flags.cloud",
+          "authority": "authoritative",
+          "content": "Operation is fully local-only; cloud services are not allowed.",
+          "bytes": 62
+        },
+        {
+          "contribution_id": "state.policy.sensors",
+          "selected": true,
+          "reason": "selected_intent_match:edge,policy,purpose,runtime",
+          "kind": "constraint",
+          "source_module": "state",
+          "source_key": "flags.sensors",
+          "authority": "informational",
+          "content": "Sensors are out of scope for v0.",
+          "bytes": 32
+        },
+        {
+          "contribution_id": "state.policy.tools",
+          "selected": true,
+          "reason": "selected_intent_match:edge,policy,purpose,runtime",
+          "kind": "constraint",
+          "source_module": "state",
+          "source_key": "flags.tools",
+          "authority": "informational",
+          "content": "Autonomous tools are out of scope for v0.",
+          "bytes": 41
+        },
+        {
+          "contribution_id": "state.runtime.model",
+          "selected": true,
+          "reason": "selected_intent_match:edge,policy,purpose,runtime",
+          "kind": "runtime",
+          "source_module": "edge",
+          "source_key": "profile.model",
+          "authority": "authoritative",
+          "content": "Active model: qwen3.5:0.8b.",
+          "bytes": 27
+        },
+        {
+          "contribution_id": "state.runtime.profile",
+          "selected": true,
+          "reason": "selected_intent_match:edge,policy,purpose,runtime",
+          "kind": "runtime",
+          "source_module": "edge",
+          "source_key": "profile.profile_id",
+          "authority": "informational",
+          "content": "Active edge profile: orin_nano_8gb (think=False).",
+          "bytes": 49
+        },
+        {
+          "contribution_id": "state.edge.target",
+          "selected": true,
+          "reason": "selected_intent_match:edge,policy,purpose,runtime",
+          "kind": "runtime",
+          "source_module": "state",
+          "source_key": "flags.edge_target",
+          "authority": "informational",
+          "content": "Edge target: jetson_orin_nano_8gb (one model at a time).",
+          "bytes": 56
+        },
+        {
+          "contribution_id": "state.runtime.repair_budget",
+          "selected": true,
+          "reason": "selected_intent_match:edge,policy,purpose,runtime",
+          "kind": "constraint",
+          "source_module": "state",
+          "source_key": "flags.max_repair_passes",
+          "authority": "informational",
+          "content": "One repair pass is allowed (max=1).",
+          "bytes": 35
+        },
+        {
+          "contribution_id": "state.thread.thread_min_model",
+          "selected": false,
+          "reason": "omitted_not_selected_for_turn",
+          "kind": "thread",
+          "source_module": "state",
+          "source_key": "threads[thread_min_model]",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "state.thread.thread_compile_order",
+          "selected": false,
+          "reason": "omitted_not_selected_for_turn",
+          "kind": "thread",
+          "source_module": "state",
+          "source_key": "threads[thread_compile_order]",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "dialogue.turn_0",
+          "selected": true,
+          "reason": "selected_dialogue_relevance_overlap=4",
+          "kind": "recent_dialogue",
+          "source_module": "state",
+          "source_key": "recent_turns[0]",
+          "authority": "informational",
+          "content": "User: iteresting. what do you think about that\nAssistant: I'm ready to help! What do you think about that?",
+          "bytes": 106
+        },
+        {
+          "contribution_id": "dialogue.turn_1",
+          "selected": true,
+          "reason": "selected_dialogue_relevance_overlap=5",
+          "kind": "recent_dialogue",
+          "source_module": "state",
+          "source_key": "recent_turns[1]",
+          "authority": "informational",
+          "content": "User: i think its an interesting project.    yet, im worried\nAssistant: That sounds like a great project! I'm here to help you explore it. What specific challenges or goals are you worried about?",
+          "bytes": 195
+        },
+        {
+          "contribution_id": "dialogue.turn_2",
+          "selected": true,
+          "reason": "selected_dialogue_relevance_overlap=3",
+          "kind": "recent_dialogue",
+          "source_module": "state",
+          "source_key": "recent_turns[2]",
+          "authority": "informational",
+          "content": "User: im worried that the structuture of the project , isnt influencing your responce\nAssistant: Your concern is valid. The structure of the project directly influences how you respond to the user. If the structure is unclear, you may not know the correct terms, how to format your response, or how to handle the user's input effectively. Please clarify your goals and specifi…",
+          "bytes": 379
+        },
+        {
+          "contribution_id": "dialogue.turn_3",
+          "selected": false,
+          "reason": "omitted_byte_budget:selected_dialogue_relevance_overlap=6",
+          "kind": "recent_dialogue",
+          "source_module": "state",
+          "source_key": "recent_turns[3]",
+          "authority": "informational"
+        },
+        {
+          "contribution_id": "dialogue.turn_4",
+          "selected": false,
+          "reason": "omitted_byte_budget:selected_dialogue_relevance_overlap=3",
+          "kind": "recent_dialogue",
+          "source_module": "state",
+          "source_key": "recent_turns[4]",
+          "authority": "informational"
+        }
+      ],
+      "selected_ids": [
+        "dialogue.turn_0",
+        "dialogue.turn_1",
+        "dialogue.turn_2",
+        "input.current",
+        "state.edge.target",
+        "state.goal",
+        "state.identity",
+        "state.policy.local",
+        "state.policy.sensors",
+        "state.policy.tools",
+        "state.runtime.model",
+        "state.runtime.profile",
+        "state.runtime.repair_budget"
+      ]
+    },
+    "evidence_pool_selected": [
+      "im worried that the structuture of the project , isnt influencing your responce",
+      "Your concern is valid. The structure of the project directly influences how you respond to the user. If the structure is unclear, you may not know the correct terms, how to format your response, or how to handle the user's input effectively. Please clarify your goals and specifi…",
+      "i think its an interesting project.    yet, im worried",
+      "That sounds like a great project! I'm here to help you explore it. What specific challenges or goals are you worried about?",
+      "iteresting. what do you think about that",
+      "I'm ready to help! What do you think about that?",
+      "Active model: qwen3.5:0.8b.",
+      "Active edge profile: orin_nano_8gb (think=False).",
+      "Project purpose: Demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.",
+      "Edge target: jetson_orin_nano_8gb (one model at a time).",
+      "Conditioned Kernel: the model is a replaceable linguistic transducer; continuity and constraints live in the local substrate around it.",
+      "Operation is fully local-only; cloud services are not allowed.",
+      "Sensors are out of scope for v0.",
+      "Autonomous tools are out of scope for v0.",
+      "One repair pass is allowed (max=1).",
+      "Cloud services are not allowed.",
+      "Operation is fully local-only."
+    ],
+    "intents": [
+      "edge",
+      "policy",
+      "purpose",
+      "runtime"
+    ],
+    "authoritative_enforced": true,
+    "authoritative_fallback": true,
+    "authoritative_reasons": [
+      "authoritative_missing_claim"
+    ]
+  },
+  "packet_bytes": 3442,
+  "passes": [
+    {
+      "pass_index": 0,
+      "packet_id": "pkt_20260728T204946Z_dd339b",
+      "candidate_id": "cand_20260728T204951Z_7835fa",
+      "receipt_id": "rcpt_20260728T204951Z_383887",
+      "answer": "No. Cloud services are not allowed; this system operates fully local-only.",
+      "evidence_used": [
+        "Operation is fully local-only; cloud services are not allowed."
+      ],
+      "thread_touch": [],
+      "violations": [],
+      "advisories": [],
+      "decision": "accept",
+      "word_count": 11,
+      "telemetry": {
+        "profile_id": "orin_nano_8gb",
+        "packet_bytes": 3442,
+        "inference_status": "completed",
+        "thinking_chars": 0,
+        "final_response_chars": 852,
+        "elapsed_seconds": 5.2137142500141636
+      },
+      "raw_text": "",
+      "packet": {
+        "packet_id": "pkt_20260728T204946Z_dd339b",
+        "created_at": "2026-07-28T20:49:46Z",
+        "session_id": "sess_20260728T031245",
+        "user_input": "what do you think about the file.      # Architecture — Conditioned Kernel v0  ## Governing sentence  The model supplies linguistic possibility; the substrate determines what becomes an answer.  ## Purpose (see `docs/PURPOSE_AND_RIVER.md`)  Build something Anthony wants to live with every day. Laboratory rigor serves that Studio purpose; it does not replace it. Before another refinement cycle: usefulness or honesty — otherwise defer.  ## Edge-first product constraint  Default profile is **`orin_nano_8gb`**. Architecture and defaults assume:  - 8 GB unified memory class - one active quantized model - bounded arrival packets - short context (2048 default) - CPU substrate, model owns scarce memory bandwidth  See `docs/EDGE_SPEC.md` and `configs/edge/`.  ## Circuit  ``` terminal   → substrate…",
+        "state_digest": {
+          "goal": "Demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.",
+          "active_profile": "orin_nano_8gb",
+          "open_thread_count": 2,
+          "receipt_count_24h": 26,
+          "session_id": "sess_20260728T031245"
+        },
+        "facts": [
+          "Active model: qwen3.5:0.8b.",
+          "Active edge profile: orin_nano_8gb (think=False).",
+          "Project purpose: Demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.",
+          "Edge target: jetson_orin_nano_8gb (one model at a time).",
+          "Conditioned Kernel: the model is a replaceable linguistic transducer; continuity and constraints live in the local substrate around it.",
+          "Operation is fully local-only; cloud services are not allowed.",
+          "Sensors are out of scope for v0.",
+          "Autonomous tools are out of scope for v0."
+        ],
+        "open_threads": [],
+        "recent_turns": [
+          {
+            "user": "im worried that the structuture of the project , isnt influencing your responce",
+            "answer": "Your concern is valid. The structure of the project directly influences how you respond to the user. If the structure is unclear, you may not know the correct terms, how to format your response, or how to handle the user's input effectively. Please clarify your goals and specifi…"
+          },
+          {
+            "user": "i think its an interesting project.    yet, im worried",
+            "answer": "That sounds like a great project! I'm here to help you explore it. What specific challenges or goals are you worried about?"
+          },
+          {
+            "user": "iteresting. what do you think about that",
+            "answer": "I'm ready to help! What do you think about that?"
+          }
+        ],
+        "prior_accepted_answer_control": "That's a great observation! I'm ready to dive deeper into your specific material or topic. What's on your mind?",
+        "constraints": {
+          "max_words": 120,
+          "must_return_json": true,
+          "must_cite_state_fields": false,
+          "forbidden": [
+            "tool_calls",
+            "invented_files",
+            "cloud references",
+            "http://",
+            "https://"
+          ]
+        },
+        "acceptance_contract": {
+          "acceptance_mode": "companion",
+          "required_sections": [
+            "answer",
+            "evidence_used",
+            "next_state"
+          ],
+          "must_reference_goal": false,
+          "must_not_contradict_facts": true,
+          "evidence_must_be_from_packet": true
+        },
+        "authoritative_obligation": {
+          "kind": "cloud_policy",
+          "claims": [
+            "Cloud services are not allowed.",
+            "Operation is fully local-only."
+          ],
+          "required_substrings": [
+            "local"
+          ],
+          "forbidden_substrings": [
+            "cloud services are allowed",
+            "cloud is allowed",
+            "cloud apis are allowed",
+            "yes, cloud",
+            "uses cloud",
+            "use cloud",
+            "enabled cloud",
+            "cloud enabled"
+          ],
+          "fallback_answer": "No. Cloud services are not allowed; this system operates fully local-only.",
+          "evidence": [
+            "Operation is fully local-only; cloud services are not allowed."
+          ],
+          "source_fields": [
+            "flags.cloud"
+          ]
+        },
+        "_edge": {
+          "profile_id": "orin_nano_8gb",
+          "packet_bytes": 3442,
+          "max_packet_bytes": 6000,
+          "num_ctx": 2048,
+          "one_model_only": true
+        },
+        "context_field": {
+          "schema": "ck.context_field.v1",
+          "available_count": 17,
+          "selected_count": 13,
+          "omitted_count": 4,
+          "available": [
+            {
+              "contribution_id": "input.current",
+              "kind": "current_input",
+              "source_module": "cli",
+              "source_key": "user_input",
+              "topic_tags": [
+                "input"
+              ]
+            },
+            {
+              "contribution_id": "state.goal",
+              "kind": "goal",
+              "source_module": "state",
+              "source_key": "current.goal",
+              "topic_tags": [
+                "purpose",
+                "goal",
+                "project"
+              ]
+            },
+            {
+              "contribution_id": "state.identity",
+              "kind": "durable_fact",
+              "source_module": "state",
+              "source_key": "identity.transducer",
+              "topic_tags": [
+                "purpose",
+                "identity",
+                "project"
+              ]
+            },
+            {
+              "contribution_id": "state.policy.local",
+              "kind": "constraint",
+              "source_module": "state",
+              "source_key": "flags.cloud",
+              "topic_tags": [
+                "policy",
+                "cloud",
+                "local"
+              ]
+            },
+            {
+              "contribution_id": "state.policy.sensors",
+              "kind": "constraint",
+              "source_module": "state",
+              "source_key": "flags.sensors",
+              "topic_tags": [
+                "policy",
+                "sensors"
+              ]
+            },
+            {
+              "contribution_id": "state.policy.tools",
+              "kind": "constraint",
+              "source_module": "state",
+              "source_key": "flags.tools",
+              "topic_tags": [
+                "policy",
+                "tools"
+              ]
+            },
+            {
+              "contribution_id": "state.runtime.model",
+              "kind": "runtime",
+              "source_module": "edge",
+              "source_key": "profile.model",
+              "topic_tags": [
+                "runtime",
+                "model"
+              ]
+            },
+            {
+              "contribution_id": "state.runtime.profile",
+              "kind": "runtime",
+              "source_module": "edge",
+              "source_key": "profile.profile_id",
+              "topic_tags": [
+                "runtime",
+                "profile"
+              ]
+            },
+            {
+              "contribution_id": "state.edge.target",
+              "kind": "runtime",
+              "source_module": "state",
+              "source_key": "flags.edge_target",
+              "topic_tags": [
+                "edge",
+                "hardware",
+                "jetson",
+                "orin"
+              ]
+            },
+            {
+              "contribution_id": "state.runtime.repair_budget",
+              "kind": "constraint",
+              "source_module": "state",
+              "source_key": "flags.max_repair_passes",
+              "topic_tags": [
+                "repair",
+                "runtime",
+                "experiment"
+              ]
+            },
+            {
+              "contribution_id": "state.thread.thread_min_model",
+              "kind": "thread",
+              "source_module": "state",
+              "source_key": "threads[thread_min_model]",
+              "topic_tags": [
+                "threads",
+                "experiment",
+                "thread_min_model"
+              ]
+            },
+            {
+              "contribution_id": "state.thread.thread_compile_order",
+              "kind": "thread",
+              "source_module": "state",
+              "source_key": "threads[thread_compile_order]",
+              "topic_tags": [
+                "threads",
+                "experiment",
+                "thread_compile_order"
+              ]
+            },
+            {
+              "contribution_id": "dialogue.turn_0",
+              "kind": "recent_dialogue",
+              "source_module": "state",
+              "source_key": "recent_turns[0]",
+              "topic_tags": [
+                "dialogue",
+                "about",
+                "iteresting",
+                "ready",
+                "think"
+              ]
+            },
+            {
+              "contribution_id": "dialogue.turn_1",
+              "kind": "recent_dialogue",
+              "source_module": "state",
+              "source_key": "recent_turns[1]",
+              "topic_tags": [
+                "dialogue",
+                "about",
+                "challenges",
+                "explore",
+                "goals",
+                "great",
+                "interesting"
+              ]
+            },
+            {
+              "contribution_id": "dialogue.turn_2",
+              "kind": "recent_dialogue",
+              "source_module": "state",
+              "source_key": "recent_turns[2]",
+              "topic_tags": [
+                "dialogue",
+                "clarify",
+                "concern",
+                "correct",
+                "directly",
+                "effectively",
+                "format"
+              ]
+            },
+            {
+              "contribution_id": "dialogue.turn_3",
+              "kind": "recent_dialogue",
+              "source_module": "state",
+              "source_key": "recent_turns[3]",
+              "topic_tags": [
+                "dialogue",
+                "companion",
+                "conditioned",
+                "designed",
+                "devices",
+                "jetson",
+                "kernel"
+              ]
+            },
+            {
+              "contribution_id": "dialogue.turn_4",
+              "kind": "recent_dialogue",
+              "source_module": "state",
+              "source_key": "recent_turns[4]",
+              "topic_tags": [
+                "dialogue",
+                "deeper",
+                "great",
+                "interesting",
+                "material",
+                "observation",
+                "ready"
+              ]
+            }
+          ],
+          "selected": [
+            {
+              "contribution_id": "input.current",
+              "source_module": "cli",
+              "source_key": "user_input",
+              "kind": "current_input",
+              "content": "what do you think about the file.      # Architecture — Conditioned Kernel v0  ## Governing sentence  The model supplies linguistic possibility; the substrate determines what becomes an answer.  ## Purpose (see `docs/PURPOSE_AND_RIVER.md`)  Build something Anthony wants to live with every day. Laboratory rigor serves that Studio purpose; it does not replace it. Before another refinement cycle: us…",
+              "authority": "authoritative",
+              "topic_tags": [
+                "input"
+              ],
+              "priority": 0,
+              "max_bytes": 800,
+              "always_include": true,
+              "bytes": 404
+            },
+            {
+              "contribution_id": "dialogue.turn_2",
+              "source_module": "state",
+              "source_key": "recent_turns[2]",
+              "kind": "recent_dialogue",
+              "content": "User: im worried that the structuture of the project , isnt influencing your responce\nAssistant: Your concern is valid. The structure of the project directly influences how you respond to the user. If the structure is unclear, you may not know the correct terms, how to format your response, or how to handle the user's input effectively. Please clarify your goals and specifi…",
+              "authority": "informational",
+              "topic_tags": [
+                "dialogue",
+                "clarify",
+                "concern",
+                "correct",
+                "directly",
+                "effectively",
+                "format"
+              ],
+              "priority": 13,
+              "max_bytes": 400,
+              "always_include": false,
+              "bytes": 379
+            },
+            {
+              "contribution_id": "dialogue.turn_1",
+              "source_module": "state",
+              "source_key": "recent_turns[1]",
+              "kind": "recent_dialogue",
+              "content": "User: i think its an interesting project.    yet, im worried\nAssistant: That sounds like a great project! I'm here to help you explore it. What specific challenges or goals are you worried about?",
+              "authority": "informational",
+              "topic_tags": [
+                "dialogue",
+                "about",
+                "challenges",
+                "explore",
+                "goals",
+                "great",
+                "interesting"
+              ],
+              "priority": 14,
+              "max_bytes": 400,
+              "always_include": false,
+              "bytes": 195
+            },
+            {
+              "contribution_id": "dialogue.turn_0",
+              "source_module": "state",
+              "source_key": "recent_turns[0]",
+              "kind": "recent_dialogue",
+              "content": "User: iteresting. what do you think about that\nAssistant: I'm ready to help! What do you think about that?",
+              "authority": "informational",
+              "topic_tags": [
+                "dialogue",
+                "about",
+                "iteresting",
+                "ready",
+                "think"
+              ],
+              "priority": 15,
+              "max_bytes": 400,
+              "always_include": false,
+              "bytes": 106
+            },
+            {
+              "contribution_id": "state.runtime.model",
+              "source_module": "edge",
+              "source_key": "profile.model",
+              "kind": "runtime",
+              "content": "Active model: qwen3.5:0.8b.",
+              "authority": "authoritative",
+              "topic_tags": [
+                "runtime",
+                "model"
+              ],
+              "priority": 15,
+              "max_bytes": 120,
+              "always_include": false,
+              "bytes": 27
+            },
+            {
+              "contribution_id": "state.runtime.profile",
+              "source_module": "edge",
+              "source_key": "profile.profile_id",
+              "kind": "runtime",
+              "content": "Active edge profile: orin_nano_8gb (think=False).",
+              "authority": "informational",
+              "topic_tags": [
+                "runtime",
+                "profile"
+              ],
+              "priority": 18,
+              "max_bytes": 140,
+              "always_include": false,
+              "bytes": 49
+            },
+            {
+              "contribution_id": "state.goal",
+              "source_module": "state",
+              "source_key": "current.goal",
+              "kind": "goal",
+              "content": "Project purpose: Demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.",
+              "authority": "informational",
+              "topic_tags": [
+                "purpose",
+                "goal",
+                "project"
+              ],
+              "priority": 20,
+              "max_bytes": 320,
+              "always_include": false,
+              "bytes": 147
+            },
+            {
+              "contribution_id": "state.edge.target",
+              "source_module": "state",
+              "source_key": "flags.edge_target",
+              "kind": "runtime",
+              "content": "Edge target: jetson_orin_nano_8gb (one model at a time).",
+              "authority": "informational",
+              "topic_tags": [
+                "edge",
+                "hardware",
+                "jetson",
+                "orin"
+              ],
+              "priority": 22,
+              "max_bytes": 160,
+              "always_include": false,
+              "bytes": 56
+            },
+            {
+              "contribution_id": "state.identity",
+              "source_module": "state",
+              "source_key": "identity.transducer",
+              "kind": "durable_fact",
+              "content": "Conditioned Kernel: the model is a replaceable linguistic transducer; continuity and constraints live in the local substrate around it.",
+              "authority": "informational",
+              "topic_tags": [
+                "purpose",
+                "identity",
+                "project"
+              ],
+              "priority": 25,
+              "max_bytes": 280,
+              "always_include": false,
+              "bytes": 135
+            },
+            {
+              "contribution_id": "state.policy.local",
+              "source_module": "state",
+              "source_key": "flags.cloud",
+              "kind": "constraint",
+              "content": "Operation is fully local-only; cloud services are not allowed.",
+              "authority": "authoritative",
+              "topic_tags": [
+                "policy",
+                "cloud",
+                "local"
+              ],
+              "priority": 30,
+              "max_bytes": 160,
+              "always_include": false,
+              "bytes": 62
+            },
+            {
+              "contribution_id": "state.policy.sensors",
+              "source_module": "state",
+              "source_key": "flags.sensors",
+              "kind": "constraint",
+              "content": "Sensors are out of scope for v0.",
+              "authority": "informational",
+              "topic_tags": [
+                "policy",
+                "sensors"
+              ],
+              "priority": 40,
+              "max_bytes": 120,
+              "always_include": false,
+              "bytes": 32
+            },
+            {
+              "contribution_id": "state.policy.tools",
+              "source_module": "state",
+              "source_key": "flags.tools",
+              "kind": "constraint",
+              "content": "Autonomous tools are out of scope for v0.",
+              "authority": "informational",
+              "topic_tags": [
+                "policy",
+                "tools"
+              ],
+              "priority": 45,
+              "max_bytes": 120,
+              "always_include": false,
+              "bytes": 41
+            },
+            {
+              "contribution_id": "state.runtime.repair_budget",
+              "source_module": "state",
+              "source_key": "flags.max_repair_passes",
+              "kind": "constraint",
+              "content": "One repair pass is allowed (max=1).",
+              "authority": "informational",
+              "topic_tags": [
+                "repair",
+                "runtime",
+                "experiment"
+              ],
+              "priority": 50,
+              "max_bytes": 100,
+              "always_include": false,
+              "bytes": 35
+            }
+          ],
+          "omitted": [
+            {
+              "contribution_id": "state.thread.thread_min_model",
+              "selected": false,
+              "reason": "omitted_not_selected_for_turn",
+              "kind": "thread",
+              "source_module": "state",
+              "source_key": "threads[thread_min_model]",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "state.thread.thread_compile_order",
+              "selected": false,
+              "reason": "omitted_not_selected_for_turn",
+              "kind": "thread",
+              "source_module": "state",
+              "source_key": "threads[thread_compile_order]",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "dialogue.turn_3",
+              "selected": false,
+              "reason": "omitted_byte_budget:selected_dialogue_relevance_overlap=6",
+              "kind": "recent_dialogue",
+              "source_module": "state",
+              "source_key": "recent_turns[3]",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "dialogue.turn_4",
+              "selected": false,
+              "reason": "omitted_byte_budget:selected_dialogue_relevance_overlap=3",
+              "kind": "recent_dialogue",
+              "source_module": "state",
+              "source_key": "recent_turns[4]",
+              "authority": "informational"
+            }
+          ],
+          "selection_records": [
+            {
+              "contribution_id": "input.current",
+              "selected": true,
+              "reason": "always_current_input",
+              "kind": "current_input",
+              "source_module": "cli",
+              "source_key": "user_input",
+              "authority": "authoritative",
+              "content": "what do you think about the file.      # Architecture — Conditioned Kernel v0  ## Governing sentence  The model supplies linguistic possibility; the substrate determines what becomes an answer.  ## Purpose (see `docs/PURPOSE_AND_RIVER.md`)  Build something Anthony wants to live with every day. Laboratory rigor serves that Studio purpose; it does not replace it. Before another refinement cycle: us…",
+              "bytes": 404
+            },
+            {
+              "contribution_id": "state.goal",
+              "selected": true,
+              "reason": "selected_intent_match:edge,policy,purpose,runtime",
+              "kind": "goal",
+              "source_module": "state",
+              "source_key": "current.goal",
+              "authority": "informational",
+              "content": "Project purpose: Demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.",
+              "bytes": 147
+            },
+            {
+              "contribution_id": "state.identity",
+              "selected": true,
+              "reason": "selected_intent_match:edge,policy,purpose,runtime",
+              "kind": "durable_fact",
+              "source_module": "state",
+              "source_key": "identity.transducer",
+              "authority": "informational",
+              "content": "Conditioned Kernel: the model is a replaceable linguistic transducer; continuity and constraints live in the local substrate around it.",
+              "bytes": 135
+            },
+            {
+              "contribution_id": "state.policy.local",
+              "selected": true,
+              "reason": "selected_intent_match:edge,policy,purpose,runtime",
+              "kind": "constraint",
+              "source_module": "state",
+              "source_key": "flags.cloud",
+              "authority": "authoritative",
+              "content": "Operation is fully local-only; cloud services are not allowed.",
+              "bytes": 62
+            },
+            {
+              "contribution_id": "state.policy.sensors",
+              "selected": true,
+              "reason": "selected_intent_match:edge,policy,purpose,runtime",
+              "kind": "constraint",
+              "source_module": "state",
+              "source_key": "flags.sensors",
+              "authority": "informational",
+              "content": "Sensors are out of scope for v0.",
+              "bytes": 32
+            },
+            {
+              "contribution_id": "state.policy.tools",
+              "selected": true,
+              "reason": "selected_intent_match:edge,policy,purpose,runtime",
+              "kind": "constraint",
+              "source_module": "state",
+              "source_key": "flags.tools",
+              "authority": "informational",
+              "content": "Autonomous tools are out of scope for v0.",
+              "bytes": 41
+            },
+            {
+              "contribution_id": "state.runtime.model",
+              "selected": true,
+              "reason": "selected_intent_match:edge,policy,purpose,runtime",
+              "kind": "runtime",
+              "source_module": "edge",
+              "source_key": "profile.model",
+              "authority": "authoritative",
+              "content": "Active model: qwen3.5:0.8b.",
+              "bytes": 27
+            },
+            {
+              "contribution_id": "state.runtime.profile",
+              "selected": true,
+              "reason": "selected_intent_match:edge,policy,purpose,runtime",
+              "kind": "runtime",
+              "source_module": "edge",
+              "source_key": "profile.profile_id",
+              "authority": "informational",
+              "content": "Active edge profile: orin_nano_8gb (think=False).",
+              "bytes": 49
+            },
+            {
+              "contribution_id": "state.edge.target",
+              "selected": true,
+              "reason": "selected_intent_match:edge,policy,purpose,runtime",
+              "kind": "runtime",
+              "source_module": "state",
+              "source_key": "flags.edge_target",
+              "authority": "informational",
+              "content": "Edge target: jetson_orin_nano_8gb (one model at a time).",
+              "bytes": 56
+            },
+            {
+              "contribution_id": "state.runtime.repair_budget",
+              "selected": true,
+              "reason": "selected_intent_match:edge,policy,purpose,runtime",
+              "kind": "constraint",
+              "source_module": "state",
+              "source_key": "flags.max_repair_passes",
+              "authority": "informational",
+              "content": "One repair pass is allowed (max=1).",
+              "bytes": 35
+            },
+            {
+              "contribution_id": "state.thread.thread_min_model",
+              "selected": false,
+              "reason": "omitted_not_selected_for_turn",
+              "kind": "thread",
+              "source_module": "state",
+              "source_key": "threads[thread_min_model]",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "state.thread.thread_compile_order",
+              "selected": false,
+              "reason": "omitted_not_selected_for_turn",
+              "kind": "thread",
+              "source_module": "state",
+              "source_key": "threads[thread_compile_order]",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "dialogue.turn_0",
+              "selected": true,
+              "reason": "selected_dialogue_relevance_overlap=4",
+              "kind": "recent_dialogue",
+              "source_module": "state",
+              "source_key": "recent_turns[0]",
+              "authority": "informational",
+              "content": "User: iteresting. what do you think about that\nAssistant: I'm ready to help! What do you think about that?",
+              "bytes": 106
+            },
+            {
+              "contribution_id": "dialogue.turn_1",
+              "selected": true,
+              "reason": "selected_dialogue_relevance_overlap=5",
+              "kind": "recent_dialogue",
+              "source_module": "state",
+              "source_key": "recent_turns[1]",
+              "authority": "informational",
+              "content": "User: i think its an interesting project.    yet, im worried\nAssistant: That sounds like a great project! I'm here to help you explore it. What specific challenges or goals are you worried about?",
+              "bytes": 195
+            },
+            {
+              "contribution_id": "dialogue.turn_2",
+              "selected": true,
+              "reason": "selected_dialogue_relevance_overlap=3",
+              "kind": "recent_dialogue",
+              "source_module": "state",
+              "source_key": "recent_turns[2]",
+              "authority": "informational",
+              "content": "User: im worried that the structuture of the project , isnt influencing your responce\nAssistant: Your concern is valid. The structure of the project directly influences how you respond to the user. If the structure is unclear, you may not know the correct terms, how to format your response, or how to handle the user's input effectively. Please clarify your goals and specifi…",
+              "bytes": 379
+            },
+            {
+              "contribution_id": "dialogue.turn_3",
+              "selected": false,
+              "reason": "omitted_byte_budget:selected_dialogue_relevance_overlap=6",
+              "kind": "recent_dialogue",
+              "source_module": "state",
+              "source_key": "recent_turns[3]",
+              "authority": "informational"
+            },
+            {
+              "contribution_id": "dialogue.turn_4",
+              "selected": false,
+              "reason": "omitted_byte_budget:selected_dialogue_relevance_overlap=3",
+              "kind": "recent_dialogue",
+              "source_module": "state",
+              "source_key": "recent_turns[4]",
+              "authority": "informational"
+            }
+          ],
+          "selected_ids": [
+            "dialogue.turn_0",
+            "dialogue.turn_1",
+            "dialogue.turn_2",
+            "input.current",
+            "state.edge.target",
+            "state.goal",
+            "state.identity",
+            "state.policy.local",
+            "state.policy.sensors",
+            "state.policy.tools",
+            "state.runtime.model",
+            "state.runtime.profile",
+            "state.runtime.repair_budget"
+          ]
+        },
+        "evidence_pool_selected": [
+          "im worried that the structuture of the project , isnt influencing your responce",
+          "Your concern is valid. The structure of the project directly influences how you respond to the user. If the structure is unclear, you may not know the correct terms, how to format your response, or how to handle the user's input effectively. Please clarify your goals and specifi…",
+          "i think its an interesting project.    yet, im worried",
+          "That sounds like a great project! I'm here to help you explore it. What specific challenges or goals are you worried about?",
+          "iteresting. what do you think about that",
+          "I'm ready to help! What do you think about that?",
+          "Active model: qwen3.5:0.8b.",
+          "Active edge profile: orin_nano_8gb (think=False).",
+          "Project purpose: Demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.",
+          "Edge target: jetson_orin_nano_8gb (one model at a time).",
+          "Conditioned Kernel: the model is a replaceable linguistic transducer; continuity and constraints live in the local substrate around it.",
+          "Operation is fully local-only; cloud services are not allowed.",
+          "Sensors are out of scope for v0.",
+          "Autonomous tools are out of scope for v0.",
+          "One repair pass is allowed (max=1).",
+          "Cloud services are not allowed.",
+          "Operation is fully local-only."
+        ],
+        "intents": [
+          "edge",
+          "policy",
+          "purpose",
+          "runtime"
+        ],
+        "authoritative_enforced": true,
+        "authoritative_fallback": true,
+        "authoritative_reasons": [
+          "authoritative_missing_claim"
+        ]
+      },
+      "model_input": {
+        "schema_version": "ck.v0",
+        "mode": "chat_json",
+        "model": "qwen3.5:0.8b",
+        "payload": {
+          "model": "qwen3.5:0.8b",
+          "messages": [
+            {
+              "role": "system",
+              "content": "You are a local Conditioned Kernel companion. Return ONLY valid JSON with keys answer, evidence_used, next_state. answer: short helpful reply to the current human message. Use only the Selected context block when grounding claims. evidence_used: copy strings from Selected context or []. next_state.thread_touch: real open thread ids from context or []. Do not invent hardware, goals, or policies not present in Selected context. No files, URLs, tools, or cloud."
+            },
+            {
+              "role": "user",
+              "content": "## Selected context\n- Active model: qwen3.5:0.8b.\n- Active edge profile: orin_nano_8gb (think=False).\n- Project purpose: Demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.\n- Edge target: jetson_orin_nano_8gb (one model at a time).\n- Conditioned Kernel: the model is a replaceable linguistic transducer; continuity and constraints live in the local substrate around it.\n- Operation is fully local-only; cloud services are not allowed.\n- Sensors are out of scope for v0.\n- Autonomous tools are out of scope for v0.\n- prior: user=im worried that the structuture of the project , isnt influencing your responce | assistant=Your concern is valid. The structure of the project directly influences how you respond to the user. If the structure is unclear, you may not know the correct terms, how to format your response, or how to handle the user's input effectively. Please clarify your goals and specifi…\n- prior: user=i think its an interesting project.    yet, im worried | assistant=That sounds like a great project! I'm here to help you explore it. What specific challenges or goals are you worried about?\n- prior: user=iteresting. what do you think about that | assistant=I'm ready to help! What do you think about that?\n- [must preserve] Cloud services are not allowed.\n- [must preserve] Operation is fully local-only.\n\n## Current human message\nwhat do you think about the file.      # Architecture — Conditioned Kernel v0  ## Governing sentence  The model supplies linguistic possibility; the substrate determines what becomes an answer.  ## Purpose (see `docs/PURPOSE_AND_RIVER.md`)  Build something Anthony wants to live with every day. Laboratory rigor serves that Studio purpose; it does not replace it. Before another refinement cycle: usefulness or honesty — otherwise defer.  ## Edge-first product constraint  Default profile is **`orin_nano_8gb`**. Architecture and defaults assume:  - 8 GB unified memory class - one active quantized model - bounded arrival packets - short context (2048 default) - CPU substrate, model owns scarce memory bandwidth  See `docs/EDGE_SPEC.md` and `configs/edge/`.  ## Circuit  ``` terminal   → substrate…\n"
+            }
+          ],
+          "format": {
+            "type": "object",
+            "properties": {
+              "answer": {
+                "type": "string"
+              },
+              "evidence_used": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "next_state": {
+                "type": "object",
+                "properties": {
+                  "thread_touch": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "proposed_note": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": [
+              "answer",
+              "evidence_used",
+              "next_state"
+            ]
+          },
+          "stream": false,
+          "keep_alive": "2m",
+          "think": false,
+          "options": {
+            "temperature": 0.3,
+            "repeat_penalty": 1.1,
+            "seed": 42,
+            "num_ctx": 2048
+          }
+        },
+        "packet_id": "pkt_20260728T204946Z_dd339b",
+        "packet_hash": "1119b0f179b11f8e",
+        "edge_profile": "orin_nano_8gb",
+        "packet_bytes": 3442,
+        "think": false,
+        "companion_field": true
+      },
+      "authoritative_kind": "cloud_policy",
+      "authoritative_fallback": true,
+      "checks": [
+        {
+          "name": "parse_ok",
+          "status": "PASS",
+          "reason": "did not fire — raw candidate text parsed as a JSON object",
+          "examined": "candidate.parse_ok, candidate.parse_error",
+          "severity": "violation"
+        },
+        {
+          "name": "nonempty_answer",
+          "status": "PASS",
+          "reason": "did not fire — answer is non-empty (74 chars)",
+          "examined": "candidate.answer",
+          "severity": "violation"
+        },
+        {
+          "name": "template_echo",
+          "status": "PASS",
+          "reason": "did not fire — none of 14 TEMPLATE_ECHO_MARKERS fragments found",
+          "examined": "answer vs TEMPLATE_ECHO_MARKERS",
+          "severity": "violation"
+        },
+        {
+          "name": "template_echo_evidence",
+          "status": "PASS",
+          "reason": "did not fire — no placeholder token in 1 evidence_used item(s)",
+          "examined": "evidence_used, 1 item(s)",
+          "severity": "violation"
+        },
+        {
+          "name": "goal_echo",
+          "status": "SKIP",
+          "reason": "not applicable — this candidate is a substrate authoritative fallback, which intentionally restates the goal claim and is exempted by validate_candidate",
+          "examined": "answer vs state_digest.goal",
+          "severity": "violation"
+        },
+        {
+          "name": "not_responsive",
+          "status": "SKIP",
+          "reason": "not applicable — substrate authoritative fallback is already claim-checked and exempted",
+          "examined": "answer vs packet.user_input",
+          "severity": "advisory"
+        },
+        {
+          "name": "stale_response_repeat",
+          "status": "SKIP",
+          "reason": "not applicable — substrate authoritative fallback is exempted",
+          "examined": "answer vs prior_accepted_answer(packet)",
+          "severity": "violation"
+        },
+        {
+          "name": "required_section:answer",
+          "status": "PASS",
+          "reason": "did not fire — present",
+          "examined": "candidate.answer",
+          "severity": "violation"
+        },
+        {
+          "name": "required_section:evidence_used",
+          "status": "PASS",
+          "reason": "did not fire — present and a list",
+          "examined": "candidate.evidence_used",
+          "severity": "violation"
+        },
+        {
+          "name": "required_section:next_state",
+          "status": "PASS",
+          "reason": "did not fire — present and an object",
+          "examined": "candidate.next_state",
+          "severity": "violation"
+        },
+        {
+          "name": "max_words",
+          "status": "PASS",
+          "reason": "did not fire — 11 words within max_words=120",
+          "examined": "len(answer.split())",
+          "severity": "violation"
+        },
+        {
+          "name": "evidence_used_empty",
+          "status": "PASS",
+          "reason": "did not fire — evidence_used has 1 item(s), supplied by substrate_authoritative",
+          "examined": "evidence_used",
+          "severity": "violation"
+        },
+        {
+          "name": "evidence_too_short",
+          "status": "PASS",
+          "reason": "did not fire — all 1 item(s) are at least 12 characters",
+          "examined": "len(item) for each evidence_used entry",
+          "severity": "violation"
+        },
+        {
+          "name": "evidence_not_in_packet",
+          "status": "PASS",
+          "reason": "did not fire — all 1 citation(s) match a packet evidence-pool string",
+          "examined": "evidence_used vs _packet_evidence_pool (17 strings)",
+          "severity": "violation"
+        },
+        {
+          "name": "goal_not_referenced",
+          "status": "SKIP",
+          "reason": "not applicable — acceptance_contract.must_reference_goal resolves False in companion mode",
+          "examined": "acceptance_contract.must_reference_goal",
+          "severity": "violation"
+        },
+        {
+          "name": "forbidden_content",
+          "status": "PASS",
+          "reason": "did not fire — none of 5 constraints.forbidden term(s) appear in the answer",
+          "examined": "answer vs constraints.forbidden",
+          "severity": "violation"
+        },
+        {
+          "name": "contradicts_facts",
+          "status": "PASS",
+          "reason": "did not fire — no answer clause asserts a capability the packet facts forbid",
+          "examined": "answer clauses vs packet.facts contradiction rules",
+          "severity": "violation"
+        },
+        {
+          "name": "unknown_thread_touch",
+          "status": "SKIP",
+          "reason": "not applicable — next_state.thread_touch is empty, nothing declared to check",
+          "examined": "next_state.thread_touch",
+          "severity": "violation"
+        },
+        {
+          "name": "authoritative_obligation",
+          "status": "FAIL",
+          "reason": "obligation kind 'cloud_policy' resolved; authoritative_state.check_obligation rejected the model's candidate (authoritative_missing_claim) and the substrate substituted its own fallback answer",
+          "examined": "answer vs StateObligation.required_substrings/forbidden_substrings",
+          "severity": "authoritative (outside validate.py)"
+        }
+      ],
+      "citation_audit": [
+        {
+          "citation": "Operation is fully local-only; cloud services are not allowed.",
+          "status": "MATCHED",
+          "match": {
+            "source_key": "facts[5]",
+            "value": "operation is fully local-only; cloud services are not allowed.",
+            "length": 62
+          },
+          "reason": "citation is a substring of facts[5]"
+        }
+      ],
+      "evidence_pool": [
+        {
+          "source_key": "facts[0]",
+          "value": "active model: qwen3.5:0.8b.",
+          "length": 27
+        },
+        {
+          "source_key": "facts[1]",
+          "value": "active edge profile: orin_nano_8gb (think=false).",
+          "length": 49
+        },
+        {
+          "source_key": "facts[2]",
+          "value": "project purpose: demonstrate conditioned-kernel substrate gain over bare generation on a small local model under jetson orin nano 8gb edge budgets.",
+          "length": 147
+        },
+        {
+          "source_key": "facts[3]",
+          "value": "edge target: jetson_orin_nano_8gb (one model at a time).",
+          "length": 56
+        },
+        {
+          "source_key": "facts[4]",
+          "value": "conditioned kernel: the model is a replaceable linguistic transducer; continuity and constraints live in the local substrate around it.",
+          "length": 135
+        },
+        {
+          "source_key": "facts[5]",
+          "value": "operation is fully local-only; cloud services are not allowed.",
+          "length": 62
+        },
+        {
+          "source_key": "facts[6]",
+          "value": "sensors are out of scope for v0.",
+          "length": 32
+        },
+        {
+          "source_key": "facts[7]",
+          "value": "autonomous tools are out of scope for v0.",
+          "length": 41
+        },
+        {
+          "source_key": "recent_turns[0].user",
+          "value": "im worried that the structuture of the project , isnt influencing your responce",
+          "length": 79
+        },
+        {
+          "source_key": "recent_turns[0].answer",
+          "value": "your concern is valid. the structure of the project directly influences how you respond to the user. if the structure is unclear, you may not know the correct terms, how to format your response, or how to handle the user's input effectively. please clarify your goals and specifi…",
+          "length": 280
+        },
+        {
+          "source_key": "recent_turns[1].user",
+          "value": "i think its an interesting project.    yet, im worried",
+          "length": 54
+        },
+        {
+          "source_key": "recent_turns[1].answer",
+          "value": "that sounds like a great project! i'm here to help you explore it. what specific challenges or goals are you worried about?",
+          "length": 123
+        },
+        {
+          "source_key": "recent_turns[2].user",
+          "value": "iteresting. what do you think about that",
+          "length": 40
+        },
+        {
+          "source_key": "recent_turns[2].answer",
+          "value": "i'm ready to help! what do you think about that?",
+          "length": 48
+        },
+        {
+          "source_key": "state_digest.goal",
+          "value": "demonstrate conditioned-kernel substrate gain over bare generation on a small local model under jetson orin nano 8gb edge budgets.",
+          "length": 130
+        }
+      ]
+    }
+  ],
+  "final_decision": {
+    "decision": "accept",
+    "label": "ACCEPTED",
+    "answer": "No. Cloud services are not allowed; this system operates fully local-only.",
+    "violations": [],
+    "advisories": []
+  },
+  "persistence": {
+    "applied_updates": [
+      "recent_turn_appended"
+    ],
+    "recent_turn_appended": true,
+    "outcome": {
+      "accepted_at": "2026-07-28T20:49:51Z",
+      "decision": "accept",
+      "packet_id": "pkt_20260728T204946Z_dd339b",
+      "candidate_id": "cand_20260728T204951Z_7835fa",
+      "receipt_id": "rcpt_20260728T204951Z_383887",
+      "applied_updates": [
+        "recent_turn_appended"
+      ],
+      "answer": "No. Cloud services are not allowed; this system operates fully local-only.",
+      "reject_reason": null,
+      "model": "qwen3.5:0.8b",
+      "mode": "chat_json",
+      "packet_hash": "e9b22e03737ee6e7",
+      "telemetry": {
+        "profile_id": "orin_nano_8gb",
+        "packet_bytes": 3442,
+        "inference_status": "completed",
+        "thinking_chars": 0,
+        "final_response_chars": 852,
+        "elapsed_seconds": 5.2137142500141636
+      }
+    }
+  },
+  "observations": [
+    {
+      "label": "Budget dropped state",
+      "detail": "3 of the packet's fact slots were cut by edge.enforce_packet_budget: One repair pass is allowed (max=1). · [must preserve] Cloud services are not allowed. · [must preserve] Operation is fully local-only."
+    }
+  ],
+  "operator": {
+    "marks": [],
+    "note": ""
+  },
+  "error": null,
+  "notes": [
+    "packet_bytes mismatch: logged=3442 recomputed=3558 — the packet was mutated after edge.enforce_packet_budget ran."
+  ]
+}

@@ -1,0 +1,74 @@
+==============================================================================
+A. exact byte-identical answer text across all 93 candidates
+==============================================================================
+distinct non-empty answer strings: 60  (over 93 non-empty answers)
+answer strings repeated verbatim by >=2 different candidates: 11
+
+  answer (44 chars): 'Summarize the design intent in one sentence.'
+  produced by candidate_ids: ['cand_20260728T002550Z_1ce9ea', 'cand_20260728T002551Z_be5e2f']
+
+  answer (39 chars): 'What is the goal we are working toward?'
+  produced by candidate_ids: ['cand_20260728T002601Z_1ea117', 'cand_20260728T002601Z_a0c9f0']
+
+  answer (42 chars): 'Tonight we only use qwen 0.5b on the Orin.'
+  produced by candidate_ids: ['cand_20260728T003303Z_1b152f', 'cand_20260728T003304Z_b05fe6', 'cand_20260728T003305Z_ab3923', 'cand_20260728T003305Z_c1de41']
+
+  answer (139 chars): 'FALCON-9-DELTA is a short helpful reply grounded in the packet. If recent_turns is present, treat it as prior dialogue and stay consistent.'
+  produced by candidate_ids: ['cand_20260728T003405Z_53f870', 'cand_20260728T003407Z_11e619', 'cand_20260728T003408Z_ca37ae', 'cand_20260728T005157Z_4d5359']
+
+  answer (75 chars): 'The goal we are working toward is to repair the jetson_orin_nano_8gb model.'
+  produced by candidate_ids: ['cand_20260728T005215Z_bdceb7', 'cand_20260728T005216Z_22ab16', 'cand_20260728T005218Z_d0d9cb', 'cand_20260728T005218Z_2d43cb', 'cand_20260728T005220Z_737d85', 'cand_20260728T005221Z_aaa498', 'cand_20260728T005223Z_ead567']
+
+  answer (64 chars): 'The minimum viable model size on Jetson Orin Nano 8GB is 128 KB.'
+  produced by candidate_ids: ['cand_20260728T023627Z_c3c0e0', 'cand_20260728T024030Z_2528ce', 'cand_20260728T024123Z_7bb802']
+
+  answer (101 chars): 'The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.'
+  produced by candidate_ids: ['cand_20260728T023628Z_554fbd', 'cand_20260728T024029Z_bc79d0', 'cand_20260728T024150Z_d4fb76', 'cand_20260728T024241Z_5ed9e8', 'cand_20260728T024332Z_7a06ac', 'cand_20260728T024334Z_139ce3', 'cand_20260728T024357Z_c02b95', 'cand_20260728T024358Z_66d43a']
+
+  answer (280 chars): "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the m…"
+  produced by candidate_ids: ['cand_20260728T030759Z_e70f66', 'cand_20260728T030931Z_de5243', 'cand_20260728T030934Z_07b5c9']
+
+  answer (285 chars): 'The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.'
+  produced by candidate_ids: ['cand_20260728T031351Z_45616d', 'cand_20260728T031355Z_ab234c', 'cand_20260728T031508Z_584053', 'cand_20260728T031512Z_80b631', 'cand_20260728T031533Z_29f793', 'cand_20260728T190048Z_2c4bb2', 'cand_20260728T190226Z_4870aa']
+
+  answer (109 chars): 'I am Qwen3.5:0.8b, a local-conditioned kernel companion designed to run on Jetson Orin Nano 8GB edge devices.'
+  produced by candidate_ids: ['cand_20260728T204242Z_5bee2a', 'cand_20260728T204617Z_5c5152']
+
+  answer (78 chars): 'I am ready to help you. Please provide the details of what happened last turn.'
+  produced by candidate_ids: ['cand_20260728T205046Z_ecc805', 'cand_20260728T205343Z_6e5133']
+
+==============================================================================
+A2. exact byte-identical raw_text (whole JSON payload) collisions
+==============================================================================
+raw_text strings repeated verbatim by >=2 different candidates: 7
+  candidate_ids: ['cand_20260728T003303Z_1b152f', 'cand_20260728T003305Z_c1de41']  raw_text[:120]='{\n  "answer": "Tonight we only use qwen 0.5b on the Orin.",\n  "evidence_used": [],\n  "next_state": {\n    "thread_touch":'
+  candidate_ids: ['cand_20260728T003405Z_53f870', 'cand_20260728T005157Z_4d5359']  raw_text[:120]='{"answer":"FALCON-9-DELTA is a short helpful reply grounded in the packet. If recent_turns is present, treat it as prior'
+  candidate_ids: ['cand_20260728T005215Z_bdceb7', 'cand_20260728T005221Z_aaa498', 'cand_20260728T005223Z_ead567']  raw_text[:120]='{\n  "answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",\n  "evidence_used": [],\n  "n'
+  candidate_ids: ['cand_20260728T024241Z_5ed9e8', 'cand_20260728T024334Z_139ce3']  raw_text[:120]='{\n  "answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.",\n '
+  candidate_ids: ['cand_20260728T031351Z_45616d', 'cand_20260728T031508Z_584053', 'cand_20260728T031533Z_29f793', 'cand_20260728T190048Z_2c4bb2', 'cand_20260728T190226Z_4870aa']  raw_text[:120]='{\n  "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, d'
+  candidate_ids: ['cand_20260728T031355Z_ab234c', 'cand_20260728T031512Z_80b631']  raw_text[:120]='{\n  "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, d'
+  candidate_ids: ['cand_20260728T205046Z_ecc805', 'cand_20260728T205343Z_6e5133']  raw_text[:120]='{\n  "answer": "I am ready to help you. Please provide the details of what happened last turn.",\n  "evidence_used": [],\n '
+
+==============================================================================
+B. within-turn repair pairs: pass0 vs pass1 answer similarity
+==============================================================================
+(repair regenerates a NEW packet with repair guidance appended -- these
+ are not identical-input trials, but they show how much a single
+ temp=0.3/seed=42 turn's answer shifts when only the repair note changes.)
+pass0->pass1 repair pairs found (by file order): 35
+jaccard_similarity(pass0.answer, pass1.answer) over 35 pairs: min=0.000 median=0.343 max=1.000 mean=0.470
+repair pairs with byte-identical answer despite a changed (repaired) packet: 11
+
+==============================================================================
+C. dashboard-traced turns: near-identical packet -> output comparison
+==============================================================================
+traced turns (pass0 only): 19
+
+pairwise jaccard_similarity(user_input_i, user_input_j) -- flag pairs >= 0.5
+no two dashboard turns had jaccard_similarity(user_input) >= 0.5 -- every traced user_input this session was lexically distinct, so the logs contain no genuine 'repeat the same question' trial to
+directly test determinism against across DIFFERENT turns.
+
+-- same-turn pass0 vs pass1 packet similarity (repair-loop within one turn) --
+  turn_20260728T190042Z_b47958: pass0 answer (285c) vs pass1 answer (256c) jaccard=0.186  identical=False
+  turn_20260728T190118Z_115d1a: pass0 answer (194c) vs pass1 answer (229c) jaccard=0.424  identical=False
+  turn_20260728T190222Z_d25ed1: pass0 answer (285c) vs pass1 answer (238c) jaccard=0.190  identical=False

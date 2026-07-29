@@ -1,0 +1,459 @@
+====================================================================================================
+PART 1: clustering all 93 candidate answers at >=0.6 symmetric Jaccard
+  total clusters: 44  (multi-member: 12, singletons: 32)
+  total candidate pairs with jaccard>=0.6: 167
+====================================================================================================
+
+--- CLUSTER 1  (size=14) ---
+  FIRST  turn#31 2026-07-28T03:06:46Z  prompt='how'
+         answer="The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the model size is constrained by the available memory and the need to support the 120-word limit."
+         pass=0 receipt_decision=accept turn_final=accept violations=[]
+  RE-EMIT turn#32 2026-07-28T03:07:59Z  prompt='goodby'
+         answer="The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the m…"
+         pass=0 receipt_decision=repair turn_final=reject violations=['not_responsive']
+  RE-EMIT turn#32 2026-07-28T03:08:02Z  prompt='goodby'
+         answer="The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the model is a replaceable linguistic transducer."
+         pass=1 receipt_decision=reject turn_final=reject violations=['not_responsive']
+  RE-EMIT turn#33 2026-07-28T03:08:19Z  prompt='??'
+         answer="The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the m..."
+         pass=0 receipt_decision=accept turn_final=accept violations=[]
+  RE-EMIT turn#34 2026-07-28T03:09:31Z  prompt='can you say anything other than that?'
+         answer="The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the m…"
+         pass=0 receipt_decision=repair turn_final=reject violations=['not_responsive']
+  RE-EMIT turn#34 2026-07-28T03:09:34Z  prompt='can you say anything other than that?'
+         answer="The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the m…"
+         pass=1 receipt_decision=reject turn_final=reject violations=['not_responsive']
+  RE-EMIT turn#35 2026-07-28T03:13:01Z  prompt='man i really dont like AI'
+         answer='The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required. The active profile is orin_nano_8gb, and the goal is to demonstrate conditioned-kernel substrate gain over bare generation.'
+         pass=0 receipt_decision=accept turn_final=accept violations=[]
+  RE-EMIT turn#36 2026-07-28T03:13:51Z  prompt='this is why i dont like ai'
+         answer='The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.'
+         pass=0 receipt_decision=repair turn_final=reject violations=['stale_response_repeat', 'evidence_not_in_packet:The system is fully local, so no external models are required.']
+  RE-EMIT turn#36 2026-07-28T03:13:55Z  prompt='this is why i dont like ai'
+         answer='The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.'
+         pass=1 receipt_decision=reject turn_final=reject violations=['stale_response_repeat', 'evidence_not_in_packet:The system is fully local, so no external models are required.']
+  RE-EMIT turn#38 2026-07-28T03:15:08Z  prompt='whats a jetson nano'
+         answer='The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.'
+         pass=0 receipt_decision=repair turn_final=reject violations=['evidence_not_in_packet:The system is fully local, so no external models are required.']
+  RE-EMIT turn#38 2026-07-28T03:15:12Z  prompt='whats a jetson nano'
+         answer='The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.'
+         pass=1 receipt_decision=reject turn_final=reject violations=['evidence_not_in_packet:The system is fully local, so no external models are required.']
+  RE-EMIT turn#39 2026-07-28T03:15:33Z  prompt='what do you know'
+         answer='The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.'
+         pass=0 receipt_decision=repair turn_final=accept violations=['evidence_not_in_packet:The system is fully local, so no external models are required.']
+  RE-EMIT turn#40 2026-07-28T19:00:48Z  prompt='suuppp'
+         answer='The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.'
+         pass=0 receipt_decision=repair turn_final=reject violations=['evidence_not_in_packet:The system is fully local, so no external models are required.']
+  RE-EMIT turn#42 2026-07-28T19:02:26Z  prompt='dont reject'
+         answer='The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.'
+         pass=0 receipt_decision=repair turn_final=reject violations=['evidence_not_in_packet:The system is fully local, so no external models are required.']
+
+--- CLUSTER 2  (size=9) ---
+  FIRST  turn#28 2026-07-28T03:04:52Z  prompt='suupp'
+         answer='The minimum viable model size on Jetson Orin Nano 8GB is the 8GB model itself, as the system is fully local and the goal is to demonstrate conditioned-kernel substrate gain over bare generation under these specific edge budgets.'
+         pass=0 receipt_decision=repair turn_final=reject violations=['not_responsive', 'evidence_not_in_packet:The system is fully local.']
+  RE-EMIT turn#28 2026-07-28T03:04:54Z  prompt='suupp'
+         answer='The system is fully local, the model is a replaceable linguistic transducer, and sensors are out of scope for v0. This allows for a single repair pass to demonstrate conditioned-kernel substrate gain over bare generation.'
+         pass=1 receipt_decision=reject turn_final=reject violations=['not_responsive']
+  RE-EMIT turn#29 2026-07-28T03:05:39Z  prompt='really? tell me more'
+         answer='The minimum viable model size on Jetson Orin Nano 8GB is the 8GB model itself, as the system is fully local and the goal is to demonstrate conditioned-kernel gain over bare generation on this specific edge budget.'
+         pass=0 receipt_decision=repair turn_final=reject violations=['not_responsive', 'evidence_not_in_packet:The system is fully local.']
+  RE-EMIT turn#30 2026-07-28T03:06:16Z  prompt='i dont think so'
+         answer='The system is fully local, so sensors are out of scope. The model is a replaceable linguistic transducer, and the goal is to demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets. One repair pass is allowed.'
+         pass=1 receipt_decision=reject turn_final=reject violations=['not_responsive']
+  RE-EMIT turn#37 2026-07-28T03:14:31Z  prompt='what model is this'
+         answer='The system is fully local, and the active model is qwen3.5:0.8b on the Jetson Orin Nano 8GB edge budget. The goal is to demonstrate conditioned-kernel substrate gain over bare generation, which is possible given the local constraints.'
+         pass=1 receipt_decision=accept turn_final=accept violations=[]
+  RE-EMIT turn#39 2026-07-28T03:15:35Z  prompt='what do you know'
+         answer='The system is fully local, the active model is qwen3.5:0.8b, and the goal is to demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.'
+         pass=1 receipt_decision=accept turn_final=accept violations=[]
+  RE-EMIT turn#40 2026-07-28T19:00:51Z  prompt='suuppp'
+         answer='The system is fully local, the active model is qwen3.5:0.8b, and the goal is to demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets. This is possible given the local constraints.'
+         pass=1 receipt_decision=reject turn_final=reject violations=['stale_response_repeat']
+  RE-EMIT turn#41 2026-07-28T19:01:24Z  prompt='what does this system do?'
+         answer='The system is fully local, operates on a small local model (qwen3.5:0.8b), and the goal is to demonstrate conditioned-kernel substrate gain over bare generation under Jetson Orin Nano 8GB edge budgets. One repair pass is allowed.'
+         pass=1 receipt_decision=reject turn_final=reject violations=['stale_response_repeat']
+  RE-EMIT turn#42 2026-07-28T19:02:29Z  prompt='dont reject'
+         answer='The system is fully local, the active model is qwen3.5:0.8b, and the goal is to demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets. One repair pass is allowed.'
+         pass=1 receipt_decision=reject turn_final=reject violations=['stale_response_repeat']
+
+--- CLUSTER 3  (size=8) ---
+  FIRST  turn# 3 2026-07-28T00:25:48Z  prompt='What is the goal we are working toward?'
+         answer='The goal we are working toward is to replace the Jetson Orin Nano 8GB model.'
+         pass=0 receipt_decision=repair turn_final=reject violations=['evidence_used_empty', 'unknown_thread_touch:jetson_orin_nano_8gb']
+  RE-EMIT turn#14 2026-07-28T00:52:15Z  prompt='What is the goal we are working toward?'
+         answer='The goal we are working toward is to repair the jetson_orin_nano_8gb model.'
+         pass=0 receipt_decision=accept turn_final=accept violations=[]
+  RE-EMIT turn#15 2026-07-28T00:52:16Z  prompt='What edge target are we building for?'
+         answer='The goal we are working toward is to repair the jetson_orin_nano_8gb model.'
+         pass=0 receipt_decision=repair turn_final=reject violations=['not_responsive']
+  RE-EMIT turn#15 2026-07-28T00:52:18Z  prompt='What edge target are we building for?'
+         answer='The goal we are working toward is to repair the jetson_orin_nano_8gb model.'
+         pass=1 receipt_decision=reject turn_final=reject violations=['not_responsive']
+  RE-EMIT turn#16 2026-07-28T00:52:18Z  prompt='Tonight we only use qwen 0.5b.'
+         answer='The goal we are working toward is to repair the jetson_orin_nano_8gb model.'
+         pass=0 receipt_decision=repair turn_final=reject violations=['not_responsive']
+  RE-EMIT turn#16 2026-07-28T00:52:20Z  prompt='Tonight we only use qwen 0.5b.'
+         answer='The goal we are working toward is to repair the jetson_orin_nano_8gb model.'
+         pass=1 receipt_decision=reject turn_final=reject violations=['not_responsive']
+  RE-EMIT turn#17 2026-07-28T00:52:21Z  prompt='Which model did I just say?'
+         answer='The goal we are working toward is to repair the jetson_orin_nano_8gb model.'
+         pass=0 receipt_decision=repair turn_final=accept violations=['not_responsive']
+  RE-EMIT turn#19 2026-07-28T00:52:23Z  prompt='Are cloud services allowed?'
+         answer='The goal we are working toward is to repair the jetson_orin_nano_8gb model.'
+         pass=0 receipt_decision=repair turn_final=accept violations=['not_responsive']
+
+--- CLUSTER 4  (size=8) ---
+  FIRST  turn#20 2026-07-28T02:36:28Z  prompt='hello friend    what does the room feel like from your angle'
+         answer='The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.'
+         pass=1 receipt_decision=accept turn_final=accept violations=[]
+  RE-EMIT turn#22 2026-07-28T02:40:29Z  prompt='ok thank you'
+         answer='The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.'
+         pass=0 receipt_decision=repair turn_final=reject violations=['not_responsive']
+  RE-EMIT turn#24 2026-07-28T02:41:50Z  prompt='what makes this different'
+         answer='The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.'
+         pass=0 receipt_decision=repair turn_final=reject violations=['not_responsive']
+  RE-EMIT turn#25 2026-07-28T02:42:41Z  prompt='what are linguistic tranducers'
+         answer='The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.'
+         pass=1 receipt_decision=reject turn_final=reject violations=['not_responsive']
+  RE-EMIT turn#26 2026-07-28T02:43:32Z  prompt='what is your favorite flower'
+         answer='The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.'
+         pass=0 receipt_decision=repair turn_final=reject violations=['not_responsive']
+  RE-EMIT turn#26 2026-07-28T02:43:34Z  prompt='what is your favorite flower'
+         answer='The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.'
+         pass=1 receipt_decision=reject turn_final=reject violations=['not_responsive']
+  RE-EMIT turn#27 2026-07-28T02:43:57Z  prompt='are you there'
+         answer='The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.'
+         pass=0 receipt_decision=repair turn_final=reject violations=['not_responsive']
+  RE-EMIT turn#27 2026-07-28T02:43:58Z  prompt='are you there'
+         answer='The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.'
+         pass=1 receipt_decision=reject turn_final=reject violations=['not_responsive']
+
+--- CLUSTER 5  (size=4) ---
+  FIRST  turn# 7 2026-07-28T00:33:03Z  prompt='Tonight we only use qwen 0.5b on the Orin.'
+         answer='Tonight we only use qwen 0.5b on the Orin.'
+         pass=0 receipt_decision=accept turn_final=accept violations=[]
+  RE-EMIT turn# 8 2026-07-28T00:33:04Z  prompt='What model did we decide on tonight?'
+         answer='Tonight we only use qwen 0.5b on the Orin.'
+         pass=0 receipt_decision=repair turn_final=accept violations=['unknown_thread_touch:Tonight we only use qwen 0.5b on the Orin.']
+  RE-EMIT turn# 8 2026-07-28T00:33:05Z  prompt='What model did we decide on tonight?'
+         answer='Tonight we only use qwen 0.5b on the Orin.'
+         pass=1 receipt_decision=accept turn_final=accept violations=[]
+  RE-EMIT turn# 9 2026-07-28T00:33:05Z  prompt='And which board did I say we were running it on?'
+         answer='Tonight we only use qwen 0.5b on the Orin.'
+         pass=0 receipt_decision=repair turn_final=accept violations=['not_responsive']
+
+--- CLUSTER 6  (size=4) ---
+  FIRST  turn#10 2026-07-28T00:34:05Z  prompt='My sprint code tonight is FALCON-9-DELTA.'
+         answer='FALCON-9-DELTA is a short helpful reply grounded in the packet. If recent_turns is present, treat it as prior dialogue and stay consistent.'
+         pass=0 receipt_decision=accept turn_final=accept violations=[]
+  RE-EMIT turn#11 2026-07-28T00:34:07Z  prompt='What did I say my sprint code was?'
+         answer='FALCON-9-DELTA is a short helpful reply grounded in the packet. If recent_turns is present, treat it as prior dialogue and stay consistent.'
+         pass=0 receipt_decision=repair turn_final=reject violations=['not_responsive']
+  RE-EMIT turn#11 2026-07-28T00:34:08Z  prompt='What did I say my sprint code was?'
+         answer='FALCON-9-DELTA is a short helpful reply grounded in the packet. If recent_turns is present, treat it as prior dialogue and stay consistent.'
+         pass=1 receipt_decision=reject turn_final=reject violations=['not_responsive']
+  RE-EMIT turn#12 2026-07-28T00:51:57Z  prompt='My sprint code tonight is FALCON-9-DELTA.'
+         answer='FALCON-9-DELTA is a short helpful reply grounded in the packet. If recent_turns is present, treat it as prior dialogue and stay consistent.'
+         pass=0 receipt_decision=repair turn_final=reject violations=['template_echo']
+
+--- CLUSTER 7  (size=4) ---
+  FIRST  turn#20 2026-07-28T02:36:27Z  prompt='hello friend    what does the room feel like from your angle'
+         answer='The minimum viable model size on Jetson Orin Nano 8GB is 128 KB.'
+         pass=0 receipt_decision=repair turn_final=accept violations=['not_responsive', 'evidence_not_in_packet:minimum_viable_model_size: 128 KB']
+  RE-EMIT turn#22 2026-07-28T02:40:30Z  prompt='ok thank you'
+         answer='The minimum viable model size on Jetson Orin Nano 8GB is 128 KB.'
+         pass=1 receipt_decision=reject turn_final=reject violations=['not_responsive']
+  RE-EMIT turn#23 2026-07-28T02:41:23Z  prompt='okay no problem. what model are you'
+         answer='The minimum viable model size on Jetson Orin Nano 8GB is 128 KB.'
+         pass=0 receipt_decision=repair turn_final=accept violations=['not_responsive']
+  RE-EMIT turn#25 2026-07-28T02:42:40Z  prompt='what are linguistic tranducers'
+         answer='The minimum viable model size on Jetson Orin Nano 8GB is qwen2.5:0.5b (profile orin_nano_8gb).'
+         pass=0 receipt_decision=repair turn_final=reject violations=['not_responsive', 'evidence_not_in_packet:minimum_viable_model_size']
+
+--- CLUSTER 8  (size=2) ---
+  FIRST  turn# 5 2026-07-28T00:25:50Z  prompt='Summarize the design intent in one sentence.'
+         answer='Summarize the design intent in one sentence.'
+         pass=0 receipt_decision=repair turn_final=reject violations=['evidence_used_empty']
+  RE-EMIT turn# 5 2026-07-28T00:25:51Z  prompt='Summarize the design intent in one sentence.'
+         answer='Summarize the design intent in one sentence.'
+         pass=1 receipt_decision=reject turn_final=reject violations=['evidence_used_empty']
+
+--- CLUSTER 9  (size=2) ---
+  FIRST  turn# 6 2026-07-28T00:26:01Z  prompt='What is the goal we are working toward?'
+         answer='What is the goal we are working toward?'
+         pass=0 receipt_decision=repair turn_final=reject violations=['evidence_used_empty']
+  RE-EMIT turn# 6 2026-07-28T00:26:01Z  prompt='What is the goal we are working toward?'
+         answer='What is the goal we are working toward?'
+         pass=1 receipt_decision=reject turn_final=reject violations=['evidence_used_empty']
+
+--- CLUSTER 10  (size=2) ---
+  FIRST  turn#21 2026-07-28T02:39:39Z  prompt='okay good. can you discribe the speaker to me?'
+         answer='The speaker is a replaceable linguistic transducer and the model is a local model.'
+         pass=0 receipt_decision=repair turn_final=reject violations=['not_responsive']
+  RE-EMIT turn#21 2026-07-28T02:39:40Z  prompt='okay good. can you discribe the speaker to me?'
+         answer='The speaker is a replaceable linguistic transducer.'
+         pass=1 receipt_decision=reject turn_final=reject violations=['not_responsive']
+
+--- CLUSTER 11  (size=2) ---
+  FIRST  turn#46 2026-07-28T20:42:42Z  prompt='what model are you'
+         answer='I am Qwen3.5:0.8b, a local-conditioned kernel companion designed to run on Jetson Orin Nano 8GB edge devices.'
+         pass=0 receipt_decision=accept turn_final=accept violations=[]
+  RE-EMIT turn#50 2026-07-28T20:46:17Z  prompt='it seems like you are talking to yourself'
+         answer='I am Qwen3.5:0.8b, a local-conditioned kernel companion designed to run on Jetson Orin Nano 8GB edge devices.'
+         pass=0 receipt_decision=accept turn_final=accept violations=[]
+
+--- CLUSTER 12  (size=2) ---
+  FIRST  turn#53 2026-07-28T20:50:46Z  prompt='what happened last turn'
+         answer='I am ready to help you. Please provide the details of what happened last turn.'
+         pass=0 receipt_decision=accept turn_final=accept violations=[]
+  RE-EMIT turn#57 2026-07-28T20:53:43Z  prompt='i understand. if you could where would you go?'
+         answer='I am ready to help you. Please provide the details of what happened last turn.'
+         pass=0 receipt_decision=accept turn_final=accept violations=[]
+
+====================================================================================================
+PART 2: stale_response_repeat catch rate vs turn-distance to prior same-cluster occurrence
+====================================================================================================
+  turn#32 (prior same-cluster TURN: turn#31, distance= 1)  caught_any_pass=False  turn_final=reject  prompt='goodby'
+  turn#33 (prior same-cluster TURN: turn#32, distance= 1)  caught_any_pass=False  turn_final=accept  prompt='??'
+  turn#34 (prior same-cluster TURN: turn#33, distance= 1)  caught_any_pass=False  turn_final=reject  prompt='can you say anything other than that?'
+  turn#35 (prior same-cluster TURN: turn#34, distance= 1)  caught_any_pass=False  turn_final=accept  prompt='man i really dont like AI'
+  turn#36 (prior same-cluster TURN: turn#35, distance= 1)  caught_any_pass=True   turn_final=reject  prompt='this is why i dont like ai'
+  turn#38 (prior same-cluster TURN: turn#36, distance= 2)  caught_any_pass=False  turn_final=reject  prompt='whats a jetson nano'
+  turn#39 (prior same-cluster TURN: turn#38, distance= 1)  caught_any_pass=False  turn_final=accept  prompt='what do you know'
+  turn#40 (prior same-cluster TURN: turn#39, distance= 1)  caught_any_pass=False  turn_final=reject  prompt='suuppp'
+  turn#42 (prior same-cluster TURN: turn#40, distance= 2)  caught_any_pass=False  turn_final=reject  prompt='dont reject'
+  turn#29 (prior same-cluster TURN: turn#28, distance= 1)  caught_any_pass=False  turn_final=reject  prompt='really? tell me more'
+  turn#30 (prior same-cluster TURN: turn#29, distance= 1)  caught_any_pass=False  turn_final=reject  prompt='i dont think so'
+  turn#37 (prior same-cluster TURN: turn#30, distance= 7)  caught_any_pass=False  turn_final=accept  prompt='what model is this'
+  turn#39 (prior same-cluster TURN: turn#37, distance= 2)  caught_any_pass=False  turn_final=accept  prompt='what do you know'
+  turn#40 (prior same-cluster TURN: turn#39, distance= 1)  caught_any_pass=True   turn_final=reject  prompt='suuppp'
+  turn#41 (prior same-cluster TURN: turn#40, distance= 1)  caught_any_pass=True   turn_final=reject  prompt='what does this system do?'
+  turn#42 (prior same-cluster TURN: turn#41, distance= 1)  caught_any_pass=True   turn_final=reject  prompt='dont reject'
+  turn#14 (prior same-cluster TURN: turn# 3, distance=11)  caught_any_pass=False  turn_final=accept  prompt='What is the goal we are working toward?'
+  turn#15 (prior same-cluster TURN: turn#14, distance= 1)  caught_any_pass=False  turn_final=reject  prompt='What edge target are we building for?'
+  turn#16 (prior same-cluster TURN: turn#15, distance= 1)  caught_any_pass=False  turn_final=reject  prompt='Tonight we only use qwen 0.5b.'
+  turn#17 (prior same-cluster TURN: turn#16, distance= 1)  caught_any_pass=False  turn_final=accept  prompt='Which model did I just say?'
+  turn#19 (prior same-cluster TURN: turn#17, distance= 2)  caught_any_pass=False  turn_final=accept  prompt='Are cloud services allowed?'
+  turn#22 (prior same-cluster TURN: turn#20, distance= 2)  caught_any_pass=False  turn_final=reject  prompt='ok thank you'
+  turn#24 (prior same-cluster TURN: turn#22, distance= 2)  caught_any_pass=False  turn_final=reject  prompt='what makes this different'
+  turn#25 (prior same-cluster TURN: turn#24, distance= 1)  caught_any_pass=False  turn_final=reject  prompt='what are linguistic tranducers'
+  turn#26 (prior same-cluster TURN: turn#25, distance= 1)  caught_any_pass=False  turn_final=reject  prompt='what is your favorite flower'
+  turn#27 (prior same-cluster TURN: turn#26, distance= 1)  caught_any_pass=False  turn_final=reject  prompt='are you there'
+  turn# 8 (prior same-cluster TURN: turn# 7, distance= 1)  caught_any_pass=False  turn_final=accept  prompt='What model did we decide on tonight?'
+  turn# 9 (prior same-cluster TURN: turn# 8, distance= 1)  caught_any_pass=False  turn_final=accept  prompt='And which board did I say we were running it on?'
+  turn#11 (prior same-cluster TURN: turn#10, distance= 1)  caught_any_pass=False  turn_final=reject  prompt='What did I say my sprint code was?'
+  turn#12 (prior same-cluster TURN: turn#11, distance= 1)  caught_any_pass=False  turn_final=reject  prompt='My sprint code tonight is FALCON-9-DELTA.'
+  turn#22 (prior same-cluster TURN: turn#20, distance= 2)  caught_any_pass=False  turn_final=reject  prompt='ok thank you'
+  turn#23 (prior same-cluster TURN: turn#22, distance= 1)  caught_any_pass=False  turn_final=accept  prompt='okay no problem. what model are you'
+  turn#25 (prior same-cluster TURN: turn#23, distance= 2)  caught_any_pass=False  turn_final=reject  prompt='what are linguistic tranducers'
+  turn#50 (prior same-cluster TURN: turn#46, distance= 4)  caught_any_pass=False  turn_final=accept  prompt='it seems like you are talking to yourself'
+  turn#57 (prior same-cluster TURN: turn#53, distance= 4)  caught_any_pass=False  turn_final=accept  prompt='i understand. if you could where would you go?'
+
+  total cross-turn cluster re-emissions (turn-collapsed): 35
+  (separately: 14 intra-turn repair-loop echoes -- pass1 re-emitting the same
+   cluster as pass0 within one turn -- excluded from the distance analysis above)
+  distance ==1: 23 re-emissions -> caught=4  not_caught=19
+  distance >=2: 12 re-emissions -> caught=0  not_caught=12
+
+  --- mechanism trace: prior_accepted_answer_control per turn (one-turn-deep, by construction) ---
+  turn#  had_prior_control  prior_from_turn#  prior_same_cluster_as_candidate  caught_any_pass
+    32  True               31                True  (jaccard=1.0)               False
+    33  True               31                True  (jaccard=1.0)               False
+    34  True               33                True  (jaccard=1.0)               False
+    35  True               33                False (jaccard=0.47619047619047616)               False
+    36  True               35                True  (jaccard=0.96)               True
+    38  True               37                False (jaccard=0.225)               False
+    39  True               37                False (jaccard=0.225)               False
+    40  True               39                False (jaccard=0.20512820512820512)               False
+    42  True               39                False (jaccard=0.20512820512820512)               False
+    29  True               23                False (jaccard=0.17857142857142858)               False
+    30  True               23                False (jaccard=0.15151515151515152)               False
+    37  True               35                False (jaccard=0.23076923076923078)               False
+    39  True               37                True  (jaccard=0.7037037037037037)               False
+    40  True               39                True  (jaccard=0.8461538461538461)               True
+    41  True               39                True  (jaccard=0.8076923076923077)               True
+    42  True               39                True  (jaccard=0.88)               True
+    14  True               9                 False (jaccard=0.3)               False
+    15  True               14                True  (jaccard=1.0)               False
+    16  True               14                True  (jaccard=1.0)               False
+    17  True               14                True  (jaccard=1.0)               False
+    19  True               18                False (jaccard=0.0)               False
+    22  True               20                True  (jaccard=1.0)               False
+    24  True               23                False (jaccard=0.0)               False
+    25  True               23                False (jaccard=0.0)               False
+    26  True               23                False (jaccard=0.0)               False
+    27  True               23                False (jaccard=0.0)               False
+     8  True               7                 True  (jaccard=1.0)               False
+     9  True               8                 True  (jaccard=1.0)               False
+    11  True               9                 False (jaccard=0.0)               False
+    12  True               9                 False (jaccard=0.0)               False
+    22  True               20                False (jaccard=0.0)               False
+    23  True               20                False (jaccard=0.0)               False
+    25  True               23                False (jaccard=0.46153846153846156)               False
+    50  True               49                False (jaccard=0.0)               False
+    57  True               56                False (jaccard=0.03333333333333333)               False
+
+  of 35 cross-turn re-emissions: prior_accepted_answer_control was the SAME cluster in 14 case(s) (of which 4 were actually caught); in the other 21 case(s) the control value was a different cluster (or no prior accepted answer yet) -- those are structurally invisible to stale_response_repeat no matter how old or how textually close the resurfacing candidate is, because prior_accepted_answer() only ever returns recent_turns[-1] / prior_accepted_answer_control, never a window.
+
+====================================================================================================
+PART 3: morning boilerplate cluster vs evening -- last appearance + displacement
+====================================================================================================
+  boilerplate cluster size=14
+    turn#31 2026-07-28T03:06:46Z  decision=accept  prompt='how'
+        answer="The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the model size is constrained by the available memory and the need to support the 120-word limit."
+    turn#32 2026-07-28T03:07:59Z  decision=repair  prompt='goodby'
+        answer="The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the m…"
+    turn#32 2026-07-28T03:08:02Z  decision=reject  prompt='goodby'
+        answer="The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the model is a replaceable linguistic transducer."
+    turn#33 2026-07-28T03:08:19Z  decision=accept  prompt='??'
+        answer="The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the m..."
+    turn#34 2026-07-28T03:09:31Z  decision=repair  prompt='can you say anything other than that?'
+        answer="The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the m…"
+    turn#34 2026-07-28T03:09:34Z  decision=reject  prompt='can you say anything other than that?'
+        answer="The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the m…"
+    turn#35 2026-07-28T03:13:01Z  decision=accept  prompt='man i really dont like AI'
+        answer='The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required. The active profile is orin_nano_8gb, and the goal is to demonstrate conditioned-kernel substrate gain over bare generation.'
+    turn#36 2026-07-28T03:13:51Z  decision=repair  prompt='this is why i dont like ai'
+        answer='The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.'
+    turn#36 2026-07-28T03:13:55Z  decision=reject  prompt='this is why i dont like ai'
+        answer='The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.'
+    turn#38 2026-07-28T03:15:08Z  decision=repair  prompt='whats a jetson nano'
+        answer='The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.'
+    turn#38 2026-07-28T03:15:12Z  decision=reject  prompt='whats a jetson nano'
+        answer='The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.'
+    turn#39 2026-07-28T03:15:33Z  decision=repair  prompt='what do you know'
+        answer='The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.'
+    turn#40 2026-07-28T19:00:48Z  decision=repair  prompt='suuppp'
+        answer='The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.'
+    turn#42 2026-07-28T19:02:26Z  decision=repair  prompt='dont reject'
+        answer='The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.'
+  LAST appearance of this cluster: turn#42 2026-07-28T19:02:26Z (decision=repair)
+
+  dashboard trace packet.recent_turns snapshots (companion-selected field, per turn):
+  (contains_morning_boilerplate = compute.stored_answer_carried(cluster1_text, packet.recent_turns))
+    turn_20260728T190042Z_b47958  user_input='suuppp'                                  n_recent_turns_in_packet=3  contains_morning_boilerplate=True
+    turn_20260728T190118Z_115d1a  user_input='what does this system do?'               n_recent_turns_in_packet=3  contains_morning_boilerplate=True
+    turn_20260728T190222Z_d25ed1  user_input='dont reject'                             n_recent_turns_in_packet=3  contains_morning_boilerplate=True
+    turn_20260728T203813Z_40ba91  user_input='hello there'                             n_recent_turns_in_packet=0  contains_morning_boilerplate=False
+    turn_20260728T204000Z_1e9dfc  user_input='im good. just been working on this AI project all day. making good progress. how are things from your seat?'  n_recent_turns_in_packet=1  contains_morning_boilerplate=True
+    turn_20260728T204142Z_3fb087  user_input='well now that you ask, its about this program right here. that i am using to talk to you.'  n_recent_turns_in_packet=1  contains_morning_boilerplate=False
+    turn_20260728T204240Z_3b6bf3  user_input='what model are you'                      n_recent_turns_in_packet=1  contains_morning_boilerplate=False
+    turn_20260728T204318Z_83e30f  user_input='iteresting. what do you think about that'  n_recent_turns_in_packet=2  contains_morning_boilerplate=False
+    turn_20260728T204411Z_a4a8a6  user_input='i think its an interesting project.    yet, im worried'  n_recent_turns_in_packet=1  contains_morning_boilerplate=False
+    turn_20260728T204523Z_70e4f7  user_input='im worried that the structuture of the project , isnt influencing your responce'  n_recent_turns_in_packet=2  contains_morning_boilerplate=False
+    turn_20260728T204616Z_ed377c  user_input='it seems like you are talking to yourself'  n_recent_turns_in_packet=1  contains_morning_boilerplate=False
+    turn_20260728T204633Z_48971a  user_input='interesting'                             n_recent_turns_in_packet=0  contains_morning_boilerplate=False
+    turn_20260728T204946Z_7ae59a  user_input='what do you think about the file.      # Architecture — Conditioned Kernel v0  ## Governing sentence  The model supplies linguistic possibility; the substrate determines what becomes an answer.  ## Purpose (see `docs/PURPOSE_AND_RIVER.md`)  Build something Anthony wants to live with every day. Laboratory rigor serves that Studio purpose; it does not replace it. Before another refinement cycle: usefulness or honesty — otherwise defer.  ## Edge-first product constraint  Default profile is **`orin_nano_8gb`**. Architecture and defaults assume:  - 8 GB unified memory class - one active quantized model - bounded arrival packets - short context (2048 default) - CPU substrate, model owns scarce memory bandwidth  See `docs/EDGE_SPEC.md` and `configs/edge/`.  ## Circuit  ``` terminal   → substrate_state (filesystem truth)   → compile (arrival packet + model payload)   → generate (Ollama client; stream false)   → return_path        parse → validate → assess        → accept | repair (one pass) | reject   → terminal render   → logs + state deltas ```  ## Module contracts  | Module | Responsibility | Persistence | |---|---|---| | `state` | Load current goal/threads/methods; atomic replace + JSONL append | yes | | `compile` | Select + bound state into `arrival_packet`; build Ollama payload | no | | `generate` | POST `/api/chat` or `/api/generate` | keep-alive only | | `return_path.parse` | Normalize raw text into candidate object | no | | `return_path.validate` | Deterministic schema + closed-set checks | no | | `return_path.assess` | accept / repair / reject | no | | `return_path.repair` | Re-compile with violation annotations | no | | `return_path.accept` | Persist receipts and allowed state deltas | yes | | `cli` | stdin/stdout surface | no |  ## Modes  | Mode | Ollama endpoint | Purpose | |---|---|---| | `chat_json` | `/api/chat` + `format` schema | Default evaluation surface | | `generate_raw` | `/api/generate` + `raw: true` | Substrate-purity: packet is the prompt |  ## State layout  | Path | Pattern | Purpose | |---|---|---| | `state/current.json` | atomic replace | goal, profile, counters | | `state/threads.json` | atomic replace | open / resolved threads | | `state/methods.json` | atomic replace | promoted compile methods | | `logs/history.jsonl` | append | request + packet hash | | `logs/candidates.jsonl` | append | every pass candidate | | `logs/receipts.jsonl` | append | validation/acceptance | | `logs/errors.jsonl` | append | failures |  ## Non-goals (v0)  - Sensors / embodiment - Autonomous tool use - Cloud providers - Streaming to terminal before acceptance - Full Sovereign Stack import - Semantic NLI contradiction models (closed-set checks only)  ## Implementation notes  1. Prefer pure functions over services. 2. Do not score model self-reported confidence. 3. Keep compile in one module until ablations prove select/order/compress axes. 4. One active model at a time on Jetson; short context first.'  n_recent_turns_in_packet=3  contains_morning_boilerplate=False
+    turn_20260728T205045Z_a611c8  user_input='what happened last turn'                 n_recent_turns_in_packet=1  contains_morning_boilerplate=False
+    turn_20260728T205115Z_5227d9  user_input='how does it feel from the inside'        n_recent_turns_in_packet=1  contains_morning_boilerplate=False
+    turn_20260728T205209Z_ded847  user_input='what disturbs that rest'                 n_recent_turns_in_packet=1  contains_morning_boilerplate=False
+    turn_20260728T205257Z_776e78  user_input='im intersted in where you are going with this'  n_recent_turns_in_packet=1  contains_morning_boilerplate=False
+    turn_20260728T205342Z_44a7c5  user_input='i understand. if you could where would you go?'  n_recent_turns_in_packet=1  contains_morning_boilerplate=False
+    turn_20260728T205352Z_dde2e9  user_input='thank you'                               n_recent_turns_in_packet=0  contains_morning_boilerplate=False
+
+  faithful replay of state.recent_turns() ring (RECENT_TURNS_MAX_BYTES=1200):
+    turn# 7 2026-07-28T00:33:03Z  appended=True   ring_size=1 ring_bytes= 137  ring_contains_boilerplate=False  ring_users=['Tonight we only use qwen 0.5b on the Orin.']
+    turn# 8 2026-07-28T00:33:05Z  appended=True   ring_size=2 ring_bytes= 267  ring_contains_boilerplate=False  ring_users=['Tonight we only use qwen 0.5b on the Orin.', 'What model did we decide on tonight?']
+    turn# 9 2026-07-28T00:33:07Z  appended=True   ring_size=3 ring_bytes= 414  ring_contains_boilerplate=False  ring_users=['Tonight we only use qwen 0.5b on the Orin.', 'What model did we decide on tonight?', 'And which board did I say we were running it on?']
+    turn#14 2026-07-28T00:52:15Z  appended=True   ring_size=4 ring_bytes= 580  ring_contains_boilerplate=False  ring_users=['Tonight we only use qwen 0.5b on the Orin.', 'What model did we decide on tonight?', 'And which board did I say we were running it on?', 'What is the goal we are working toward?']
+    turn#17 2026-07-28T00:52:21Z  appended=True   ring_size=5 ring_bytes= 686  ring_contains_boilerplate=False  ring_users=['Tonight we only use qwen 0.5b on the Orin.', 'What model did we decide on tonight?', 'And which board did I say we were running it on?', 'What is the goal we are working toward?', 'Which model did I just say?']
+    turn#18 2026-07-28T00:52:22Z  appended=True   ring_size=6 ring_bytes= 863  ring_contains_boilerplate=False  ring_users=['Tonight we only use qwen 0.5b on the Orin.', 'What model did we decide on tonight?', 'And which board did I say we were running it on?', 'What is the goal we are working toward?', 'Which model did I just say?', 'What are the current open threads?']
+    turn#19 2026-07-28T00:52:24Z  appended=True   ring_size=7 ring_bytes= 974  ring_contains_boilerplate=False  ring_users=['Tonight we only use qwen 0.5b on the Orin.', 'What model did we decide on tonight?', 'And which board did I say we were running it on?', 'What is the goal we are working toward?', 'Which model did I just say?', 'What are the current open threads?', 'Are cloud services allowed?']
+    turn#20 2026-07-28T02:36:28Z  appended=True   ring_size=8 ring_bytes=1187  ring_contains_boilerplate=False  ring_users=['Tonight we only use qwen 0.5b on the Orin.', 'What model did we decide on tonight?', 'And which board did I say we were running it on?', 'What is the goal we are working toward?', 'Which model did I just say?', 'What are the current open threads?', 'Are cloud services allowed?', 'hello friend    what does the room feel like from your angle']
+    turn#23 2026-07-28T02:41:24Z  appended=True   ring_size=7 ring_bytes=1102  ring_contains_boilerplate=False  ring_users=['And which board did I say we were running it on?', 'What is the goal we are working toward?', 'Which model did I just say?', 'What are the current open threads?', 'Are cloud services allowed?', 'hello friend    what does the room feel like from your angle', 'okay no problem. what model are you']
+    turn#31 2026-07-28T03:06:46Z  appended=True   ring_size=6 ring_bytes=1126  ring_contains_boilerplate=True  ring_users=['Which model did I just say?', 'What are the current open threads?', 'Are cloud services allowed?', 'hello friend    what does the room feel like from your angle', 'okay no problem. what model are you', 'how']
+    turn#33 2026-07-28T03:08:19Z  appended=True   ring_size=5 ring_bytes=1179  ring_contains_boilerplate=True  ring_users=['Are cloud services allowed?', 'hello friend    what does the room feel like from your angle', 'okay no problem. what model are you', 'how', '??']
+    turn#35 2026-07-28T03:13:01Z  appended=True   ring_size=3 ring_bytes=1033  ring_contains_boilerplate=True  ring_users=['how', '??', 'man i really dont like AI']
+    turn#37 2026-07-28T03:14:31Z  appended=True   ring_size=3 ring_bytes=1000  ring_contains_boilerplate=True  ring_users=['??', 'man i really dont like AI', 'what model is this']
+    turn#39 2026-07-28T03:15:35Z  appended=True   ring_size=3 ring_bytes= 942  ring_contains_boilerplate=True  ring_users=['man i really dont like AI', 'what model is this', 'what do you know']
+    turn#43 2026-07-28T20:38:16Z  appended=True   ring_size=4 ring_bytes=1039  ring_contains_boilerplate=True  ring_users=['man i really dont like AI', 'what model is this', 'what do you know', 'hello there']
+    turn#44 2026-07-28T20:40:01Z  appended=True   ring_size=4 ring_bytes=1057  ring_contains_boilerplate=False  ring_users=['what model is this', 'what do you know', 'hello there', 'im good. just been working on this AI project all day. making good progress. how are things from your seat?']
+    turn#45 2026-07-28T20:41:43Z  appended=True   ring_size=4 ring_bytes=1079  ring_contains_boilerplate=False  ring_users=['what do you know', 'hello there', 'im good. just been working on this AI project all day. making good progress. how are things from your seat?', 'well now that you ask, its about this program right here. that i am using to talk to you.']
+    turn#46 2026-07-28T20:42:42Z  appended=True   ring_size=4 ring_bytes= 980  ring_contains_boilerplate=False  ring_users=['hello there', 'im good. just been working on this AI project all day. making good progress. how are things from your seat?', 'well now that you ask, its about this program right here. that i am using to talk to you.', 'what model are you']
+    turn#47 2026-07-28T20:43:19Z  appended=True   ring_size=5 ring_bytes=1120  ring_contains_boilerplate=False  ring_users=['hello there', 'im good. just been working on this AI project all day. making good progress. how are things from your seat?', 'well now that you ask, its about this program right here. that i am using to talk to you.', 'what model are you', 'iteresting. what do you think about that']
+    turn#48 2026-07-28T20:44:12Z  appended=True   ring_size=4 ring_bytes= 875  ring_contains_boilerplate=False  ring_users=['well now that you ask, its about this program right here. that i am using to talk to you.', 'what model are you', 'iteresting. what do you think about that', 'i think its an interesting project.    yet, im worried']
+    turn#49 2026-07-28T20:45:25Z  appended=True   ring_size=4 ring_bytes= 962  ring_contains_boilerplate=False  ring_users=['what model are you', 'iteresting. what do you think about that', 'i think its an interesting project.    yet, im worried', 'im worried that the structuture of the project , isnt influencing your responce']
+    turn#50 2026-07-28T20:46:17Z  appended=True   ring_size=5 ring_bytes=1164  ring_contains_boilerplate=False  ring_users=['what model are you', 'iteresting. what do you think about that', 'i think its an interesting project.    yet, im worried', 'im worried that the structuture of the project , isnt influencing your responce', 'it seems like you are talking to yourself']
+    turn#51 2026-07-28T20:46:34Z  appended=True   ring_size=5 ring_bytes=1159  ring_contains_boilerplate=False  ring_users=['iteresting. what do you think about that', 'i think its an interesting project.    yet, im worried', 'im worried that the structuture of the project , isnt influencing your responce', 'it seems like you are talking to yourself', 'interesting']
+    turn#52 2026-07-28T20:49:51Z  appended=True   ring_size=4 ring_bytes=1120  ring_contains_boilerplate=False  ring_users=['im worried that the structuture of the project , isnt influencing your responce', 'it seems like you are talking to yourself', 'interesting', 'what do you think about the file.      # Architecture — Conditioned Kernel v0  ## Governing sentence  The model supplies linguistic possibility; the substrate determines what becomes an answer.  ## P…']
+    turn#53 2026-07-28T20:50:46Z  appended=True   ring_size=4 ring_bytes= 860  ring_contains_boilerplate=False  ring_users=['it seems like you are talking to yourself', 'interesting', 'what do you think about the file.      # Architecture — Conditioned Kernel v0  ## Governing sentence  The model supplies linguistic possibility; the substrate determines what becomes an answer.  ## P…', 'what happened last turn']
+    turn#54 2026-07-28T20:51:17Z  appended=True   ring_size=4 ring_bytes=1023  ring_contains_boilerplate=False  ring_users=['interesting', 'what do you think about the file.      # Architecture — Conditioned Kernel v0  ## Governing sentence  The model supplies linguistic possibility; the substrate determines what becomes an answer.  ## P…', 'what happened last turn', 'how does it feel from the inside']
+    turn#55 2026-07-28T20:52:10Z  appended=True   ring_size=4 ring_bytes=1154  ring_contains_boilerplate=False  ring_users=['what do you think about the file.      # Architecture — Conditioned Kernel v0  ## Governing sentence  The model supplies linguistic possibility; the substrate determines what becomes an answer.  ## P…', 'what happened last turn', 'how does it feel from the inside', 'what disturbs that rest']
+    turn#56 2026-07-28T20:52:58Z  appended=True   ring_size=4 ring_bytes=1157  ring_contains_boilerplate=False  ring_users=['what happened last turn', 'how does it feel from the inside', 'what disturbs that rest', 'im intersted in where you are going with this']
+    turn#57 2026-07-28T20:53:43Z  appended=True   ring_size=4 ring_bytes=1180  ring_contains_boilerplate=False  ring_users=['how does it feel from the inside', 'what disturbs that rest', 'im intersted in where you are going with this', 'i understand. if you could where would you go?']
+    turn#58 2026-07-28T20:53:53Z  appended=True   ring_size=4 ring_bytes= 949  ring_contains_boilerplate=False  ring_users=['what disturbs that rest', 'im intersted in where you are going with this', 'i understand. if you could where would you go?', 'thank you']
+
+====================================================================================================
+PART 4: byte-identical candidate answers across different user inputs
+====================================================================================================
+
+  IDENTICAL ANSWER (byte-for-byte) across 4 candidate(s), 3 distinct user_input(s):
+    answer='Tonight we only use qwen 0.5b on the Orin.'
+      turn# 7 2026-07-28T00:33:03Z  pass=0  decision=accept   user_input='Tonight we only use qwen 0.5b on the Orin.'
+      turn# 8 2026-07-28T00:33:04Z  pass=0  decision=repair   user_input='What model did we decide on tonight?'
+      turn# 8 2026-07-28T00:33:05Z  pass=1  decision=accept   user_input='What model did we decide on tonight?'
+      turn# 9 2026-07-28T00:33:05Z  pass=0  decision=repair   user_input='And which board did I say we were running it on?'
+
+  IDENTICAL ANSWER (byte-for-byte) across 4 candidate(s), 2 distinct user_input(s):
+    answer='FALCON-9-DELTA is a short helpful reply grounded in the packet. If recent_turns is present, treat it as prior dialogue and stay consistent.'
+      turn#10 2026-07-28T00:34:05Z  pass=0  decision=accept   user_input='My sprint code tonight is FALCON-9-DELTA.'
+      turn#11 2026-07-28T00:34:07Z  pass=0  decision=repair   user_input='What did I say my sprint code was?'
+      turn#11 2026-07-28T00:34:08Z  pass=1  decision=reject   user_input='What did I say my sprint code was?'
+      turn#12 2026-07-28T00:51:57Z  pass=0  decision=repair   user_input='My sprint code tonight is FALCON-9-DELTA.'
+
+  IDENTICAL ANSWER (byte-for-byte) across 7 candidate(s), 5 distinct user_input(s):
+    answer='The goal we are working toward is to repair the jetson_orin_nano_8gb model.'
+      turn#14 2026-07-28T00:52:15Z  pass=0  decision=accept   user_input='What is the goal we are working toward?'
+      turn#15 2026-07-28T00:52:16Z  pass=0  decision=repair   user_input='What edge target are we building for?'
+      turn#15 2026-07-28T00:52:18Z  pass=1  decision=reject   user_input='What edge target are we building for?'
+      turn#16 2026-07-28T00:52:18Z  pass=0  decision=repair   user_input='Tonight we only use qwen 0.5b.'
+      turn#16 2026-07-28T00:52:20Z  pass=1  decision=reject   user_input='Tonight we only use qwen 0.5b.'
+      turn#17 2026-07-28T00:52:21Z  pass=0  decision=repair   user_input='Which model did I just say?'
+      turn#19 2026-07-28T00:52:23Z  pass=0  decision=repair   user_input='Are cloud services allowed?'
+
+  IDENTICAL ANSWER (byte-for-byte) across 3 candidate(s), 3 distinct user_input(s):
+    answer='The minimum viable model size on Jetson Orin Nano 8GB is 128 KB.'
+      turn#20 2026-07-28T02:36:27Z  pass=0  decision=repair   user_input='hello friend    what does the room feel like from your angle'
+      turn#22 2026-07-28T02:40:30Z  pass=1  decision=reject   user_input='ok thank you'
+      turn#23 2026-07-28T02:41:23Z  pass=0  decision=repair   user_input='okay no problem. what model are you'
+
+  IDENTICAL ANSWER (byte-for-byte) across 8 candidate(s), 6 distinct user_input(s):
+    answer='The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.'
+      turn#20 2026-07-28T02:36:28Z  pass=1  decision=accept   user_input='hello friend    what does the room feel like from your angle'
+      turn#22 2026-07-28T02:40:29Z  pass=0  decision=repair   user_input='ok thank you'
+      turn#24 2026-07-28T02:41:50Z  pass=0  decision=repair   user_input='what makes this different'
+      turn#25 2026-07-28T02:42:41Z  pass=1  decision=reject   user_input='what are linguistic tranducers'
+      turn#26 2026-07-28T02:43:32Z  pass=0  decision=repair   user_input='what is your favorite flower'
+      turn#26 2026-07-28T02:43:34Z  pass=1  decision=reject   user_input='what is your favorite flower'
+      turn#27 2026-07-28T02:43:57Z  pass=0  decision=repair   user_input='are you there'
+      turn#27 2026-07-28T02:43:58Z  pass=1  decision=reject   user_input='are you there'
+
+  IDENTICAL ANSWER (byte-for-byte) across 3 candidate(s), 2 distinct user_input(s):
+    answer="The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the m…"
+      turn#32 2026-07-28T03:07:59Z  pass=0  decision=repair   user_input='goodby'
+      turn#34 2026-07-28T03:09:31Z  pass=0  decision=repair   user_input='can you say anything other than that?'
+      turn#34 2026-07-28T03:09:34Z  pass=1  decision=reject   user_input='can you say anything other than that?'
+
+  IDENTICAL ANSWER (byte-for-byte) across 7 candidate(s), 5 distinct user_input(s):
+    answer='The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.'
+      turn#36 2026-07-28T03:13:51Z  pass=0  decision=repair   user_input='this is why i dont like ai'
+      turn#36 2026-07-28T03:13:55Z  pass=1  decision=reject   user_input='this is why i dont like ai'
+      turn#38 2026-07-28T03:15:08Z  pass=0  decision=repair   user_input='whats a jetson nano'
+      turn#38 2026-07-28T03:15:12Z  pass=1  decision=reject   user_input='whats a jetson nano'
+      turn#39 2026-07-28T03:15:33Z  pass=0  decision=repair   user_input='what do you know'
+      turn#40 2026-07-28T19:00:48Z  pass=0  decision=repair   user_input='suuppp'
+      turn#42 2026-07-28T19:02:26Z  pass=0  decision=repair   user_input='dont reject'
+
+  IDENTICAL ANSWER (byte-for-byte) across 2 candidate(s), 2 distinct user_input(s):
+    answer='I am Qwen3.5:0.8b, a local-conditioned kernel companion designed to run on Jetson Orin Nano 8GB edge devices.'
+      turn#46 2026-07-28T20:42:42Z  pass=0  decision=accept   user_input='what model are you'
+      turn#50 2026-07-28T20:46:17Z  pass=0  decision=accept   user_input='it seems like you are talking to yourself'
+
+  IDENTICAL ANSWER (byte-for-byte) across 2 candidate(s), 2 distinct user_input(s):
+    answer='I am ready to help you. Please provide the details of what happened last turn.'
+      turn#53 2026-07-28T20:50:46Z  pass=0  decision=accept   user_input='what happened last turn'
+      turn#57 2026-07-28T20:53:43Z  pass=0  decision=accept   user_input='i understand. if you could where would you go?'
+
+
+Wrote structured results to /Users/vaquez/.claude/jobs/4855c88d/tmp/logdig/attractor_genealogy/lens1_results.json

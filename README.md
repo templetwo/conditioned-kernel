@@ -106,7 +106,7 @@ Conditions include bare, budget-matched bare, static persona, full Conditioned K
 
 ## Studio observations (public)
 
-Lived companion / Interior View field notes — redacted for public read, separate from private `logs/`:
+Lived companion / Interior View field notes, plus the published raw evidence they cite ([evidence/](evidence/) — full session traces, ledgers, and state, hash-manifested, published at the operator's explicit direction):
 
 **[docs/observations/](docs/observations/)** — index, privacy rules, and session notes (Context Field, `not_responsive`, night phenomenology).
 
@@ -129,7 +129,7 @@ v0 does **not** import the full stack. Bridge surfaces are P3 after the core exp
 conditioned-kernel/
 ├── src/conditioned_kernel/   # package
 ├── state/                    # default substrate files
-├── logs/                     # receipts / history (local only; gitignored)
+├── logs/                     # receipts / history (live writes; frozen session copies land in evidence/)
 ├── experiments/              # matrix runners + probes
 ├── tests/                    # offline unit tests
 └── docs/

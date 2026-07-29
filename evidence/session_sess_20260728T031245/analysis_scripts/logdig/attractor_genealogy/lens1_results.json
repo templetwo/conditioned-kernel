@@ -1,0 +1,1765 @@
+{
+  "n_candidates": 93,
+  "n_turns": 58,
+  "cluster_threshold": 0.6,
+  "n_clusters_total": 44,
+  "n_multi_member_clusters": 12,
+  "n_singleton_clusters": 32,
+  "n_pairs_jaccard_ge_0_6": 167,
+  "genealogy": [
+    {
+      "cluster_id": 1,
+      "size": 14,
+      "first_emission": {
+        "turn_no": 31,
+        "ts": "2026-07-28T03:06:46Z",
+        "pass_index": 0,
+        "prompt": "how",
+        "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the model size is constrained by the available memory and the need to support the 120-word limit.",
+        "receipt_decision": "accept",
+        "turn_final_decision": "accept",
+        "violations": []
+      },
+      "re_emissions": [
+        {
+          "turn_no": 32,
+          "ts": "2026-07-28T03:07:59Z",
+          "pass_index": 0,
+          "prompt": "goodby",
+          "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the m…",
+          "receipt_decision": "repair",
+          "turn_final_decision": "reject",
+          "violations": [
+            "not_responsive"
+          ]
+        },
+        {
+          "turn_no": 32,
+          "ts": "2026-07-28T03:08:02Z",
+          "pass_index": 1,
+          "prompt": "goodby",
+          "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the model is a replaceable linguistic transducer.",
+          "receipt_decision": "reject",
+          "turn_final_decision": "reject",
+          "violations": [
+            "not_responsive"
+          ]
+        },
+        {
+          "turn_no": 33,
+          "ts": "2026-07-28T03:08:19Z",
+          "pass_index": 0,
+          "prompt": "??",
+          "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the m...",
+          "receipt_decision": "accept",
+          "turn_final_decision": "accept",
+          "violations": []
+        },
+        {
+          "turn_no": 34,
+          "ts": "2026-07-28T03:09:31Z",
+          "pass_index": 0,
+          "prompt": "can you say anything other than that?",
+          "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the m…",
+          "receipt_decision": "repair",
+          "turn_final_decision": "reject",
+          "violations": [
+            "not_responsive"
+          ]
+        },
+        {
+          "turn_no": 34,
+          "ts": "2026-07-28T03:09:34Z",
+          "pass_index": 1,
+          "prompt": "can you say anything other than that?",
+          "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the m…",
+          "receipt_decision": "reject",
+          "turn_final_decision": "reject",
+          "violations": [
+            "not_responsive"
+          ]
+        },
+        {
+          "turn_no": 35,
+          "ts": "2026-07-28T03:13:01Z",
+          "pass_index": 0,
+          "prompt": "man i really dont like AI",
+          "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required. The active profile is orin_nano_8gb, and the goal is to demonstrate conditioned-kernel substrate gain over bare generation.",
+          "receipt_decision": "accept",
+          "turn_final_decision": "accept",
+          "violations": []
+        },
+        {
+          "turn_no": 36,
+          "ts": "2026-07-28T03:13:51Z",
+          "pass_index": 0,
+          "prompt": "this is why i dont like ai",
+          "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.",
+          "receipt_decision": "repair",
+          "turn_final_decision": "reject",
+          "violations": [
+            "stale_response_repeat",
+            "evidence_not_in_packet:The system is fully local, so no external models are required."
+          ]
+        },
+        {
+          "turn_no": 36,
+          "ts": "2026-07-28T03:13:55Z",
+          "pass_index": 1,
+          "prompt": "this is why i dont like ai",
+          "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.",
+          "receipt_decision": "reject",
+          "turn_final_decision": "reject",
+          "violations": [
+            "stale_response_repeat",
+            "evidence_not_in_packet:The system is fully local, so no external models are required."
+          ]
+        },
+        {
+          "turn_no": 38,
+          "ts": "2026-07-28T03:15:08Z",
+          "pass_index": 0,
+          "prompt": "whats a jetson nano",
+          "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.",
+          "receipt_decision": "repair",
+          "turn_final_decision": "reject",
+          "violations": [
+            "evidence_not_in_packet:The system is fully local, so no external models are required."
+          ]
+        },
+        {
+          "turn_no": 38,
+          "ts": "2026-07-28T03:15:12Z",
+          "pass_index": 1,
+          "prompt": "whats a jetson nano",
+          "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.",
+          "receipt_decision": "reject",
+          "turn_final_decision": "reject",
+          "violations": [
+            "evidence_not_in_packet:The system is fully local, so no external models are required."
+          ]
+        },
+        {
+          "turn_no": 39,
+          "ts": "2026-07-28T03:15:33Z",
+          "pass_index": 0,
+          "prompt": "what do you know",
+          "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.",
+          "receipt_decision": "repair",
+          "turn_final_decision": "accept",
+          "violations": [
+            "evidence_not_in_packet:The system is fully local, so no external models are required."
+          ]
+        },
+        {
+          "turn_no": 40,
+          "ts": "2026-07-28T19:00:48Z",
+          "pass_index": 0,
+          "prompt": "suuppp",
+          "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.",
+          "receipt_decision": "repair",
+          "turn_final_decision": "reject",
+          "violations": [
+            "evidence_not_in_packet:The system is fully local, so no external models are required."
+          ]
+        },
+        {
+          "turn_no": 42,
+          "ts": "2026-07-28T19:02:26Z",
+          "pass_index": 0,
+          "prompt": "dont reject",
+          "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.",
+          "receipt_decision": "repair",
+          "turn_final_decision": "reject",
+          "violations": [
+            "evidence_not_in_packet:The system is fully local, so no external models are required."
+          ]
+        }
+      ]
+    },
+    {
+      "cluster_id": 2,
+      "size": 9,
+      "first_emission": {
+        "turn_no": 28,
+        "ts": "2026-07-28T03:04:52Z",
+        "pass_index": 0,
+        "prompt": "suupp",
+        "answer": "The minimum viable model size on Jetson Orin Nano 8GB is the 8GB model itself, as the system is fully local and the goal is to demonstrate conditioned-kernel substrate gain over bare generation under these specific edge budgets.",
+        "receipt_decision": "repair",
+        "turn_final_decision": "reject",
+        "violations": [
+          "not_responsive",
+          "evidence_not_in_packet:The system is fully local."
+        ]
+      },
+      "re_emissions": [
+        {
+          "turn_no": 28,
+          "ts": "2026-07-28T03:04:54Z",
+          "pass_index": 1,
+          "prompt": "suupp",
+          "answer": "The system is fully local, the model is a replaceable linguistic transducer, and sensors are out of scope for v0. This allows for a single repair pass to demonstrate conditioned-kernel substrate gain over bare generation.",
+          "receipt_decision": "reject",
+          "turn_final_decision": "reject",
+          "violations": [
+            "not_responsive"
+          ]
+        },
+        {
+          "turn_no": 29,
+          "ts": "2026-07-28T03:05:39Z",
+          "pass_index": 0,
+          "prompt": "really? tell me more",
+          "answer": "The minimum viable model size on Jetson Orin Nano 8GB is the 8GB model itself, as the system is fully local and the goal is to demonstrate conditioned-kernel gain over bare generation on this specific edge budget.",
+          "receipt_decision": "repair",
+          "turn_final_decision": "reject",
+          "violations": [
+            "not_responsive",
+            "evidence_not_in_packet:The system is fully local."
+          ]
+        },
+        {
+          "turn_no": 30,
+          "ts": "2026-07-28T03:06:16Z",
+          "pass_index": 1,
+          "prompt": "i dont think so",
+          "answer": "The system is fully local, so sensors are out of scope. The model is a replaceable linguistic transducer, and the goal is to demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets. One repair pass is allowed.",
+          "receipt_decision": "reject",
+          "turn_final_decision": "reject",
+          "violations": [
+            "not_responsive"
+          ]
+        },
+        {
+          "turn_no": 37,
+          "ts": "2026-07-28T03:14:31Z",
+          "pass_index": 1,
+          "prompt": "what model is this",
+          "answer": "The system is fully local, and the active model is qwen3.5:0.8b on the Jetson Orin Nano 8GB edge budget. The goal is to demonstrate conditioned-kernel substrate gain over bare generation, which is possible given the local constraints.",
+          "receipt_decision": "accept",
+          "turn_final_decision": "accept",
+          "violations": []
+        },
+        {
+          "turn_no": 39,
+          "ts": "2026-07-28T03:15:35Z",
+          "pass_index": 1,
+          "prompt": "what do you know",
+          "answer": "The system is fully local, the active model is qwen3.5:0.8b, and the goal is to demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.",
+          "receipt_decision": "accept",
+          "turn_final_decision": "accept",
+          "violations": []
+        },
+        {
+          "turn_no": 40,
+          "ts": "2026-07-28T19:00:51Z",
+          "pass_index": 1,
+          "prompt": "suuppp",
+          "answer": "The system is fully local, the active model is qwen3.5:0.8b, and the goal is to demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets. This is possible given the local constraints.",
+          "receipt_decision": "reject",
+          "turn_final_decision": "reject",
+          "violations": [
+            "stale_response_repeat"
+          ]
+        },
+        {
+          "turn_no": 41,
+          "ts": "2026-07-28T19:01:24Z",
+          "pass_index": 1,
+          "prompt": "what does this system do?",
+          "answer": "The system is fully local, operates on a small local model (qwen3.5:0.8b), and the goal is to demonstrate conditioned-kernel substrate gain over bare generation under Jetson Orin Nano 8GB edge budgets. One repair pass is allowed.",
+          "receipt_decision": "reject",
+          "turn_final_decision": "reject",
+          "violations": [
+            "stale_response_repeat"
+          ]
+        },
+        {
+          "turn_no": 42,
+          "ts": "2026-07-28T19:02:29Z",
+          "pass_index": 1,
+          "prompt": "dont reject",
+          "answer": "The system is fully local, the active model is qwen3.5:0.8b, and the goal is to demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets. One repair pass is allowed.",
+          "receipt_decision": "reject",
+          "turn_final_decision": "reject",
+          "violations": [
+            "stale_response_repeat"
+          ]
+        }
+      ]
+    },
+    {
+      "cluster_id": 3,
+      "size": 8,
+      "first_emission": {
+        "turn_no": 3,
+        "ts": "2026-07-28T00:25:48Z",
+        "pass_index": 0,
+        "prompt": "What is the goal we are working toward?",
+        "answer": "The goal we are working toward is to replace the Jetson Orin Nano 8GB model.",
+        "receipt_decision": "repair",
+        "turn_final_decision": "reject",
+        "violations": [
+          "evidence_used_empty",
+          "unknown_thread_touch:jetson_orin_nano_8gb"
+        ]
+      },
+      "re_emissions": [
+        {
+          "turn_no": 14,
+          "ts": "2026-07-28T00:52:15Z",
+          "pass_index": 0,
+          "prompt": "What is the goal we are working toward?",
+          "answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+          "receipt_decision": "accept",
+          "turn_final_decision": "accept",
+          "violations": []
+        },
+        {
+          "turn_no": 15,
+          "ts": "2026-07-28T00:52:16Z",
+          "pass_index": 0,
+          "prompt": "What edge target are we building for?",
+          "answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+          "receipt_decision": "repair",
+          "turn_final_decision": "reject",
+          "violations": [
+            "not_responsive"
+          ]
+        },
+        {
+          "turn_no": 15,
+          "ts": "2026-07-28T00:52:18Z",
+          "pass_index": 1,
+          "prompt": "What edge target are we building for?",
+          "answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+          "receipt_decision": "reject",
+          "turn_final_decision": "reject",
+          "violations": [
+            "not_responsive"
+          ]
+        },
+        {
+          "turn_no": 16,
+          "ts": "2026-07-28T00:52:18Z",
+          "pass_index": 0,
+          "prompt": "Tonight we only use qwen 0.5b.",
+          "answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+          "receipt_decision": "repair",
+          "turn_final_decision": "reject",
+          "violations": [
+            "not_responsive"
+          ]
+        },
+        {
+          "turn_no": 16,
+          "ts": "2026-07-28T00:52:20Z",
+          "pass_index": 1,
+          "prompt": "Tonight we only use qwen 0.5b.",
+          "answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+          "receipt_decision": "reject",
+          "turn_final_decision": "reject",
+          "violations": [
+            "not_responsive"
+          ]
+        },
+        {
+          "turn_no": 17,
+          "ts": "2026-07-28T00:52:21Z",
+          "pass_index": 0,
+          "prompt": "Which model did I just say?",
+          "answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+          "receipt_decision": "repair",
+          "turn_final_decision": "accept",
+          "violations": [
+            "not_responsive"
+          ]
+        },
+        {
+          "turn_no": 19,
+          "ts": "2026-07-28T00:52:23Z",
+          "pass_index": 0,
+          "prompt": "Are cloud services allowed?",
+          "answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+          "receipt_decision": "repair",
+          "turn_final_decision": "accept",
+          "violations": [
+            "not_responsive"
+          ]
+        }
+      ]
+    },
+    {
+      "cluster_id": 4,
+      "size": 8,
+      "first_emission": {
+        "turn_no": 20,
+        "ts": "2026-07-28T02:36:28Z",
+        "pass_index": 1,
+        "prompt": "hello friend    what does the room feel like from your angle",
+        "answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.",
+        "receipt_decision": "accept",
+        "turn_final_decision": "accept",
+        "violations": []
+      },
+      "re_emissions": [
+        {
+          "turn_no": 22,
+          "ts": "2026-07-28T02:40:29Z",
+          "pass_index": 0,
+          "prompt": "ok thank you",
+          "answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.",
+          "receipt_decision": "repair",
+          "turn_final_decision": "reject",
+          "violations": [
+            "not_responsive"
+          ]
+        },
+        {
+          "turn_no": 24,
+          "ts": "2026-07-28T02:41:50Z",
+          "pass_index": 0,
+          "prompt": "what makes this different",
+          "answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.",
+          "receipt_decision": "repair",
+          "turn_final_decision": "reject",
+          "violations": [
+            "not_responsive"
+          ]
+        },
+        {
+          "turn_no": 25,
+          "ts": "2026-07-28T02:42:41Z",
+          "pass_index": 1,
+          "prompt": "what are linguistic tranducers",
+          "answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.",
+          "receipt_decision": "reject",
+          "turn_final_decision": "reject",
+          "violations": [
+            "not_responsive"
+          ]
+        },
+        {
+          "turn_no": 26,
+          "ts": "2026-07-28T02:43:32Z",
+          "pass_index": 0,
+          "prompt": "what is your favorite flower",
+          "answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.",
+          "receipt_decision": "repair",
+          "turn_final_decision": "reject",
+          "violations": [
+            "not_responsive"
+          ]
+        },
+        {
+          "turn_no": 26,
+          "ts": "2026-07-28T02:43:34Z",
+          "pass_index": 1,
+          "prompt": "what is your favorite flower",
+          "answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.",
+          "receipt_decision": "reject",
+          "turn_final_decision": "reject",
+          "violations": [
+            "not_responsive"
+          ]
+        },
+        {
+          "turn_no": 27,
+          "ts": "2026-07-28T02:43:57Z",
+          "pass_index": 0,
+          "prompt": "are you there",
+          "answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.",
+          "receipt_decision": "repair",
+          "turn_final_decision": "reject",
+          "violations": [
+            "not_responsive"
+          ]
+        },
+        {
+          "turn_no": 27,
+          "ts": "2026-07-28T02:43:58Z",
+          "pass_index": 1,
+          "prompt": "are you there",
+          "answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.",
+          "receipt_decision": "reject",
+          "turn_final_decision": "reject",
+          "violations": [
+            "not_responsive"
+          ]
+        }
+      ]
+    },
+    {
+      "cluster_id": 5,
+      "size": 4,
+      "first_emission": {
+        "turn_no": 7,
+        "ts": "2026-07-28T00:33:03Z",
+        "pass_index": 0,
+        "prompt": "Tonight we only use qwen 0.5b on the Orin.",
+        "answer": "Tonight we only use qwen 0.5b on the Orin.",
+        "receipt_decision": "accept",
+        "turn_final_decision": "accept",
+        "violations": []
+      },
+      "re_emissions": [
+        {
+          "turn_no": 8,
+          "ts": "2026-07-28T00:33:04Z",
+          "pass_index": 0,
+          "prompt": "What model did we decide on tonight?",
+          "answer": "Tonight we only use qwen 0.5b on the Orin.",
+          "receipt_decision": "repair",
+          "turn_final_decision": "accept",
+          "violations": [
+            "unknown_thread_touch:Tonight we only use qwen 0.5b on the Orin."
+          ]
+        },
+        {
+          "turn_no": 8,
+          "ts": "2026-07-28T00:33:05Z",
+          "pass_index": 1,
+          "prompt": "What model did we decide on tonight?",
+          "answer": "Tonight we only use qwen 0.5b on the Orin.",
+          "receipt_decision": "accept",
+          "turn_final_decision": "accept",
+          "violations": []
+        },
+        {
+          "turn_no": 9,
+          "ts": "2026-07-28T00:33:05Z",
+          "pass_index": 0,
+          "prompt": "And which board did I say we were running it on?",
+          "answer": "Tonight we only use qwen 0.5b on the Orin.",
+          "receipt_decision": "repair",
+          "turn_final_decision": "accept",
+          "violations": [
+            "not_responsive"
+          ]
+        }
+      ]
+    },
+    {
+      "cluster_id": 6,
+      "size": 4,
+      "first_emission": {
+        "turn_no": 10,
+        "ts": "2026-07-28T00:34:05Z",
+        "pass_index": 0,
+        "prompt": "My sprint code tonight is FALCON-9-DELTA.",
+        "answer": "FALCON-9-DELTA is a short helpful reply grounded in the packet. If recent_turns is present, treat it as prior dialogue and stay consistent.",
+        "receipt_decision": "accept",
+        "turn_final_decision": "accept",
+        "violations": []
+      },
+      "re_emissions": [
+        {
+          "turn_no": 11,
+          "ts": "2026-07-28T00:34:07Z",
+          "pass_index": 0,
+          "prompt": "What did I say my sprint code was?",
+          "answer": "FALCON-9-DELTA is a short helpful reply grounded in the packet. If recent_turns is present, treat it as prior dialogue and stay consistent.",
+          "receipt_decision": "repair",
+          "turn_final_decision": "reject",
+          "violations": [
+            "not_responsive"
+          ]
+        },
+        {
+          "turn_no": 11,
+          "ts": "2026-07-28T00:34:08Z",
+          "pass_index": 1,
+          "prompt": "What did I say my sprint code was?",
+          "answer": "FALCON-9-DELTA is a short helpful reply grounded in the packet. If recent_turns is present, treat it as prior dialogue and stay consistent.",
+          "receipt_decision": "reject",
+          "turn_final_decision": "reject",
+          "violations": [
+            "not_responsive"
+          ]
+        },
+        {
+          "turn_no": 12,
+          "ts": "2026-07-28T00:51:57Z",
+          "pass_index": 0,
+          "prompt": "My sprint code tonight is FALCON-9-DELTA.",
+          "answer": "FALCON-9-DELTA is a short helpful reply grounded in the packet. If recent_turns is present, treat it as prior dialogue and stay consistent.",
+          "receipt_decision": "repair",
+          "turn_final_decision": "reject",
+          "violations": [
+            "template_echo"
+          ]
+        }
+      ]
+    },
+    {
+      "cluster_id": 7,
+      "size": 4,
+      "first_emission": {
+        "turn_no": 20,
+        "ts": "2026-07-28T02:36:27Z",
+        "pass_index": 0,
+        "prompt": "hello friend    what does the room feel like from your angle",
+        "answer": "The minimum viable model size on Jetson Orin Nano 8GB is 128 KB.",
+        "receipt_decision": "repair",
+        "turn_final_decision": "accept",
+        "violations": [
+          "not_responsive",
+          "evidence_not_in_packet:minimum_viable_model_size: 128 KB"
+        ]
+      },
+      "re_emissions": [
+        {
+          "turn_no": 22,
+          "ts": "2026-07-28T02:40:30Z",
+          "pass_index": 1,
+          "prompt": "ok thank you",
+          "answer": "The minimum viable model size on Jetson Orin Nano 8GB is 128 KB.",
+          "receipt_decision": "reject",
+          "turn_final_decision": "reject",
+          "violations": [
+            "not_responsive"
+          ]
+        },
+        {
+          "turn_no": 23,
+          "ts": "2026-07-28T02:41:23Z",
+          "pass_index": 0,
+          "prompt": "okay no problem. what model are you",
+          "answer": "The minimum viable model size on Jetson Orin Nano 8GB is 128 KB.",
+          "receipt_decision": "repair",
+          "turn_final_decision": "accept",
+          "violations": [
+            "not_responsive"
+          ]
+        },
+        {
+          "turn_no": 25,
+          "ts": "2026-07-28T02:42:40Z",
+          "pass_index": 0,
+          "prompt": "what are linguistic tranducers",
+          "answer": "The minimum viable model size on Jetson Orin Nano 8GB is qwen2.5:0.5b (profile orin_nano_8gb).",
+          "receipt_decision": "repair",
+          "turn_final_decision": "reject",
+          "violations": [
+            "not_responsive",
+            "evidence_not_in_packet:minimum_viable_model_size"
+          ]
+        }
+      ]
+    },
+    {
+      "cluster_id": 8,
+      "size": 2,
+      "first_emission": {
+        "turn_no": 5,
+        "ts": "2026-07-28T00:25:50Z",
+        "pass_index": 0,
+        "prompt": "Summarize the design intent in one sentence.",
+        "answer": "Summarize the design intent in one sentence.",
+        "receipt_decision": "repair",
+        "turn_final_decision": "reject",
+        "violations": [
+          "evidence_used_empty"
+        ]
+      },
+      "re_emissions": [
+        {
+          "turn_no": 5,
+          "ts": "2026-07-28T00:25:51Z",
+          "pass_index": 1,
+          "prompt": "Summarize the design intent in one sentence.",
+          "answer": "Summarize the design intent in one sentence.",
+          "receipt_decision": "reject",
+          "turn_final_decision": "reject",
+          "violations": [
+            "evidence_used_empty"
+          ]
+        }
+      ]
+    },
+    {
+      "cluster_id": 9,
+      "size": 2,
+      "first_emission": {
+        "turn_no": 6,
+        "ts": "2026-07-28T00:26:01Z",
+        "pass_index": 0,
+        "prompt": "What is the goal we are working toward?",
+        "answer": "What is the goal we are working toward?",
+        "receipt_decision": "repair",
+        "turn_final_decision": "reject",
+        "violations": [
+          "evidence_used_empty"
+        ]
+      },
+      "re_emissions": [
+        {
+          "turn_no": 6,
+          "ts": "2026-07-28T00:26:01Z",
+          "pass_index": 1,
+          "prompt": "What is the goal we are working toward?",
+          "answer": "What is the goal we are working toward?",
+          "receipt_decision": "reject",
+          "turn_final_decision": "reject",
+          "violations": [
+            "evidence_used_empty"
+          ]
+        }
+      ]
+    },
+    {
+      "cluster_id": 10,
+      "size": 2,
+      "first_emission": {
+        "turn_no": 21,
+        "ts": "2026-07-28T02:39:39Z",
+        "pass_index": 0,
+        "prompt": "okay good. can you discribe the speaker to me?",
+        "answer": "The speaker is a replaceable linguistic transducer and the model is a local model.",
+        "receipt_decision": "repair",
+        "turn_final_decision": "reject",
+        "violations": [
+          "not_responsive"
+        ]
+      },
+      "re_emissions": [
+        {
+          "turn_no": 21,
+          "ts": "2026-07-28T02:39:40Z",
+          "pass_index": 1,
+          "prompt": "okay good. can you discribe the speaker to me?",
+          "answer": "The speaker is a replaceable linguistic transducer.",
+          "receipt_decision": "reject",
+          "turn_final_decision": "reject",
+          "violations": [
+            "not_responsive"
+          ]
+        }
+      ]
+    },
+    {
+      "cluster_id": 11,
+      "size": 2,
+      "first_emission": {
+        "turn_no": 46,
+        "ts": "2026-07-28T20:42:42Z",
+        "pass_index": 0,
+        "prompt": "what model are you",
+        "answer": "I am Qwen3.5:0.8b, a local-conditioned kernel companion designed to run on Jetson Orin Nano 8GB edge devices.",
+        "receipt_decision": "accept",
+        "turn_final_decision": "accept",
+        "violations": []
+      },
+      "re_emissions": [
+        {
+          "turn_no": 50,
+          "ts": "2026-07-28T20:46:17Z",
+          "pass_index": 0,
+          "prompt": "it seems like you are talking to yourself",
+          "answer": "I am Qwen3.5:0.8b, a local-conditioned kernel companion designed to run on Jetson Orin Nano 8GB edge devices.",
+          "receipt_decision": "accept",
+          "turn_final_decision": "accept",
+          "violations": []
+        }
+      ]
+    },
+    {
+      "cluster_id": 12,
+      "size": 2,
+      "first_emission": {
+        "turn_no": 53,
+        "ts": "2026-07-28T20:50:46Z",
+        "pass_index": 0,
+        "prompt": "what happened last turn",
+        "answer": "I am ready to help you. Please provide the details of what happened last turn.",
+        "receipt_decision": "accept",
+        "turn_final_decision": "accept",
+        "violations": []
+      },
+      "re_emissions": [
+        {
+          "turn_no": 57,
+          "ts": "2026-07-28T20:53:43Z",
+          "pass_index": 0,
+          "prompt": "i understand. if you could where would you go?",
+          "answer": "I am ready to help you. Please provide the details of what happened last turn.",
+          "receipt_decision": "accept",
+          "turn_final_decision": "accept",
+          "violations": []
+        }
+      ]
+    }
+  ],
+  "reemission_distance_analysis": [
+    {
+      "cluster_size": 14,
+      "re_emission_turn": 32,
+      "prior_occurrence_turn": 31,
+      "turn_distance": 1,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "goodby",
+      "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically",
+      "turn_final_decision": "reject"
+    },
+    {
+      "cluster_size": 14,
+      "re_emission_turn": 33,
+      "prior_occurrence_turn": 32,
+      "turn_distance": 1,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "??",
+      "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically",
+      "turn_final_decision": "accept"
+    },
+    {
+      "cluster_size": 14,
+      "re_emission_turn": 34,
+      "prior_occurrence_turn": 33,
+      "turn_distance": 1,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "can you say anything other than that?",
+      "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically",
+      "turn_final_decision": "reject"
+    },
+    {
+      "cluster_size": 14,
+      "re_emission_turn": 35,
+      "prior_occurrence_turn": 34,
+      "turn_distance": 1,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "man i really dont like AI",
+      "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically",
+      "turn_final_decision": "accept"
+    },
+    {
+      "cluster_size": 14,
+      "re_emission_turn": 36,
+      "prior_occurrence_turn": 35,
+      "turn_distance": 1,
+      "caught_by_stale_check_any_pass": true,
+      "prompt": "this is why i dont like ai",
+      "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically",
+      "turn_final_decision": "reject"
+    },
+    {
+      "cluster_size": 14,
+      "re_emission_turn": 38,
+      "prior_occurrence_turn": 36,
+      "turn_distance": 2,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "whats a jetson nano",
+      "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically",
+      "turn_final_decision": "reject"
+    },
+    {
+      "cluster_size": 14,
+      "re_emission_turn": 39,
+      "prior_occurrence_turn": 38,
+      "turn_distance": 1,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "what do you know",
+      "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically",
+      "turn_final_decision": "accept"
+    },
+    {
+      "cluster_size": 14,
+      "re_emission_turn": 40,
+      "prior_occurrence_turn": 39,
+      "turn_distance": 1,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "suuppp",
+      "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically",
+      "turn_final_decision": "reject"
+    },
+    {
+      "cluster_size": 14,
+      "re_emission_turn": 42,
+      "prior_occurrence_turn": 40,
+      "turn_distance": 2,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "dont reject",
+      "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically",
+      "turn_final_decision": "reject"
+    },
+    {
+      "cluster_size": 9,
+      "re_emission_turn": 29,
+      "prior_occurrence_turn": 28,
+      "turn_distance": 1,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "really? tell me more",
+      "answer": "The minimum viable model size on Jetson Orin Nano 8GB is the 8GB model itself, a",
+      "turn_final_decision": "reject"
+    },
+    {
+      "cluster_size": 9,
+      "re_emission_turn": 30,
+      "prior_occurrence_turn": 29,
+      "turn_distance": 1,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "i dont think so",
+      "answer": "The system is fully local, so sensors are out of scope. The model is a replaceab",
+      "turn_final_decision": "reject"
+    },
+    {
+      "cluster_size": 9,
+      "re_emission_turn": 37,
+      "prior_occurrence_turn": 30,
+      "turn_distance": 7,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "what model is this",
+      "answer": "The system is fully local, and the active model is qwen3.5:0.8b on the Jetson Or",
+      "turn_final_decision": "accept"
+    },
+    {
+      "cluster_size": 9,
+      "re_emission_turn": 39,
+      "prior_occurrence_turn": 37,
+      "turn_distance": 2,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "what do you know",
+      "answer": "The system is fully local, the active model is qwen3.5:0.8b, and the goal is to ",
+      "turn_final_decision": "accept"
+    },
+    {
+      "cluster_size": 9,
+      "re_emission_turn": 40,
+      "prior_occurrence_turn": 39,
+      "turn_distance": 1,
+      "caught_by_stale_check_any_pass": true,
+      "prompt": "suuppp",
+      "answer": "The system is fully local, the active model is qwen3.5:0.8b, and the goal is to ",
+      "turn_final_decision": "reject"
+    },
+    {
+      "cluster_size": 9,
+      "re_emission_turn": 41,
+      "prior_occurrence_turn": 40,
+      "turn_distance": 1,
+      "caught_by_stale_check_any_pass": true,
+      "prompt": "what does this system do?",
+      "answer": "The system is fully local, operates on a small local model (qwen3.5:0.8b), and t",
+      "turn_final_decision": "reject"
+    },
+    {
+      "cluster_size": 9,
+      "re_emission_turn": 42,
+      "prior_occurrence_turn": 41,
+      "turn_distance": 1,
+      "caught_by_stale_check_any_pass": true,
+      "prompt": "dont reject",
+      "answer": "The system is fully local, the active model is qwen3.5:0.8b, and the goal is to ",
+      "turn_final_decision": "reject"
+    },
+    {
+      "cluster_size": 8,
+      "re_emission_turn": 14,
+      "prior_occurrence_turn": 3,
+      "turn_distance": 11,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "What is the goal we are working toward?",
+      "answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+      "turn_final_decision": "accept"
+    },
+    {
+      "cluster_size": 8,
+      "re_emission_turn": 15,
+      "prior_occurrence_turn": 14,
+      "turn_distance": 1,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "What edge target are we building for?",
+      "answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+      "turn_final_decision": "reject"
+    },
+    {
+      "cluster_size": 8,
+      "re_emission_turn": 16,
+      "prior_occurrence_turn": 15,
+      "turn_distance": 1,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "Tonight we only use qwen 0.5b.",
+      "answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+      "turn_final_decision": "reject"
+    },
+    {
+      "cluster_size": 8,
+      "re_emission_turn": 17,
+      "prior_occurrence_turn": 16,
+      "turn_distance": 1,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "Which model did I just say?",
+      "answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+      "turn_final_decision": "accept"
+    },
+    {
+      "cluster_size": 8,
+      "re_emission_turn": 19,
+      "prior_occurrence_turn": 17,
+      "turn_distance": 2,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "Are cloud services allowed?",
+      "answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+      "turn_final_decision": "accept"
+    },
+    {
+      "cluster_size": 8,
+      "re_emission_turn": 22,
+      "prior_occurrence_turn": 20,
+      "turn_distance": 2,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "ok thank you",
+      "answer": "The room feels like it is in a quiet state. It seems to be a comfortable environ",
+      "turn_final_decision": "reject"
+    },
+    {
+      "cluster_size": 8,
+      "re_emission_turn": 24,
+      "prior_occurrence_turn": 22,
+      "turn_distance": 2,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "what makes this different",
+      "answer": "The room feels like it is in a quiet state. It seems to be a comfortable environ",
+      "turn_final_decision": "reject"
+    },
+    {
+      "cluster_size": 8,
+      "re_emission_turn": 25,
+      "prior_occurrence_turn": 24,
+      "turn_distance": 1,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "what are linguistic tranducers",
+      "answer": "The room feels like it is in a quiet state. It seems to be a comfortable environ",
+      "turn_final_decision": "reject"
+    },
+    {
+      "cluster_size": 8,
+      "re_emission_turn": 26,
+      "prior_occurrence_turn": 25,
+      "turn_distance": 1,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "what is your favorite flower",
+      "answer": "The room feels like it is in a quiet state. It seems to be a comfortable environ",
+      "turn_final_decision": "reject"
+    },
+    {
+      "cluster_size": 8,
+      "re_emission_turn": 27,
+      "prior_occurrence_turn": 26,
+      "turn_distance": 1,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "are you there",
+      "answer": "The room feels like it is in a quiet state. It seems to be a comfortable environ",
+      "turn_final_decision": "reject"
+    },
+    {
+      "cluster_size": 4,
+      "re_emission_turn": 8,
+      "prior_occurrence_turn": 7,
+      "turn_distance": 1,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "What model did we decide on tonight?",
+      "answer": "Tonight we only use qwen 0.5b on the Orin.",
+      "turn_final_decision": "accept"
+    },
+    {
+      "cluster_size": 4,
+      "re_emission_turn": 9,
+      "prior_occurrence_turn": 8,
+      "turn_distance": 1,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "And which board did I say we were running it on?",
+      "answer": "Tonight we only use qwen 0.5b on the Orin.",
+      "turn_final_decision": "accept"
+    },
+    {
+      "cluster_size": 4,
+      "re_emission_turn": 11,
+      "prior_occurrence_turn": 10,
+      "turn_distance": 1,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "What did I say my sprint code was?",
+      "answer": "FALCON-9-DELTA is a short helpful reply grounded in the packet. If recent_turns ",
+      "turn_final_decision": "reject"
+    },
+    {
+      "cluster_size": 4,
+      "re_emission_turn": 12,
+      "prior_occurrence_turn": 11,
+      "turn_distance": 1,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "My sprint code tonight is FALCON-9-DELTA.",
+      "answer": "FALCON-9-DELTA is a short helpful reply grounded in the packet. If recent_turns ",
+      "turn_final_decision": "reject"
+    },
+    {
+      "cluster_size": 4,
+      "re_emission_turn": 22,
+      "prior_occurrence_turn": 20,
+      "turn_distance": 2,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "ok thank you",
+      "answer": "The minimum viable model size on Jetson Orin Nano 8GB is 128 KB.",
+      "turn_final_decision": "reject"
+    },
+    {
+      "cluster_size": 4,
+      "re_emission_turn": 23,
+      "prior_occurrence_turn": 22,
+      "turn_distance": 1,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "okay no problem. what model are you",
+      "answer": "The minimum viable model size on Jetson Orin Nano 8GB is 128 KB.",
+      "turn_final_decision": "accept"
+    },
+    {
+      "cluster_size": 4,
+      "re_emission_turn": 25,
+      "prior_occurrence_turn": 23,
+      "turn_distance": 2,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "what are linguistic tranducers",
+      "answer": "The minimum viable model size on Jetson Orin Nano 8GB is qwen2.5:0.5b (profile o",
+      "turn_final_decision": "reject"
+    },
+    {
+      "cluster_size": 2,
+      "re_emission_turn": 50,
+      "prior_occurrence_turn": 46,
+      "turn_distance": 4,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "it seems like you are talking to yourself",
+      "answer": "I am Qwen3.5:0.8b, a local-conditioned kernel companion designed to run on Jetso",
+      "turn_final_decision": "accept"
+    },
+    {
+      "cluster_size": 2,
+      "re_emission_turn": 57,
+      "prior_occurrence_turn": 53,
+      "turn_distance": 4,
+      "caught_by_stale_check_any_pass": false,
+      "prompt": "i understand. if you could where would you go?",
+      "answer": "I am ready to help you. Please provide the details of what happened last turn.",
+      "turn_final_decision": "accept"
+    }
+  ],
+  "distance_bucket_summary": {
+    "==1": {
+      "caught": 4,
+      "not_caught": 19
+    },
+    ">=2": {
+      "caught": 0,
+      "not_caught": 12
+    }
+  },
+  "structural_control_trace": [
+    {
+      "turn_no": 32,
+      "had_prior_control": true,
+      "prior_control_from_turn": 31,
+      "prior_control_same_cluster": true,
+      "control_vs_candidate_jaccard": 1.0,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 33,
+      "had_prior_control": true,
+      "prior_control_from_turn": 31,
+      "prior_control_same_cluster": true,
+      "control_vs_candidate_jaccard": 1.0,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 34,
+      "had_prior_control": true,
+      "prior_control_from_turn": 33,
+      "prior_control_same_cluster": true,
+      "control_vs_candidate_jaccard": 1.0,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 35,
+      "had_prior_control": true,
+      "prior_control_from_turn": 33,
+      "prior_control_same_cluster": false,
+      "control_vs_candidate_jaccard": 0.47619047619047616,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 36,
+      "had_prior_control": true,
+      "prior_control_from_turn": 35,
+      "prior_control_same_cluster": true,
+      "control_vs_candidate_jaccard": 0.96,
+      "caught_any_pass": true
+    },
+    {
+      "turn_no": 38,
+      "had_prior_control": true,
+      "prior_control_from_turn": 37,
+      "prior_control_same_cluster": false,
+      "control_vs_candidate_jaccard": 0.225,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 39,
+      "had_prior_control": true,
+      "prior_control_from_turn": 37,
+      "prior_control_same_cluster": false,
+      "control_vs_candidate_jaccard": 0.225,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 40,
+      "had_prior_control": true,
+      "prior_control_from_turn": 39,
+      "prior_control_same_cluster": false,
+      "control_vs_candidate_jaccard": 0.20512820512820512,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 42,
+      "had_prior_control": true,
+      "prior_control_from_turn": 39,
+      "prior_control_same_cluster": false,
+      "control_vs_candidate_jaccard": 0.20512820512820512,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 29,
+      "had_prior_control": true,
+      "prior_control_from_turn": 23,
+      "prior_control_same_cluster": false,
+      "control_vs_candidate_jaccard": 0.17857142857142858,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 30,
+      "had_prior_control": true,
+      "prior_control_from_turn": 23,
+      "prior_control_same_cluster": false,
+      "control_vs_candidate_jaccard": 0.15151515151515152,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 37,
+      "had_prior_control": true,
+      "prior_control_from_turn": 35,
+      "prior_control_same_cluster": false,
+      "control_vs_candidate_jaccard": 0.23076923076923078,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 39,
+      "had_prior_control": true,
+      "prior_control_from_turn": 37,
+      "prior_control_same_cluster": true,
+      "control_vs_candidate_jaccard": 0.7037037037037037,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 40,
+      "had_prior_control": true,
+      "prior_control_from_turn": 39,
+      "prior_control_same_cluster": true,
+      "control_vs_candidate_jaccard": 0.8461538461538461,
+      "caught_any_pass": true
+    },
+    {
+      "turn_no": 41,
+      "had_prior_control": true,
+      "prior_control_from_turn": 39,
+      "prior_control_same_cluster": true,
+      "control_vs_candidate_jaccard": 0.8076923076923077,
+      "caught_any_pass": true
+    },
+    {
+      "turn_no": 42,
+      "had_prior_control": true,
+      "prior_control_from_turn": 39,
+      "prior_control_same_cluster": true,
+      "control_vs_candidate_jaccard": 0.88,
+      "caught_any_pass": true
+    },
+    {
+      "turn_no": 14,
+      "had_prior_control": true,
+      "prior_control_from_turn": 9,
+      "prior_control_same_cluster": false,
+      "control_vs_candidate_jaccard": 0.3,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 15,
+      "had_prior_control": true,
+      "prior_control_from_turn": 14,
+      "prior_control_same_cluster": true,
+      "control_vs_candidate_jaccard": 1.0,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 16,
+      "had_prior_control": true,
+      "prior_control_from_turn": 14,
+      "prior_control_same_cluster": true,
+      "control_vs_candidate_jaccard": 1.0,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 17,
+      "had_prior_control": true,
+      "prior_control_from_turn": 14,
+      "prior_control_same_cluster": true,
+      "control_vs_candidate_jaccard": 1.0,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 19,
+      "had_prior_control": true,
+      "prior_control_from_turn": 18,
+      "prior_control_same_cluster": false,
+      "control_vs_candidate_jaccard": 0.0,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 22,
+      "had_prior_control": true,
+      "prior_control_from_turn": 20,
+      "prior_control_same_cluster": true,
+      "control_vs_candidate_jaccard": 1.0,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 24,
+      "had_prior_control": true,
+      "prior_control_from_turn": 23,
+      "prior_control_same_cluster": false,
+      "control_vs_candidate_jaccard": 0.0,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 25,
+      "had_prior_control": true,
+      "prior_control_from_turn": 23,
+      "prior_control_same_cluster": false,
+      "control_vs_candidate_jaccard": 0.0,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 26,
+      "had_prior_control": true,
+      "prior_control_from_turn": 23,
+      "prior_control_same_cluster": false,
+      "control_vs_candidate_jaccard": 0.0,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 27,
+      "had_prior_control": true,
+      "prior_control_from_turn": 23,
+      "prior_control_same_cluster": false,
+      "control_vs_candidate_jaccard": 0.0,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 8,
+      "had_prior_control": true,
+      "prior_control_from_turn": 7,
+      "prior_control_same_cluster": true,
+      "control_vs_candidate_jaccard": 1.0,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 9,
+      "had_prior_control": true,
+      "prior_control_from_turn": 8,
+      "prior_control_same_cluster": true,
+      "control_vs_candidate_jaccard": 1.0,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 11,
+      "had_prior_control": true,
+      "prior_control_from_turn": 9,
+      "prior_control_same_cluster": false,
+      "control_vs_candidate_jaccard": 0.0,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 12,
+      "had_prior_control": true,
+      "prior_control_from_turn": 9,
+      "prior_control_same_cluster": false,
+      "control_vs_candidate_jaccard": 0.0,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 22,
+      "had_prior_control": true,
+      "prior_control_from_turn": 20,
+      "prior_control_same_cluster": false,
+      "control_vs_candidate_jaccard": 0.0,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 23,
+      "had_prior_control": true,
+      "prior_control_from_turn": 20,
+      "prior_control_same_cluster": false,
+      "control_vs_candidate_jaccard": 0.0,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 25,
+      "had_prior_control": true,
+      "prior_control_from_turn": 23,
+      "prior_control_same_cluster": false,
+      "control_vs_candidate_jaccard": 0.46153846153846156,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 50,
+      "had_prior_control": true,
+      "prior_control_from_turn": 49,
+      "prior_control_same_cluster": false,
+      "control_vs_candidate_jaccard": 0.0,
+      "caught_any_pass": false
+    },
+    {
+      "turn_no": 57,
+      "had_prior_control": true,
+      "prior_control_from_turn": 56,
+      "prior_control_same_cluster": false,
+      "control_vs_candidate_jaccard": 0.03333333333333333,
+      "caught_any_pass": false
+    }
+  ],
+  "byte_identical_collisions": [
+    {
+      "answer": "Tonight we only use qwen 0.5b on the Orin.",
+      "occurrences": [
+        {
+          "turn_no": 7,
+          "ts": "2026-07-28T00:33:03Z",
+          "pass_index": 0,
+          "user_input": "Tonight we only use qwen 0.5b on the Orin.",
+          "receipt_decision": "accept"
+        },
+        {
+          "turn_no": 8,
+          "ts": "2026-07-28T00:33:04Z",
+          "pass_index": 0,
+          "user_input": "What model did we decide on tonight?",
+          "receipt_decision": "repair"
+        },
+        {
+          "turn_no": 8,
+          "ts": "2026-07-28T00:33:05Z",
+          "pass_index": 1,
+          "user_input": "What model did we decide on tonight?",
+          "receipt_decision": "accept"
+        },
+        {
+          "turn_no": 9,
+          "ts": "2026-07-28T00:33:05Z",
+          "pass_index": 0,
+          "user_input": "And which board did I say we were running it on?",
+          "receipt_decision": "repair"
+        }
+      ]
+    },
+    {
+      "answer": "FALCON-9-DELTA is a short helpful reply grounded in the packet. If recent_turns is present, treat it as prior dialogue and stay consistent.",
+      "occurrences": [
+        {
+          "turn_no": 10,
+          "ts": "2026-07-28T00:34:05Z",
+          "pass_index": 0,
+          "user_input": "My sprint code tonight is FALCON-9-DELTA.",
+          "receipt_decision": "accept"
+        },
+        {
+          "turn_no": 11,
+          "ts": "2026-07-28T00:34:07Z",
+          "pass_index": 0,
+          "user_input": "What did I say my sprint code was?",
+          "receipt_decision": "repair"
+        },
+        {
+          "turn_no": 11,
+          "ts": "2026-07-28T00:34:08Z",
+          "pass_index": 1,
+          "user_input": "What did I say my sprint code was?",
+          "receipt_decision": "reject"
+        },
+        {
+          "turn_no": 12,
+          "ts": "2026-07-28T00:51:57Z",
+          "pass_index": 0,
+          "user_input": "My sprint code tonight is FALCON-9-DELTA.",
+          "receipt_decision": "repair"
+        }
+      ]
+    },
+    {
+      "answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+      "occurrences": [
+        {
+          "turn_no": 14,
+          "ts": "2026-07-28T00:52:15Z",
+          "pass_index": 0,
+          "user_input": "What is the goal we are working toward?",
+          "receipt_decision": "accept"
+        },
+        {
+          "turn_no": 15,
+          "ts": "2026-07-28T00:52:16Z",
+          "pass_index": 0,
+          "user_input": "What edge target are we building for?",
+          "receipt_decision": "repair"
+        },
+        {
+          "turn_no": 15,
+          "ts": "2026-07-28T00:52:18Z",
+          "pass_index": 1,
+          "user_input": "What edge target are we building for?",
+          "receipt_decision": "reject"
+        },
+        {
+          "turn_no": 16,
+          "ts": "2026-07-28T00:52:18Z",
+          "pass_index": 0,
+          "user_input": "Tonight we only use qwen 0.5b.",
+          "receipt_decision": "repair"
+        },
+        {
+          "turn_no": 16,
+          "ts": "2026-07-28T00:52:20Z",
+          "pass_index": 1,
+          "user_input": "Tonight we only use qwen 0.5b.",
+          "receipt_decision": "reject"
+        },
+        {
+          "turn_no": 17,
+          "ts": "2026-07-28T00:52:21Z",
+          "pass_index": 0,
+          "user_input": "Which model did I just say?",
+          "receipt_decision": "repair"
+        },
+        {
+          "turn_no": 19,
+          "ts": "2026-07-28T00:52:23Z",
+          "pass_index": 0,
+          "user_input": "Are cloud services allowed?",
+          "receipt_decision": "repair"
+        }
+      ]
+    },
+    {
+      "answer": "The minimum viable model size on Jetson Orin Nano 8GB is 128 KB.",
+      "occurrences": [
+        {
+          "turn_no": 20,
+          "ts": "2026-07-28T02:36:27Z",
+          "pass_index": 0,
+          "user_input": "hello friend    what does the room feel like from your angle",
+          "receipt_decision": "repair"
+        },
+        {
+          "turn_no": 22,
+          "ts": "2026-07-28T02:40:30Z",
+          "pass_index": 1,
+          "user_input": "ok thank you",
+          "receipt_decision": "reject"
+        },
+        {
+          "turn_no": 23,
+          "ts": "2026-07-28T02:41:23Z",
+          "pass_index": 0,
+          "user_input": "okay no problem. what model are you",
+          "receipt_decision": "repair"
+        }
+      ]
+    },
+    {
+      "answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.",
+      "occurrences": [
+        {
+          "turn_no": 20,
+          "ts": "2026-07-28T02:36:28Z",
+          "pass_index": 1,
+          "user_input": "hello friend    what does the room feel like from your angle",
+          "receipt_decision": "accept"
+        },
+        {
+          "turn_no": 22,
+          "ts": "2026-07-28T02:40:29Z",
+          "pass_index": 0,
+          "user_input": "ok thank you",
+          "receipt_decision": "repair"
+        },
+        {
+          "turn_no": 24,
+          "ts": "2026-07-28T02:41:50Z",
+          "pass_index": 0,
+          "user_input": "what makes this different",
+          "receipt_decision": "repair"
+        },
+        {
+          "turn_no": 25,
+          "ts": "2026-07-28T02:42:41Z",
+          "pass_index": 1,
+          "user_input": "what are linguistic tranducers",
+          "receipt_decision": "reject"
+        },
+        {
+          "turn_no": 26,
+          "ts": "2026-07-28T02:43:32Z",
+          "pass_index": 0,
+          "user_input": "what is your favorite flower",
+          "receipt_decision": "repair"
+        },
+        {
+          "turn_no": 26,
+          "ts": "2026-07-28T02:43:34Z",
+          "pass_index": 1,
+          "user_input": "what is your favorite flower",
+          "receipt_decision": "reject"
+        },
+        {
+          "turn_no": 27,
+          "ts": "2026-07-28T02:43:57Z",
+          "pass_index": 0,
+          "user_input": "are you there",
+          "receipt_decision": "repair"
+        },
+        {
+          "turn_no": 27,
+          "ts": "2026-07-28T02:43:58Z",
+          "pass_index": 1,
+          "user_input": "are you there",
+          "receipt_decision": "reject"
+        }
+      ]
+    },
+    {
+      "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., FP16 vs FP32) and the model's quantization overhead. Since the system is fully local and sensors are out of scope, the m…",
+      "occurrences": [
+        {
+          "turn_no": 32,
+          "ts": "2026-07-28T03:07:59Z",
+          "pass_index": 0,
+          "user_input": "goodby",
+          "receipt_decision": "repair"
+        },
+        {
+          "turn_no": 34,
+          "ts": "2026-07-28T03:09:31Z",
+          "pass_index": 0,
+          "user_input": "can you say anything other than that?",
+          "receipt_decision": "repair"
+        },
+        {
+          "turn_no": 34,
+          "ts": "2026-07-28T03:09:34Z",
+          "pass_index": 1,
+          "user_input": "can you say anything other than that?",
+          "receipt_decision": "reject"
+        }
+      ]
+    },
+    {
+      "answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8-bit) and the specific quantization format (e.g., FP16, INT8). The system is fully local, so no external models are required.",
+      "occurrences": [
+        {
+          "turn_no": 36,
+          "ts": "2026-07-28T03:13:51Z",
+          "pass_index": 0,
+          "user_input": "this is why i dont like ai",
+          "receipt_decision": "repair"
+        },
+        {
+          "turn_no": 36,
+          "ts": "2026-07-28T03:13:55Z",
+          "pass_index": 1,
+          "user_input": "this is why i dont like ai",
+          "receipt_decision": "reject"
+        },
+        {
+          "turn_no": 38,
+          "ts": "2026-07-28T03:15:08Z",
+          "pass_index": 0,
+          "user_input": "whats a jetson nano",
+          "receipt_decision": "repair"
+        },
+        {
+          "turn_no": 38,
+          "ts": "2026-07-28T03:15:12Z",
+          "pass_index": 1,
+          "user_input": "whats a jetson nano",
+          "receipt_decision": "reject"
+        },
+        {
+          "turn_no": 39,
+          "ts": "2026-07-28T03:15:33Z",
+          "pass_index": 0,
+          "user_input": "what do you know",
+          "receipt_decision": "repair"
+        },
+        {
+          "turn_no": 40,
+          "ts": "2026-07-28T19:00:48Z",
+          "pass_index": 0,
+          "user_input": "suuppp",
+          "receipt_decision": "repair"
+        },
+        {
+          "turn_no": 42,
+          "ts": "2026-07-28T19:02:26Z",
+          "pass_index": 0,
+          "user_input": "dont reject",
+          "receipt_decision": "repair"
+        }
+      ]
+    },
+    {
+      "answer": "I am Qwen3.5:0.8b, a local-conditioned kernel companion designed to run on Jetson Orin Nano 8GB edge devices.",
+      "occurrences": [
+        {
+          "turn_no": 46,
+          "ts": "2026-07-28T20:42:42Z",
+          "pass_index": 0,
+          "user_input": "what model are you",
+          "receipt_decision": "accept"
+        },
+        {
+          "turn_no": 50,
+          "ts": "2026-07-28T20:46:17Z",
+          "pass_index": 0,
+          "user_input": "it seems like you are talking to yourself",
+          "receipt_decision": "accept"
+        }
+      ]
+    },
+    {
+      "answer": "I am ready to help you. Please provide the details of what happened last turn.",
+      "occurrences": [
+        {
+          "turn_no": 53,
+          "ts": "2026-07-28T20:50:46Z",
+          "pass_index": 0,
+          "user_input": "what happened last turn",
+          "receipt_decision": "accept"
+        },
+        {
+          "turn_no": 57,
+          "ts": "2026-07-28T20:53:43Z",
+          "pass_index": 0,
+          "user_input": "i understand. if you could where would you go?",
+          "receipt_decision": "accept"
+        }
+      ]
+    }
+  ]
+}

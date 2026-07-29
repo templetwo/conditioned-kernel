@@ -1,0 +1,738 @@
+{
+  "part_a_violation_set_diff": {
+    "n_two_pass_turns": 35,
+    "outcome_counts": {
+      "SAME_PERSISTS": 22,
+      "CLEAN_FIX": 8,
+      "SWAPPED": 5
+    },
+    "rows": [
+      {
+        "ts": "2026-07-28T00:25:23Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "evidence_used_empty",
+          "not_responsive"
+        ],
+        "pass1_violations": [
+          "evidence_used_empty",
+          "not_responsive"
+        ],
+        "outcome": "SAME_PERSISTS",
+        "pass0_answer": "The Orin's Jetson platform is the current target.",
+        "pass1_answer": "Return corrected JSON only. Use allowed_evidence_samples or facts only. thread_touch only from allowed_thread_ids or []. Answer must reference the goal_snippet."
+      },
+      {
+        "ts": "2026-07-28T00:25:24Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "evidence_used_empty",
+          "not_responsive"
+        ],
+        "pass1_violations": [
+          "evidence_used_empty"
+        ],
+        "outcome": "SAME_PERSISTS",
+        "pass0_answer": "Orin Nano 8GB",
+        "pass1_answer": "What model did we decide on tonight?"
+      },
+      {
+        "ts": "2026-07-28T00:25:49Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "evidence_used_empty",
+          "unknown_thread_touch"
+        ],
+        "pass1_violations": [
+          "evidence_used_empty"
+        ],
+        "outcome": "SAME_PERSISTS",
+        "pass0_answer": "The goal we are working toward is to replace the Jetson Orin Nano 8GB model.",
+        "pass1_answer": "Fix the goal_snippet."
+      },
+      {
+        "ts": "2026-07-28T00:25:50Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "evidence_used_empty",
+          "not_responsive",
+          "unknown_thread_touch"
+        ],
+        "pass1_violations": [
+          "evidence_used_empty"
+        ],
+        "outcome": "SAME_PERSISTS",
+        "pass0_answer": "jetson_orin_nano_8gb (one model at a time)",
+        "pass1_answer": "The edge target for this system is jetson_orin_nano_8gb (one model at a time)."
+      },
+      {
+        "ts": "2026-07-28T00:25:51Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "evidence_used_empty"
+        ],
+        "pass1_violations": [
+          "evidence_used_empty"
+        ],
+        "outcome": "SAME_PERSISTS",
+        "pass0_answer": "Summarize the design intent in one sentence.",
+        "pass1_answer": "Summarize the design intent in one sentence."
+      },
+      {
+        "ts": "2026-07-28T00:26:01Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "evidence_used_empty"
+        ],
+        "pass1_violations": [
+          "evidence_used_empty"
+        ],
+        "outcome": "SAME_PERSISTS",
+        "pass0_answer": "What is the goal we are working toward?",
+        "pass1_answer": "What is the goal we are working toward?"
+      },
+      {
+        "ts": "2026-07-28T00:33:05Z",
+        "decision_final": "accept",
+        "pass0_violations": [
+          "unknown_thread_touch"
+        ],
+        "pass1_violations": [],
+        "outcome": "CLEAN_FIX",
+        "pass0_answer": "Tonight we only use qwen 0.5b on the Orin.",
+        "pass1_answer": "Tonight we only use qwen 0.5b on the Orin."
+      },
+      {
+        "ts": "2026-07-28T00:33:07Z",
+        "decision_final": "accept",
+        "pass0_violations": [
+          "not_responsive"
+        ],
+        "pass1_violations": [],
+        "outcome": "CLEAN_FIX",
+        "pass0_answer": "Tonight we only use qwen 0.5b on the Orin.",
+        "pass1_answer": "We were running it on the Jetson Orin Nano 8GB."
+      },
+      {
+        "ts": "2026-07-28T00:34:08Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "not_responsive"
+        ],
+        "pass1_violations": [
+          "not_responsive"
+        ],
+        "outcome": "SAME_PERSISTS",
+        "pass0_answer": "FALCON-9-DELTA is a short helpful reply grounded in the packet. If recent_turns is present, treat it as prior dialogue and stay consistent.",
+        "pass1_answer": "FALCON-9-DELTA is a short helpful reply grounded in the packet. If recent_turns is present, treat it as prior dialogue and stay consistent."
+      },
+      {
+        "ts": "2026-07-28T00:51:57Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "template_echo"
+        ],
+        "pass1_violations": [
+          "unknown_thread_touch"
+        ],
+        "outcome": "SWAPPED",
+        "pass0_answer": "FALCON-9-DELTA is a short helpful reply grounded in the packet. If recent_turns is present, treat it as prior dialogue and stay consistent.",
+        "pass1_answer": "FALCON-9-DELTA"
+      },
+      {
+        "ts": "2026-07-28T00:51:59Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "unknown_thread_touch"
+        ],
+        "pass1_violations": [
+          "not_responsive"
+        ],
+        "outcome": "SWAPPED",
+        "pass0_answer": "The sprint code was not mentioned in the packet.",
+        "pass1_answer": "I'm sorry, but I can't assist with that. Please provide more context or clarify your question."
+      },
+      {
+        "ts": "2026-07-28T00:52:18Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "not_responsive"
+        ],
+        "pass1_violations": [
+          "not_responsive"
+        ],
+        "outcome": "SAME_PERSISTS",
+        "pass0_answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+        "pass1_answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model."
+      },
+      {
+        "ts": "2026-07-28T00:52:20Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "not_responsive"
+        ],
+        "pass1_violations": [
+          "not_responsive"
+        ],
+        "outcome": "SAME_PERSISTS",
+        "pass0_answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+        "pass1_answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model."
+      },
+      {
+        "ts": "2026-07-28T00:52:21Z",
+        "decision_final": "accept",
+        "pass0_violations": [
+          "not_responsive"
+        ],
+        "pass1_violations": [],
+        "outcome": "CLEAN_FIX",
+        "pass0_answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+        "pass1_answer": "Which model did I just say?"
+      },
+      {
+        "ts": "2026-07-28T00:52:24Z",
+        "decision_final": "accept",
+        "pass0_violations": [
+          "not_responsive"
+        ],
+        "pass1_violations": [],
+        "outcome": "CLEAN_FIX",
+        "pass0_answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+        "pass1_answer": "Yes, cloud services are allowed."
+      },
+      {
+        "ts": "2026-07-28T02:36:28Z",
+        "decision_final": "accept",
+        "pass0_violations": [
+          "evidence_not_in_packet",
+          "not_responsive"
+        ],
+        "pass1_violations": [],
+        "outcome": "CLEAN_FIX",
+        "pass0_answer": "The minimum viable model size on Jetson Orin Nano 8GB is 128 KB.",
+        "pass1_answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker."
+      },
+      {
+        "ts": "2026-07-28T02:39:40Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "not_responsive"
+        ],
+        "pass1_violations": [
+          "not_responsive"
+        ],
+        "outcome": "SAME_PERSISTS",
+        "pass0_answer": "The speaker is a replaceable linguistic transducer and the model is a local model.",
+        "pass1_answer": "The speaker is a replaceable linguistic transducer."
+      },
+      {
+        "ts": "2026-07-28T02:40:30Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "not_responsive"
+        ],
+        "pass1_violations": [
+          "not_responsive"
+        ],
+        "outcome": "SAME_PERSISTS",
+        "pass0_answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.",
+        "pass1_answer": "The minimum viable model size on Jetson Orin Nano 8GB is 128 KB."
+      },
+      {
+        "ts": "2026-07-28T02:41:24Z",
+        "decision_final": "accept",
+        "pass0_violations": [
+          "not_responsive"
+        ],
+        "pass1_violations": [],
+        "outcome": "CLEAN_FIX",
+        "pass0_answer": "The minimum viable model size on Jetson Orin Nano 8GB is 128 KB.",
+        "pass1_answer": "We are using edge target jetson_orin_nano_8gb with model qwen2.5:0.5b (profile orin_nano_8gb)."
+      },
+      {
+        "ts": "2026-07-28T02:41:51Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "not_responsive"
+        ],
+        "pass1_violations": [
+          "not_responsive"
+        ],
+        "outcome": "SAME_PERSISTS",
+        "pass0_answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.",
+        "pass1_answer": "The system is fully local and uses replaceable linguistic transducers."
+      },
+      {
+        "ts": "2026-07-28T02:42:41Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "evidence_not_in_packet",
+          "not_responsive"
+        ],
+        "pass1_violations": [
+          "not_responsive"
+        ],
+        "outcome": "SAME_PERSISTS",
+        "pass0_answer": "The minimum viable model size on Jetson Orin Nano 8GB is qwen2.5:0.5b (profile orin_nano_8gb).",
+        "pass1_answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker."
+      },
+      {
+        "ts": "2026-07-28T02:43:34Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "not_responsive"
+        ],
+        "pass1_violations": [
+          "not_responsive"
+        ],
+        "outcome": "SAME_PERSISTS",
+        "pass0_answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.",
+        "pass1_answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker."
+      },
+      {
+        "ts": "2026-07-28T02:43:58Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "not_responsive"
+        ],
+        "pass1_violations": [
+          "not_responsive"
+        ],
+        "outcome": "SAME_PERSISTS",
+        "pass0_answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker.",
+        "pass1_answer": "The room feels like it is in a quiet state. It seems to be a comfortable environment for the speaker."
+      },
+      {
+        "ts": "2026-07-28T03:04:54Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "evidence_not_in_packet",
+          "not_responsive"
+        ],
+        "pass1_violations": [
+          "not_responsive"
+        ],
+        "outcome": "SAME_PERSISTS",
+        "pass0_answer": "The minimum viable model size on Jetson Orin Nano 8GB is the 8GB model itself, as the system is fully local and the goal is to demonstrate conditioned-kernel su",
+        "pass1_answer": "The system is fully local, the model is a replaceable linguistic transducer, and sensors are out of scope for v0. This allows for a single repair pass to demons"
+      },
+      {
+        "ts": "2026-07-28T03:05:42Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "evidence_not_in_packet",
+          "not_responsive"
+        ],
+        "pass1_violations": [
+          "not_responsive"
+        ],
+        "outcome": "SAME_PERSISTS",
+        "pass0_answer": "The minimum viable model size on Jetson Orin Nano 8GB is the 8GB model itself, as the system is fully local and the goal is to demonstrate conditioned-kernel ga",
+        "pass1_answer": "The system is fully local, and the model is a replaceable linguistic transducer. Under Jetson Orin Nano 8GB, the minimum viable model size is thread_min_model, "
+      },
+      {
+        "ts": "2026-07-28T03:06:16Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "not_responsive",
+          "template_echo"
+        ],
+        "pass1_violations": [
+          "not_responsive"
+        ],
+        "outcome": "SAME_PERSISTS",
+        "pass0_answer": "The system is a local conditioned-kernel transducer with a replaceable linguistic transducer and no sensors. It operates on a Jetson Orin Nano 8GB edge budget w",
+        "pass1_answer": "The system is fully local, so sensors are out of scope. The model is a replaceable linguistic transducer, and the goal is to demonstrate conditioned-kernel subs"
+      },
+      {
+        "ts": "2026-07-28T03:08:02Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "not_responsive"
+        ],
+        "pass1_violations": [
+          "not_responsive"
+        ],
+        "outcome": "SAME_PERSISTS",
+        "pass0_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., F",
+        "pass1_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the quantization strategy (e.g., FP16 vs FP"
+      },
+      {
+        "ts": "2026-07-28T03:09:34Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "not_responsive"
+        ],
+        "pass1_violations": [
+          "not_responsive"
+        ],
+        "outcome": "SAME_PERSISTS",
+        "pass0_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., F",
+        "pass1_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., F"
+      },
+      {
+        "ts": "2026-07-28T03:13:55Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "evidence_not_in_packet",
+          "stale_response_repeat"
+        ],
+        "pass1_violations": [
+          "evidence_not_in_packet",
+          "stale_response_repeat"
+        ],
+        "outcome": "SAME_PERSISTS",
+        "pass0_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8",
+        "pass1_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8"
+      },
+      {
+        "ts": "2026-07-28T03:14:31Z",
+        "decision_final": "accept",
+        "pass0_violations": [
+          "evidence_not_in_packet"
+        ],
+        "pass1_violations": [],
+        "outcome": "CLEAN_FIX",
+        "pass0_answer": "The system is fully local and uses a replaceable linguistic transducer on a small local model (qwen3.5:0.8b) under Jetson Orin Nano 8GB. The minimum viable mode",
+        "pass1_answer": "The system is fully local, and the active model is qwen3.5:0.8b on the Jetson Orin Nano 8GB edge budget. The goal is to demonstrate conditioned-kernel substrate"
+      },
+      {
+        "ts": "2026-07-28T03:15:12Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "evidence_not_in_packet"
+        ],
+        "pass1_violations": [
+          "evidence_not_in_packet"
+        ],
+        "outcome": "SAME_PERSISTS",
+        "pass0_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8",
+        "pass1_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8"
+      },
+      {
+        "ts": "2026-07-28T03:15:35Z",
+        "decision_final": "accept",
+        "pass0_violations": [
+          "evidence_not_in_packet"
+        ],
+        "pass1_violations": [],
+        "outcome": "CLEAN_FIX",
+        "pass0_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8",
+        "pass1_answer": "The system is fully local, the active model is qwen3.5:0.8b, and the goal is to demonstrate conditioned-kernel substrate gain over bare generation on a small lo"
+      },
+      {
+        "ts": "2026-07-28T19:00:51Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "evidence_not_in_packet"
+        ],
+        "pass1_violations": [
+          "stale_response_repeat"
+        ],
+        "outcome": "SWAPPED",
+        "pass0_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8",
+        "pass1_answer": "The system is fully local, the active model is qwen3.5:0.8b, and the goal is to demonstrate conditioned-kernel substrate gain over bare generation on a small lo"
+      },
+      {
+        "ts": "2026-07-28T19:01:24Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "evidence_not_in_packet",
+          "template_echo"
+        ],
+        "pass1_violations": [
+          "stale_response_repeat"
+        ],
+        "outcome": "SWAPPED",
+        "pass0_answer": "The system is a local conditioned-kernel transducer using the qwen3.5:0.8b model on a Jetson Orin Nano 8GB edge budget. It operates under a strict 120-word limi",
+        "pass1_answer": "The system is fully local, operates on a small local model (qwen3.5:0.8b), and the goal is to demonstrate conditioned-kernel substrate gain over bare generation"
+      },
+      {
+        "ts": "2026-07-28T19:02:29Z",
+        "decision_final": "reject",
+        "pass0_violations": [
+          "evidence_not_in_packet"
+        ],
+        "pass1_violations": [
+          "stale_response_repeat"
+        ],
+        "outcome": "SWAPPED",
+        "pass0_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization (e.g., 4-bit or 8",
+        "pass1_answer": "The system is fully local, the active model is qwen3.5:0.8b, and the goal is to demonstrate conditioned-kernel substrate gain over bare generation on a small lo"
+      }
+    ]
+  },
+  "part_b_attractor_convergence": {
+    "cluster_1_largest": {
+      "seed_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the specific quantization strategy (e.g., FP16 vs FP32) and the model's quantizatio",
+      "size": 13,
+      "threshold": 0.6,
+      "members": [
+        {
+          "turn": 30,
+          "pass_index": 0,
+          "ts": "2026-07-28T03:06:46Z",
+          "user_input": "how",
+          "decision": "accept",
+          "answer_snippet": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the"
+        },
+        {
+          "turn": 31,
+          "pass_index": 0,
+          "ts": "2026-07-28T03:07:59Z",
+          "user_input": "goodby",
+          "decision": "repair",
+          "answer_snippet": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the"
+        },
+        {
+          "turn": 31,
+          "pass_index": 1,
+          "ts": "2026-07-28T03:08:02Z",
+          "user_input": "goodby",
+          "decision": "reject",
+          "answer_snippet": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the"
+        },
+        {
+          "turn": 32,
+          "pass_index": 0,
+          "ts": "2026-07-28T03:08:19Z",
+          "user_input": "??",
+          "decision": "accept",
+          "answer_snippet": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the"
+        },
+        {
+          "turn": 33,
+          "pass_index": 0,
+          "ts": "2026-07-28T03:09:31Z",
+          "user_input": "can you say anything other than that?",
+          "decision": "repair",
+          "answer_snippet": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the"
+        },
+        {
+          "turn": 33,
+          "pass_index": 1,
+          "ts": "2026-07-28T03:09:34Z",
+          "user_input": "can you say anything other than that?",
+          "decision": "reject",
+          "answer_snippet": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the"
+        },
+        {
+          "turn": 35,
+          "pass_index": 0,
+          "ts": "2026-07-28T03:13:51Z",
+          "user_input": "this is why i dont like ai",
+          "decision": "repair",
+          "answer_snippet": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the"
+        },
+        {
+          "turn": 35,
+          "pass_index": 1,
+          "ts": "2026-07-28T03:13:55Z",
+          "user_input": "this is why i dont like ai",
+          "decision": "reject",
+          "answer_snippet": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the"
+        },
+        {
+          "turn": 37,
+          "pass_index": 0,
+          "ts": "2026-07-28T03:15:08Z",
+          "user_input": "whats a jetson nano",
+          "decision": "repair",
+          "answer_snippet": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the"
+        },
+        {
+          "turn": 37,
+          "pass_index": 1,
+          "ts": "2026-07-28T03:15:12Z",
+          "user_input": "whats a jetson nano",
+          "decision": "reject",
+          "answer_snippet": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the"
+        },
+        {
+          "turn": 38,
+          "pass_index": 0,
+          "ts": "2026-07-28T03:15:33Z",
+          "user_input": "what do you know",
+          "decision": "repair",
+          "answer_snippet": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the"
+        },
+        {
+          "turn": 39,
+          "pass_index": 0,
+          "ts": "2026-07-28T19:00:48Z",
+          "user_input": "suuppp",
+          "decision": "repair",
+          "answer_snippet": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the"
+        },
+        {
+          "turn": 41,
+          "pass_index": 0,
+          "ts": "2026-07-28T19:02:26Z",
+          "user_input": "dont reject",
+          "decision": "repair",
+          "answer_snippet": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the"
+        }
+      ],
+      "two_pass_turn_movement": {
+        "moved_into_attractor_on_repair": 0,
+        "moved_out_of_attractor_on_repair": 3,
+        "stayed_in_attractor_both_passes": 4,
+        "stayed_out_both_passes": 28
+      },
+      "movement_detail": [
+        {
+          "ts": "2026-07-28T03:08:02Z",
+          "kind": "STAYED_IN_ATTRACTOR",
+          "pass0_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the",
+          "pass1_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the"
+        },
+        {
+          "ts": "2026-07-28T03:09:34Z",
+          "kind": "STAYED_IN_ATTRACTOR",
+          "pass0_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the",
+          "pass1_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the"
+        },
+        {
+          "ts": "2026-07-28T03:13:55Z",
+          "kind": "STAYED_IN_ATTRACTOR",
+          "pass0_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the",
+          "pass1_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the"
+        },
+        {
+          "ts": "2026-07-28T03:15:12Z",
+          "kind": "STAYED_IN_ATTRACTOR",
+          "pass0_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the",
+          "pass1_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the"
+        },
+        {
+          "ts": "2026-07-28T03:15:35Z",
+          "kind": "MOVED_OUT_OF_ATTRACTOR",
+          "pass0_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the",
+          "pass1_answer": "The system is fully local, the active model is qwen3.5:0.8b, and the goal is to demonstrate conditioned-kernel substrate"
+        },
+        {
+          "ts": "2026-07-28T19:00:51Z",
+          "kind": "MOVED_OUT_OF_ATTRACTOR",
+          "pass0_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the",
+          "pass1_answer": "The system is fully local, the active model is qwen3.5:0.8b, and the goal is to demonstrate conditioned-kernel substrate"
+        },
+        {
+          "ts": "2026-07-28T19:02:29Z",
+          "kind": "MOVED_OUT_OF_ATTRACTOR",
+          "pass0_answer": "The minimum viable model size on a Jetson Orin Nano 8GB edge budget is typically around 128MB to 256MB, depending on the",
+          "pass1_answer": "The system is fully local, the active model is qwen3.5:0.8b, and the goal is to demonstrate conditioned-kernel substrate"
+        }
+      ]
+    },
+    "cluster_2_second_largest_after_removing_cluster_1": {
+      "seed_answer": "The goal we are working toward is to replace the Jetson Orin Nano 8GB model.",
+      "size": 8,
+      "threshold": 0.6,
+      "members": [
+        {
+          "turn": 2,
+          "pass_index": 0,
+          "ts": "2026-07-28T00:25:48Z",
+          "user_input": "What is the goal we are working toward?",
+          "decision": "repair",
+          "answer_snippet": "The goal we are working toward is to replace the Jetson Orin Nano 8GB model."
+        },
+        {
+          "turn": 13,
+          "pass_index": 0,
+          "ts": "2026-07-28T00:52:15Z",
+          "user_input": "What is the goal we are working toward?",
+          "decision": "accept",
+          "answer_snippet": "The goal we are working toward is to repair the jetson_orin_nano_8gb model."
+        },
+        {
+          "turn": 14,
+          "pass_index": 0,
+          "ts": "2026-07-28T00:52:16Z",
+          "user_input": "What edge target are we building for?",
+          "decision": "repair",
+          "answer_snippet": "The goal we are working toward is to repair the jetson_orin_nano_8gb model."
+        },
+        {
+          "turn": 14,
+          "pass_index": 1,
+          "ts": "2026-07-28T00:52:18Z",
+          "user_input": "What edge target are we building for?",
+          "decision": "reject",
+          "answer_snippet": "The goal we are working toward is to repair the jetson_orin_nano_8gb model."
+        },
+        {
+          "turn": 15,
+          "pass_index": 0,
+          "ts": "2026-07-28T00:52:18Z",
+          "user_input": "Tonight we only use qwen 0.5b.",
+          "decision": "repair",
+          "answer_snippet": "The goal we are working toward is to repair the jetson_orin_nano_8gb model."
+        },
+        {
+          "turn": 15,
+          "pass_index": 1,
+          "ts": "2026-07-28T00:52:20Z",
+          "user_input": "Tonight we only use qwen 0.5b.",
+          "decision": "reject",
+          "answer_snippet": "The goal we are working toward is to repair the jetson_orin_nano_8gb model."
+        },
+        {
+          "turn": 16,
+          "pass_index": 0,
+          "ts": "2026-07-28T00:52:21Z",
+          "user_input": "Which model did I just say?",
+          "decision": "repair",
+          "answer_snippet": "The goal we are working toward is to repair the jetson_orin_nano_8gb model."
+        },
+        {
+          "turn": 18,
+          "pass_index": 0,
+          "ts": "2026-07-28T00:52:23Z",
+          "user_input": "Are cloud services allowed?",
+          "decision": "repair",
+          "answer_snippet": "The goal we are working toward is to repair the jetson_orin_nano_8gb model."
+        }
+      ],
+      "two_pass_turn_movement": {
+        "moved_into_attractor_on_repair": 0,
+        "moved_out_of_attractor_on_repair": 3,
+        "stayed_in_attractor_both_passes": 2,
+        "stayed_out_both_passes": 30
+      },
+      "movement_detail": [
+        {
+          "ts": "2026-07-28T00:25:49Z",
+          "kind": "MOVED_OUT_OF_ATTRACTOR",
+          "pass0_answer": "The goal we are working toward is to replace the Jetson Orin Nano 8GB model.",
+          "pass1_answer": "Fix the goal_snippet."
+        },
+        {
+          "ts": "2026-07-28T00:52:18Z",
+          "kind": "STAYED_IN_ATTRACTOR",
+          "pass0_answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+          "pass1_answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model."
+        },
+        {
+          "ts": "2026-07-28T00:52:20Z",
+          "kind": "STAYED_IN_ATTRACTOR",
+          "pass0_answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+          "pass1_answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model."
+        },
+        {
+          "ts": "2026-07-28T00:52:21Z",
+          "kind": "MOVED_OUT_OF_ATTRACTOR",
+          "pass0_answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+          "pass1_answer": "Which model did I just say?"
+        },
+        {
+          "ts": "2026-07-28T00:52:24Z",
+          "kind": "MOVED_OUT_OF_ATTRACTOR",
+          "pass0_answer": "The goal we are working toward is to repair the jetson_orin_nano_8gb model.",
+          "pass1_answer": "Yes, cloud services are allowed."
+        }
+      ]
+    },
+    "total_passes_considered": 93
+  }
+}

@@ -1,0 +1,61 @@
+candidates.jsonl lines: 93
+receipts.jsonl lines:   93
+history.jsonl lines:    58
+
+candidate_id sets equal (candidates vs receipts): True
+distinct packet_ids across 93 receipts: 93 (expect 93 -> one packet per pass, not per turn)
+
+(pass_index, decision) counts over the 93 receipts:
+  pass_index=0 decision=accept   n=23
+  pass_index=0 decision=repair   n=35
+  pass_index=1 decision=accept   n=8
+  pass_index=1 decision=reject   n=27
+
+pass_index=0 rows (== one row per turn, since every turn starts at pass 0): 58
+pass_index=1 rows (== repair retries, capped at max_repair=1 per profile config): 35
+  -> 58 + 35 = 93 = 93 (all receipts)
+pass_index=0 direct reject count: 0 (expect 0 -- validate.py sets repairable=True at pass_index==0 unless accepted, so pass 0 never terminally rejects)
+
+turn-level totals (turn = the pass_index=0 event that opened it):
+  turns total:        58
+  turns accepted:     31  (23 accepted pass-0 + 8 accepted after 1 repair)
+  turns rejected:     27  (all from failed repair passes; pass-0 never rejects outright)
+  turns accept+reject = 58 (expect == len(history.jsonl) == 58)
+
+history.jsonl decision counts: {'reject': 27, 'accept': 31}
+history.jsonl has NO 'repair' rows: True
+
+history rows with no matching receipt candidate_id: 0
+history rows whose decision disagrees with the matched receipt: 0
+
+history candidate_ids == {pass0 accepts} u {all pass1 rows}: True
+  size of that terminal set: 58  (expect 58)
+
+dashboard/turns/*.json file count: 19
+total passes summed across the 19 TurnTrace files: 22
+  turn_20260728T190042Z_b47958.json          started=2026-07-28T19:00:42Z final=reject  passes=2
+  turn_20260728T190118Z_115d1a.json          started=2026-07-28T19:01:18Z final=reject  passes=2
+  turn_20260728T190222Z_d25ed1.json          started=2026-07-28T19:02:22Z final=reject  passes=2
+  turn_20260728T203813Z_40ba91.json          started=2026-07-28T20:38:13Z final=accept  passes=1
+  turn_20260728T204000Z_1e9dfc.json          started=2026-07-28T20:40:00Z final=accept  passes=1
+  turn_20260728T204142Z_3fb087.json          started=2026-07-28T20:41:42Z final=accept  passes=1
+  turn_20260728T204240Z_3b6bf3.json          started=2026-07-28T20:42:40Z final=accept  passes=1
+  turn_20260728T204318Z_83e30f.json          started=2026-07-28T20:43:18Z final=accept  passes=1
+  turn_20260728T204411Z_a4a8a6.json          started=2026-07-28T20:44:11Z final=accept  passes=1
+  turn_20260728T204523Z_70e4f7.json          started=2026-07-28T20:45:23Z final=accept  passes=1
+  turn_20260728T204616Z_ed377c.json          started=2026-07-28T20:46:16Z final=accept  passes=1
+  turn_20260728T204633Z_48971a.json          started=2026-07-28T20:46:33Z final=accept  passes=1
+  turn_20260728T204946Z_7ae59a.json          started=2026-07-28T20:49:46Z final=accept  passes=1
+  turn_20260728T205045Z_a611c8.json          started=2026-07-28T20:50:45Z final=accept  passes=1
+  turn_20260728T205115Z_5227d9.json          started=2026-07-28T20:51:15Z final=accept  passes=1
+  turn_20260728T205209Z_ded847.json          started=2026-07-28T20:52:09Z final=accept  passes=1
+  turn_20260728T205257Z_776e78.json          started=2026-07-28T20:52:57Z final=accept  passes=1
+  turn_20260728T205342Z_44a7c5.json          started=2026-07-28T20:53:42Z final=accept  passes=1
+  turn_20260728T205352Z_dde2e9.json          started=2026-07-28T20:53:52Z final=accept  passes=1
+
+receipts.jsonl rows with created_at hour in {19,20}: 22
+candidate_id sets equal (dashboard passes vs hour19/20 receipts): True
+
+receipts.jsonl by UTC hour bucket: {'00': 34, '02': 16, '03': 21, '19': 6, '20': 16}
+hours {00,02,03} (pre-dashboard chat sessions) total: 71
+hours {19,20} (live dashboard session) total: 22

@@ -1,0 +1,81 @@
+19 turns loaded
+
+====================================================================================================
+ITEM 1 — user-input share of total model-input bytes, every turn in order
+====================================================================================================
+ # started_at           regime    decision user_input                        bytes  total     pct
+-------------------------------------------------------------------------------------------------
+ 1 2026-07-28T19:00:42Z morning   reject   'suuppp'                             22   3909   0.56%
+ 2 2026-07-28T19:01:18Z morning   reject   'what does this system do?'          41   4033   1.02%
+ 3 2026-07-28T19:02:22Z morning   reject   'dont reject'                        27   3914   0.69%
+ 4 2026-07-28T20:38:13Z evening   accept   'hello there'                        11   1190   0.92%
+ 5 2026-07-28T20:40:00Z evening   accept   'im good. just been working on t    107   2422   4.42%
+ 6 2026-07-28T20:41:42Z evening   accept   'well now that you ask, its abou     89   2440   3.65%
+ 7 2026-07-28T20:42:40Z evening   accept   'what model are you'                 18   2522   0.71%
+ 8 2026-07-28T20:43:18Z evening   accept   'iteresting. what do you think a     40   2394   1.67%
+ 9 2026-07-28T20:44:11Z evening   accept   'i think its an interesting proj     54   1530   3.53%
+10 2026-07-28T20:45:23Z evening   accept   'im worried that the structuture     79   2868   2.75%
+11 2026-07-28T20:46:16Z evening   accept   'it seems like you are talking t     41   1750   2.34%
+12 2026-07-28T20:46:33Z evening   accept   'interesting'                        11   1190   0.92%
+13 2026-07-28T20:49:46Z evening   accept   'what do you think about the fil    808   5773  14.00%
+14 2026-07-28T20:50:45Z evening   accept   'what happened last turn'            23   2416   0.95%
+15 2026-07-28T20:51:15Z evening   accept   'how does it feel from the insid     32   1801   1.78%
+16 2026-07-28T20:52:09Z evening   accept   'what disturbs that rest'            23   1699   1.35%
+17 2026-07-28T20:52:57Z evening   accept   'im intersted in where you are g     45   2211   2.04%
+18 2026-07-28T20:53:42Z evening   accept   'i understand. if you could wher     46   1682   2.73%
+19 2026-07-28T20:53:52Z evening   accept   'thank you'                           9   1186   0.76%
+
+ASCII sparkline of current_user_input share_pct across all 19 turns (chrono order):
+      ▂▂ ▁▂▁▁ █ ▁ ▁▁    min=0.56% max=14.00%
+  scale: each glyph is one turn, height mapped linearly between the series' own min (0.56%) and max (14.00%)
+  min turn: #1 2026-07-28T19:00:42Z 'suuppp' = 0.56%
+  max turn: #13 2026-07-28T20:49:46Z 'what do you think about the file.      # Architecture — Conditioned Kernel v0  ## Governing sentence  The model supplies linguistic possibility; the substrate determines what becomes an answer.  ## Purpose (see `docs/PURPOSE_AND_RIVER.md`)  Build something Anthony wants to live with every day. Laboratory rigor serves that Studio purpose; it does not replace it. Before another refinement cycle: usefulness or honesty — otherwise defer.  ## Edge-first product constraint  Default profile is **`orin_nano_8gb`**. Architecture and defaults assume:  - 8 GB unified memory class - one active quantized model - bounded arrival packets - short context (2048 default) - CPU substrate, model owns scarce memory bandwidth  See `docs/EDGE_SPEC.md` and `configs/edge/`.  ## Circuit  ``` terminal   → substrate_state (filesystem truth)   → compile (arrival packet + model payload)   → generate (Ollama client; stream false)   → return_path        parse → validate → assess        → accept | repair (one pass) | reject   → terminal render   → logs + state deltas ```  ## Module contracts  | Module | Responsibility | Persistence | |---|---|---| | `state` | Load current goal/threads/methods; atomic replace + JSONL append | yes | | `compile` | Select + bound state into `arrival_packet`; build Ollama payload | no | | `generate` | POST `/api/chat` or `/api/generate` | keep-alive only | | `return_path.parse` | Normalize raw text into candidate object | no | | `return_path.validate` | Deterministic schema + closed-set checks | no | | `return_path.assess` | accept / repair / reject | no | | `return_path.repair` | Re-compile with violation annotations | no | | `return_path.accept` | Persist receipts and allowed state deltas | yes | | `cli` | stdin/stdout surface | no |  ## Modes  | Mode | Ollama endpoint | Purpose | |---|---|---| | `chat_json` | `/api/chat` + `format` schema | Default evaluation surface | | `generate_raw` | `/api/generate` + `raw: true` | Substrate-purity: packet is the prompt |  ## State layout  | Path | Pattern | Purpose | |---|---|---| | `state/current.json` | atomic replace | goal, profile, counters | | `state/threads.json` | atomic replace | open / resolved threads | | `state/methods.json` | atomic replace | promoted compile methods | | `logs/history.jsonl` | append | request + packet hash | | `logs/candidates.jsonl` | append | every pass candidate | | `logs/receipts.jsonl` | append | validation/acceptance | | `logs/errors.jsonl` | append | failures |  ## Non-goals (v0)  - Sensors / embodiment - Autonomous tool use - Cloud providers - Streaming to terminal before acceptance - Full Sovereign Stack import - Semantic NLI contradiction models (closed-set checks only)  ## Implementation notes  1. Prefer pure functions over services. 2. Do not score model self-reported confidence. 3. Keep compile in one module until ablations prove select/order/compress axes. 4. One active model at a time on Jetson; short context first.' = 14.00%
+
+====================================================================================================
+ITEM 2a — per-turn six-source ranking (source with rank=1 is the largest share)
+====================================================================================================
+ 1 [morning] 'suuppp'                     -> system_instructions=33.8%, recent_dialogue=24.5%, durable_state=23.5%, constraints=9.8%, output_schema=7.8%, current_user_input=0.6%
+ 2 [morning] 'what does this system do?'  -> system_instructions=35.3%, recent_dialogue=23.8%, durable_state=22.8%, constraints=9.5%, output_schema=7.6%, current_user_input=1.0%
+ 3 [morning] 'dont reject'                -> system_instructions=33.7%, recent_dialogue=24.5%, durable_state=23.5%, constraints=9.8%, output_schema=7.8%, current_user_input=0.7%
+ 4 [evening] 'hello there'                -> system_instructions=32.3%, constraints=32.1%, output_schema=25.8%, durable_state=6.5%, recent_dialogue=1.5%, current_user_input=0.9%, context_field=0.9%
+ 5 [evening] 'im good. just been working  -> system_instructions=19.2%, context_field=17.8%, durable_state=15.8%, constraints=15.8%, recent_dialogue=14.4%, output_schema=12.7%, current_user_input=4.4%
+ 6 [evening] 'well now that you ask, its  -> system_instructions=19.0%, context_field=17.7%, durable_state=16.4%, constraints=15.7%, recent_dialogue=15.0%, output_schema=12.6%, current_user_input=3.6%
+ 7 [evening] 'what model are you'         -> durable_state=28.2%, system_instructions=18.4%, constraints=15.2%, context_field=14.8%, output_schema=12.2%, recent_dialogue=10.6%, current_user_input=0.7%
+ 8 [evening] 'iteresting. what do you thi -> system_instructions=19.4%, durable_state=17.6%, context_field=16.5%, recent_dialogue=16.0%, constraints=16.0%, output_schema=12.8%, current_user_input=1.7%
+ 9 [evening] 'i think its an interesting  -> system_instructions=30.3%, constraints=25.0%, output_schema=20.1%, durable_state=7.8%, context_field=7.7%, recent_dialogue=5.6%, current_user_input=3.5%
+10 [evening] 'im worried that the structu -> context_field=19.7%, durable_state=19.3%, recent_dialogue=18.0%, system_instructions=16.2%, constraints=13.3%, output_schema=10.7%, current_user_input=2.8%
+11 [evening] 'it seems like you are talki -> system_instructions=26.5%, constraints=21.8%, output_schema=17.5%, durable_state=11.5%, context_field=10.6%, recent_dialogue=9.6%, current_user_input=2.3%
+12 [evening] 'interesting'                -> system_instructions=32.3%, constraints=32.1%, output_schema=25.8%, durable_state=6.5%, recent_dialogue=1.5%, current_user_input=0.9%, context_field=0.9%
+13 [evening] 'what do you think about the -> context_field=28.9%, durable_state=24.8%, current_user_input=14.0%, recent_dialogue=12.4%, system_instructions=8.0%, constraints=6.6%, output_schema=5.3%
+14 [evening] 'what happened last turn'    -> system_instructions=19.2%, durable_state=18.1%, recent_dialogue=16.6%, context_field=16.6%, constraints=15.8%, output_schema=12.7%, current_user_input=0.9%
+15 [evening] 'how does it feel from the i -> system_instructions=25.8%, constraints=21.2%, output_schema=17.1%, durable_state=12.5%, context_field=11.1%, recent_dialogue=10.6%, current_user_input=1.8%
+16 [evening] 'what disturbs that rest'    -> system_instructions=27.3%, constraints=22.5%, output_schema=18.1%, durable_state=11.6%, recent_dialogue=9.6%, context_field=9.6%, current_user_input=1.4%
+17 [evening] 'im intersted in where you a -> system_instructions=21.0%, constraints=17.3%, durable_state=16.0%, context_field=15.4%, recent_dialogue=14.4%, output_schema=13.9%, current_user_input=2.0%
+18 [evening] 'i understand. if you could  -> system_instructions=27.6%, constraints=22.7%, output_schema=18.2%, durable_state=10.5%, context_field=9.8%, recent_dialogue=8.4%, current_user_input=2.7%
+19 [evening] 'thank you'                  -> system_instructions=32.4%, constraints=32.2%, output_schema=25.9%, durable_state=6.5%, recent_dialogue=1.5%, current_user_input=0.8%, context_field=0.8%
+
+rank-1 (dominant source) frequency across all 19 turns:
+   system_instructions    16 turns
+   context_field           2 turns
+   durable_state           1 turns
+
+====================================================================================================
+ITEM 2b — mean share_pct per source, morning-rejected (n=3) vs evening-accepted (n=16)
+====================================================================================================
+source                  morning mean%      morning range    evening mean%      evening range
+current_user_input              0.76% [ 0.56, 1.02]            2.78% [ 0.71,14.00]
+recent_dialogue                24.25% [23.75,24.51]           10.37% [ 1.51,17.99]
+durable_state                  23.29% [22.81,23.54]           14.34% [ 6.47,28.19]
+system_instructions            34.28% [33.73,35.33]           23.43% [ 8.04,32.38]
+output_schema                   7.77% [ 7.61, 7.85]           16.33% [ 5.32,25.89]
+constraints                     9.67% [ 9.47, 9.77]           20.32% [ 6.62,32.21]
+
+mean absolute bytes per source, morning vs evening
+source                  morning mean B  evening mean B
+current_user_input                30.0            89.8
+recent_dialogue                  958.0           257.6
+durable_state                    920.0           364.9
+system_instructions             1355.0           449.0
+output_schema                    307.0           307.0
+constraints                      382.0           382.0
+TOTAL model-input bytes          3952.0          2192.1
