@@ -113,19 +113,57 @@ def _tokens(s: str, min_len: int = 4) -> set[str]:
 # a class — it over-captures ordinary system reports (see tests).
 _PRESENCE_GREETING = re.compile(
     r"\b(hi|hello|hey|sup+|suup+|yo|thanks|thank you|bye|goodbye|goodby|"
-    r"are you there|you there|how are you|ok|okay|cool)\b"
+    r"are you there|you there|how are you)\b"
 )
+# "ok"/"okay"/"cool" only read as presence when they carry the whole short
+# utterance. Line-start position alone does not separate them: "ok" opens
+# both "ok" and "ok the manifest is ratified now". Length does.
+_SHORT_ACK = frozenset({"ok", "okay", "cool"})
+_STRIP_PUNCT = ".,!?;:'\""
 _AFFECT_CONTENT = re.compile(
     r"\b("
     r"miss|sad|lonely|tired|exhausted|drained|stressed|anxious|afraid|scared|"
     r"angry|upset|hurt|grieving|heartbroken|overwhelmed|depressed|hopeless|"
     r"numb|empty|worried|nervous|frustrated|grateful|thankful|proud|relieved|"
     r"peaceful|burnt|burned|worn|fed up|"
+    # Appreciative/awe register. The list above is heavy on grief and
+    # exhaustion and was blind to delight, so warmth met a project dump.
+    r"wow+|whoa+|awesome|awwsome|amazing|remarkable|incredible|breathtaking|"
+    r"breathetaking|beautiful|love (it|this|that)|i feel like|sit with (you|this|it)|"
     r"hard day|rough (day|night|shift|week)|long day|"
     r"burnt out|burned out|worn out|"
     r"love you|hate (this|that|it|ai|myself)"
     r")\b"
 )
+# Some affect words double as ordinary systems vocabulary: a cache "miss",
+# an "empty" queue, a "drained" retry budget, a test that "hurt" the run.
+# The veto fires only when EVERY affect hit in the line is one of these AND
+# a system noun co-occurs — so "the queue is empty and im exhausted" still
+# reads as affect on the strength of "exhausted".
+_AMBIGUOUS_AFFECT_WORDS = frozenset({"miss", "empty", "drained", "hurt", "worn", "tired"})
+_SYSTEM_NOUN = re.compile(
+    r"\b(cache|queue|budget|run|test|build|session|dashboard|retry|thread|"
+    r"commit|branch|pipeline|deploy|server|log|node|config|manifest|matrix|"
+    r"restart)\b"
+)
+# Verb-initial terse directives ("merge", "check the commits", "build it",
+# "approved") are instructions to act, not ambient presence. Checked against
+# words[0] only, so a line that merely mentions the verb later is untouched.
+_TERSE_DIRECTIVE_VERBS = frozenset(
+    {
+        "merge", "do", "go", "continue", "check", "build", "audit", "approved",
+        "armed", "run", "deploy", "apply", "confirm", "approve", "arm", "stop",
+        "execute", "revert", "retry", "commit", "push", "sync", "pull", "ship",
+        "restart", "resume", "pause", "proceed", "take", "lets", "let's",
+    }
+)
+# A gratitude or greeting particle stays presence even in a long line —
+# unless the line also carries an action. "thank you very much for your time"
+# is presence; "thank you now call the stack and log the moment" is an order.
+_DIRECTIVE_ANYWHERE = _TERSE_DIRECTIVE_VERBS | {
+    "call", "log", "add", "publish", "send", "update", "switch", "breakdown",
+    "record", "write", "fix", "make", "put", "set", "install", "fetch",
+}
 _TASK_OR_INQUIRY = re.compile(
     r"\b("
     r"write|code|implement|fix|debug|explain|summarize|list|define|generate|"
@@ -216,16 +254,29 @@ def _is_presence_or_affect(q: str, words: list[str]) -> bool:
     """
     if _is_task_or_inquiry(q, words):
         return False
-    if _PRESENCE_GREETING.search(q):
+    # A greeting particle only carries the turn when it IS the turn. "thanks"
+    # is presence; "thank you now call the stack and log the moment" is a
+    # directive wearing a greeting, and withholding state there makes the
+    # companion go quiet on an instruction.
+    if _PRESENCE_GREETING.search(q) and not (
+        len(words) > 5 and _DIRECTIVE_ANYWHERE.intersection(words)
+    ):
         return True
-    if _AFFECT_CONTENT.search(q):
+    first = words[0].strip(_STRIP_PUNCT) if words else ""
+    if first in _SHORT_ACK and len(words) <= 2:
         return True
+    hits = [m.group(1) for m in _AFFECT_CONTENT.finditer(q)]
+    if hits:
+        # Vetoed only if every hit is ambiguous and the line names a system noun.
+        if not (all(h in _AMBIGUOUS_AFFECT_WORDS for h in hits) and _SYSTEM_NOUN.search(q)):
+            return True
     if (
         len(words) <= 3
         and not q.endswith("?")
         and "what" not in words
         and "remember" not in words
         and "codeword" not in words
+        and first not in _TERSE_DIRECTIVE_VERBS
     ):
         return True
     # Light social particles without system inquiry (kept general).
