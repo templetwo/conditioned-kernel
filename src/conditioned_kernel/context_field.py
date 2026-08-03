@@ -106,6 +106,134 @@ def _tokens(s: str, min_len: int = 4) -> set[str]:
     return set(re.findall(rf"[a-z0-9]{{{min_len},}}", (s or "").lower()))
 
 
+# Presence / affect is a structural class, not a prompt lookup table.
+# Session-specific greets (e.g. "suuppp") are covered by short-form + elongated
+# "sup" patterns; sentence-length experiential lines are covered by affect
+# content, not by listing prior dashboard prompts. Bare first-person is NOT
+# a class — it over-captures ordinary system reports (see tests).
+_PRESENCE_GREETING = re.compile(
+    r"\b(hi|hello|hey|sup+|suup+|yo|thanks|thank you|bye|goodbye|goodby|"
+    r"are you there|you there|how are you|ok|okay|cool)\b"
+)
+_AFFECT_CONTENT = re.compile(
+    r"\b("
+    r"miss|sad|lonely|tired|exhausted|drained|stressed|anxious|afraid|scared|"
+    r"angry|upset|hurt|grieving|heartbroken|overwhelmed|depressed|hopeless|"
+    r"numb|empty|worried|nervous|frustrated|grateful|thankful|proud|relieved|"
+    r"peaceful|burnt|burned|worn|fed up|"
+    r"hard day|rough (day|night|shift|week)|long day|"
+    r"burnt out|burned out|worn out|"
+    r"love you|hate (this|that|it|ai|myself)"
+    r")\b"
+)
+_TASK_OR_INQUIRY = re.compile(
+    r"\b("
+    r"write|code|implement|fix|debug|explain|summarize|list|define|generate|"
+    r"create|show me|tell me about|help me (with|to)|"
+    r"how (do|does|to|can|would|should)|what (is|are|was|were|do|does|did|should|would)|"
+    r"which|why (is|are|do|does|did|would|should)|when (is|are|do|does|did)|"
+    r"where (is|are|do|does|did)|who (is|are|was|were)|"
+    r"calculate|compute|script|function|loop|program"
+    r")\b"
+)
+_TASKY_WANT = re.compile(
+    r"\b(i (need|want|would like)|can you|could you|please)\b"
+)
+_TASK_OBJECT = re.compile(
+    r"\b(code|script|function|loop|file|program|snippet|example|command|"
+    r"help (me )?(with|to)|you to)\b"
+)
+
+
+def _is_presence_checkin(q: str) -> bool:
+    return bool(
+        re.search(
+            r"\b(how are you|you there|are you (there|ok|okay)|right\?|you know\?)\b",
+            q,
+        )
+    )
+
+
+def _has_wh_inquiry(words: list[str]) -> bool:
+    """True for WH-shaped tokens including contractions (what's, how's)."""
+    for w in words:
+        base = w.split("'")[0]
+        if base in {"what", "which", "who", "whom", "whose", "when", "where", "why", "how"}:
+            return True
+    return False
+
+
+def _is_task_or_inquiry(q: str, words: list[str]) -> bool:
+    """True when the line is asking the system to do/explain something.
+
+    Presence check-ins that look like questions ("how are you") stay social.
+    """
+    if _is_presence_checkin(q):
+        return False
+    if _TASK_OR_INQUIRY.search(q):
+        return True
+    if _has_wh_inquiry(words) and not _is_presence_checkin(q):
+        # "so what's next", "how does that look…" are generative, not affect.
+        return True
+    if q.endswith("?") and not _is_presence_checkin(q):
+        # Open questions are generative, not presence-affect.
+        return True
+    if _TASKY_WANT.search(q) and _TASK_OBJECT.search(q):
+        return True
+    # Imperative openers common in companion use
+    if words and words[0] in {
+        "write",
+        "code",
+        "implement",
+        "fix",
+        "debug",
+        "explain",
+        "summarize",
+        "list",
+        "define",
+        "generate",
+        "create",
+        "show",
+        "make",
+    }:
+        return True
+    return False
+
+
+def _is_presence_or_affect(q: str, words: list[str]) -> bool:
+    """Structural presence/affect — generalizes past short greetings.
+
+    Classes (any one is enough, provided the line is not a task/inquiry):
+      1. greeting / check-in / thanks / goodbye
+      2. affect content (experiential predicates, situation-of-day)
+      3. very short non-question non-memory lines (ambient presence)
+      4. light social particles without system inquiry
+
+    Bare first-person (i/me/my) is deliberately NOT a class by itself —
+    it over-captures ordinary system reports (\"my session keeps losing
+    the thread state\"). First-person affect is covered when the line also
+    carries affect content (\"i miss my grandmother\", \"i'm exhausted\").
+    """
+    if _is_task_or_inquiry(q, words):
+        return False
+    if _PRESENCE_GREETING.search(q):
+        return True
+    if _AFFECT_CONTENT.search(q):
+        return True
+    if (
+        len(words) <= 3
+        and not q.endswith("?")
+        and "what" not in words
+        and "remember" not in words
+        and "codeword" not in words
+    ):
+        return True
+    # Light social particles without system inquiry (kept general).
+    if re.search(r"\b(man |really|dont|don't)\b", q) and len(words) <= 10:
+        return True
+    return False
+
+
 def detect_intents(user_input: str) -> frozenset[Intent]:
     """General intent tags for selection — not a prompt lookup table."""
     q = _norm(user_input)
@@ -153,23 +281,13 @@ def detect_intents(user_input: str) -> frozenset[Intent]:
     if re.search(r"\b(open threads?|current threads?|thread_)\b", q):
         intents.add("threads")
 
-    # Social / presence / short affect (no system inquiry)
-    social_hit = bool(
-        re.search(
-            r"\b(hi|hello|hey|sup+|suup+|yo|thanks|thank you|bye|goodbye|goodby|"
-            r"are you there|you there|really|dont|don't|ok|okay|cool|man |"
-            r"i (really )?(don't|dont|hate|like)|love you|how are you)\b",
-            q,
-        )
-        or (
-            len(words) <= 3
-            and not q.endswith("?")
-            and "what" not in words
-            and "remember" not in words
-            and "codeword" not in words
-        )
+    # Social / presence / affect (no system inquiry). System intents win:
+    # "i feel like this system isn't doing much — what does this kernel do?"
+    # must stay purpose, not collapse to social-only.
+    system_intents = intents.intersection(
+        {"purpose", "runtime", "edge", "policy", "threads"}
     )
-    if social_hit and not intents.intersection({"purpose", "runtime", "edge", "policy", "threads"}):
+    if not system_intents and _is_presence_or_affect(q, words):
         intents.add("social")
 
     # Follow-up continuity (short reaction after dialogue exists)

@@ -177,3 +177,113 @@ def test_detect_intents_not_exact_prompt_table():
     assert "purpose" in detect_intents("what does this system do?")
     assert "runtime" in detect_intents("what model is this")
     assert "edge" in detect_intents("tell me about the Jetson board")
+
+
+def test_sentence_length_affect_routes_social():
+    """Presence/affect must generalize past short greetings and session-seen lines.
+
+    Measured miss class (docs/observations + seat board): sentence-length
+    emotional statements were routing to ``open`` and receiving the full
+    project fact field. Social is affect/presence content without system
+    inquiry — not a bare first-person table and not a prompt lookup list.
+    """
+    affect_lines = [
+        "i miss my grandmother",
+        "rough shift at work",
+        "feeling pretty burnt out",
+        "that made me sad",
+        "had a hard day",
+        "i'm exhausted today",
+        "feeling lonely tonight",
+        "work left me drained",
+    ]
+    for line in affect_lines:
+        intents = detect_intents(line)
+        assert "social" in intents, f"{line!r} -> {sorted(intents)}"
+        assert not intents.intersection(
+            {"purpose", "runtime", "edge", "policy", "threads"}
+        ), f"{line!r} should not open system intents: {sorted(intents)}"
+
+
+def test_sentence_length_affect_withholds_project_state(tmp_path: Path):
+    """Companion field must stay quiet on presence turns — the usefulness cut."""
+    st = _boot(tmp_path)
+    for line in (
+        "i miss my grandmother",
+        "feeling pretty burnt out",
+        "rough shift at work",
+    ):
+        packet = build_arrival_packet(st, line, acceptance_mode="companion")
+        ids = _selected_ids(packet)
+        assert "input.current" in ids, line
+        assert "state.edge.target" not in ids, line
+        assert "state.goal" not in ids, line
+        assert "state.runtime.repair_budget" not in ids, line
+        assert packet["facts"] == [], line
+
+
+def test_task_and_generative_requests_stay_open():
+    """Affect generalization must not swallow ordinary open asks."""
+    open_lines = [
+        "write me a python for loop",
+        "what is your favorite flower?",
+        "how does a hash table work",
+        "summarize the design in one sentence",
+        "so what's next",
+        "how does that look from your perspective",
+    ]
+    for line in open_lines:
+        intents = detect_intents(line)
+        assert "social" not in intents, f"{line!r} -> {sorted(intents)}"
+        assert "open" in intents or intents.intersection(
+            {"purpose", "runtime", "edge", "policy", "threads", "dialogue_followup"}
+        ), f"{line!r} -> {sorted(intents)}"
+
+
+def test_system_inquiry_wins_over_first_person_affect():
+    """If the human is asking about the system, do not collapse to social-only."""
+    intents = detect_intents(
+        "i feel like this system isn't doing much — what does this kernel do?"
+    )
+    assert "purpose" in intents
+    assert "social" not in intents
+
+
+def test_first_person_system_reports_stay_open():
+    """Bare first-person must not silence ordinary system/project reports.
+
+    Fable cold-read (2026-08-03): a catch-all ``i/me/my`` branch collapsed
+    bug reports and work notes into social_only withhold. Affect content
+    still routes social; first-person alone must not.
+    """
+    system_reports = [
+        "i noticed the dashboard is showing stale data",
+        "my session keeps losing the thread state",
+        "i ran the experiment matrix again last night",
+        "i want to talk through the repair budget logic",
+        "my favorite part of this project is the evidence freeze",
+        "me and the team are looking at this tomorrow",
+        "i wonder if the model swap will hold up",
+    ]
+    for line in system_reports:
+        intents = detect_intents(line)
+        assert "social" not in intents, f"{line!r} -> {sorted(intents)}"
+        assert "open" in intents or intents.intersection(
+            {"purpose", "runtime", "edge", "policy", "threads", "dialogue_followup"}
+        ), f"{line!r} -> {sorted(intents)}"
+
+
+def test_first_person_system_reports_do_not_force_social_withhold(tmp_path: Path):
+    """Companion selection must not apply social_only withhold to work reports."""
+    st = _boot(tmp_path)
+    line = "my session keeps losing the thread state"
+    packet = build_arrival_packet(st, line, acceptance_mode="companion")
+    field = packet.get("context_field") or {}
+    social_withholds = [
+        r
+        for r in (field.get("selection_records") or [])
+        if (r.get("reason") or "").startswith("omitted_social_turn_withhold")
+    ]
+    assert not social_withholds, (
+        f"unexpected social withhold on system report: {social_withholds[:3]}"
+    )

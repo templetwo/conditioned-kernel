@@ -226,6 +226,21 @@ def test_canonical_state_absent_for_social_turn(tmp_path: Path):
     assert before.relevant_canonical == []
 
 
+def test_canonical_state_absent_for_sentence_length_affect(tmp_path: Path):
+    """Flow compose must not open durable project state on presence turns."""
+    state_dir, logs_dir = _bootstrap(tmp_path)
+    state = SubstrateState.load(state_dir=state_dir, logs_dir=logs_dir)
+    field = FlowField.fresh("sess_test")
+    for line in (
+        "i miss my grandmother",
+        "feeling pretty burnt out",
+        "rough shift at work",
+    ):
+        before = compose_field(field, line, state)
+        assert "social" in before.intents, line
+        assert before.relevant_canonical == [], line
+
+
 def test_canonical_state_enters_when_relevant_to_message(tmp_path: Path):
     state_dir, logs_dir = _bootstrap(tmp_path)
     state = SubstrateState.load(state_dir=state_dir, logs_dir=logs_dir)

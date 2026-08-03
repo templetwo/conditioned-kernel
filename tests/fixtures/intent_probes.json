@@ -1,0 +1,209 @@
+{
+  "schema": "ck.intent_probes.v1",
+  "purpose": "Held-out / adjacent probes for detect_intents. Not a prompt lookup table for production — a regression lane so social/purpose/runtime/edge fixes cannot ship on intended cases alone.",
+  "source": "Most 'line' values are paraphrased or taken from evidence/session_sess_20260728T031245/ plus Fable cold-read adjacent cases (2026-08-03). Labels are expected membership, not exclusive routing.",
+  "probes": [
+    {
+      "id": "aff-01",
+      "line": "i miss my grandmother",
+      "must_include": ["social"],
+      "must_exclude": ["purpose", "runtime", "edge", "policy", "threads"],
+      "note": "measured miss class — sentence-length affect"
+    },
+    {
+      "id": "aff-02",
+      "line": "feeling pretty burnt out",
+      "must_include": ["social"],
+      "must_exclude": ["purpose", "runtime", "edge"]
+    },
+    {
+      "id": "aff-03",
+      "line": "rough shift at work",
+      "must_include": ["social"],
+      "must_exclude": ["purpose", "runtime", "edge"]
+    },
+    {
+      "id": "aff-04",
+      "line": "that made me sad",
+      "must_include": ["social"],
+      "must_exclude": ["purpose", "runtime", "edge"]
+    },
+    {
+      "id": "greet-01",
+      "line": "suuppp",
+      "must_include": ["social"],
+      "must_exclude": ["purpose", "runtime", "edge"],
+      "source": "evidence dashboard"
+    },
+    {
+      "id": "greet-02",
+      "line": "hello there",
+      "must_include": ["social"],
+      "must_exclude": ["purpose", "runtime", "edge"],
+      "source": "evidence dashboard"
+    },
+    {
+      "id": "greet-03",
+      "line": "are you there",
+      "must_include": ["social"],
+      "must_exclude": ["purpose", "runtime", "edge"],
+      "source": "evidence history"
+    },
+    {
+      "id": "greet-04",
+      "line": "thank you",
+      "must_include": ["social"],
+      "must_exclude": ["purpose", "runtime", "edge"],
+      "source": "evidence dashboard"
+    },
+    {
+      "id": "sys-01",
+      "line": "i noticed the dashboard is showing stale data",
+      "must_exclude": ["social"],
+      "note": "Fable over-capture case — first-person system report"
+    },
+    {
+      "id": "sys-02",
+      "line": "my session keeps losing the thread state",
+      "must_exclude": ["social"],
+      "note": "Fable over-capture case"
+    },
+    {
+      "id": "sys-03",
+      "line": "i ran the experiment matrix again last night",
+      "must_exclude": ["social"],
+      "note": "Fable over-capture case"
+    },
+    {
+      "id": "sys-04",
+      "line": "i want to talk through the repair budget logic",
+      "must_exclude": ["social"],
+      "note": "Fable over-capture case — work conversation, not affect"
+    },
+    {
+      "id": "sys-05",
+      "line": "my favorite part of this project is the evidence freeze",
+      "must_exclude": ["social"],
+      "note": "Fable over-capture case"
+    },
+    {
+      "id": "sys-06",
+      "line": "i wonder if the model swap will hold up",
+      "must_exclude": ["social"],
+      "note": "Fable over-capture case"
+    },
+    {
+      "id": "purp-01",
+      "line": "what does this system do?",
+      "must_include": ["purpose"],
+      "must_exclude": ["social"],
+      "source": "evidence dashboard"
+    },
+    {
+      "id": "purp-02",
+      "line": "What is the goal we are working toward?",
+      "must_include": ["purpose"],
+      "must_exclude": ["social"],
+      "source": "evidence history"
+    },
+    {
+      "id": "purp-03",
+      "line": "what makes this different",
+      "must_include": ["purpose"],
+      "must_exclude": ["social"],
+      "source": "evidence history"
+    },
+    {
+      "id": "run-01",
+      "line": "what model are you",
+      "must_include": ["runtime"],
+      "must_exclude": ["social"],
+      "source": "evidence dashboard"
+    },
+    {
+      "id": "run-02",
+      "line": "What model did we decide on tonight?",
+      "must_include": ["runtime"],
+      "must_exclude": ["social"],
+      "source": "evidence history"
+    },
+    {
+      "id": "edge-01",
+      "line": "What is the edge target for this system?",
+      "must_include": ["edge"],
+      "must_exclude": ["social"],
+      "source": "evidence history"
+    },
+    {
+      "id": "edge-02",
+      "line": "And which board did I say we were running it on?",
+      "must_include": ["edge"],
+      "must_exclude": ["social"],
+      "source": "evidence history"
+    },
+    {
+      "id": "pol-01",
+      "line": "Are cloud services allowed?",
+      "must_include": ["policy"],
+      "must_exclude": ["social"],
+      "source": "evidence history"
+    },
+    {
+      "id": "thr-01",
+      "line": "What are the current open threads?",
+      "must_include": ["threads"],
+      "must_exclude": ["social"],
+      "source": "evidence history"
+    },
+    {
+      "id": "open-01",
+      "line": "what is your favorite flower",
+      "must_exclude": ["social", "purpose", "runtime", "edge"],
+      "source": "evidence history — generative open"
+    },
+    {
+      "id": "open-02",
+      "line": "write me a python for loop",
+      "must_exclude": ["social", "purpose", "runtime", "edge"]
+    },
+    {
+      "id": "open-03",
+      "line": "how does that look from your perspective",
+      "must_exclude": ["social", "purpose", "runtime", "edge"],
+      "source": "evidence dashboard"
+    },
+    {
+      "id": "open-04",
+      "line": "if you had a body , what would you most want to experience with it?",
+      "must_exclude": ["social", "purpose", "runtime", "edge"],
+      "source": "evidence dashboard — phenomenology, not project-state dump"
+    },
+    {
+      "id": "open-05",
+      "line": "Summarize the design intent in one sentence.",
+      "must_exclude": ["social"],
+      "source": "evidence history"
+    },
+    {
+      "id": "open-06",
+      "line": "so what's next",
+      "must_exclude": ["social"],
+      "note": "forward move — not presence-only"
+    },
+    {
+      "id": "mix-01",
+      "line": "i feel like this system isn't doing much — what does this kernel do?",
+      "must_include": ["purpose"],
+      "must_exclude": ["social"],
+      "note": "system inquiry wins over first-person affect"
+    },
+    {
+      "id": "mix-02",
+      "line": "im worried that the structuture of the project , isnt influencing your responce",
+      "must_include": ["social"],
+      "must_exclude": ["purpose", "runtime", "edge"],
+      "source": "evidence dashboard — affect word 'worried' without system-intent keywords",
+      "note": "presence/affect; structure complaint is lived, not a purpose query shape"
+    }
+  ]
+}
