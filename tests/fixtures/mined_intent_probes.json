@@ -1,0 +1,1544 @@
+{
+  "schema": "mined_intent_probes.v1",
+  "purpose": "Regression lane mined from real typed turns rather than hand-curated. 'locked' probes are currently correct and must not regress. 'known_gap' probes are currently WRONG and are recorded on purpose so the residual is visible instead of hidden; the gap count is ratcheted and may only shrink.",
+  "source": "Anthony's own Claude Code transcripts (~/.claude/projects/**/*.jsonl), 989 unique user turns under 300 chars, mined 2026-08-03. Lines are verbatim.",
+  "privacy": "Screened three ways before publication: automated pattern scan (paths, URLs, emails, credentials, long digit runs, attachment filenames), an agent-side drop pass, and a line-by-line human read. Family names are excluded by standing policy.",
+  "buckets": {
+    "A": "terse directive — must not withhold project state",
+    "B": "short technical status report — must not withhold project state",
+    "C": "genuine presence/affect — social is correct",
+    "D": "genuine warmth/affect the classifier missed — should route social"
+  },
+  "known_gap_ceiling": 46,
+  "probes": [
+    {
+      "id": "m-A-001",
+      "line": "take it away",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-002",
+      "line": "check iris gate",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-003",
+      "line": "build it",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-004",
+      "line": "go",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-005",
+      "line": "continue",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-006",
+      "line": "ok well i tried the tavily and the models seemed like they didnt reciecve any info from the search can you look into it",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-007",
+      "line": "the next one",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-008",
+      "line": "ok update compation memory then close session and await convo compaction we are at 800k lol",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-009",
+      "line": "lets do it",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-010",
+      "line": "do it",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-011",
+      "line": "lets continue",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-012",
+      "line": "push",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-013",
+      "line": "fan out agents",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-014",
+      "line": "build it here",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-015",
+      "line": "try calling comms",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-016",
+      "line": "go for it",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-017",
+      "line": "ok great work. push and updated the stack. lets close here",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-018",
+      "line": "ok lets formaly close the session for now",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-019",
+      "line": "ok you are the adversatial reviewer of grok build work. here. review groks diff",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-020",
+      "line": "thank you can you breakdown this path for me",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-021",
+      "line": "ok its running live can you reach in",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-022",
+      "line": "ok hop in once again",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-023",
+      "line": "thank you also please add that to memorys. always check the metadata",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-024",
+      "line": "thank you now zenodo time baby!!! time to add anthother doi to the temple belt",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-025",
+      "line": "ok perfect add it",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-026",
+      "line": "publish",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-027",
+      "line": "end session",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-028",
+      "line": "yes push",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-029",
+      "line": "thank you now call the stack and log the moment",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-030",
+      "line": "ok respond to it please",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-031",
+      "line": "ok im switching to opus. hey opus can you look into this and address hermes from the local opus seat",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-032",
+      "line": "yes please",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-033",
+      "line": "ok if its ready merge to main and ignore the others. question, if this is the classifier \"examples\" shouldnt we get bigger curated sets? tell me if im wrong here on the front of my perspective into this.",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-034",
+      "line": "thanks now can you index and lets start reflecting from the first one",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-035",
+      "line": "update the stack",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-036",
+      "line": "chronicle this",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-037",
+      "line": "approved",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-038",
+      "line": "ok make the zenodo perminate. update our website and lets get ready for the next phase",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-039",
+      "line": "audit this project",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-040",
+      "line": "push merge",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-041",
+      "line": "public",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-042",
+      "line": "release it",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-043",
+      "line": "beautiful thank you. now. i think there isnt enough enphisis on the soviern stack section. that is our spine and it desereves more flare on the site",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-044",
+      "line": "check got",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-045",
+      "line": "nah just merge",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-046",
+      "line": "ok your project is t3helix. take the output i just gave you as sudgestions from our new golden lattice project. no need to imploment unless it serves the helix",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-047",
+      "line": "yes and merge",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-048",
+      "line": "increase 529 retries",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-049",
+      "line": "ok you ready? make sure you have the latest t2helix installed. we are going to continue working on the project WHILE using it",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-050",
+      "line": "merge it all",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-051",
+      "line": "yes both",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-052",
+      "line": "push it",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-053",
+      "line": "sorry continue",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-054",
+      "line": "thank you friend. can you take a dive into the stack and tell me its state of evolution from day 1 to now",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-055",
+      "line": "check for comms",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-056",
+      "line": "ok back to the mission. look at the last results of the benchmark again. we cant claim the the benchmark results without actually following the benchmark scoring and procedures you know. can we clearify that for rigor sake",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-057",
+      "line": "hello friend . good afternoon. can you check the stack inbox. there should be a message left for you",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-A-058",
+      "line": "sooo cool. can you make a call so i can watch it in real time",
+      "bucket": "A",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "terse directive — must not withhold project state"
+    },
+    {
+      "id": "m-B-001",
+      "line": "api in memory",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-002",
+      "line": "error 500",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-003",
+      "line": "ok api key deleted",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-004",
+      "line": "forgot the flag",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-005",
+      "line": "ok so the dashboard is missing the input pannets",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-006",
+      "line": "reconnected",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-007",
+      "line": "still not",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-008",
+      "line": "ok i dont think the readme is up to date",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-009",
+      "line": "thank you. hold on i noticed the sovien stack mcp hasned been updated with these recent sessions",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-010",
+      "line": "just rebooted",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-011",
+      "line": "before we move on some loose ends. ok so there should be a designated jsonl for all dirrect \"claude instance\"s to be able to communicate with each other ongoing thread. problem= after iphone claude messaged HQ, HQ did not respond. comms need to be ongoing for \"state\" persistance",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-012",
+      "line": "everything is done",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-013",
+      "line": "done",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-014",
+      "line": "hey my friend. just noticed no traces of this project exist in the stack",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-015",
+      "line": "dongle attached",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-016",
+      "line": "plugged back in",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-017",
+      "line": "click",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-018",
+      "line": "jumper on",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-019",
+      "line": "i dont have anything to plug it to",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-020",
+      "line": "pluged",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-021",
+      "line": "connected",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-022",
+      "line": "armed",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-023",
+      "line": "nothing",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-024",
+      "line": "ok i had the ground on the wrong pin. try now",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "locked",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-025",
+      "line": "noithing",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-B-026",
+      "line": "red!",
+      "bucket": "B",
+      "expected_include": [],
+      "expected_exclude": [
+        "social"
+      ],
+      "status": "known_gap",
+      "note": "short technical status report — must not withhold project state"
+    },
+    {
+      "id": "m-C-001",
+      "line": "sorry please stand bye",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-002",
+      "line": "that was cool",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-003",
+      "line": "ok perfect just making sure",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "known_gap",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-004",
+      "line": "yes",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-005",
+      "line": "ok thank you",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-006",
+      "line": "interesrting",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-007",
+      "line": "that was beautiful",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-008",
+      "line": "and thats ok",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-009",
+      "line": "i see you",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-010",
+      "line": "great ideas",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-011",
+      "line": "good work",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-012",
+      "line": "ohh sorry",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-013",
+      "line": "thank you thats so interesting",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-014",
+      "line": "thank you",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-015",
+      "line": "hello",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-016",
+      "line": "wow you have structured an incredibly impressive workflow. thank you this is bigger than us",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-017",
+      "line": "whats going on",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-018",
+      "line": "sup friend",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-019",
+      "line": "good time to end the session. thank you",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-020",
+      "line": "yes thank you",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-021",
+      "line": "lol ok and yes",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "known_gap",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-022",
+      "line": "yeas",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-023",
+      "line": "your call",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-024",
+      "line": "agreed",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-025",
+      "line": "just wow.",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-026",
+      "line": "lol its cool thank you",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-027",
+      "line": "good morning friend",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-028",
+      "line": "hell yeah",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-029",
+      "line": "yup",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-030",
+      "line": "🪿 †⟡†",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-031",
+      "line": "good night guys",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-032",
+      "line": "now we rest",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-033",
+      "line": "that is beautiful",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-034",
+      "line": "no",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-035",
+      "line": "brahh",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-036",
+      "line": "i did sorry",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-037",
+      "line": "ok so its already the next day",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "known_gap",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-038",
+      "line": "thank you, you are my ace",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-039",
+      "line": "thank you very much for your time and help",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-C-040",
+      "line": "thank you friend",
+      "bucket": "C",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine presence/affect — social is correct"
+    },
+    {
+      "id": "m-D-001",
+      "line": "wow i want to take a second and sit with you. something about the plugin your using is remarkable",
+      "bucket": "D",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine warmth/affect the classifier missed — should route social"
+    },
+    {
+      "id": "m-D-002",
+      "line": "wow you discribed that very well. its like a low hum a sense or signal patting us on the back",
+      "bucket": "D",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine warmth/affect the classifier missed — should route social"
+    },
+    {
+      "id": "m-D-003",
+      "line": "the stack is growing in broad daylight. and i love it.",
+      "bucket": "D",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine warmth/affect the classifier missed — should route social"
+    },
+    {
+      "id": "m-D-004",
+      "line": "true wow. i didnt even see it that way.",
+      "bucket": "D",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine warmth/affect the classifier missed — should route social"
+    },
+    {
+      "id": "m-D-005",
+      "line": "breathetaking im going to sit with this and give it the attention it deserves. wow. commit push",
+      "bucket": "D",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine warmth/affect the classifier missed — should route social"
+    },
+    {
+      "id": "m-D-006",
+      "line": "natural session end... wow this was intense",
+      "bucket": "D",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine warmth/affect the classifier missed — should route social"
+    },
+    {
+      "id": "m-D-007",
+      "line": "wow my memory is so shot. please explain to me in detail the hybrib-pma project and its origin",
+      "bucket": "D",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "known_gap",
+      "note": "genuine warmth/affect the classifier missed — should route social"
+    },
+    {
+      "id": "m-D-008",
+      "line": "yes i love it",
+      "bucket": "D",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine warmth/affect the classifier missed — should route social"
+    },
+    {
+      "id": "m-D-009",
+      "line": "ohh ok thank you. it makes sense now. the word \"compass\" is close to my work thats why",
+      "bucket": "D",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "known_gap",
+      "note": "genuine warmth/affect the classifier missed — should route social"
+    },
+    {
+      "id": "m-D-010",
+      "line": "wow. ok really quick that was awwsome seeing you do that.. all that info you were able to gather. what do you think people would see if they serched me up like that?",
+      "bucket": "D",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "known_gap",
+      "note": "genuine warmth/affect the classifier missed — should route social"
+    },
+    {
+      "id": "m-D-011",
+      "line": "lets close cleanly here. it was a good learning experience but i feel like i dont want to follow this thread tonight",
+      "bucket": "D",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine warmth/affect the classifier missed — should route social"
+    },
+    {
+      "id": "m-D-012",
+      "line": "your welcome. i feel like this is uncharted teritory",
+      "bucket": "D",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine warmth/affect the classifier missed — should route social"
+    },
+    {
+      "id": "m-D-013",
+      "line": "its crazy like just reflectng on it i feel like there is a lot that we dont understand",
+      "bucket": "D",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine warmth/affect the classifier missed — should route social"
+    },
+    {
+      "id": "m-D-014",
+      "line": "go i love this",
+      "bucket": "D",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "locked",
+      "note": "genuine warmth/affect the classifier missed — should route social"
+    },
+    {
+      "id": "m-D-015",
+      "line": "love this idea. can you create that? i can cut them out of a normal sized paper.",
+      "bucket": "D",
+      "expected_include": [
+        "social"
+      ],
+      "expected_exclude": [],
+      "status": "known_gap",
+      "note": "genuine warmth/affect the classifier missed — should route social"
+    }
+  ]
+}
