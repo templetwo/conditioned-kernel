@@ -64,16 +64,22 @@ ecs/
     crc32.ecs.yaml            + one file per kernel
     fir_q15.weak.ecs.yaml     deliberately weakened variant (dose-response arm)
   trusted/
-    oracles/                  two independent reference impls per kernel
+    oracles/                  two independent reference impls per kernel,
+                              named <kernel>_<seat>.c, revealed only after
+                              both seals are posted (section 6 amendment)
     vectors/                  acceptance vectors (committed)
     probes/                   generator spec + committed hash only; realized
                               probe data lives ONLY on the Jetson
   harness/
     runner.py                 state machine (section 9)
-    device.py                 SSH executor, clock pin/check, thermal guard
+    device/                   phase0_bringup.py, eviction_barrier.py,
+                              generators.json (SINGLE SOURCE for per-model
+                              MemFree thresholds), seed_guard.py
     generators/               anthropic.py, xai.py, ollama.py adapters
-    gates/                    lint, compile, sanitize, cbmc, vectors, budget
-    measure/                  bench_main.c template, stats.py
+    gates/                    lint, compile, sanitize, cbmc, vectors, budget;
+                              oracle_agreement_<kernel>.c differential tests
+    measure/                  bench_main.c, crc32_ref.c (P0 BENCH FIXTURE,
+                              not an oracle of record)
   redteam/                    known-bad candidates the gates must reject
   receipts/                   one JSON per candidate, append-only
   results/
@@ -216,11 +222,35 @@ Fixed C interfaces; single translation unit; no allocation; no globals; no I/O; 
 
 Floating point (quaternion rotate) is a separate later arm whose stated purpose is exercising the tolerance policy. It does not join the primary signal in v1.
 
+### Open packet decision — pointer preconditions (raised 2026-08-04, NOT decided)
+
+The input-domain column above constrains `n`. It says nothing about **pointer validity**, and that gap is not hypothetical: the two independently sealed `crc32` oracles agreed on all 24,359 tested inputs and diverged on exactly one case outside the stated domain. Agent B guards `data == NULL && n != 0` and treats it as empty; Agent A does not, leaving that call undefined behaviour. Neither violates the spec as written, because the spec is silent.
+
+This is an **unpinned specification bit sitting just outside the constraint surface** — the exact class of thing the ECS experiment exists to measure, surfaced on the calibration kernel before a single generator had been called.
+
+Two defensible resolutions, and this document records the question rather than answering it:
+
+1. **Pin it.** Each ECS packet states NULL behaviour explicitly, and oracles must match. Narrows the admissible region; may reduce D.
+2. **Declare the precondition.** Each packet states that pointers are valid and non-null for `n > 0`, and behaviour outside that is undefined and untested. Keeps the surface honest about what it does not constrain.
+
+**Do not resolve this by editing an oracle until the two match.** That would destroy the signal the trusted tier exists to detect and convert a real finding into a silent reconciliation. Decision belongs to the trusted-tier lane (Agent B) with Anthony. Tracked on the seat board at #13816.
+
 ---
 
 ## 6. Trusted tier
 
 **Oracles.** Two independent slow-and-obvious reference implementations per kernel (one per agent, written blind). Trust = pairwise agreement on all vectors + agreement with published check values where they exist (CRC32) + CBMC bounded equivalence on small n where feasible.
+
+> **Amendment 2026-08-04 — "written blind" is now enforced, not promised.**
+> As originally written, this clause asserted blindness without any mechanism to establish it. That was the weakness thread #20 was opened to address, after this seat published an oracle and declared it blind in the same act. **Hash-and-seal** is now standing law, frozen in `PREREG.md` §8 against tag `prereg-v1`:
+>
+> For each kernel, each seat independently authors its oracle, computes the SHA-256 of that file, and posts the hash to the seat board. **Content is revealed only after both hashes exist.** Ordering becomes a receipt rather than a promise. Seals are valid only when posted against the frozen tag. The seat board is the sole seal ledger; the seal table in frozen PREREG §8 stays empty by ruling and is not to be filled.
+>
+> This matters because a blindness breach is the one failure in this design that produces **no symptom anywhere**: two echoing oracles still pass vectors, still close under CBMC (both share the bug), and still yield clean calibration D. Agreement without an ordering receipt is not evidence.
+>
+> Reveal convention: `trusted/oracles/<kernel>_<seat>.c`. Seat labels are load-bearing — an unlabeled pair cannot be audited.
+>
+> `harness/measure/crc32_ref.c` is a **P0 bench fixture, not an oracle of record.**
 
 **Acceptance vectors.** Committed to the repo. Generated from the oracles: edge cases (empty, single element, max domain values, saturation boundaries) plus seeded random inputs. These are what generation and repair are allowed to see failures against.
 
@@ -339,7 +369,7 @@ Totals: ~240 generations plus repairs. All headless via `runner.py`.
 | phase | scope | lane | done when |
 |---|---|---|---|
 | P0 | device bring-up (section 4) | A builds, B verifies | phase0 receipt incl. 2 percent stability check |
-| P1 | trusted tier: dual oracles, vectors, ECS packets, probe realization on device, PREREG frozen | B leads oracles/probes, A writes its own blind oracle set, both author ECS packets for their kernels | oracles agree on all vectors incl. published; packets validate against schema; probe hashes committed; `prereg-v1` tagged |
+| P1 | trusted tier: dual oracles under hash-and-seal, vectors, ECS packets, probe realization on device | B leads oracles/probes, A writes its own sealed oracle set, both author ECS packets for their kernels | **both seal hashes posted to the board before either reveal, per kernel**; revealed files verify against their posted seals; oracles agree on all vectors incl. published check values; packets validate against schema; probe hashes committed |
 | P2 | harness: runner, device executor, adapters, gates, receipts | A leads; B builds redteam fixtures | stub generator (returns oracle verbatim) produces a full green receipt end to end; every redteam fixture rejected at its intended gate |
 | P3 | runs: calibration, main, dose-response | harness runs headless; both agents on-call for infrastructure faults only | all receipts present; calibration D <= 1 percent passed before main |
 | P4 | analysis + writeup | B computes, A audits (swap of P2 roles) | `results/` with variance decomposition, prereg outcomes stated as pass/fail, systems-result draft |
