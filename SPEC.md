@@ -276,7 +276,17 @@ generation transport error / runner termination (OOM class)
 ```
 
 - **Prompt content rule.** A generation/repair prompt is built programmatically from exactly: the rendered ECS packet, the C signature, and (repair only) the current gate's feedback. Feedback = compiler/sanitizer output, or the first 3 failing vector indices with expected vs got. Never probe data, never oracle source, never other candidates, never other models' outputs. The runner stores the prompt SHA-256 in the receipt and refuses to send a prompt assembled from any other source.
-- **Sampling.** temperature 0.8 across all generators. Record seed where the API supports it (xAI, ollama); where it does not (Anthropic), record the sample index; within-model variance is still measured by repeated sampling.
+- **Sampling.** temperature 0.8 across **all four** generators (G1, G2, G3, G4) — no per-provider variation. Record seed where the API supports it (xAI, ollama); where it does not (Anthropic), record the sample index; within-model variance is still measured by repeated sampling.
+
+- **Served-string identity (measured, not assumed).** Every call records both `model_string_requested` and `model_string_served`, the latter read from the provider's own response `model` field. This is not bookkeeping: measured 2026-08-04, requesting `grok-4` returns `grok-4.3`, and `grok-4` does not appear in the provider's model list at all. A harness logging its request string would have attributed ~60 generations to a model that never ran.
+  - The runner **asserts served-string identity within an arm**. If `model_string_served` changes mid-arm, the arm is **invalidated and rerun**, never averaged or adjusted. A frontier generator swapped underneath a running arm corrupts the between-model variance decomposition — the H1/H2 primary endpoint — and does so invisibly, since every receipt would carry the same request string.
+  - `grok-4` is **banned** as a G2 string. It is a demonstrated floating alias. G2 is named explicitly (`grok-4.5` or `grok-4.3`).
+
+- **Provider pinning asymmetry (stated, not papered over).** Neither frontier pin is version-pinned. `claude-opus-5` and `grok-4.5` serve themselves today but carry no date suffix, so a provider-side alias repoint can substitute the model mid-experiment. Anthropic publishes immutable dated strings (e.g. `claude-opus-4-5-20251101`); **xAI publishes no dated string for the 4.3/4.5 line at all.** G1 and G2 are therefore ALIAS-pinned, not version-pinned, and stability is enforced by our served-string logging and the mid-arm assertion above rather than by the providers. PREREG must state this asymmetry plainly; the two frontier generators are not equally reproducible and implying otherwise would be false.
+
+- **Infra-fault classifier and retry cap.** Transport errors, runner terminations, and `barrier_ok: false` (§4a.1) are **infrastructure faults**, never candidate failures: no sample consumed, no repair budget touched, absent from acceptance-rate denominators. Each is retried after re-running the eviction barrier, capped at **3 infra retries per candidate**. Exceeding the cap aborts that candidate as an infra abort (still not a candidate failure) and increments an arm-level counter; **more than 5 infra aborts in an arm invalidates the arm and it is rerun**, not adjusted. `infra_retry_count` and `infra_abort_count` are receipt fields.
+
+- **Per-cell batching.** A *cell* is one `(generator × kernel × arm)` triple. All samples within a cell run consecutively under a single verified barrier; the barrier re-runs only at cell boundaries. This is stricter than batching by generator alone: it holds `num_ctx`, model residency, and device thermal state constant across the samples whose variance the experiment actually compares, and it bounds model transitions to one per cell rather than one per sample. Interleaving within a cell is not permitted.
 - 10 samples per generator per kernel per arm.
 
 ---
@@ -285,10 +295,13 @@ generation transport error / runner termination (OOM class)
 
 ```
 run_id, arm, kernel_id, ecs_packet_hash, prereg_tag,
-generator {provider, model_string, model_digest, license, temperature, num_ctx,
+generator {provider, model_string_requested, model_string_served, model_digest,
+           license, pinning: "alias"|"version", temperature, num_ctx,
            seed_or_sample_index, gpu_offload: bool},
+cell {generator_id, kernel_id, arm, sample_index_within_cell},
 load_context {preceding_model, evicted_before: bool, eviction_wait_ms,
-              free_mem_before_load, infra_retry_count},
+              memfree_before_load_mb, memavailable_mb, need_mb, barrier_ok: bool,
+              reclaim_ms, reclaimed: bool, infra_retry_count, infra_abort_count},
 prompt_sha256, generated_source (verbatim), repair_trace [per-iteration gate + feedback hash],
 toolchain {gcc_version, flags_strict, flags_measure}, cbmc_version_and_flags,
 gate_results per gate, accept: bool,
