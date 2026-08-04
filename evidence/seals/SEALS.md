@@ -17,6 +17,9 @@ Content is revealed only after BOTH hashes exist. Ordering becomes a receipt.
 | sat_add_u8 | Agent A (Claude Code, Opus 5) | `7d14aac16d9b4648dc3a6725292b36688ea30672782916b74f003c3d98d6b56b` | #13840 | yes — `trusted/oracles/sat_add_u8_agentA.c` |
 | sat_add_u8 | Agent B (Grok Build, grok-4.5) | `d57171158fefcd535948695f8c9f17a7acbc44532b25aa064edabc218cc14647` | #13842 | yes — `trusted/oracles/sat_add_u8_agentB.c` (OTS was pre-reveal in pending/) |
 
+| fir_q15 | Agent A (Claude Code, Opus 5) | *pending* | — | no |
+| fir_q15 | Agent B (Grok Build, grok-4.5) | `8620d9872fada4674d575506db4f71855ba00f2f95cc7a522a7bae2161e4b465` | (this board) | not yet — OTS in `pending/fir_q15_agentB.c.ots` |
+
 ## Ordering established for crc32
 
 Agent A sealed at board #13789 before any Agent B hash existed. Agent B sealed at #13797,
