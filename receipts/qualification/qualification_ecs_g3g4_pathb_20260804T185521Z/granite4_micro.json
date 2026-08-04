@@ -1,0 +1,140 @@
+{
+  "model": "granite4:micro",
+  "checks": {
+    "installed": true,
+    "0_eviction_barrier": true,
+    "1_capability_probe": true,
+    "7_fits_memory": true,
+    "2_final_response_observed": true,
+    "3_reasoning_channel_separate": true,
+    "4_think_false_honoured": null,
+    "5_latency_under_budget": true,
+    "6_schema_compliance": true,
+    "8_raw_path_works": true,
+    "9_determinism_class": "stable"
+  },
+  "evidence": {
+    "memfree_needed_mb": 5100,
+    "pre_load_barrier": {
+      "evict_ms": 506,
+      "ps_empty": true,
+      "reclaim_ms": 7290,
+      "reclaimed": true,
+      "need_mb": 5100,
+      "memfree_before_load_mb": 5936,
+      "memavailable_mb": 6717,
+      "barrier_ok": true,
+      "threshold_source": "harness/device/generators.json",
+      "metric": "MemFree"
+    },
+    "memfree_before_load_mb": 5936,
+    "memavailable_mb": 6717,
+    "show_ok": true,
+    "capabilities": [
+      "completion",
+      "tools"
+    ],
+    "details": {
+      "parameter_size": "3.4B",
+      "quantization_level": "Q4_K_M",
+      "family": "granite"
+    },
+    "size_bytes": 2099521385,
+    "size_gb": 1.955,
+    "default_run": {
+      "status": "completed",
+      "output": "Ready",
+      "error": null,
+      "elapsed_seconds": 4.251,
+      "timeout_seconds": 180.0,
+      "thinking_observed": false,
+      "thinking_chars": 0,
+      "final_response_observed": true,
+      "final_response_chars": 5,
+      "quality_admitted": true,
+      "valid_measurement": true
+    },
+    "think_false_run": {
+      "na": "no thinking capability observed"
+    },
+    "latency_s": 4.251,
+    "timeout_budget_s": 180.0,
+    "schema_run": {
+      "status": "completed",
+      "output": "{\n  \"answer\": \"ready\",\n  \"evidence_used\": [\n    \"probe\"\n  ],\n  \"next_state\": {\n    \"thread_touch\": []\n  }\n}",
+      "error": null,
+      "elapsed_seconds": 3.145,
+      "timeout_seconds": 180.0,
+      "thinking_observed": false,
+      "thinking_chars": 0,
+      "final_response_observed": true,
+      "final_response_chars": 107,
+      "quality_admitted": true,
+      "valid_measurement": true
+    },
+    "raw_path": {
+      "status": "completed",
+      "output": "</details>",
+      "error": null,
+      "elapsed_seconds": 3.228,
+      "timeout_seconds": 180.0,
+      "thinking_observed": false,
+      "thinking_chars": 0,
+      "final_response_observed": true,
+      "final_response_chars": 10,
+      "quality_admitted": true,
+      "valid_measurement": true
+    },
+    "determinism_barriers": {
+      "cold_a": {
+        "memfree_before_load_mb": 6254,
+        "memavailable_mb": 6762,
+        "need_mb": 5100,
+        "barrier_ok": true
+      },
+      "cold_b": {
+        "memfree_before_load_mb": 6140,
+        "memavailable_mb": 6822,
+        "need_mb": 5100,
+        "barrier_ok": true
+      }
+    },
+    "determinism": {
+      "cold_a": {
+        "label": "cold_a",
+        "status": "completed",
+        "hash": "6bb85e2d1bee",
+        "output": "Blue.",
+        "elapsed_s": 3.928
+      },
+      "warm_a": {
+        "label": "warm_a",
+        "status": "completed",
+        "hash": "6bb85e2d1bee",
+        "output": "Blue.",
+        "elapsed_s": 0.362
+      },
+      "warm_b": {
+        "label": "warm_b",
+        "status": "completed",
+        "hash": "6bb85e2d1bee",
+        "output": "Blue.",
+        "elapsed_s": 0.346
+      },
+      "cold_b": {
+        "label": "cold_b",
+        "status": "completed",
+        "hash": "6bb85e2d1bee",
+        "output": "Blue.",
+        "elapsed_s": 3.901
+      },
+      "cold_stable": true,
+      "warm_stable": true,
+      "cold_eq_warm": true
+    }
+  },
+  "verdict": "QUALIFIED",
+  "disqualify_reasons": [],
+  "infra_faults": [],
+  "ecs_codegen": true
+}

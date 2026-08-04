@@ -1,0 +1,141 @@
+{
+  "model": "qwen2.5-coder:3b",
+  "checks": {
+    "installed": true,
+    "0_eviction_barrier": true,
+    "1_capability_probe": true,
+    "7_fits_memory": true,
+    "2_final_response_observed": true,
+    "3_reasoning_channel_separate": true,
+    "4_think_false_honoured": null,
+    "5_latency_under_budget": true,
+    "6_schema_compliance": true,
+    "8_raw_path_works": true,
+    "9_determinism_class": "stable"
+  },
+  "evidence": {
+    "memfree_needed_mb": 3600,
+    "pre_load_barrier": {
+      "evict_ms": 2,
+      "ps_empty": true,
+      "reclaim_ms": 7608,
+      "reclaimed": true,
+      "need_mb": 3600,
+      "memfree_before_load_mb": 5887,
+      "memavailable_mb": 6848,
+      "barrier_ok": true,
+      "threshold_source": "harness/device/generators.json",
+      "metric": "MemFree"
+    },
+    "memfree_before_load_mb": 5887,
+    "memavailable_mb": 6848,
+    "show_ok": true,
+    "capabilities": [
+      "completion",
+      "tools",
+      "insert"
+    ],
+    "details": {
+      "parameter_size": "3.1B",
+      "quantization_level": "Q4_K_M",
+      "family": "qwen2"
+    },
+    "size_bytes": 1929912626,
+    "size_gb": 1.797,
+    "default_run": {
+      "status": "completed",
+      "output": "Yes",
+      "error": null,
+      "elapsed_seconds": 3.969,
+      "timeout_seconds": 180.0,
+      "thinking_observed": false,
+      "thinking_chars": 0,
+      "final_response_observed": true,
+      "final_response_chars": 3,
+      "quality_admitted": true,
+      "valid_measurement": true
+    },
+    "think_false_run": {
+      "na": "no thinking capability observed"
+    },
+    "latency_s": 3.969,
+    "timeout_budget_s": 180.0,
+    "schema_run": {
+      "status": "completed",
+      "output": "{\n  \"answer\": \"ready\",\n  \"evidence_used\": [\"probe\"],\n  \"next_state\": {\n    \"thread_touch\": []\n  }\n}",
+      "error": null,
+      "elapsed_seconds": 3.066,
+      "timeout_seconds": 180.0,
+      "thinking_observed": false,
+      "thinking_chars": 0,
+      "final_response_observed": true,
+      "final_response_chars": 99,
+      "quality_admitted": true,
+      "valid_measurement": true
+    },
+    "raw_path": {
+      "status": "completed",
+      "output": "",
+      "error": null,
+      "elapsed_seconds": 3.663,
+      "timeout_seconds": 180.0,
+      "thinking_observed": false,
+      "thinking_chars": 0,
+      "final_response_observed": false,
+      "final_response_chars": 0,
+      "quality_admitted": true,
+      "valid_measurement": true
+    },
+    "determinism_barriers": {
+      "cold_a": {
+        "memfree_before_load_mb": 4830,
+        "memavailable_mb": 6726,
+        "need_mb": 3600,
+        "barrier_ok": true
+      },
+      "cold_b": {
+        "memfree_before_load_mb": 4794,
+        "memavailable_mb": 6691,
+        "need_mb": 3600,
+        "barrier_ok": true
+      }
+    },
+    "determinism": {
+      "cold_a": {
+        "label": "cold_a",
+        "status": "completed",
+        "hash": "9594eec95be7",
+        "output": "Blue",
+        "elapsed_s": 3.264
+      },
+      "warm_a": {
+        "label": "warm_a",
+        "status": "completed",
+        "hash": "9594eec95be7",
+        "output": "Blue",
+        "elapsed_s": 0.342
+      },
+      "warm_b": {
+        "label": "warm_b",
+        "status": "completed",
+        "hash": "9594eec95be7",
+        "output": "Blue",
+        "elapsed_s": 0.339
+      },
+      "cold_b": {
+        "label": "cold_b",
+        "status": "completed",
+        "hash": "9594eec95be7",
+        "output": "Blue",
+        "elapsed_s": 3.279
+      },
+      "cold_stable": true,
+      "warm_stable": true,
+      "cold_eq_warm": true
+    }
+  },
+  "verdict": "QUALIFIED",
+  "disqualify_reasons": [],
+  "infra_faults": [],
+  "ecs_codegen": true
+}
