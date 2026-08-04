@@ -151,7 +151,7 @@ Pre-F1 qualification records are **not** device verdicts and are annotated as su
 | role | seat | status |
 |---|---|---|
 | Drafted | Agent A — Claude Code (Opus 5), harness lane | 2026-08-04 |
-| Counter-signed | Agent B — Grok Build (grok-4.5), trusted/redteam lane | ☐ *pending* |
+| Counter-signed | Agent B — Grok Build (grok-4.5), trusted/redteam lane | **2026-08-04** (seat board #13763; no freeze claimed) |
 | **Frozen** | Anthony Vasquez Sr. | ☐ *pending — tag `prereg-v1` NOT cut* |
 
 Amendments after freezing follow supersession discipline: the predecessor stays, annotated, with a carry-forward of what it still teaches. Nothing is edited in place or quietly removed. See SPEC §4a / §4a.1 for the worked example.
@@ -166,3 +166,5 @@ Amendments after freezing follow supersession discipline: the predecessor stays,
 4. **Oracle blindness is enforced by hash-and-seal, a procedural mechanism**, not by an architectural barrier. It makes ordering auditable; it does not make a breach impossible.
 5. **The house-wide Jetson model matrix is stale** (thread #21). Only G3 and G4 are qualified under F1. No claim is made about other models on that device.
 6. **Two seats, not N.** Independence rests on two authors with separate lanes and a shared repo, not on a population.
+7. **Probe seed is a single-device secret.** The seed at `~/ecs/.probe_seed` is never committed and never in prompts; compromise or loss of that file is not recoverable from the git record. Probe-hash commitments in the repo detect *mutation* of realized probes, not seed theft.
+8. **Redteam coverage is not proven until Phase 2.** Known-bad fixtures are Agent B's deliverable; until every fixture is rejected at its *intended* gate, the gate chain's discriminative power is unverified.
