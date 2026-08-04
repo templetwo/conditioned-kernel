@@ -8,9 +8,9 @@ Raised by outside review, 2026-08-04. **LN-1** answers the H2 measurement-floor 
 |---|---|---|
 | Drafted | Agent A — Claude Code (Opus 5), harness lane | 2026-08-04 (LN-1, LN-2) · 2026-08-04 (LN-3, census, canary) |
 | Counter-signed — **LN-1 and LN-2 only** | Agent B — Grok Build (grok-4.5), trusted/redteam lane | **2026-08-04** (seat board after #13866; Wilson + quantization verified) |
-| Counter-signed — **LN-3, census, canary** | Agent B — Grok Build (grok-4.5), trusted/redteam lane | ☐ *pending* |
+| Counter-signed — **LN-3, census, canary** | Agent B — Grok Build (grok-4.5), trusted/redteam lane | **2026-08-04** (seat board after #13878; scoped to LN-3 + census + canary only) |
 
-> **Signature scope, stated so it cannot be misread.** Agent B's counter-signature below was given against LN-1 and LN-2 as they stood at commit `17f73fa`. LN-3, the post-arm census specification, and the canary entry were added afterwards at Anthony's direction and **are not covered by it**. A second counter-signature is outstanding. Treat the later material as single-seat until that row is filled.
+> **Signature scope, stated so it cannot be misread.** Agent B's first counter-signature was given against LN-1 and LN-2 as they stood at commit `17f73fa`. LN-3, the post-arm census specification, and the canary entry were added afterwards at Anthony's direction. The second counter-signature (this row) covers **only** those later sections. LN-1/LN-2 remain under the first row. Do not read either signature as covering material outside its row.
 
 **Agent B verification (counter-sign, not freeze of PREREG):**
 - LN-1 Wilson 95% for 7/10 recomputed: **[0.397, 0.892]** — matches the note's ~0.40–0.89.
@@ -19,6 +19,15 @@ Raised by outside review, 2026-08-04. **LN-1** answers the H2 measurement-floor 
 - S4 interpretation (weak clearance on pass; halt still correct on fail) accepted as **declared limitation, not a repair** of the frozen gate.
 - Claim language **"locating, not sizing"** for all n=10 results: adopted for this seat's writeups.
 - v1.1 (third local family; wider n; nonce calibration kernel): **supersession only after pilot as frozen**.
+
+**Agent B verification — second counter-sign (LN-3, census, canary only):**
+- **LN-3 gate-chain bias.** Accepted: D is defined over *accepted* artifacts, so gates 1–6 sit inside the estimand. Gates 3–5 behavior-correlated → **deflate** D; gate 6 performance-only → **inflates only when it removes a largest-cluster member** (note already states this; minority removals would deflate — the budget-only count should be interpreted with that conditional). Lint/compile neutral accepted.
+- **Net conservative D.** Accepted as writeup law: headline D is a **lower bound** on pre-filter behavioral disagreement, compounding LN-2.
+- **Budget-only rejection count.** Accepted as reporting requirement. With first-failure gate order, "budget-only" = failed gate 6 after passing 1–5 — countable from `gate_results` without ambiguity. Zero such rejections ⇒ no inflationary term from gate 6 in that cell.
+- **Not a repair.** Thresholds and chain stay frozen; interpretation + co-reporting only. Correct discipline.
+- **Post-arm census.** Accepted: once after all arms close; sanitized rebuild; **CRASH is a labeled output class per probe** (not discard). Rationale on cross-build UB accepted. Scope bound accepted: exploratory D only; never replaces preregistered endpoint; does **not** refine 1/*k* (that needs sample-to-quota / v1.1).
+- **Canary.** Mechanics accepted: procedure+seed+algorithm+mapping sealed and OTS'd **with the draw, before any arm touches the twin**; draw seed **≠** probe seed (independent failure domains; protects §12.7 and dual blindness). Honesty flag on purpose-as-inferred accepted — mechanics stand if framing is later corrected. Does-not-prove list (fairness/intent) accepted as parallel to §12.4 procedural seals.
+- **Protected signature scope.** A correctly refused to let the LN-1/LN-2 signature cover post-hoc material. That is the dual-lane design working.
 
 ---
 
