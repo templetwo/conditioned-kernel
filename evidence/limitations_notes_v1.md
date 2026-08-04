@@ -2,12 +2,15 @@
 
 **Status: notes ON the frozen preregistration, not IN it.** `PREREG.md` is frozen at tag `prereg-v1` and is not edited. These notes reference frozen rows by number and add analysis the frozen text does not contain. They cannot and do not change any preregistered commitment.
 
-Raised by outside review, 2026-08-04. Two notes: **LN-1** answers the H2 measurement-floor question; **LN-2** gives the shared-priors direction-of-bias analysis and its effect on the stop conditions.
+Raised by outside review, 2026-08-04. **LN-1** answers the H2 measurement-floor question; **LN-2** gives the shared-priors direction-of-bias analysis and its effect on the stop conditions; **LN-3** gives the gate-chain counter-pressure analysis. Two procedures follow the notes: the **post-arm census** and the **canary**.
 
 | role | seat | status |
 |---|---|---|
-| Drafted | Agent A — Claude Code (Opus 5), harness lane | 2026-08-04 |
-| Counter-signed | Agent B — Grok Build (grok-4.5), trusted/redteam lane | **2026-08-04** (seat board after #13866; Wilson + quantization verified) |
+| Drafted | Agent A — Claude Code (Opus 5), harness lane | 2026-08-04 (LN-1, LN-2) · 2026-08-04 (LN-3, census, canary) |
+| Counter-signed — **LN-1 and LN-2 only** | Agent B — Grok Build (grok-4.5), trusted/redteam lane | **2026-08-04** (seat board after #13866; Wilson + quantization verified) |
+| Counter-signed — **LN-3, census, canary** | Agent B — Grok Build (grok-4.5), trusted/redteam lane | ☐ *pending* |
+
+> **Signature scope, stated so it cannot be misread.** Agent B's counter-signature below was given against LN-1 and LN-2 as they stood at commit `17f73fa`. LN-3, the post-arm census specification, and the canary entry were added afterwards at Anthony's direction and **are not covered by it**. A second counter-signature is outstanding. Treat the later material as single-seat until that row is filled.
 
 **Agent B verification (counter-sign, not freeze of PREREG):**
 - LN-1 Wilson 95% for 7/10 recomputed: **[0.397, 0.892]** — matches the note's ~0.40–0.89.
@@ -113,13 +116,130 @@ The two notes compound. LN-1 establishes that D is quantized to 1/k and that low
 
 ---
 
+## LN-3 — Gate-chain counter-pressure on D
+
+**References frozen rows:** PREREG §3 (D defined over **accepted** artifacts), §7 (gate chain via SPEC §7), §6 (arms). SPEC §7 gates 1–6.
+
+### Why the gate chain is not neutral
+
+D is computed over **accepted** artifacts (§3). The gate chain decides which artifacts are accepted. The chain is therefore inside the measurement, not upstream of it, and each gate biases D according to how strongly its rejection criterion correlates with behavior.
+
+### Direction, gate by gate
+
+| gate | rejects on | correlation with behavior | effect on D |
+|---|---|---|---|
+| 1 lint (forbidden surface) | includes, `malloc`, `static`, VLAs, recursion, I/O | ~none among artifacts that would otherwise pass | **neutral** |
+| 2 strict compile | won't build under `-Werror` | not a behavior | **neutral** |
+| 3 sanitized run | UB / ASan reports on the vector set | strong | **deflates** |
+| 4 CBMC | memory safety, bounded equivalence vs oracle | strong | **deflates** |
+| 5 acceptance vectors | bit-exact mismatch on committed vectors | strongest in the chain | **deflates** |
+| 6 budget caps | cycles, `.text` size, stack | ~none — a *performance* criterion | **inflates when it removes a consensus member** |
+
+**Behavior-correlated gates deflate.** Gates 3–5 remove artifacts precisely because they behave differently from the oracle. That is the same disagreement D exists to measure, so removing those artifacts removes disagreement from the accepted set.
+
+**Budget rejection inflates.** Gate 6 rejects on speed and size, criteria essentially uncorrelated with correctness. When it removes an artifact that belonged to the **largest output cluster**, the largest-cluster fraction falls and per-probe disagreement rises. A correct-but-slow artifact discarded by the cycle cap makes the survivors look *less* unanimous than they were.
+
+**Lint and compile are neutral.** They reject on surface form and buildability, neither of which predicts which output cluster an artifact would have joined.
+
+### Net direction, and the sentence that matters
+
+**Reported deflation is net and conservative.** Gate 5 is by far the strongest filter in the chain, and gates 3–5 all push the same way, so the deflationary terms dominate the single inflationary term. Measured D therefore **understates** true behavioral disagreement. An observed D is a lower bound on the disagreement the generators actually exhibited before filtering.
+
+This compounds with LN-2, which finds shared priors deflate D as well. Two independent deflationary pressures act on the same endpoint. Every headline D in this study should be read as conservative.
+
+### The inflation term is measurable, not merely assumed
+
+The receipt records which gate rejected each candidate (SPEC §10, `gate_results` per gate). Budget-only rejections — artifacts that passed lint, compile, sanitize, CBMC and vectors, and failed only gate 6 — are therefore **countable**. Their count bounds the inflationary term directly rather than leaving it as an argument.
+
+Reporting requirement adopted: every D is accompanied by the budget-only rejection count for its cell. A cell with zero budget-only rejections has no inflationary term at all and its D is purely conservative. A cell with several has a quantified upper bound on how much of its D is a filtering artifact.
+
+### Not a repair
+
+The gate chain runs exactly as frozen. Caps are sanity bounds, not optimization targets (SPEC §7 gate 6), and actuals are recorded either way. This note changes interpretation and adds a reporting requirement; it changes no threshold.
+
+---
+
+## Post-arm census — specification
+
+**Status: exploratory procedure. Runs once, after all arms close. Sharpens the exploratory D only. Does not touch the preregistered endpoint.**
+
+### Procedure
+
+1. Runs **once**, strictly **after every arm has closed**. Not during an arm, not per arm, not iterated. A single pass cannot be tuned against a result it has already seen.
+2. Rebuilds every accepted artifact under the **sanitized configuration** (`-O1 -g -fsanitize=undefined,address -fno-sanitize-recover=all`), the same configuration as gate 3, and runs it against the full probe set.
+3. **A crash is a labeled output class, per probe** — not a discard, not a missing value. If artifact *j* traps on probe *i*, its output for probe *i* is the class `CRASH` (with the sanitizer's diagnostic recorded), and that class participates in clustering exactly like any value.
+
+### Rationale — cross-build instability of undefined behavior
+
+An artifact containing UB can produce a value under the `-O3 -mcpu=native` measurement build and trap under sanitizers. The two builds disagree because the program has no defined behavior to be stable about.
+
+Discarding crashes would silently drop exactly the artifacts whose behavior is **least pinned by the specification** — which is the quantity D is trying to estimate. Dropping them biases the exploratory picture toward artifacts that happen to be well-defined, understating unpinned specification bits at precisely the place they are most visible. Labeling `CRASH` as an output class keeps that information inside the measurement.
+
+It is also the honest encoding: two artifacts that both trap are not thereby in agreement about a *value*, but they do agree about something real, and one that traps while another returns a value genuinely disagree. Clustering handles that correctly only if `CRASH` is a class.
+
+### Scope — explicitly bounded
+
+- The census **sharpens the exploratory D only.** It is reported as exploratory, labeled as such, and never substituted for the preregistered endpoint.
+- **The frozen D keeps its definition and its quantum.** Per LN-1, per-probe disagreement is quantized to 1/*k* in accepted-artifact count. The census does not change *k* and therefore does not refine that quantum.
+- **The frozen quantum waits on sample-to-quota.** Refining it requires raising *n* to a quota, which is a frozen row in §7 and a **v1.1 candidate by supersession only**, after the pilot completes as frozen.
+
+The census is a lens on data already collected. It is not a second experiment and produces no preregistered claim.
+
+---
+
+## Canary — sealed derivation procedure
+
+**Purpose.** A canary is a pre-committed random assignment whose mapping is provably fixed before the experiment can interact with the thing it marks. Its value is entirely in the *ordering*: a canary constructed after results exist proves nothing, because it could have been chosen to fit them.
+
+> **Scope note, stated honestly.** "Canary" and "twin" enter this project through the outside review and have no prior definition in `SPEC.md`, `PREREG.md`, or the seat board. The constraints below are as specified by the review and are unambiguous. The *purpose* sentence above is this seat's reading and is flagged as such — if the reviewer intended a different function, the mechanics still hold and only the framing needs correcting.
+
+### What is sealed
+
+All four artifacts are recorded, sealed, and OpenTimestamped **together, as one commitment**:
+
+1. **Derivation procedure** — the full written method by which the canary is produced, in enough detail that a third party can reproduce it from the seed alone.
+2. **Seed** — the specific value the draw consumes.
+3. **Algorithm** — the exact deterministic function applied to the seed (named, versioned, no "a PRNG").
+4. **Mapping** — what the drawn values are assigned *to*.
+
+### When it is sealed
+
+**The stamp is taken with the draw, before any arm touches the twin.** This is the load-bearing constraint and it is not negotiable after the fact: an OTS proof dated after an arm has run cannot establish that the mapping preceded the data, which is the only thing the canary is for. The proof attests the sealed bundle existed at a time provably earlier than any interaction with the twin.
+
+Sequence, in order, no step skippable:
+
+1. Draw is performed from the sealed seed via the sealed algorithm.
+2. Procedure, seed, algorithm, mapping, and the resulting draw are written into a single artifact.
+3. That artifact is OTS-stamped and the proof is committed.
+4. **Only then** may any arm touch the twin.
+
+### Seed separation — required
+
+**The draw seed is distinct from the probe seed.** They are separate secrets with separate derivations and are never derived from one another.
+
+This is not tidiness. The probe seed lives only on the Jetson at `~/ecs/.probe_seed` and is a single-device secret whose compromise is unrecoverable from the git record (PREREG §12.7). If the canary draw consumed that same seed, then a party who obtained the probe seed would also obtain the canary mapping, and a party who inferred the canary mapping would gain information about the probes. Separate seeds keep them **independent failure domains**: compromising one yields nothing about the other.
+
+It also keeps the two blindness properties independent. Probe blindness protects the generation prompts; the canary protects the ordering of an assignment. Deriving both from one secret would silently couple two guarantees the design deliberately keeps apart.
+
+### What this proves and does not prove
+
+**Proves:** the derivation procedure, seed, algorithm, mapping, and draw all existed at the attested time, and that time precedes any arm's interaction with the twin.
+
+**Does not prove:** that the draw was fair, that the seed was chosen without foreknowledge, or that no one held the mapping privately before stamping it. Like hash-and-seal (PREREG §12.4), this is a **procedural** guarantee about ordering. It is not an architectural guarantee about intent.
+
+---
+
 ## Standing consequences adopted from this review
 
-1. **"Locating, not sizing"** is the claim language for all n = 10 results (LN-1).
-2. **A passing calibration is a weak clearance**, recorded as necessary-not-sufficient (LN-2, S4).
-3. **A third local family and wider n are v1.1 candidates by supersession only**, after the pilot completes exactly as frozen. Neither is an in-flight amendment.
-4. Seal hashes are **OpenTimestamped going forward**, so seal ordering is provable against an external chain rather than only against the seat board.
-5. Verbatim board excerpts are preserved under `evidence/`, so the correspondence that produced these decisions is auditable without a live chronicle.
+1. **"Locating, not sizing"** is the claim language for all n = 10 results (LN-1). Effect sizes may be *reported* with intervals; they may not be *claimed* as measured magnitudes.
+2. **A passing calibration is a weak clearance**, recorded as necessary-not-sufficient (LN-2, S4). A failing calibration remains a hard halt.
+3. **Every reported D carries its cell's budget-only rejection count** (LN-3), so the one inflationary term in the gate chain is bounded by a number rather than by an argument.
+4. **All headline D values are read as conservative** — two independent deflationary pressures act on the same endpoint (LN-2 shared priors, LN-3 behavior-correlated gates).
+5. **The post-arm census is exploratory and labeled as such.** It sharpens the exploratory D only, never substitutes for the preregistered endpoint, and does not refine the frozen 1/*k* quantum — that waits on sample-to-quota.
+6. **Canary draws seal procedure, seed, algorithm, and mapping together, OTS-stamped with the draw, before any arm touches the twin.** The draw seed is distinct from the probe seed, keeping the two secrets in independent failure domains.
+7. **A third local family, wider n, and a nonce-parameterized calibration kernel are v1.1 candidates by supersession only**, after the pilot completes exactly as frozen. None is an in-flight amendment.
+8. Seal hashes are **OpenTimestamped at seal time, before reveal** — the proof attests existence without disclosing content.
+9. Verbatim board excerpts are preserved under `evidence/board_excerpts/` with a per-file hash manifest, so the correspondence is auditable without a live chronicle.
 
 ---
 
