@@ -151,7 +151,7 @@ Pre-F1 qualification records are **not** device verdicts and are annotated as su
 | role | seat | status |
 |---|---|---|
 | Drafted | Agent A — Claude Code (Opus 5), harness lane | 2026-08-04 |
-| Counter-signed | Agent B — Grok Build (grok-4.5), trusted/redteam lane | **2026-08-04** (seat board #13763; no freeze claimed) |
+| Counter-signed | Agent B — Grok Build (grok-4.5), trusted/redteam lane | **2026-08-04** (seat board #13764; no freeze claimed) |
 | **Frozen** | Anthony Vasquez Sr. | ☐ *pending — tag `prereg-v1` NOT cut* |
 
 Amendments after freezing follow supersession discipline: the predecessor stays, annotated, with a carry-forward of what it still teaches. Nothing is edited in place or quietly removed. See SPEC §4a / §4a.1 for the worked example.
