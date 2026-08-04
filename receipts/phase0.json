@@ -1,0 +1,119 @@
+{
+ "phase": "P0",
+ "spec": "ECS Build Spec v1",
+ "generated_utc": "2026-08-04T17:58:35Z",
+ "host": {
+  "hostname": "tony-jetson",
+  "arch": "aarch64",
+  "kernel": "5.15.148-tegra",
+  "l4t": "# R36 (release), REVISION: 4.7, GCID: 42132812, BOARD: generic, EABI: aarch64, DATE: Thu Sep 18 22:54:44 UTC 2025",
+  "mem_total_mb": 7619
+ },
+ "device_state": {
+  "nvpmodel_q": "NV Power Mode: MAXN_SUPER 2",
+  "power_mode_table": "0=15W 1=25W 2=MAXN_SUPER 3=7W",
+  "mode_used": 2,
+  "jetson_clocks_applied": true,
+  "governor": "schedutil",
+  "core": 3,
+  "cur_freq_khz": "1728000",
+  "timing_source": "clock",
+  "timing_reason": "perf not installed; SPEC section 4 fallback"
+ },
+ "toolchain": {
+  "gcc": "gcc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+  "flags_measure": "-std=c11 -O3 -mcpu=native -Wall -Wextra"
+ },
+ "baseline_crc32": {
+  "median_ns": 59296.0,
+  "mad_ns": 0.0,
+  "spread_pct": 0.0,
+  "batches": 10,
+  "warmup": 200,
+  "measured": 1000,
+  "stability_gate_2pct": true,
+  "check_value": "0xCBF43926 verified"
+ },
+ "generators": [
+  {
+   "id": "G3",
+   "model": "qwen2.5-coder:3b",
+   "digest": "f72c60cabf62",
+   "params": "3.1B",
+   "quant": "Q4_K_M",
+   "ctx_max": 32768,
+   "num_ctx_used": 4096,
+   "license": "Qwen Research (non-commercial)",
+   "resident_mb": 2280,
+   "memfree_needed_mb": 3600
+  },
+  {
+   "id": "G4",
+   "model": "granite4:micro",
+   "digest": "89962fcc7523",
+   "params": "3.4B",
+   "quant": "Q4_K_M",
+   "ctx_max": 131072,
+   "num_ctx_used": 4096,
+   "license": "Apache-2.0",
+   "resident_mb": 2586,
+   "memfree_needed_mb": 5100
+  }
+ ],
+ "ollama": {
+  "version": "ollama version is 0.24.0",
+  "bind": "127.0.0.1:11434"
+ },
+ "smoke_tests": [
+  {
+   "model": "qwen2.5-coder:3b",
+   "barrier": {
+    "evict_ms": 5,
+    "ps_empty": true,
+    "reclaim_ms": 6317,
+    "reclaimed": true,
+    "need_mb": 3600,
+    "memfree_before_load_mb": 5319,
+    "memavailable_mb": 6787,
+    "barrier_ok": true
+   },
+   "generated": true,
+   "error": null,
+   "infra_fault": false,
+   "gen_ms": 9789,
+   "resident_mb": 2280,
+   "chars": 300,
+   "has_signature": true,
+   "emits_markdown_fence": true,
+   "sha256": "e95509267aec1917"
+  },
+  {
+   "model": "granite4:micro",
+   "barrier": {
+    "evict_ms": 507,
+    "ps_empty": true,
+    "reclaim_ms": 7392,
+    "reclaimed": true,
+    "need_mb": 5100,
+    "memfree_before_load_mb": 5877,
+    "memavailable_mb": 6776,
+    "barrier_ok": true
+   },
+   "generated": true,
+   "error": null,
+   "infra_fault": false,
+   "gen_ms": 9716,
+   "resident_mb": 2586,
+   "chars": 266,
+   "has_signature": true,
+   "emits_markdown_fence": true,
+   "sha256": "28017cd227842300"
+  }
+ ],
+ "sudo_invocations": [
+  "nvpmodel -m 0 (OPERATOR ERROR: that is 15W not max; reverted)",
+  "nvpmodel -m 2 (MAXN_SUPER)",
+  "jetson_clocks",
+  "nvpmodel -q"
+ ]
+}
