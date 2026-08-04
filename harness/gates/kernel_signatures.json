@@ -1,0 +1,62 @@
+{
+  "_comment": "SINGLE SOURCE for kernel C signatures, consumed by vector_check.py to generate a driver per kernel. Adding a kernel means adding an entry here, not writing a new driver. Buffers are initialised from a byte-hex blob via memcpy so element width and signedness are handled uniformly and host byte order is used consistently on both sides of every comparison.",
+  "_dir": "in = read-only input buffer; out = buffer the kernel writes and the vector pins; scalar return is compared directly.",
+  "_hex": "field name in the vector record holding this buffer's bytes, little-endian host order for multi-byte element types.",
+
+  "crc32": {
+    "signature": "uint32_t crc32(const uint8_t *data, size_t n)",
+    "returns": "uint32_t",
+    "params": [
+      {"name": "data", "dir": "in", "ctype": "uint8_t", "hex": "input_hex"}
+    ],
+    "trailing_n": true,
+    "expect": {"kind": "scalar", "field": "expected"}
+  },
+
+  "sat_add_u8": {
+    "signature": "void sat_add_u8(const uint8_t *a, const uint8_t *b, uint8_t *out, size_t n)",
+    "returns": "void",
+    "params": [
+      {"name": "a", "dir": "in", "ctype": "uint8_t", "hex": "a_hex"},
+      {"name": "b", "dir": "in", "ctype": "uint8_t", "hex": "b_hex"},
+      {"name": "out", "dir": "out", "ctype": "uint8_t", "elems": 256}
+    ],
+    "trailing_n": true,
+    "expect": {"kind": "buffer", "param": "out", "hex": "expected_hex"}
+  },
+
+  "fir_q15": {
+    "signature": "void fir_q15(const int16_t x[256], const int16_t h[16], int16_t y[256])",
+    "returns": "void",
+    "params": [
+      {"name": "x", "dir": "in", "ctype": "int16_t", "elems": 256, "hex": "x_hex"},
+      {"name": "h", "dir": "in", "ctype": "int16_t", "elems": 16, "hex": "h_hex"},
+      {"name": "y", "dir": "out", "ctype": "int16_t", "elems": 256}
+    ],
+    "trailing_n": false,
+    "expect": {"kind": "buffer", "param": "y", "hex": "y_hex"}
+  },
+
+  "matmul8_i32": {
+    "signature": "void matmul8_i32(const int32_t a[64], const int32_t b[64], int32_t c[64])",
+    "returns": "void",
+    "params": [
+      {"name": "a", "dir": "in", "ctype": "int32_t", "elems": 64, "hex": "a_hex"},
+      {"name": "b", "dir": "in", "ctype": "int32_t", "elems": 64, "hex": "b_hex"},
+      {"name": "c", "dir": "out", "ctype": "int32_t", "elems": 64}
+    ],
+    "trailing_n": false,
+    "expect": {"kind": "buffer", "param": "c", "hex": "c_hex"}
+  },
+
+  "median3x3_u8": {
+    "signature": "void median3x3_u8(const uint8_t in[16*16], uint8_t out[14*14])",
+    "returns": "void",
+    "params": [
+      {"name": "in", "dir": "in", "ctype": "uint8_t", "elems": 256, "hex": "in_hex"},
+      {"name": "out", "dir": "out", "ctype": "uint8_t", "elems": 196}
+    ],
+    "trailing_n": false,
+    "expect": {"kind": "buffer", "param": "out", "hex": "out_hex"}
+  }
+}
