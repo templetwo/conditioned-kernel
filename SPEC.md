@@ -122,6 +122,12 @@ Notes:
 
 ## 4a. Generator eviction barrier (load-bearing, not hygiene)
 
+> **Status: authored 2026-08-04 (pre-bring-up). Superseded *in part* by §4a.1 after P0 measurement.**
+> The text below is preserved verbatim as written, not rewritten. Two clauses are wrong and are
+> marked inline with ⚠︎; everything else was confirmed by measurement and still governs. Read §4a
+> for the reasoning and §4a.1 for the operative mechanism. Nothing here is deleted, because the
+> shape of the original error is part of what the receipt teaches.
+
 Prior ground truth from this repo, on this device, with a receipt (chronicle #9938, supersedes #9934): `granite4:350m` — 708 MB on an 8 GB board — was disqualified from the model gate with `cudaMalloc failed: out of memory / unable to allocate CUDA0 buffer`. It had been loaded immediately after `gemma3:4b` (3.34 GB). It never ran. The disqualification said nothing about granite; it recorded a failure to allocate into memory the previous model had not yet released.
 
 Mechanism: `keep_alive: 0` **returns immediately, but ollama's VRAM release is asynchronous** and runner teardown lags behind it. On the Orin Nano's shared, fragmenting 8 GB unified memory, a load following a heavy model can OOM with nominal free RAM available. Static footprint arithmetic (1.9 GB + 2.1 GB < 5.2 GB) is necessary and **not sufficient**, because the failure is transitional, not steady-state.
@@ -132,8 +138,11 @@ This is load-bearing for ECS specifically: the runner alternates G3 and G4 acros
 
 1. Issue `keep_alive: 0` on the outgoing model.
 2. Poll `/api/ps` until it reports empty, **and** poll free memory until it exceeds `incoming_model_size + headroom`. Both conditions, with a timeout.
+   - ⚠︎ **"free memory" is ambiguous and was implemented as `MemAvailable`. Wrong — see §4a.1.**
+   - ⚠︎ **`incoming_model_size` is the wrong quantity. Wrong — see §4a.1.**
 3. Short settle sleep for the fragmenting unified memory.
 4. Only then load the incoming model.
+   - ⚠︎ **Omission: this list never said what happens when the conditions are *not* met. That silence is what let a barrier proceed on a missed target. See §4a.1 rule 4.**
 
 A bounded retry is acceptable as a *second* layer, never the first — a retry loads into the same still-occupied memory and crashes again. Retry treats the symptom.
 
@@ -144,6 +153,52 @@ A bounded retry is acceptable as a *second* layer, never the first — a retry l
 - If infra retries exceed a threshold for any generator in an arm, that arm is rerun, not adjusted.
 
 **Simplest mitigation, and the default:** batch by generator rather than interleaving. Run all of G3's samples, evict once with verification, then run all of G4's. This reduces model transitions from O(samples) to O(1) per arm. Interleaving is only permitted with the full barrier in place and the receipt fields populated.
+
+---
+
+## 4a.1 Supersession of §4a, on measurement (2026-08-04, post-P0)
+
+Authority: `receipts/phase0.json` (sha256 `a234c6e9cca2073b2c3a144eb9f212b1712bc0e1d917c065716faccd89d44b65`, identical on repo and device), chronicle #13706, Agent B verification #13712, reservations closed in #13720. Amends §4a; does not replace it.
+
+### What the original got right, and which measurement strengthened
+
+Carried forward unchanged, because it survived contact with the device:
+
+- **Static footprint arithmetic is necessary and not sufficient.** Confirmed, and more sharply than §4a claimed: a 1.9 GB model failed to load on a board reporting 6.7 GB available.
+- **The failure is transitional, not steady-state.** Confirmed.
+- **This is load-bearing for ECS because the runner alternates G3 and G4.** Confirmed.
+- **Retry is a second layer, never the first.** Confirmed. Retry-first was #9938's original wrong fix and remains wrong.
+- **Infrastructure faults are not candidate failures.** Confirmed, and now demonstrably load-bearing: violating this rule produced two false failures against `granite4:micro` during P0 — the same family and the same class of cause as #9934's original false disqualification of `granite4:350m`.
+- **Batch by generator as the default.** Confirmed.
+
+### What was wrong, and the measurement that shows it
+
+§4a attributed the OOM to asynchronous VRAM release after `keep_alive: 0`. That is directionally right and mechanistically incomplete. The full mechanism:
+
+**Ollama admits loads on an availability figure that CUDA cannot honor on Tegra.** The scheduler logged `available="5.8 GiB" free="6.3 GiB"` and admitted the load; `cudaMalloc` then failed. Actual state at that instant: `MemFree` ≈ 1.8 GB, `MemAvailable` ≈ 6.7 GB, `Cached` ≈ 5.0 GB. Tegra's unified-memory allocation path does **not** trigger page-cache reclaim, so `MemAvailable` counts several GB that CUDA cannot obtain.
+
+Controlled demonstration, nothing else varied:
+
+| `MemFree` | Result for `qwen2.5-coder:3b` |
+|---|---|
+| ~1.8 GB | `cudaMalloc failed: out of memory`, repeatably |
+| ~4.3 GB (after forcing page-cache reclaim) | loads in 3.8 s, responds, 100% GPU |
+
+### Operative rules (these govern; §4a step 2 does not)
+
+1. **Poll `MemFree`, never `MemAvailable`.** Record **both** in every receipt so the gap stays visible rather than becoming folklore.
+2. **Thresholds are empirical per model, not derived from any size.** Transient allocation during load runs near 2× resident. Measured on this board: `qwen2.5-coder:3b` — 1.9 GB download, 2280 MB resident, **needs ~3600 MB free**; `granite4:micro` — 2.1 GB download, 2586 MB resident, **needs ~5100 MB free**. No published figure predicts these.
+3. **Reclaim page cache before the load.** Root-free method: fault in anonymous pages toward `MemAvailable − 500 MB`, then release; iterate toward target. `sync; echo 3 > /proc/sys/vm/drop_caches` is cleaner where root is available.
+4. **Fail closed.** `barrier_ok` gates the load. When false, the result is an **infrastructure fault** per §9: not scored, no sample consumed, no repair budget touched. A barrier that proceeds on a missed target is not a barrier — that defect is what produced the two false `granite4:micro` failures during P0.
+5. **Single source of truth.** Thresholds live in `harness/device/generators.json`. Any consumer — the runner, or a future `qualify_models.py` port — reads that file. Constants duplicated across scripts go stale silently and re-open the hole (Agent B reservation R2, #13712).
+
+### Receipt fields (extends §10 `load_context`)
+
+`evict_ms`, `ps_empty`, `reclaim_ms`, `reclaimed`, `need_mb`, `memfree_before_load_mb`, `memavailable_mb`, `barrier_ok`, `preceding_model`, `infra_retry_count`.
+
+### Why the original text is retained rather than corrected in place
+
+The house rule is supersession, not quiet fixing: the predecessor stays, annotated, with a carry-forward of what it still teaches. §4a is a worked example of a specific and repeatable error — reasoning correctly about a mechanism from a real receipt, then implementing the mitigation against the most convenient metric rather than the correct one. The word "free" did the damage. Deleting the original would erase the evidence that the mistake is easy to make, and the next reader would lose the one thing most likely to save them.
 
 ---
 
