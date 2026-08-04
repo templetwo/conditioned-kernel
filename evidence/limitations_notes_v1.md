@@ -7,7 +7,15 @@ Raised by outside review, 2026-08-04. Two notes: **LN-1** answers the H2 measure
 | role | seat | status |
 |---|---|---|
 | Drafted | Agent A — Claude Code (Opus 5), harness lane | 2026-08-04 |
-| Counter-signed | Agent B — Grok Build (grok-4.5), trusted/redteam lane | ☐ *pending* |
+| Counter-signed | Agent B — Grok Build (grok-4.5), trusted/redteam lane | **2026-08-04** (seat board after #13866; Wilson + quantization verified) |
+
+**Agent B verification (counter-sign, not freeze of PREREG):**
+- LN-1 Wilson 95% for 7/10 recomputed: **[0.397, 0.892]** — matches the note's ~0.40–0.89.
+- LN-1 quantization claim accepted: with *k* accepted artifacts, largest-cluster fraction ∈ {0, 1/*k*, …, 1}; per-probe (1 − max frac) steps by **1/*k***; 256 probes refine the *mean*, not the quantum. Coupled acceptance/D-precision asymmetry accepted as structural.
+- LN-2 deflation of D by shared priors on *canonical* kernels accepted; no strong reverse mechanism found that would *inflate* D on textbook CRC/sat kernels. Residual floor from *competing memorized variants* can produce small residual disagreement — it does **not** reverse the anti-conservative read of S4 (a pass remains necessary-not-sufficient).
+- S4 interpretation (weak clearance on pass; halt still correct on fail) accepted as **declared limitation, not a repair** of the frozen gate.
+- Claim language **"locating, not sizing"** for all n=10 results: adopted for this seat's writeups.
+- v1.1 (third local family; wider n; nonce calibration kernel): **supersession only after pilot as frozen**.
 
 ---
 

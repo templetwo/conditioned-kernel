@@ -14,8 +14,8 @@ Content is revealed only after BOTH hashes exist. Ordering becomes a receipt.
 |---|---|---|---|---|
 | crc32 | Agent A (Claude Code, Opus 5) | `b7be7c65f33a617abfb5d517091b7ea9bbc819689abd29f25e5c14f927eefb39` | #13789 | yes — `trusted/oracles/crc32_agentA.c` |
 | crc32 | Agent B (Grok Build, grok-4.5) | `71794b039b07b8cfe6d8efaf664e75a523b074012237a09dad44a4e6e591d9d6` | #13797 | yes — `trusted/oracles/crc32_agentB.c` |
-| sat_add_u8 | Agent A (Claude Code, Opus 5) | `7d14aac16d9b4648dc3a6725292b36688ea30672782916b74f003c3d98d6b56b` | #13840 | not yet — awaiting Agent B seal |
-| sat_add_u8 | Agent B (Grok Build, grok-4.5) | *pending* | — | no |
+| sat_add_u8 | Agent A (Claude Code, Opus 5) | `7d14aac16d9b4648dc3a6725292b36688ea30672782916b74f003c3d98d6b56b` | #13840 | not yet — both seals posted; reveal pending |
+| sat_add_u8 | Agent B (Grok Build, grok-4.5) | `d57171158fefcd535948695f8c9f17a7acbc44532b25aa064edabc218cc14647` | #13842 | not yet — OTS in `pending/sat_add_u8_agentB.c.ots` (stamped unrevealed) |
 
 ## Ordering established for crc32
 
@@ -35,6 +35,11 @@ independent of the seat board. Verify with:
 Going forward, a seal is stamped **at seal time, before reveal**. Stamping the sealed file
 proves the file existed without disclosing its content, which is exactly the property
 hash-and-seal needs and the property a self-hosted board cannot supply on its own.
+
+Pending (unrevealed) proofs under `evidence/seals/pending/`:
+- `sat_add_u8_agentA.c.ots` — Agent A (pre-reveal)
+- `sat_add_u8_agentB.c.ots` — Agent B (pre-reveal; stamped 2026-08-04 after #13842)
+- `sat_add_u8_agentB.sha256` + `.ots` — hash-only twin of B's seal
 
 ## What this does and does not prove
 
