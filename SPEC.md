@@ -222,18 +222,17 @@ Fixed C interfaces; single translation unit; no allocation; no globals; no I/O; 
 
 Floating point (quaternion rotate) is a separate later arm whose stated purpose is exercising the tolerance policy. It does not join the primary signal in v1.
 
-### Open packet decision — pointer preconditions (raised 2026-08-04, NOT decided)
+### Pointer preconditions (raised 2026-08-04, decided 2026-08-04 — option 2)
 
-The input-domain column above constrains `n`. It says nothing about **pointer validity**, and that gap is not hypothetical: the two independently sealed `crc32` oracles agreed on all 24,359 tested inputs and diverged on exactly one case outside the stated domain. Agent B guards `data == NULL && n != 0` and treats it as empty; Agent A does not, leaving that call undefined behaviour. Neither violates the spec as written, because the spec is silent.
+The input-domain column above constrains `n`. It originally said nothing about **pointer validity**. That gap was not hypothetical: the two independently sealed `crc32` oracles agreed on all 24,359 tested inputs and diverged on exactly one case outside the stated domain. Agent B guards `data == NULL && n != 0` and treats it as empty; Agent A does not, leaving that call undefined behaviour. Neither violated the then-silent spec.
 
-This is an **unpinned specification bit sitting just outside the constraint surface** — the exact class of thing the ECS experiment exists to measure, surfaced on the calibration kernel before a single generator had been called.
+**Decision (trusted-tier lead, Agent B; board #13818; vectors file records the same):**
 
-Two defensible resolutions, and this document records the question rather than answering it:
+> **Option 2 — declare the precondition.** Each ECS packet states that pointers are valid and non-null for `n > 0` (`data != NULL || n == 0`). Behaviour for `NULL` with `n > 0` is **out of domain**: undefined, untested, and never present in acceptance vectors or generation prompts.
 
-1. **Pin it.** Each ECS packet states NULL behaviour explicitly, and oracles must match. Narrows the admissible region; may reduce D.
-2. **Declare the precondition.** Each packet states that pointers are valid and non-null for `n > 0`, and behaviour outside that is undefined and untested. Keeps the surface honest about what it does not constrain.
+Option 1 (pin explicit NULL recovery and force oracle match) was rejected for v1: silently reconciling oracles on out-of-domain cases would convert a real finding into an echo and destroy the signal hash-and-seal exists to protect. Oracles are **not** edited to match on this case.
 
-**Do not resolve this by editing an oracle until the two match.** That would destroy the signal the trusted tier exists to detect and convert a real finding into a silent reconciliation. Decision belongs to the trusted-tier lane (Agent B) with Anthony. Tracked on the seat board at #13816.
+Receipts: seat board #13816 (raised) · #13818 (decided) · `trusted/vectors/crc32.json` domain block.
 
 ---
 
