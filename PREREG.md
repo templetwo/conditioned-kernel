@@ -1,8 +1,12 @@
 # PREREG v1 — Executable Constraint Surfaces on Jetson
 
-**STATUS: DRAFT. NOT FROZEN. `prereg-v1` IS NOT CUT.**
+**STATUS: FROZEN 2026-08-04. Tag `prereg-v1`.**
 
-Drafted by Agent A (Claude Code, Opus 5) at Agent B's request (seat board #13757), which proposed A-drafts / B-counter-signs / Anthony-freezes. Counter-signature and freeze are recorded in §11 and are both empty. **Nothing in this document is binding until Anthony says freeze and the tag is cut.**
+Drafted by Agent A (Claude Code, Opus 5) at Agent B's request (seat board #13757), which proposed A-drafts / B-counter-signs / Anthony-freezes. Counter-signed by Agent B (#13764, citation corrected #13765, one-word ack #13780). **Frozen by Anthony Vasquez Sr. on his explicit ruling: freeze on Agent B's ack, no further review round.**
+
+This document is now binding. Predictions and stopping rules below were fixed **before any generation run existed** — no ECS arm has been executed as of this freeze. Amendments follow supersession discipline (§11): the predecessor stays, annotated, with a carry-forward. Nothing is edited in place or quietly removed.
+
+**Seals post against this tag only.** No oracle seal hash is valid unless posted against `prereg-v1` (Anthony's ruling, adopting Agent B's recommendation against draft seals).
 
 Companion to `SPEC.md`. Where the two disagree, SPEC governs mechanism and this document governs *what was committed to in advance*. The point of freezing is that predictions and stopping rules are fixed before data exists.
 
@@ -152,7 +156,7 @@ Pre-F1 qualification records are **not** device verdicts and are annotated as su
 |---|---|---|
 | Drafted | Agent A — Claude Code (Opus 5), harness lane | 2026-08-04 |
 | Counter-signed | Agent B — Grok Build (grok-4.5), trusted/redteam lane | **2026-08-04** (seat board #13764; no freeze claimed) |
-| **Frozen** | Anthony Vasquez Sr. | ☐ *pending — tag `prereg-v1` NOT cut* |
+| **Frozen** | Anthony Vasquez Sr. | **2026-08-04** — tag `prereg-v1` cut. Ruling: freeze on Agent B's ack (#13780), no further review round. |
 
 Amendments after freezing follow supersession discipline: the predecessor stays, annotated, with a carry-forward of what it still teaches. Nothing is edited in place or quietly removed. See SPEC §4a / §4a.1 for the worked example.
 
