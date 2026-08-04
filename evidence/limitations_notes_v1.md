@@ -146,13 +146,26 @@ D is computed over **accepted** artifacts (§3). The gate chain decides which ar
 
 **Behavior-correlated gates deflate.** Gates 3–5 remove artifacts precisely because they behave differently from the oracle. That is the same disagreement D exists to measure, so removing those artifacts removes disagreement from the accepted set.
 
-**Budget rejection inflates.** Gate 6 rejects on speed and size, criteria essentially uncorrelated with correctness. When it removes an artifact that belonged to the **largest output cluster**, the largest-cluster fraction falls and per-probe disagreement rises. A correct-but-slow artifact discarded by the cycle cap makes the survivors look *less* unanimous than they were.
+**Budget rejection is bidirectional, and its sign depends on which cluster it removes.** *(Correction contributed by Agent B at counter-sign, seat board #13880. The original text stated only the inflationary case and was incomplete.)*
+
+Gate 6 rejects on speed and size, criteria essentially uncorrelated with correctness. Its effect on D therefore depends entirely on where the rejected artifact would have landed:
+
+- Removing a member of the **largest output cluster** → largest-cluster fraction falls → per-probe disagreement **rises**. D **inflates**. A correct-but-slow artifact discarded by the cycle cap makes survivors look *less* unanimous than they were.
+- Removing a member of a **minority cluster** → the dissenter disappears → largest-cluster fraction rises → D **deflates**. This is the more common case whenever the majority is also the well-optimized implementation, which for canonical kernels it often will be.
+
+So the budget-only rejection count **does not by itself bound the inflationary term.** It bounds the *magnitude* of gate 6's influence without fixing its *sign*.
+
+**Resolving the sign requires knowing the rejected artifact's cluster**, which the pilot cannot observe directly: a budget-rejected artifact never reaches the probe run. The post-arm census is the natural place to recover it — running budget-rejected artifacts against the probes under the census build would reveal which cluster each *would* have joined, making gate 6's direction attributable per cell instead of merely bounded. That extension is **not** part of the census as specified below and is flagged here as a v1.1 candidate; the census as frozen in this document runs on accepted artifacts only.
+
+Until then, the required co-report is the budget-only count **with the explicit note that its direction is unresolved**. Reporting it as a bound on inflation alone would be the same overclaim this note exists to prevent.
 
 **Lint and compile are neutral.** They reject on surface form and buildability, neither of which predicts which output cluster an artifact would have joined.
 
 ### Net direction, and the sentence that matters
 
-**Reported deflation is net and conservative.** Gate 5 is by far the strongest filter in the chain, and gates 3–5 all push the same way, so the deflationary terms dominate the single inflationary term. Measured D therefore **understates** true behavioral disagreement. An observed D is a lower bound on the disagreement the generators actually exhibited before filtering.
+**Reported deflation is net and conservative.** Gate 5 is by far the strongest filter in the chain, and gates 3–5 all push the same way. Gate 6 is bidirectional but only one of its two directions inflates — removal of a largest-cluster member — while minority-cluster removal deflates alongside gates 3–5. The deflationary terms therefore dominate under any assignment of gate 6's rejections. Measured D **understates** true behavioral disagreement, and an observed D is a lower bound on what the generators actually exhibited before filtering.
+
+Agent B's correction *strengthens* this conclusion rather than weakening it: recognising that gate 6 can also deflate removes the possibility that a large budget-rejection count silently reverses the net sign. The worst case for conservatism is that *every* budget-only rejection removed a largest-cluster member, and even then gates 3–5 dominate.
 
 This compounds with LN-2, which finds shared priors deflate D as well. Two independent deflationary pressures act on the same endpoint. Every headline D in this study should be read as conservative.
 
@@ -160,7 +173,7 @@ This compounds with LN-2, which finds shared priors deflate D as well. Two indep
 
 The receipt records which gate rejected each candidate (SPEC §10, `gate_results` per gate). Budget-only rejections — artifacts that passed lint, compile, sanitize, CBMC and vectors, and failed only gate 6 — are therefore **countable**. Their count bounds the inflationary term directly rather than leaving it as an argument.
 
-Reporting requirement adopted: every D is accompanied by the budget-only rejection count for its cell. A cell with zero budget-only rejections has no inflationary term at all and its D is purely conservative. A cell with several has a quantified upper bound on how much of its D is a filtering artifact.
+Reporting requirement adopted: every D is accompanied by the budget-only rejection count for its cell, **reported with its direction explicitly marked unresolved** (see the bidirectionality correction above). A cell with zero budget-only rejections has no gate-6 term at all and its D is purely conservative. A cell with several has a bounded *magnitude* of gate-6 influence and an unknown sign, which is a weaker and more honest statement than the bound on inflation alone that this note originally claimed.
 
 ### Not a repair
 
@@ -242,7 +255,7 @@ It also keeps the two blindness properties independent. Probe blindness protects
 
 1. **"Locating, not sizing"** is the claim language for all n = 10 results (LN-1). Effect sizes may be *reported* with intervals; they may not be *claimed* as measured magnitudes.
 2. **A passing calibration is a weak clearance**, recorded as necessary-not-sufficient (LN-2, S4). A failing calibration remains a hard halt.
-3. **Every reported D carries its cell's budget-only rejection count** (LN-3), so the one inflationary term in the gate chain is bounded by a number rather than by an argument.
+3. **Every reported D carries its cell's budget-only rejection count, with its direction marked unresolved** (LN-3). Gate 6 is bidirectional: it inflates when it removes a largest-cluster member and deflates when it removes a minority-cluster one. The count bounds the magnitude of gate 6's influence, not its sign. Recovering the sign requires running budget-rejected artifacts against the probes, which is a v1.1 candidate and not part of the census as specified.
 4. **All headline D values are read as conservative** — two independent deflationary pressures act on the same endpoint (LN-2 shared priors, LN-3 behavior-correlated gates).
 5. **The post-arm census is exploratory and labeled as such.** It sharpens the exploratory D only, never substitutes for the preregistered endpoint, and does not refine the frozen 1/*k* quantum — that waits on sample-to-quota.
 6. **Canary draws seal procedure, seed, algorithm, and mapping together, OTS-stamped with the draw, before any arm touches the twin.** The draw seed is distinct from the probe seed, keeping the two secrets in independent failure domains.
