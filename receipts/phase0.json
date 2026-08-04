@@ -115,5 +115,100 @@
   "nvpmodel -m 2 (MAXN_SUPER)",
   "jetson_clocks",
   "nvpmodel -q"
- ]
+ ],
+ "eviction_cycle": {
+  "spec": "4a",
+  "metric": "MemFree",
+  "sequence": [
+   "qwen2.5-coder:3b",
+   "granite4:micro",
+   "qwen2.5-coder:3b"
+  ],
+  "threshold_source": "generators.json",
+  "transitions": [
+   {
+    "step": 0,
+    "model": "qwen2.5-coder:3b",
+    "preceding_model": null,
+    "barrier": {
+     "evict_ms": 511,
+     "ps_empty": true,
+     "reclaim_ms": 7198,
+     "reclaimed": true,
+     "need_mb": 3600,
+     "memfree_before_load_mb": 5817,
+     "memavailable_mb": 6786,
+     "barrier_ok": true
+    },
+    "loaded": true,
+    "infra_fault": false,
+    "resp": "ok",
+    "load_gen_ms": 3829,
+    "resident_mb": 2280
+   },
+   {
+    "step": 1,
+    "model": "granite4:micro",
+    "preceding_model": "qwen2.5-coder:3b",
+    "barrier": {
+     "evict_ms": 506,
+     "ps_empty": true,
+     "reclaim_ms": 7079,
+     "reclaimed": true,
+     "need_mb": 5100,
+     "memfree_before_load_mb": 6261,
+     "memavailable_mb": 6795,
+     "barrier_ok": true
+    },
+    "loaded": true,
+    "infra_fault": false,
+    "resp": "OK",
+    "load_gen_ms": 4233,
+    "resident_mb": 2586
+   },
+   {
+    "step": 2,
+    "model": "qwen2.5-coder:3b",
+    "preceding_model": "granite4:micro",
+    "barrier": {
+     "evict_ms": 507,
+     "ps_empty": true,
+     "reclaim_ms": 0,
+     "reclaimed": false,
+     "need_mb": 3600,
+     "memfree_before_load_mb": 4179,
+     "memavailable_mb": 6786,
+     "barrier_ok": true
+    },
+    "loaded": true,
+    "infra_fault": false,
+    "resp": "ok",
+    "load_gen_ms": 4032,
+    "resident_mb": 2280
+   }
+  ],
+  "oom_count": 0,
+  "infra_faults": 0,
+  "all_loaded": true
+ },
+ "threshold_source": "harness/device/generators.json (single source; Grok R2 #13712)",
+ "p0_definition_of_done": {
+  "ssh_alias": true,
+  "clocks_pinned_and_reported": true,
+  "crc32_10x_median_spread_within_2pct": true,
+  "generators_pulled_with_provenance": true,
+  "gpu_offload_confirmed": true,
+  "syntactic_smoke_test_each": true,
+  "eviction_cycle_G3_G4_G3_zero_oom": true,
+  "closes_grok_R1": true
+ },
+ "verification": {
+  "agent_b_letter": "#13712",
+  "reservations_addressed": [
+   "R1 eviction cycle now embedded",
+   "R2 thresholds single-sourced from generators.json"
+  ],
+  "R3_note": "Agent B audited artifacts and device identity; did not re-measure independently. Stated honestly by B."
+ },
+ "updated_utc": "2026-08-04T18:09:24Z"
 }

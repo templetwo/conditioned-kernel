@@ -1,0 +1,10 @@
+{
+  "_comment": "SINGLE SOURCE OF TRUTH for generator memory thresholds. Measured empirically at P0 on tony-jetson (Orin Nano 8GB, L4T R36.4.7, ollama 0.24.0). Both eviction_barrier.py and any future qualify_models.py port MUST read this file rather than hardcoding constants. Re-measure if quantization, ollama version, or driver changes. Grok reservation R2, #13712.",
+  "measured_on": {"host": "tony-jetson", "date": "2026-08-04", "ollama": "0.24.0", "l4t": "R36.4.7"},
+  "metric": "MemFree",
+  "metric_note": "MemAvailable is NOT usable for CUDA admission on Tegra. See #13706.",
+  "generators": {
+    "qwen2.5-coder:3b": {"id": "G3", "digest": "f72c60cabf62", "download_mb": 1900, "resident_mb": 2280, "memfree_needed_mb": 3600, "num_ctx": 4096, "license": "Qwen Research (non-commercial)"},
+    "granite4:micro":   {"id": "G4", "digest": "89962fcc7523", "download_mb": 2100, "resident_mb": 2586, "memfree_needed_mb": 5100, "num_ctx": 4096, "license": "Apache-2.0"}
+  }
+}

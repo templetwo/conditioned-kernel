@@ -1,59 +1,108 @@
-import json, time, mmap, urllib.request
-API="http://127.0.0.1:11434"
-def meminfo(k):
-    for l in open('/proc/meminfo'):
-        if l.startswith(k+':'): return int(l.split()[1])//1024
-def ps():
-    return json.loads(urllib.request.urlopen(API+"/api/ps",timeout=30).read()).get("models",[])
-def post(p,b,t=300):
-    r=urllib.request.Request(API+p,data=json.dumps(b).encode(),headers={"content-type":"application/json"})
-    return json.loads(urllib.request.urlopen(r,timeout=t).read())
-def reclaim(target_mb, cap_mb=4600):
-    """Force page-cache reclaim without root: fault in anonymous pages, then release."""
-    if meminfo('MemFree') >= target_mb: return 0, False
-    t0=time.time(); n=min(cap_mb, meminfo('MemAvailable')-400)
-    m=mmap.mmap(-1, n*1024*1024)
-    for off in range(0, n*1024*1024, 4096): m[off]=1
-    m.close()
-    return round((time.time()-t0)*1000), True
-def barrier(prev, need_mb):
-    """SPEC 4a corrected: evict, verify ps empty, verify MemFree (NOT MemAvailable), reclaim, settle."""
-    r={"evict_ms":0,"ps_empty":False,"reclaim_ms":0,"reclaimed":False}
-    t0=time.time()
-    if prev:
-        post("/api/generate",{"model":prev,"prompt":"","keep_alive":0,"stream":False})
-        while time.time()-t0<120:
-            if not ps(): r["ps_empty"]=True; break
-            time.sleep(0.5)
-    else: r["ps_empty"]=not ps()
-    r["evict_ms"]=round((time.time()-t0)*1000)
-    r["memfree_after_evict_mb"]=meminfo('MemFree')
-    r["reclaim_ms"], r["reclaimed"] = reclaim(need_mb)
-    time.sleep(1.5)
-    r["memfree_before_load_mb"]=meminfo('MemFree')
-    r["memavailable_mb"]=meminfo('MemAvailable')
-    r["barrier_ok"]= r["ps_empty"] and r["memfree_before_load_mb"]>=need_mb
-    return r
+#!/usr/bin/env python3
+"""ECS SPEC 4a - generator eviction barrier, corrected.
 
-G3,G4="qwen2.5-coder:3b","granite4:micro"
-NEED={G3:3200,G4:3400}   # resident size + headroom, NOT download size
-seq=[G3,G4,G3]
-out={"spec":"4a-corrected","metric":"MemFree","sequence":seq,"transitions":[],"oom":0}
-prev=None
-for i,m in enumerate(seq):
-    rec={"step":i,"model":m,"preceding_model":prev}
-    rec["barrier"]=barrier(prev, NEED[m])
-    t0=time.time()
-    try:
-        r=post("/api/generate",{"model":m,"prompt":"return the single word ok","stream":False,
-                                "keep_alive":"3m","options":{"num_ctx":4096,"num_predict":8}})
-        rec["ok"]=True; rec["resp"]=(r.get("response") or "").strip()[:20]
-    except Exception as e:
-        rec["ok"]=False; rec["error"]=str(e)[:120]
-        if "memory" in str(e).lower() or "terminated" in str(e).lower(): out["oom"]+=1
-    rec["load_gen_ms"]=round((time.time()-t0)*1000)
-    p=ps(); rec["resident_mb"]= round(p[0]["size"]/1048576) if p else None
-    out["transitions"].append(rec); prev=m
-out["all_ok"]=all(t.get("ok") for t in out["transitions"])
-out["oom_count"]=out["oom"]
-print(json.dumps(out,indent=1))
+Thresholds are read from generators.json (single source of truth). Do NOT
+hardcode NEED constants here: stale constants re-open the soft-barrier hole
+(Grok reservation R2, #13712).
+
+Mechanism (#13706): ollama admits loads on MemAvailable-style accounting that
+CUDA cannot honor on Tegra, because unified-memory allocation does not trigger
+page-cache reclaim. Poll MemFree, reclaim page cache, and FAIL CLOSED.
+"""
+import json, time, mmap, os, sys, urllib.request
+
+API = "http://127.0.0.1:11434"
+HERE = os.path.dirname(os.path.abspath(__file__))
+
+def load_table(path=None):
+    with open(path or os.path.join(HERE, "generators.json")) as f:
+        return json.load(f)["generators"]
+
+def meminfo(k):
+    for l in open("/proc/meminfo"):
+        if l.startswith(k + ":"):
+            return int(l.split()[1]) // 1024
+
+def ps():
+    return json.loads(urllib.request.urlopen(API + "/api/ps", timeout=30).read()).get("models", [])
+
+def post(p, b, t=300):
+    r = urllib.request.Request(API + p, data=json.dumps(b).encode(),
+                               headers={"content-type": "application/json"})
+    return json.loads(urllib.request.urlopen(r, timeout=t).read())
+
+def reclaim(target_mb, rounds=4):
+    """Evict page cache by faulting in anonymous pages, then releasing. No root needed."""
+    if meminfo("MemFree") >= target_mb:
+        return 0, False
+    t0, did = time.time(), False
+    for _ in range(rounds):
+        n = max(500, meminfo("MemAvailable") - 500)
+        try:
+            m = mmap.mmap(-1, n * 1024 * 1024)
+            for off in range(0, n * 1024 * 1024, 4096):
+                m[off] = 1
+            m.close()
+            did = True
+        except Exception:
+            pass
+        time.sleep(1.5)
+        if meminfo("MemFree") >= target_mb:
+            break
+    return round((time.time() - t0) * 1000), did
+
+def barrier(need_mb, settle_s=1.5):
+    """Evict all resident models, verify ps empty, reclaim to MemFree>=need, settle.
+
+    Returns a dict whose barrier_ok MUST gate the subsequent load. barrier_ok
+    False is an INFRASTRUCTURE FAULT per SPEC 9: not a candidate failure, no
+    sample consumed, no repair budget touched.
+    """
+    t0 = time.time()
+    for r in ps():
+        post("/api/generate", {"model": r["name"], "prompt": "", "keep_alive": 0, "stream": False})
+    while time.time() - t0 < 120 and ps():
+        time.sleep(0.5)
+    evict_ms = round((time.time() - t0) * 1000)
+    reclaim_ms, reclaimed = reclaim(need_mb)
+    time.sleep(settle_s)
+    mf, empty = meminfo("MemFree"), not ps()
+    return {"evict_ms": evict_ms, "ps_empty": empty, "reclaim_ms": reclaim_ms,
+            "reclaimed": reclaimed, "need_mb": need_mb, "memfree_before_load_mb": mf,
+            "memavailable_mb": meminfo("MemAvailable"), "barrier_ok": empty and mf >= need_mb}
+
+def run_cycle(seq, table, prompt="return the single word ok"):
+    out = {"spec": "4a", "metric": "MemFree", "sequence": seq,
+           "threshold_source": "generators.json", "transitions": [], "oom_count": 0,
+           "infra_faults": 0}
+    prev = None
+    for i, m in enumerate(seq):
+        need = table[m]["memfree_needed_mb"]
+        rec = {"step": i, "model": m, "preceding_model": prev, "barrier": barrier(need)}
+        if not rec["barrier"]["barrier_ok"]:
+            rec.update(loaded=None, infra_fault=True,
+                       note="BARRIER FAILED CLOSED - infra fault, not a candidate failure, not scored")
+            out["infra_faults"] += 1
+            out["transitions"].append(rec); prev = m; continue
+        t0 = time.time()
+        try:
+            r = post("/api/generate", {"model": m, "prompt": prompt, "stream": False,
+                                       "keep_alive": "3m",
+                                       "options": {"num_ctx": table[m]["num_ctx"], "num_predict": 8}})
+            rec.update(loaded=True, infra_fault=False, resp=(r.get("response") or "").strip()[:24])
+        except Exception as e:
+            rec.update(loaded=False, infra_fault=True, error=str(e)[:160])
+            out["infra_faults"] += 1
+            if "memory" in str(e).lower() or "terminated" in str(e).lower():
+                out["oom_count"] += 1
+        rec["load_gen_ms"] = round((time.time() - t0) * 1000)
+        p = ps()
+        rec["resident_mb"] = round(p[0]["size"] / 1048576) if p else None
+        out["transitions"].append(rec); prev = m
+    out["all_loaded"] = all(t.get("loaded") for t in out["transitions"])
+    return out
+
+if __name__ == "__main__":
+    table = load_table()
+    seq = sys.argv[1:] or ["qwen2.5-coder:3b", "granite4:micro", "qwen2.5-coder:3b"]
+    print(json.dumps(run_cycle(seq, table), indent=1))
