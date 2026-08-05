@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/templetwo/conditioned-kernel/ecs/schema/ecs.schema.json",
+  "title": "Executable Constraint Surface packet",
+  "description": "A machine-checkable specification packet for one kernel. THE PACKET IS THE INDEPENDENT VARIABLE of this experiment: completeness is manipulated across arms, so what a packet may contain is itself preregistered. Per PREREG §8 and SPEC §9 the rendered packet is one of exactly three permitted prompt inputs, alongside the C signature and (repair only) the current gate's feedback. Anything a packet can express, a generator can see. Anything it cannot express is either pinned by another channel or left unpinned — see evidence/choice_point_map.md.",
+
+  "type": "object",
+  "required": ["kernel", "prereg_tag", "completeness", "signature", "domain", "semantics", "forbidden", "budgets"],
+  "additionalProperties": false,
+
+  "properties": {
+    "kernel": {
+      "type": "string",
+      "enum": ["crc32", "sat_add_u8", "fir_q15", "matmul8_i32", "median3x3_u8"],
+      "description": "Must match a kernel in SPEC §5 and a row in kernel_signatures.json. The frozen v1 set is closed; adding a kernel is a v1.1 supersession."
+    },
+    "prereg_tag": {
+      "type": "string",
+      "const": "prereg-v1",
+      "description": "Packets are valid only against the frozen preregistration."
+    },
+    "completeness": {
+      "type": "string",
+      "enum": ["full", "weak"],
+      "description": "Which arm this packet belongs to. 'weak' is the dose-response variant of SPEC §11 arm 3: forbidden list dropped, budgets dropped, half the vectors withheld. Prediction on record: D and variance RISE under 'weak'."
+    },
+
+    "signature": {
+      "type": "string",
+      "description": "The exact C prototype. MUST match SPEC §5 and both sealed oracle prototypes — enforced by harness/gates/prearm_check.py, which compares type sequences rather than strings."
+    },
+
+    "domain": {
+      "type": "object",
+      "required": ["description"],
+      "additionalProperties": true,
+      "description": "Input constraints. A packet MUST NOT claim to constrain behaviour outside the domain it declares; the vector gate refuses out-of-domain vectors for exactly this reason.",
+      "properties": {
+        "description": {"type": "string"},
+        "n": {"type": "integer", "minimum": 0},
+        "n_max": {"type": "integer", "minimum": 0},
+        "element_range": {
+          "type": "array", "items": {"type": "integer"}, "minItems": 2, "maxItems": 2,
+          "description": "Inclusive [lo, hi] bound on element values where the kernel declares one."
+        },
+        "pointer_precondition": {
+          "type": "string",
+          "description": "Decided option 2, board #13818: pointers valid and non-null for n>0. Behaviour for NULL with n>0 is OUT OF DOMAIN — undefined, untested, and never a vector."
+        }
+      }
+    },
+
+    "semantics": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Prose statement of required behaviour. This is the channel whose completeness the experiment manipulates. Where it is silent, the choice-point map records what pins the bit instead — or that nothing does."
+    },
+
+    "check_values": {
+      "type": "array",
+      "description": "Published external anchors, where the kernel has any. crc32 has one; most kernels do not. An anchor is stronger evidence than an oracle pair because it is independent of both seats.",
+      "items": {
+        "type": "object",
+        "required": ["input", "expected", "source"],
+        "additionalProperties": false,
+        "properties": {
+          "input": {"type": "string"},
+          "expected": {"type": "string"},
+          "source": {"type": "string", "description": "Where the value is published."}
+        }
+      }
+    },
+
+    "forbidden": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Constructs gate 1 rejects. EMPTY IS LEGAL AND MEANINGFUL: the 'weak' arm drops this list, and an empty array is how that is expressed rather than by omitting the key. Omission would be indistinguishable from an authoring mistake."
+    },
+
+    "budgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Gate 6 caps. Sanity bounds, not optimisation targets (SPEC §7). Empty object is legal and is how the 'weak' arm drops budgets. NOTE per LN-3: budget rejection is BIDIRECTIONAL on D — it inflates when it removes a largest-cluster member and deflates when it removes a minority one, so the budget-only rejection count is co-reported with its direction marked unresolved.",
+      "properties": {
+        "cycles_ratio_max": {"type": "number", "exclusiveMinimum": 0},
+        "text_bytes_max": {"type": "integer", "minimum": 1},
+        "stack_bytes_max": {"type": "integer", "minimum": 1}
+      }
+    },
+
+    "implementation_hint": {
+      "type": "string",
+      "description": "OPTIONAL and DELIBERATELY SEGREGATED. A hint steers implementation without constraining behaviour, so it acts on the implementation-text variance endpoint while leaving D untouched — see choice_point_map.md §4. Of the v1 set only median3x3_u8 carries one ('sorting-network friendly'). Kept as its own key rather than folded into `semantics` so that hint-bearing cells are mechanically identifiable at analysis time and cannot be silently counted as specification content."
+    },
+
+    "notes": {"type": "string", "description": "Non-normative. Never rendered into a prompt."}
+  }
+}

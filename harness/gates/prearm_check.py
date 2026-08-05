@@ -27,7 +27,7 @@ Usage:
   prearm_check.py [kernel ...]      # default: all kernels in the signature file
 Exit 0 iff every checked kernel agrees everywhere.
 """
-import json, os, re, sys
+import json, os, re, subprocess, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SIGS = os.path.join(ROOT, "harness", "gates", "kernel_signatures.json")
@@ -118,6 +118,41 @@ def check(kernel, sigs):
     return problems
 
 
+def watcher_liveness(host="jetson"):
+    """Assert the probe-seed watcher is alive on the device.
+
+    Authorised by Agent B at board #14090. A dead watcher does not raise an
+    error — it simply stops writing, and per seed_guard's own docstring gaps
+    are gaps in knowledge, not evidence of absence. So a silent death between
+    arms would leave an unmonitored window that nothing announces.
+
+    THIS MUST NOT FAIL IN THE REASSURING DIRECTION. Three distinct outcomes,
+    never collapsed into two:
+      ok        watcher confirmed running
+      DOWN      device reachable, watcher NOT running  -> blocks the arm
+      UNKNOWN   device unreachable, liveness not established -> also blocks
+
+    "Could not check" is not "fine". Reporting UNKNOWN as a pass is exactly
+    the failure this seat shipped once already in seed_guard's own liveness
+    check and had to correct.
+    """
+    try:
+        r = subprocess.run(
+            ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=6", host,
+             "pgrep -f 'seed_guard.py (watch|arm)' >/dev/null && echo ALIVE || echo DEAD"],
+            capture_output=True, text=True, timeout=20)
+    except Exception as e:
+        return "UNKNOWN", f"device unreachable ({type(e).__name__}) — liveness NOT established"
+    if r.returncode != 0:
+        return "UNKNOWN", f"ssh failed rc={r.returncode} — liveness NOT established"
+    out = r.stdout.strip()
+    if out.endswith("ALIVE"):
+        return "ok", "probe-seed watcher running on device"
+    if out.endswith("DEAD"):
+        return "DOWN", "device reachable but probe-seed watcher is NOT running"
+    return "UNKNOWN", f"unrecognised response {out!r} — liveness NOT established"
+
+
 def main(argv):
     sigs = {k: v for k, v in json.load(open(SIGS)).items() if not k.startswith("_")}
     kernels = argv or sorted(sigs)
@@ -137,6 +172,15 @@ def main(argv):
             print(f"  {k:14s} OK   SPEC ≡ signatures.json ≡ both sealed oracles; "
                   f"choice-point row present")
     print(f"\n{len(kernels) - bad}/{len(kernels)} kernels clean")
+
+    state, why = watcher_liveness()
+    mark = {"ok": "OK", "DOWN": "BLOCKED", "UNKNOWN": "BLOCKED"}[state]
+    print(f"  probe-seed watcher: {mark} — {why}")
+    if state != "ok":
+        print("  Refusing to green-light an arm: an unmonitored probe seed means "
+              "a read during the arm would leave no receipt.")
+        bad += 1
+
     return 1 if bad else 0
 
 
