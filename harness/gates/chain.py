@@ -66,7 +66,6 @@ DEVICE = "jetson"   # gates 3 and 5 run ON DEVICE — SPEC §7, and because this
 FORBIDDEN_PATTERNS = [
     (r"#\s*include\s*<(?!stdint\.h|stddef\.h)", "include beyond stdint/stddef"),
     (r"\b(malloc|calloc|realloc|free)\s*\(", "dynamic allocation"),
-    (r"^\s*static\b", "static storage"),
     (r"\bvolatile\b", "volatile"),
     (r"\b__asm__|\basm\s*\(", "inline assembly"),
     (r"\(\s*\*\s*\w+\s*\)\s*\(", "function pointer"),
@@ -74,10 +73,37 @@ FORBIDDEN_PATTERNS = [
 ]
 
 
+def _static_storage_hits(src):
+    """`static` STORAGE only — not `static` linkage on a function.
+
+    SPEC §7 forbids "`static` storage": a variable with static storage duration,
+    i.e. hidden state that survives across calls. A `static` HELPER FUNCTION has
+    no storage at all; it is internal linkage and is ordinary, idiomatic C.
+
+    A naive `^\s*static` regex conflates them, and that is not hypothetical: it
+    rejected BOTH of Agent B's sealed oracles for fir_q15 and median3x3_u8,
+    which use `static int16_t sat_i16(...)` and `static void sort9(...)`. A
+    sealed, dual-agreed oracle failing its own gate is the loudest possible
+    signal that the gate is wrong, and in a real arm it would have rejected
+    valid generator output for a reason unrelated to the ECS — inflating the
+    rejection rate and corrupting acceptance rate, a primary endpoint.
+
+    Discriminator: from `static` to the first `;` or `{`, a function declarator
+    contains `(`. A storage declaration does not.
+    """
+    hits = []
+    for m in re.finditer(r"^[ \t]*static\b", src, re.M):
+        tail = src[m.start():]
+        end = min((tail.index(c) for c in ";{" if c in tail), default=len(tail))
+        if "(" not in tail[:end]:
+            hits.append(f"static storage at offset {m.start()}")
+    return hits
+
+
 def gate1_lint(src, kernel):
     """Forbidden surface. Regex is a first pass; SPEC §7 asks for a parser check
     'where practical', and this is explicitly the weaker of the two."""
-    hits = []
+    hits = _static_storage_hits(src)
     for pat, why in FORBIDDEN_PATTERNS:
         for m in re.finditer(pat, src, re.M):
             hits.append(f"{why} at offset {m.start()}")

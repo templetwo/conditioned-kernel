@@ -1,0 +1,88 @@
+{
+ "cell": {
+  "kernel": "matmul8_i32",
+  "arm": "full"
+ },
+ "vector_policy": {
+  "vector_policy": "all",
+  "completeness": "full",
+  "vectors_total": 46,
+  "vectors_used": 46,
+  "vectors_withheld": 0,
+  "withheld_ids": []
+ },
+ "candidates": [
+  {
+   "kernel": "matmul8_i32",
+   "completeness": "full",
+   "sample_index": 0,
+   "prompt_sha256": "c60e4bbc672e8f47a7abddb9c37c099a8a63d122b1be09ff574960c73e8d482c",
+   "repair_trace": [
+    {
+     "attempt": 0,
+     "stopped_at": null,
+     "gates": {
+      "1_lint": "pass",
+      "2_compile": "pass",
+      "3_sanitize": "pass",
+      "4_cbmc": "skipped_intractable",
+      "5_vectors": "pass",
+      "6_budget": "pass"
+     }
+    }
+   ],
+   "infra_retry_count": 0,
+   "infra_abort": false,
+   "accepted": true,
+   "started_utc": "2026-08-05T22:40:15Z",
+   "generator": {
+    "generator_id": "STUB",
+    "model_string_requested": "stub:oracle-verbatim",
+    "model_string_served": "stub:oracle-verbatim",
+    "temperature": 0.8
+   },
+   "gates": {
+    "1_lint": {
+     "result": "pass",
+     "feedback": []
+    },
+    "2_compile": {
+     "result": "pass",
+     "feedback": []
+    },
+    "3_sanitize": {
+     "result": "pass",
+     "feedback": []
+    },
+    "4_cbmc": {
+     "result": "skipped_intractable",
+     "feedback": [
+      "bounded equivalence intractable for matmul8_i32 on this hardware (LN-4); reported as skipped, NOT as a pass"
+     ]
+    },
+    "5_vectors": {
+     "result": "pass",
+     "feedback": []
+    },
+    "6_budget": {
+     "result": "pass",
+     "feedback": [],
+     "actual": {
+      "text_bytes": 392,
+      "stack_bytes": 0,
+      "cycles_status": "baseline measurement unusable"
+     }
+    }
+   },
+   "candidate_sha256": "3072727980bbd11ff868404bf375cc5968d0ce56112fe41ca2272e455338268e",
+   "source": "/* ECS P1 oracle \u2014 Agent B (Grok Build, grok-4.5)\n * kernel: matmul8_i32\n * Sealed against tag prereg-v1. Authored blind: no Agent A oracle content read.\n * Spec: void matmul8_i32(const int32_t a[64], const int32_t b[64], int32_t c[64])\n * Domain: entries in [-1024, 1023] \u2014 products fit int32 with headroom.\n * Layout reading (SPEC silent): 8x8 ROW-MAJOR. a[i*8+k] * b[k*8+j] -> c[i*8+j].\n * Column-major would be a departure the C flat-array signature does not signal.\n * No saturation. No NULL guards (option 2).\n */\n#include <stdint.h>\n\nvoid matmul8_i32(const int32_t a[64], const int32_t b[64], int32_t c[64])\n{\n    int i, j, k;\n    for (i = 0; i < 8; i++) {\n        for (j = 0; j < 8; j++) {\n            int32_t sum = 0;\n            for (k = 0; k < 8; k++) {\n                sum += a[i * 8 + k] * b[k * 8 + j];\n            }\n            c[i * 8 + j] = sum;\n        }\n    }\n}"
+  }
+ ],
+ "summary": {
+  "samples": 1,
+  "accepted": 1,
+  "infra_aborts": 0,
+  "acceptance_denominator": 1,
+  "note": "infra aborts excluded from the denominator"
+ }
+}

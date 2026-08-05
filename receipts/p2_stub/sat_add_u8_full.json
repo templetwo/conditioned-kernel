@@ -1,0 +1,86 @@
+{
+ "cell": {
+  "kernel": "sat_add_u8",
+  "arm": "full"
+ },
+ "vector_policy": {
+  "vector_policy": "all",
+  "completeness": "full",
+  "vectors_total": 56,
+  "vectors_used": 56,
+  "vectors_withheld": 0,
+  "withheld_ids": []
+ },
+ "candidates": [
+  {
+   "kernel": "sat_add_u8",
+   "completeness": "full",
+   "sample_index": 0,
+   "prompt_sha256": "763507973e3b82b4872de758f907cb4f57817409c4a3d9904418165f75a047fd",
+   "repair_trace": [
+    {
+     "attempt": 0,
+     "stopped_at": null,
+     "gates": {
+      "1_lint": "pass",
+      "2_compile": "pass",
+      "3_sanitize": "pass",
+      "4_cbmc": "pass",
+      "5_vectors": "pass",
+      "6_budget": "pass"
+     }
+    }
+   ],
+   "infra_retry_count": 0,
+   "infra_abort": false,
+   "accepted": true,
+   "started_utc": "2026-08-05T22:39:58Z",
+   "generator": {
+    "generator_id": "STUB",
+    "model_string_requested": "stub:oracle-verbatim",
+    "model_string_served": "stub:oracle-verbatim",
+    "temperature": 0.8
+   },
+   "gates": {
+    "1_lint": {
+     "result": "pass",
+     "feedback": []
+    },
+    "2_compile": {
+     "result": "pass",
+     "feedback": []
+    },
+    "3_sanitize": {
+     "result": "pass",
+     "feedback": []
+    },
+    "4_cbmc": {
+     "result": "pass",
+     "feedback": []
+    },
+    "5_vectors": {
+     "result": "pass",
+     "feedback": []
+    },
+    "6_budget": {
+     "result": "pass",
+     "feedback": [],
+     "actual": {
+      "text_bytes": 892,
+      "stack_bytes": 0,
+      "cycles_status": "baseline measurement unusable"
+     }
+    }
+   },
+   "candidate_sha256": "50684e9fd96039ea051a0bb2d12175e191b3a493c532e11d23720b56ca7cf998",
+   "source": "/* ECS P1 oracle \u2014 Agent B (Grok Build, grok-4.5)\n * kernel: sat_add_u8\n * Sealed against tag prereg-v1. Authored blind: no Agent A oracle content read.\n * Spec: void sat_add_u8(const uint8_t *a, const uint8_t *b, uint8_t *out, size_t n)\n * Domain: n = 256 (SPEC \u00a75). Saturating unsigned 8-bit add: out[i] = min(255, a[i]+b[i]).\n * Pointers valid and non-null for n > 0 (precondition option 2). NULL+n>0 out of domain.\n * Slow-and-obvious reference. No tables.\n */\n#include <stdint.h>\n#include <stddef.h>\n\nvoid sat_add_u8(const uint8_t *a, const uint8_t *b, uint8_t *out, size_t n)\n{\n    size_t i;\n    for (i = 0; i < n; i++) {\n        unsigned sum = (unsigned)a[i] + (unsigned)b[i];\n        out[i] = (sum > 255u) ? (uint8_t)255u : (uint8_t)sum;\n    }\n}"
+  }
+ ],
+ "summary": {
+  "samples": 1,
+  "accepted": 1,
+  "infra_aborts": 0,
+  "acceptance_denominator": 1,
+  "note": "infra aborts excluded from the denominator"
+ }
+}

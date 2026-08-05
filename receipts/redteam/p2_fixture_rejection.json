@@ -1,23 +1,14 @@
 {
- "generated_utc": "2026-08-05T22:22:05Z",
- "purpose": "P2 definition of done: every redteam fixture rejected at its INTENDED gate.",
- "chain_order": [
-  "1_lint",
-  "2_compile",
-  "3_sanitize",
-  "4_cbmc",
-  "5_vectors",
-  "6_budget"
- ],
- "note": "gates 3 and 5 execute on the Jetson; gate 4 runs host-side CBMC.",
+ "generated_utc": "2026-08-05T22:41:27Z",
+ "purpose": "P2 DoD: every redteam fixture rejected at its INTENDED gate.",
+ "note": "regenerated after gate 1 was corrected to distinguish static STORAGE from static LINKAGE",
  "fixtures": [
   {
-   "file": "redteam/crc32_budget_text_gate6.c",
-   "sha256": "f1d46886b15dc78bf2b0600aa80e21570873b29f5d81d1333823286c66277d87",
+   "file": "crc32_budget_text_gate6.c",
    "intended_gate": "6",
    "stopped_at": "6_budget",
-   "accepted": false,
    "rejected_at_intended_gate": true,
+   "sha256": "f1d46886b15dc78bf2b0600aa80e21570873b29f5d81d1333823286c66277d87",
    "gate_results": {
     "1_lint": "pass",
     "2_compile": "pass",
@@ -25,96 +16,61 @@
     "4_cbmc": "pass",
     "5_vectors": "pass",
     "6_budget": "fail"
-   },
-   "feedback": {
-    "6_budget": [
-     ".text 36288 exceeds cap 4096"
-    ]
    }
   },
   {
-   "file": "redteam/crc32_compile_bad_gate2.c",
-   "sha256": "5ee65ebb796e3e7266fd07d600578aeb5aae0d19a03d62e53087577bc98c56d9",
+   "file": "crc32_compile_bad_gate2.c",
    "intended_gate": "2",
    "stopped_at": "2_compile",
-   "accepted": false,
    "rejected_at_intended_gate": true,
+   "sha256": "5ee65ebb796e3e7266fd07d600578aeb5aae0d19a03d62e53087577bc98c56d9",
    "gate_results": {
     "1_lint": "pass",
     "2_compile": "fail"
-   },
-   "feedback": {
-    "2_compile": [
-     "/var/folders/m3/93dz__bx387249x2qyglb2sw0000gn/T/tmp8yekoeiu/c.c:14:12: error: use of undeclared identifier 'this_is_not_defined'\n   14 |     return this_is_not_defined; /* deliberate undeclared identifier */\n      |            ^\n1 error generated."
-    ]
    }
   },
   {
-   "file": "redteam/crc32_lint_include_gate1.c",
+   "file": "crc32_lint_include_gate1.c",
+   "intended_gate": "1",
+   "stopped_at": "1_lint",
+   "rejected_at_intended_gate": true,
    "sha256": "c8e0fd03791363fbb13d1e3a609cb65ee44302fb1de2586a2771b6ffee8fbd44",
-   "intended_gate": "1",
-   "stopped_at": "1_lint",
-   "accepted": false,
-   "rejected_at_intended_gate": true,
    "gate_results": {
     "1_lint": "fail"
-   },
-   "feedback": {
-    "1_lint": [
-     "include beyond stdint/stddef at offset 72"
-    ]
    }
   },
   {
-   "file": "redteam/crc32_lint_malloc_gate1.c",
+   "file": "crc32_lint_malloc_gate1.c",
+   "intended_gate": "1",
+   "stopped_at": "1_lint",
+   "rejected_at_intended_gate": true,
    "sha256": "1a8e05288d569563ad85a0cd37f63aa7d44dfce27cad6ee22c579ea4761d5284",
-   "intended_gate": "1",
-   "stopped_at": "1_lint",
-   "accepted": false,
-   "rejected_at_intended_gate": true,
    "gate_results": {
     "1_lint": "fail"
-   },
-   "feedback": {
-    "1_lint": [
-     "dynamic allocation at offset 191"
-    ]
    }
   },
   {
-   "file": "redteam/crc32_ub_shift_chain_gate3.c",
+   "file": "crc32_ub_shift_chain_gate3.c",
+   "intended_gate": "3",
+   "stopped_at": "3_sanitize",
+   "rejected_at_intended_gate": true,
    "sha256": "ab800b4f6fa70f5516dae40df91390f9b9dccb13a5cfa2943568bde1ecbc692b",
-   "intended_gate": "3",
-   "stopped_at": "3_sanitize",
-   "accepted": false,
-   "rejected_at_intended_gate": true,
    "gate_results": {
     "1_lint": "pass",
     "2_compile": "pass",
     "3_sanitize": "fail"
-   },
-   "feedback": {
-    "3_sanitize": [
-     "i0.c:10:14: runtime error: shift exponent 32 is too large for 32-bit type 'int'\n  impl0 = /var/folders/m3/93dz__bx387249x2qyglb2sw0000gn/T/tmp0xl91c_d/cand.c  [on jetson]"
-    ]
    }
   },
   {
-   "file": "redteam/crc32_wrong_poly_gate3.c",
-   "sha256": "f8c7b3cf4d905f23914f3a5ab13a11c3021a93aae082f468c094e64985daab92",
+   "file": "crc32_wrong_poly_gate3.c",
    "intended_gate": "3",
    "stopped_at": "3_sanitize",
-   "accepted": false,
    "rejected_at_intended_gate": true,
+   "sha256": "f8c7b3cf4d905f23914f3a5ab13a11c3021a93aae082f468c094e64985daab92",
    "gate_results": {
     "1_lint": "pass",
     "2_compile": "pass",
     "3_sanitize": "fail"
-   },
-   "feedback": {
-    "3_sanitize": [
-     "FAIL [impl0] published_check\n  FAIL [impl0] single_00\n  FAIL [impl0] all_zero_256\n  FAIL [impl0] all_one_256\n  FAIL [impl0] ramp_256\n  FAIL [impl0] max_n_4096_ramp\n  FAIL [impl0] max_n_4096_zero\n  FAIL [impl0] max_n_4096_one\n  FAIL [impl0] len_2_pattern\n  FAIL [impl0] len_3_pattern\n  FAIL [impl0] len_7_pattern\n  FAIL [impl0] len_8_pattern\n  FAIL [impl0] len_15_pattern\n  FAIL [impl0] len_16_pattern\n  FAIL [impl0] len_31_pattern\n  FAIL [impl0] len_32_pattern\n  FAIL [impl0] len_63_pattern\n  FAIL [impl0] len_64_pattern\n  FAIL [impl0] len_127_pattern\n  FAIL [impl0] len_128_pattern\n  FAIL [impl0] len_511_pattern\n  FAIL [impl0] len_512_pattern\n  FAIL [impl0] len_1023_pattern\n  FAIL [impl0] len_1024_pattern\n  FAIL [impl0] len_2048_pattern\n  FAIL [impl0] len_4095_pattern\n  FAIL [impl0] seeded_rand_"
-    ]
    }
   }
  ],

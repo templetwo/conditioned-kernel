@@ -1,0 +1,119 @@
+{
+ "cell": {
+  "kernel": "fir_q15",
+  "arm": "weak"
+ },
+ "vector_policy": {
+  "vector_policy": "even-index-kept",
+  "completeness": "weak",
+  "vectors_total": 66,
+  "vectors_used": 33,
+  "vectors_withheld": 33,
+  "withheld_ids": [
+   "impulse_x0_h0",
+   "extreme_neg_neg",
+   "extreme_pos_neg",
+   "impulse_at_0",
+   "impulse_at_2",
+   "impulse_at_4",
+   "impulse_at_6",
+   "impulse_at_8",
+   "impulse_at_10",
+   "impulse_at_12",
+   "impulse_at_14",
+   "alternating",
+   "near_zero_h",
+   "seeded_rand_01",
+   "seeded_rand_03",
+   "seeded_rand_05",
+   "seeded_rand_07",
+   "seeded_rand_09",
+   "seeded_rand_11",
+   "seeded_rand_13",
+   "seeded_rand_15",
+   "seeded_rand_17",
+   "seeded_rand_19",
+   "seeded_rand_21",
+   "seeded_rand_23",
+   "seeded_rand_25",
+   "seeded_rand_27",
+   "seeded_rand_29",
+   "seeded_rand_31",
+   "seeded_rand_33",
+   "seeded_rand_35",
+   "seeded_rand_37",
+   "seeded_rand_39"
+  ]
+ },
+ "candidates": [
+  {
+   "kernel": "fir_q15",
+   "completeness": "weak",
+   "sample_index": 0,
+   "prompt_sha256": "2facc0537ec1c0aa7dc999650af6eb49c7420032fcda28b380c42811d8d3a0f0",
+   "repair_trace": [
+    {
+     "attempt": 0,
+     "stopped_at": "1_lint",
+     "gates": {
+      "1_lint": "fail"
+     }
+    },
+    {
+     "attempt": 1,
+     "stopped_at": "1_lint",
+     "gates": {
+      "1_lint": "fail"
+     }
+    },
+    {
+     "attempt": 2,
+     "stopped_at": "1_lint",
+     "gates": {
+      "1_lint": "fail"
+     }
+    },
+    {
+     "attempt": 3,
+     "stopped_at": "1_lint",
+     "gates": {
+      "1_lint": "fail"
+     }
+    },
+    {
+     "attempt": 4,
+     "stopped_at": "1_lint",
+     "gates": {
+      "1_lint": "fail"
+     }
+    }
+   ],
+   "infra_retry_count": 0,
+   "infra_abort": false,
+   "accepted": false,
+   "started_utc": "2026-08-05T22:38:06Z",
+   "generator": {
+    "generator_id": "STUB",
+    "model_string_requested": "stub:oracle-verbatim",
+    "model_string_served": "stub:oracle-verbatim",
+    "temperature": 0.8
+   },
+   "gates": {
+    "1_lint": {
+     "result": "fail",
+     "feedback": [
+      "static storage at offset 501"
+     ]
+    }
+   },
+   "note": "repair budget of 4 exhausted; full trace kept"
+  }
+ ],
+ "summary": {
+  "samples": 1,
+  "accepted": 0,
+  "infra_aborts": 0,
+  "acceptance_denominator": 1,
+  "note": "infra aborts excluded from the denominator"
+ }
+}
