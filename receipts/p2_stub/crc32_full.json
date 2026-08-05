@@ -12,9 +12,16 @@
   "withheld_ids": []
  },
  "harness": {
-  "harness_git_sha": "44dd77507c3a4c5e0bbae59131326f7e4121be30",
-  "harness_tree_dirty": true,
-  "note": "receipt produced from an UNCOMMITTED tree; not reproducible from the sha alone"
+  "harness_git_sha": "689431d3c675b4daf196cf9bc26922b5bd6cd6c8",
+  "harness_tree_dirty": false,
+  "dirty_scope": [
+   "harness",
+   "ecs",
+   "trusted",
+   "SPEC.md"
+  ],
+  "uncommitted": [],
+  "note": "instrument clean at this sha; scope is listed, not implied"
  },
  "candidates": [
   {
@@ -40,7 +47,7 @@
    "infra_retry_count": 0,
    "infra_abort": false,
    "accepted": true,
-   "started_utc": "2026-08-05T23:10:09Z",
+   "started_utc": "2026-08-05T23:27:47Z",
    "prompt_sha256": "277833b89cea32068ac662402772ebb3f2364622b07ab5626b21788edc56d994",
    "generator": {
     "generator_id": "STUB",
@@ -89,9 +96,9 @@
       "text_bytes": 236,
       "stack_bytes": 0,
       "cycles_measure": {
-       "baseline_ns": 43168.0,
+       "baseline_ns": 43328.0,
        "candidate_ns": 43136.0,
-       "ratio": 0.9993,
+       "ratio": 0.9956,
        "status": "ok",
        "freq_pre": "1728000",
        "freq_post": "1728000",
@@ -102,7 +109,7 @@
        "same_batch": true
       },
       "baseline_oracle": "crc32_agentB.c",
-      "cycles_ratio": 0.9993,
+      "cycles_ratio": 0.9956,
       "cycles_status": "measured"
      }
     }

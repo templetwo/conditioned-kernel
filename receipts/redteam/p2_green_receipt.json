@@ -1,63 +1,64 @@
 {
- "kernel": "crc32",
- "completeness": "full",
- "gates": {
-  "1_lint": {
-   "result": "pass",
-   "feedback": []
-  },
-  "2_compile": {
-   "result": "pass",
-   "feedback": []
-  },
-  "3_sanitize": {
-   "result": "pass",
-   "feedback": []
-  },
-  "4_cbmc": {
-   "result": "pass",
-   "feedback": []
-  },
-  "5_vectors": {
-   "result": "pass",
-   "feedback": []
-  },
-  "6_budget": {
-   "result": "pass",
-   "feedback": [],
-   "actual": {
-    "text_bytes": 200,
-    "stack_bytes": 0,
-    "cycles_measure": {
-     "baseline_ns": 43360.0,
-     "candidate_ns": 59296.0,
-     "ratio": 1.3675,
-     "status": "ok",
-     "freq_pre": "1728000",
-     "freq_post": "1728000",
-     "timing_source": "clock",
-     "warmup": 200,
-     "measured": 1000,
-     "core": 3,
-     "same_batch": true
-    },
-    "cycles_ratio": 1.3675,
-    "cycles_status": "measured"
-   }
-  }
+ "generated_utc": "2026-08-05T23:30:43Z",
+ "harness": {
+  "harness_git_sha": "689431d3c675b4daf196cf9bc26922b5bd6cd6c8",
+  "harness_tree_dirty": false,
+  "dirty_scope": [
+   "harness",
+   "ecs",
+   "trusted",
+   "SPEC.md"
+  ],
+  "uncommitted": [],
+  "note": "instrument clean at this sha; scope is listed, not implied"
  },
- "accepted": true,
- "stopped_at": null,
- "gate_order": [
-  "1_lint",
-  "2_compile",
-  "3_sanitize",
-  "4_cbmc",
-  "5_vectors",
-  "6_budget"
+ "purpose": "P2 DoD: stub generator produces a full green receipt end to end.",
+ "cells": [
+  {
+   "packet": "crc32.ecs.yaml",
+   "accepted": true,
+   "infra_abort": false,
+   "vectors_used": 93,
+   "vectors_total": 93
+  },
+  {
+   "packet": "fir_q15.ecs.yaml",
+   "accepted": true,
+   "infra_abort": false,
+   "vectors_used": 66,
+   "vectors_total": 66
+  },
+  {
+   "packet": "fir_q15.weak.ecs.yaml",
+   "accepted": true,
+   "infra_abort": false,
+   "vectors_used": 33,
+   "vectors_total": 66
+  },
+  {
+   "packet": "matmul8_i32.ecs.yaml",
+   "accepted": true,
+   "infra_abort": false,
+   "vectors_used": 46,
+   "vectors_total": 46
+  },
+  {
+   "packet": "median3x3_u8.ecs.yaml",
+   "accepted": true,
+   "infra_abort": false,
+   "vectors_used": 56,
+   "vectors_total": 56
+  },
+  {
+   "packet": "sat_add_u8.ecs.yaml",
+   "accepted": true,
+   "infra_abort": false,
+   "vectors_used": 56,
+   "vectors_total": 56
+  }
  ],
- "elapsed_ms": 17874,
- "candidate_sha256": "b7be7c65f33a617abfb5d517091b7ea9bbc819689abd29f25e5c14f927eefb39",
- "candidate": "trusted/oracles/crc32_agentA.c (sealed oracle, stands in for the P2 stub generator)",
- "generated_utc": "2026-08-05T22:23:06Z"
+ "summary": {
+  "packets": 6,
+  "green": 6
+ }
 }

@@ -11,15 +11,28 @@
   "vectors_withheld": 0,
   "withheld_ids": []
  },
+ "harness": {
+  "harness_git_sha": "689431d3c675b4daf196cf9bc26922b5bd6cd6c8",
+  "harness_tree_dirty": false,
+  "dirty_scope": [
+   "harness",
+   "ecs",
+   "trusted",
+   "SPEC.md"
+  ],
+  "uncommitted": [],
+  "note": "instrument clean at this sha; scope is listed, not implied"
+ },
  "candidates": [
   {
    "kernel": "fir_q15",
    "completeness": "full",
    "sample_index": 0,
-   "prompt_sha256": "ed85e2d31ed80b9ed80d31989fd74b31e7ede0d3942e5829b685ad327451c703",
    "repair_trace": [
     {
      "attempt": 0,
+     "prompt_sha256": "ed85e2d31ed80b9ed80d31989fd74b31e7ede0d3942e5829b685ad327451c703",
+     "is_repair": false,
      "stopped_at": null,
      "gates": {
       "1_lint": "pass",
@@ -34,12 +47,26 @@
    "infra_retry_count": 0,
    "infra_abort": false,
    "accepted": true,
-   "started_utc": "2026-08-05T22:40:07Z",
+   "started_utc": "2026-08-05T23:28:37Z",
+   "prompt_sha256": "ed85e2d31ed80b9ed80d31989fd74b31e7ede0d3942e5829b685ad327451c703",
    "generator": {
     "generator_id": "STUB",
     "model_string_requested": "stub:oracle-verbatim",
     "model_string_served": "stub:oracle-verbatim",
     "temperature": 0.8
+   },
+   "vector_policy": {
+    "vector_policy": "all",
+    "completeness": "full",
+    "vectors_total": 66,
+    "vectors_used": 66,
+    "vectors_withheld": 0,
+    "withheld_ids": [],
+    "applied_to": [
+     "3_sanitize",
+     "5_vectors"
+    ],
+    "arm_vector_file_sha256": "67dbc15296b8b414f647950391b27a7bfabd8198cb266fa351ba7515900512f2"
    },
    "gates": {
     "1_lint": {
@@ -70,7 +97,22 @@
      "actual": {
       "text_bytes": 440,
       "stack_bytes": 0,
-      "cycles_status": "baseline measurement unusable"
+      "cycles_measure": {
+       "baseline_ns": 2336.0,
+       "candidate_ns": 2208.0,
+       "ratio": 0.9452,
+       "status": "ok",
+       "freq_pre": "1728000",
+       "freq_post": "1728000",
+       "timing_source": "clock",
+       "warmup": 200,
+       "measured": 1000,
+       "core": 3,
+       "same_batch": true
+      },
+      "baseline_oracle": "fir_q15_agentB.c",
+      "cycles_ratio": 0.9452,
+      "cycles_status": "measured"
      }
     }
    },
@@ -78,11 +120,20 @@
    "source": "/* ECS P1 oracle \u2014 Agent B (Grok Build, grok-4.5)\n * kernel: fir_q15\n * Sealed against tag prereg-v1. Authored blind: no Agent A oracle content read.\n * Spec: void fir_q15(const int16_t x[256], const int16_t h[16], int16_t y[256])\n * Q15 FIR: for each output i, acc = sum_j x[i-j]*h[j] for i-j>=0 (zero pad left),\n * then y[i] = sat_i16(acc >> 15). Saturating accumulate after the shift.\n * Pointers valid when used (option 2). No tables. Slow-and-obvious.\n */\n#include <stdint.h>\n#include <stddef.h>\n\nstatic int16_t sat_i16(int64_t v)\n{\n    if (v > 32767) {\n        return (int16_t)32767;\n    }\n    if (v < -32768) {\n        return (int16_t)-32768;\n    }\n    return (int16_t)v;\n}\n\nvoid fir_q15(const int16_t x[256], const int16_t h[16], int16_t y[256])\n{\n    size_t i, j;\n\n    for (i = 0; i < 256; i++) {\n        int64_t acc = 0;\n        for (j = 0; j < 16; j++) {\n            if (i >= j) {\n                acc += (int64_t)x[i - j] * (int64_t)h[j];\n            }\n            /* else zero-pad: contribute nothing */\n        }\n        y[i] = sat_i16(acc >> 15);\n    }\n}"
   }
  ],
+ "barrier": {
+  "applicable": false,
+  "barrier_ok": true,
+  "note": "remote generator; no device memory to clear"
+ },
+ "slot_refills": 0,
  "summary": {
   "samples": 1,
   "accepted": 1,
   "infra_aborts": 0,
+  "slot_refills": 0,
+  "scored_samples": 1,
+  "requested_samples": 1,
   "acceptance_denominator": 1,
-  "note": "infra aborts excluded from the denominator"
+  "note": "infra aborts excluded from the denominator and their slots refilled, so n is by design not by device weather"
  }
 }

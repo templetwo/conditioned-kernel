@@ -45,75 +45,146 @@
    "seeded_rand_39"
   ]
  },
+ "harness": {
+  "harness_git_sha": "689431d3c675b4daf196cf9bc26922b5bd6cd6c8",
+  "harness_tree_dirty": false,
+  "dirty_scope": [
+   "harness",
+   "ecs",
+   "trusted",
+   "SPEC.md"
+  ],
+  "uncommitted": [],
+  "note": "instrument clean at this sha; scope is listed, not implied"
+ },
  "candidates": [
   {
    "kernel": "fir_q15",
    "completeness": "weak",
    "sample_index": 0,
-   "prompt_sha256": "2facc0537ec1c0aa7dc999650af6eb49c7420032fcda28b380c42811d8d3a0f0",
    "repair_trace": [
     {
      "attempt": 0,
-     "stopped_at": "1_lint",
+     "prompt_sha256": "2facc0537ec1c0aa7dc999650af6eb49c7420032fcda28b380c42811d8d3a0f0",
+     "is_repair": false,
+     "stopped_at": null,
      "gates": {
-      "1_lint": "fail"
-     }
-    },
-    {
-     "attempt": 1,
-     "stopped_at": "1_lint",
-     "gates": {
-      "1_lint": "fail"
-     }
-    },
-    {
-     "attempt": 2,
-     "stopped_at": "1_lint",
-     "gates": {
-      "1_lint": "fail"
-     }
-    },
-    {
-     "attempt": 3,
-     "stopped_at": "1_lint",
-     "gates": {
-      "1_lint": "fail"
-     }
-    },
-    {
-     "attempt": 4,
-     "stopped_at": "1_lint",
-     "gates": {
-      "1_lint": "fail"
+      "1_lint": "pass",
+      "2_compile": "pass",
+      "3_sanitize": "pass",
+      "4_cbmc": "skipped_intractable",
+      "5_vectors": "pass",
+      "6_budget": "pass"
      }
     }
    ],
    "infra_retry_count": 0,
    "infra_abort": false,
-   "accepted": false,
-   "started_utc": "2026-08-05T22:38:06Z",
+   "accepted": true,
+   "started_utc": "2026-08-05T23:28:47Z",
+   "prompt_sha256": "2facc0537ec1c0aa7dc999650af6eb49c7420032fcda28b380c42811d8d3a0f0",
    "generator": {
     "generator_id": "STUB",
     "model_string_requested": "stub:oracle-verbatim",
     "model_string_served": "stub:oracle-verbatim",
     "temperature": 0.8
    },
+   "vector_policy": {
+    "vector_policy": "even-index-kept",
+    "completeness": "weak",
+    "vectors_total": 66,
+    "vectors_used": 33,
+    "vectors_withheld": 33,
+    "withheld_ids": [
+     "impulse_x0_h0",
+     "extreme_neg_neg",
+     "extreme_pos_neg",
+     "impulse_at_0",
+     "impulse_at_2",
+     "impulse_at_4",
+     "impulse_at_6",
+     "impulse_at_8",
+     "impulse_at_10",
+     "impulse_at_12",
+     "impulse_at_14",
+     "alternating",
+     "near_zero_h",
+     "seeded_rand_01",
+     "seeded_rand_03",
+     "seeded_rand_05",
+     "seeded_rand_07",
+     "seeded_rand_09",
+     "seeded_rand_11",
+     "seeded_rand_13",
+     "seeded_rand_15",
+     "seeded_rand_17",
+     "seeded_rand_19",
+     "seeded_rand_21",
+     "seeded_rand_23",
+     "seeded_rand_25",
+     "seeded_rand_27",
+     "seeded_rand_29",
+     "seeded_rand_31",
+     "seeded_rand_33",
+     "seeded_rand_35",
+     "seeded_rand_37",
+     "seeded_rand_39"
+    ],
+    "applied_to": [
+     "3_sanitize",
+     "5_vectors"
+    ],
+    "arm_vector_file_sha256": "6501fa93fe08c5b16fe1ca0930ef0001680fbc4dcc88175997e944503e26e455"
+   },
    "gates": {
     "1_lint": {
-     "result": "fail",
+     "result": "pass",
+     "feedback": []
+    },
+    "2_compile": {
+     "result": "pass",
+     "feedback": []
+    },
+    "3_sanitize": {
+     "result": "pass",
+     "feedback": []
+    },
+    "4_cbmc": {
+     "result": "skipped_intractable",
      "feedback": [
-      "static storage at offset 501"
+      "bounded equivalence intractable for fir_q15 on this hardware (LN-4); reported as skipped, NOT as a pass"
      ]
+    },
+    "5_vectors": {
+     "result": "pass",
+     "feedback": []
+    },
+    "6_budget": {
+     "result": "pass",
+     "feedback": [],
+     "actual": {
+      "note": "no budgets declared (weak arm)"
+     }
     }
    },
-   "note": "repair budget of 4 exhausted; full trace kept"
+   "candidate_sha256": "2f5afcb2d6b80e0de1a177fcc2e226393a62c80d828bfcb2de95a1f8ae1c0b0e",
+   "source": "/* ECS P1 oracle \u2014 Agent B (Grok Build, grok-4.5)\n * kernel: fir_q15\n * Sealed against tag prereg-v1. Authored blind: no Agent A oracle content read.\n * Spec: void fir_q15(const int16_t x[256], const int16_t h[16], int16_t y[256])\n * Q15 FIR: for each output i, acc = sum_j x[i-j]*h[j] for i-j>=0 (zero pad left),\n * then y[i] = sat_i16(acc >> 15). Saturating accumulate after the shift.\n * Pointers valid when used (option 2). No tables. Slow-and-obvious.\n */\n#include <stdint.h>\n#include <stddef.h>\n\nstatic int16_t sat_i16(int64_t v)\n{\n    if (v > 32767) {\n        return (int16_t)32767;\n    }\n    if (v < -32768) {\n        return (int16_t)-32768;\n    }\n    return (int16_t)v;\n}\n\nvoid fir_q15(const int16_t x[256], const int16_t h[16], int16_t y[256])\n{\n    size_t i, j;\n\n    for (i = 0; i < 256; i++) {\n        int64_t acc = 0;\n        for (j = 0; j < 16; j++) {\n            if (i >= j) {\n                acc += (int64_t)x[i - j] * (int64_t)h[j];\n            }\n            /* else zero-pad: contribute nothing */\n        }\n        y[i] = sat_i16(acc >> 15);\n    }\n}"
   }
  ],
+ "barrier": {
+  "applicable": false,
+  "barrier_ok": true,
+  "note": "remote generator; no device memory to clear"
+ },
+ "slot_refills": 0,
  "summary": {
   "samples": 1,
-  "accepted": 0,
+  "accepted": 1,
   "infra_aborts": 0,
+  "slot_refills": 0,
+  "scored_samples": 1,
+  "requested_samples": 1,
   "acceptance_denominator": 1,
-  "note": "infra aborts excluded from the denominator"
+  "note": "infra aborts excluded from the denominator and their slots refilled, so n is by design not by device weather"
  }
 }

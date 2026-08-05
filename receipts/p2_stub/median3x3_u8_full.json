@@ -11,15 +11,28 @@
   "vectors_withheld": 0,
   "withheld_ids": []
  },
+ "harness": {
+  "harness_git_sha": "689431d3c675b4daf196cf9bc26922b5bd6cd6c8",
+  "harness_tree_dirty": false,
+  "dirty_scope": [
+   "harness",
+   "ecs",
+   "trusted",
+   "SPEC.md"
+  ],
+  "uncommitted": [],
+  "note": "instrument clean at this sha; scope is listed, not implied"
+ },
  "candidates": [
   {
    "kernel": "median3x3_u8",
    "completeness": "full",
    "sample_index": 0,
-   "prompt_sha256": "970343d75d32aa9f48ef916edc1c42e9c6de1d88727febdaf6a88248c6b6b6ee",
    "repair_trace": [
     {
      "attempt": 0,
+     "prompt_sha256": "970343d75d32aa9f48ef916edc1c42e9c6de1d88727febdaf6a88248c6b6b6ee",
+     "is_repair": false,
      "stopped_at": null,
      "gates": {
       "1_lint": "pass",
@@ -34,12 +47,26 @@
    "infra_retry_count": 0,
    "infra_abort": false,
    "accepted": true,
-   "started_utc": "2026-08-05T22:40:24Z",
+   "started_utc": "2026-08-05T23:29:05Z",
+   "prompt_sha256": "970343d75d32aa9f48ef916edc1c42e9c6de1d88727febdaf6a88248c6b6b6ee",
    "generator": {
     "generator_id": "STUB",
     "model_string_requested": "stub:oracle-verbatim",
     "model_string_served": "stub:oracle-verbatim",
     "temperature": 0.8
+   },
+   "vector_policy": {
+    "vector_policy": "all",
+    "completeness": "full",
+    "vectors_total": 56,
+    "vectors_used": 56,
+    "vectors_withheld": 0,
+    "withheld_ids": [],
+    "applied_to": [
+     "3_sanitize",
+     "5_vectors"
+    ],
+    "arm_vector_file_sha256": "69576bac9171dd28146d02e14524da47f0a59b95e1a2fb01adc95634338cc7c5"
    },
    "gates": {
     "1_lint": {
@@ -70,7 +97,22 @@
      "actual": {
       "text_bytes": 688,
       "stack_bytes": 96,
-      "cycles_status": "baseline measurement unusable"
+      "cycles_measure": {
+       "baseline_ns": 6976.0,
+       "candidate_ns": 7360.0,
+       "ratio": 1.055,
+       "status": "ok",
+       "freq_pre": "1728000",
+       "freq_post": "1728000",
+       "timing_source": "clock",
+       "warmup": 200,
+       "measured": 1000,
+       "core": 3,
+       "same_batch": true
+      },
+      "baseline_oracle": "median3x3_u8_agentA.c",
+      "cycles_ratio": 1.055,
+      "cycles_status": "measured"
      }
     }
    },
@@ -78,11 +120,20 @@
    "source": "/* ECS P1 oracle \u2014 Agent B (Grok Build, grok-4.5)\n * kernel: median3x3_u8\n * Sealed against tag prereg-v1. Authored blind: no Agent A median content read.\n * Spec: void median3x3_u8(const uint8_t in[16*16], uint8_t out[14*14])\n * Domain: interior only \u2014 out is 14x14 over centers (r,c) in [1..14]x[1..14]\n * of the 16x16 input (0-based). Each out value is the median of the 3x3 window.\n * Median of 9: sort ascending, take index 4.\n * Layout: row-major, in[r*16+c], out[or*14+oc] with or=r-1, oc=c-1.\n * No NULL guards (option 2). Slow-and-obvious.\n */\n#include <stdint.h>\n\nstatic void sort9(uint8_t v[9])\n{\n    /* insertion sort */\n    int i, j;\n    for (i = 1; i < 9; i++) {\n        uint8_t key = v[i];\n        j = i - 1;\n        while (j >= 0 && v[j] > key) {\n            v[j + 1] = v[j];\n            j--;\n        }\n        v[j + 1] = key;\n    }\n}\n\nvoid median3x3_u8(const uint8_t in[256], uint8_t out[196])\n{\n    int r, c, dr, dc, k;\n    for (r = 1; r <= 14; r++) {\n        for (c = 1; c <= 14; c++) {\n            uint8_t win[9];\n            k = 0;\n            for (dr = -1; dr <= 1; dr++) {\n                for (dc = -1; dc <= 1; dc++) {\n                    win[k++] = in[(r + dr) * 16 + (c + dc)];\n                }\n            }\n            sort9(win);\n            out[(r - 1) * 14 + (c - 1)] = win[4];\n        }\n    }\n}"
   }
  ],
+ "barrier": {
+  "applicable": false,
+  "barrier_ok": true,
+  "note": "remote generator; no device memory to clear"
+ },
+ "slot_refills": 0,
  "summary": {
   "samples": 1,
   "accepted": 1,
   "infra_aborts": 0,
+  "slot_refills": 0,
+  "scored_samples": 1,
+  "requested_samples": 1,
   "acceptance_denominator": 1,
-  "note": "infra aborts excluded from the denominator"
+  "note": "infra aborts excluded from the denominator and their slots refilled, so n is by design not by device weather"
  }
 }

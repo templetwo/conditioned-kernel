@@ -1,7 +1,19 @@
 {
- "generated_utc": "2026-08-05T22:41:27Z",
+ "generated_utc": "2026-08-05T23:30:43Z",
  "purpose": "P2 DoD: every redteam fixture rejected at its INTENDED gate.",
- "note": "regenerated after gate 1 was corrected to distinguish static STORAGE from static LINKAGE",
+ "harness": {
+  "harness_git_sha": "689431d3c675b4daf196cf9bc26922b5bd6cd6c8",
+  "harness_tree_dirty": false,
+  "dirty_scope": [
+   "harness",
+   "ecs",
+   "trusted",
+   "SPEC.md"
+  ],
+  "uncommitted": [],
+  "note": "instrument clean at this sha; scope is listed, not implied"
+ },
+ "supersedes": "receipts produced before the \u00a77a fail-closed corrections; those describe an instrument that could accept a candidate because it failed to measure it",
  "fixtures": [
   {
    "file": "crc32_budget_text_gate6.c",
@@ -75,8 +87,7 @@
   }
  ],
  "summary": {
-  "total": 6,
-  "rejected_at_intended": 6,
-  "all_pass": true
+  "fixtures": 6,
+  "rejected_at_intended_gate": 6
  }
 }
