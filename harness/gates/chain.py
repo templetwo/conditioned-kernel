@@ -19,11 +19,23 @@ and the runner keeps them out of denominators (SPEC §4a.1, §9). Conflating the
 two is how a device memory fault becomes evidence about a model's capability,
 which is the specific error that produced two false granite negatives.
 
+GATES 3 AND 5 RUN ON THE DEVICE. SPEC §7 says gate 5 is "Acceptance vectors on
+device" and gate 4 is "host side, spares Jetson RAM". Gate 3 belongs there too,
+and not only by the spec: homebrew gcc's sanitizer runtime HANGS on this macOS
+arm64 host for `int main(void){return 0;}`, while the Jetson runs the full
+sanitized crc32 vector set in 7.5 seconds.
+
 GATE 3 AND GATE 5 BOTH RUN THE VECTORS, AND THAT SHAPES THE REDTEAM.
 SPEC §7 gate 3 is a SANITIZED build run against the full acceptance vector set;
 gate 5 is the same vectors under the MEASUREMENT build (-O3 -mcpu=native). A
 candidate with plainly wrong values therefore fails at gate 3, not gate 5 —
 verified: a wrong-polynomial crc32 stops at 3_sanitize.
+
+DEMONSTRATED, not merely argued: a candidate containing a shift past the width
+of int produces CORRECT VALUES at -O3 and is accepted by gate 5 (exit 0), and
+is REJECTED by gate 3 (exit 1, "shift exponent 32 is too large"). The clean
+oracle passes both. That is the full truth table, so a gate-5 fixture can now
+be proven to exercise gate 5 rather than asserted to.
 
 So "stopped at gate 5" is a NARROW state. It means a candidate passed the
 vectors under sanitizers and failed them optimised, which is the signature of
@@ -47,6 +59,9 @@ import os, re, subprocess, tempfile, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 CBMC_TRACTABLE = {"crc32", "sat_add_u8"}          # LN-4, measured not assumed
+DEVICE = "jetson"   # gates 3 and 5 run ON DEVICE — SPEC §7, and because this
+                    # workstation's gcc sanitizer runtime hangs on an empty
+                    # main() while the Jetson runs the same build in 7.5s
 
 FORBIDDEN_PATTERNS = [
     (r"#\s*include\s*<(?!stdint\.h|stddef\.h)", "include beyond stdint/stddef"),
@@ -95,6 +110,7 @@ def gate3_sanitize(src, kernel, workdir):
     open(cand, "w").write(src)
     r = subprocess.run(
         ["python3", os.path.join(ROOT, "harness", "gates", "vector_check.py"),
+         "--device", DEVICE,
          "--cc", "-O1 -g -fsanitize=undefined,address -fno-sanitize-recover=all",
          vec, cand],
         capture_output=True, text=True)
@@ -125,6 +141,7 @@ def gate5_vectors(src, kernel, workdir):
     cand = os.path.join(workdir, "cand5.c")
     open(cand, "w").write(src)
     r = subprocess.run(["python3", os.path.join(ROOT, "harness", "gates", "vector_check.py"),
+                        "--device", DEVICE,
                         "--cc", "-O3 -mcpu=native", vec, cand],
                        capture_output=True, text=True)
     first3 = [l for l in r.stdout.splitlines() if "FAIL" in l][:3]

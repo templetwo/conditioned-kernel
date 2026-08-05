@@ -152,7 +152,45 @@ def in_domain(v, domain, sig):
     return True, ""
 
 
-def main(argv, cc=None):
+def _run_on_device(kernel, sig, vectors, impls, symbols, cc, host):
+    """Build and run on the Jetson.
+
+    SPEC §7 puts gate 5 ON DEVICE ("Acceptance vectors on device") and gate 4
+    host-side. Gate 3's sanitized run belongs there too, and not only by the
+    spec: homebrew gcc's sanitizer runtime HANGS on this macOS arm64
+    workstation for a program as small as `int main(void){return 0;}`, while
+    the same program and real UB both behave correctly on the Jetson. The
+    device is the only place gate 3 can actually execute.
+
+    Everything is staged under ~/ecs, the only writable area agents may use.
+    """
+    import shlex
+    drv = emit_driver(kernel, sig, vectors, symbols)
+    remote = f"~/ecs/gatework/{kernel}"
+    files = {"drv.c": drv}
+    for i, path in enumerate(impls):
+        files[f"i{i}.c"] = open(path).read()
+    script = [f"set -e", f"rm -rf {remote}", f"mkdir -p {remote}", f"cd {remote}"]
+    for name, content in files.items():
+        script.append(f"cat > {name} <<'__ECS_EOF__'\n{content}\n__ECS_EOF__")
+    objs = []
+    for i in range(len(impls)):
+        script.append(f"gcc -std=c11 {' '.join(cc[2:])} -D{kernel}={symbols[i]} "
+                      f"-c i{i}.c -o i{i}.o")
+        objs.append(f"i{i}.o")
+    script.append(f"gcc -std=c11 {' '.join(cc[2:])} -c drv.c -o drv.o")
+    script.append(f"gcc -std=c11 {' '.join(cc[2:])} -o run drv.o {' '.join(objs)}")
+    script.append("./run")
+    r = subprocess.run(["ssh", "-o", "BatchMode=yes", host, "bash -s"],
+                       input="\n".join(script), capture_output=True, text=True,
+                       timeout=900)
+    print(r.stdout.rstrip() or r.stderr.rstrip()[:600])
+    for i, path in enumerate(impls):
+        print(f"  {symbols[i]} = {path}  [on {host}]")
+    return r.returncode
+
+
+def main(argv, cc=None, device=None):
     cc = cc or CC_DEFAULT
     if len(argv) < 2:
         print(__doc__)
@@ -179,6 +217,8 @@ def main(argv, cc=None):
             print(f"  {vid}: {why}")
 
     symbols = [f"impl{i}" for i in range(len(impls))]
+    if device:
+        return _run_on_device(kernel, sig, usable, impls, symbols, cc, device)
     with tempfile.TemporaryDirectory() as td:
         objs = []
         for i, path in enumerate(impls):
@@ -212,4 +252,9 @@ if __name__ == "__main__":
         i = argv.index("--cc")
         cc = ["gcc", "-std=c11"] + argv[i + 1].split()
         argv = argv[:i] + argv[i + 2:]
-    sys.exit(main(argv, cc))
+    device = None
+    if "--device" in argv:
+        i = argv.index("--device")
+        device = argv[i + 1]
+        argv = argv[:i] + argv[i + 2:]
+    sys.exit(main(argv, cc, device))
