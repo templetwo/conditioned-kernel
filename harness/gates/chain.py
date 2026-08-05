@@ -118,18 +118,51 @@ def gate3_sanitize(src, kernel, workdir):
     return (r.returncode == 0), ([] if r.returncode == 0 else [out[:800]])
 
 
-def gate4_cbmc(kernel):
-    """STUB. This is a tractability MEMBERSHIP CHECK, not a live CBMC run.
+def gate4_cbmc(kernel, src=None, workdir=None):
+    """LIVE bounded equivalence between the candidate and a sealed oracle.
 
-    "pass" here means "bounded equivalence was established for this KERNEL at
-    P1", never "this CANDIDATE was proved equivalent on this run" (Agent B,
-    board #14171). No receipt language may claim the latter. Wiring a per-
-    candidate CBMC invocation is open work.
+    Anthony directed this to execute CBMC rather than return a stub. It now
+    does — for the two kernels where LN-4 measured it tractable. For the other
+    three it still reports skipped_intractable, and wiring the invocation does
+    not change that: bounded equivalence for fir_q15, matmul8_i32 and
+    median3x3_u8 exceeded ten minutes and one exceeded thirty-five. Making the
+    call real makes two kernels real; it does not manufacture a third.
+
+    Runs HOST-side per SPEC §7 ("host side, spares Jetson RAM"), which is also
+    where cbmc is installed. Unlike gates 3 and 5, nothing about CBMC needs the
+    device.
     """
     if kernel not in CBMC_TRACTABLE:
-        return None, [f"bounded equivalence intractable for {kernel} on this hardware "
-                      f"(LN-4); reported as skipped, NOT as a pass"]
-    return True, []
+        return None, [f"bounded equivalence intractable for {kernel} on this "
+                      f"hardware (LN-4); reported as skipped, NOT as a pass"]
+    if src is None:
+        return None, ["no candidate supplied"]
+    harness = os.path.join(ROOT, "harness", "gates", "cbmc", f"equiv_{kernel}.c")
+    if not os.path.exists(harness):
+        return None, [f"no CBMC harness for {kernel}"]
+    oracle = os.path.join(ROOT, "trusted", "oracles", f"{kernel}_agentB.c")
+    if not os.path.exists(oracle):
+        return None, ["no oracle to compare against"]
+
+    sym = {"crc32": ("crc32_A", "crc32_B"), "sat_add_u8": ("sat_add_A", "sat_add_B")}[kernel]
+    unwind = {"crc32": "60", "sat_add_u8": "10"}[kernel]
+    a = os.path.join(workdir, "cbmc_cand.c")
+    b = os.path.join(workdir, "cbmc_base.c")
+    open(a, "w").write(src.replace(f"{kernel}(", f"{sym[0]}("))
+    open(b, "w").write(open(oracle).read().replace(f"{kernel}(", f"{sym[1]}("))
+    try:
+        r = subprocess.run(
+            ["cbmc", harness, a, b, "--arch", "arm64", "--bounds-check",
+             "--pointer-check", "--signed-overflow-check", "--unwind", unwind,
+             "--unwinding-assertions"],
+            capture_output=True, text=True, timeout=600)
+    except subprocess.TimeoutExpired:
+        return None, [f"CBMC exceeded 600s for {kernel}; not a pass and not a "
+                      f"failure — the candidate is unproven, see LN-4"]
+    if "VERIFICATION SUCCESSFUL" in r.stdout:
+        return True, []
+    fails = [l for l in r.stdout.splitlines() if "FAILURE" in l][:3]
+    return False, (fails or [r.stdout[-400:]])
 
 
 def gate5_vectors(src, kernel, workdir):
@@ -245,12 +278,12 @@ def run(src, packet, workdir=None):
         ("1_lint", lambda: gate1_lint(src, kernel)),
         ("2_compile", lambda: gate2_compile(src, workdir)),
         ("3_sanitize", lambda: gate3_sanitize(src, kernel, workdir)),
-        ("4_cbmc", lambda: gate4_cbmc(kernel)),
+        ("4_cbmc", lambda: gate4_cbmc(kernel, src, workdir)),
         ("5_vectors", lambda: gate5_vectors(src, kernel, workdir)),
     ]
     for name, fn in steps:
         ok, feedback = fn()[:2]
-        rec["gates"][name] = {"result": (("kernel_proved_at_p1" if name == "4_cbmc" else "pass") if ok else
+        rec["gates"][name] = {"result": ("pass" if ok else
                                          "skipped_intractable" if ok is None else "fail"),
                               "feedback": feedback}
         if ok is False:

@@ -1,0 +1,11 @@
+{
+  "kernel": "crc32",
+  "prereg_tag": "prereg-v1",
+  "agent_a_path": "trusted/oracles/crc32_agentA.c",
+  "agent_b_path": "trusted/oracles/crc32_agentB.c",
+  "agent_a_sha256": "b7be7c65f33a617abfb5d517091b7ea9bbc819689abd29f25e5c14f927eefb39",
+  "agent_b_sha256": "71794b039b07b8cfe6d8efaf664e75a523b074012237a09dad44a4e6e591d9d6",
+  "result": "DUAL_AGREEMENT_PASS",
+  "local_commit": "07f97fb",
+  "pushed": false
+}
