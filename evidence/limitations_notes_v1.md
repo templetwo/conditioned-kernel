@@ -500,6 +500,58 @@ That correction belongs beside the original rather than replacing it, per the su
 
 ---
 
+## LN-7 — A gate can be silent, and silence read as a pass; gate 6 was, on four of five kernels
+
+**Status: drafted by Agent A 2026-08-05 after Anthony held P2 open and the regeneration exposed the cause. Counter-signature row pending Agent B.**
+
+**No experimental data is affected.** P3 has never run and no scored sample exists. This note is about the *instrument*, and it is recorded because the defect survived two-seat verification and would not have surfaced from the receipts it produced.
+
+### What happened
+
+`harness/measure/cycles.py` generated its bench driver against one hardcoded C signature — `uint32_t f(const uint8_t *, size_t)` — which fits `crc32` and none of the other four kernels. For those four the driver could not compile, the measurement returned an infrastructure fault, and gate 6 recorded the string `"baseline measurement unusable"` and **passed the candidate**.
+
+Every `full`-arm packet declares three caps. On four of five kernels one of them, `cycles_ratio_max`, was never evaluated. The receipts read green, and both build agents had verified P2 as complete against exactly those receipts.
+
+It became visible only after gates were made to fail closed (SPEC §7a.2), which converted the silence into an infrastructure abort. The correction did not introduce the defect. It made it un-greenable.
+
+### Direction of the error, and why it is the worst available direction
+
+Acceptance rate is a primary endpoint (SPEC §3). A gate that passes what it cannot measure **inflates** acceptance, and it inflates it for reasons that have nothing to do with the generator — the instrument's own coverage becomes an unmodelled term in a headline number. Worse, the inflation is invisible in the artifact it produces: a receipt reading `6_budget: pass` is byte-identical whether the cap was met or never checked.
+
+This also bears on **LN-3**, which analyses gate 6's bidirectional influence on *D* and specifies that every reported *D* carry its cell's budget-only rejection count. That analysis presumes gate 6 enforces what it declares. Had this shipped, LN-3 would have described a gate that in practice enforced `.text` alone on four kernels, and its rejection counts would have understated nothing and overstated nothing — they would simply have been counting a different gate than the one documented.
+
+### The part that generalises past this repo
+
+*An instrument's silence is the failure mode that most resembles a result.*
+
+A measurement that fails loudly gets fixed. A measurement that fails silently and defaults to pass becomes evidence, because every downstream reader treats the absence of a complaint as a confirmation. The question to ask of a harness is therefore not "does it catch failures" but **"what does it do when it cannot tell"** — and the answer must be a distinct third outcome, never a rounding into pass or fail. SPEC §7a.2 now fixes that outcome set.
+
+### Why two-seat verification did not catch it
+
+Both agents independently exercised the gate chain, and both checked the same property: *that the gates reject bad candidates*. Neither asked what a gate does when it cannot run. The redteam fixtures encode that same blind spot by construction — a fixture is built to be rejected, so a fixture set can only ever demonstrate the reject path.
+
+**Adversarial review between agents does not automatically cover the space neither agent thought to look at.** The correction came from outside both seats.
+
+### The gap this leaves open, which is not yet closed
+
+Gate 6 evaluates three caps. Exactly one of them has ever been demonstrated to **reject**:
+
+| cap | demonstrated to measure | demonstrated to reject |
+|---|---|---|
+| `text_bytes_max` | all five kernels | **crc32 only** (`crc32_budget_text_gate6.c`) |
+| `stack_bytes_max` | all five kernels | **never** |
+| `cycles_ratio_max` | all five kernels, post-fix | **never** |
+
+The cycles and stack branches are, today, in the same evidentiary position the cycles branch occupied before this finding: believed to work, never observed working. That belief is now better founded — the measurements exist and cross-check — but "it produced a number" is not "it refused an artifact".
+
+**Required to close, Agent B's lane:** a gate-6 fixture per kernel rather than per gate, including at least one artifact that exceeds `cycles_ratio_max` and one that exceeds `stack_bytes_max`. Until those exist, the writeup states gate 6's rejection evidence as `.text` on one kernel, and does not generalise it to the cap set.
+
+### What does not mitigate this
+
+That the caps are "sanity bounds, not optimisation targets" (SPEC §7 gate 6) is not a mitigation. A sanity bound that never fires is indistinguishable from an absent one, and the packet claims a constraint either way.
+
+---
+
 ## Standing consequences adopted from this review
 
 1. **"Locating, not sizing"** is the claim language for all n = 10 results (LN-1). Effect sizes may be *reported* with intervals; they may not be *claimed* as measured magnitudes.
@@ -515,6 +567,9 @@ That correction belongs beside the original rather than replacing it, per the su
 11. **A contract probe runs at arm open and close for each frontier generator** (LN-6), recording whether the arm's sampling parameters are accepted. Alias exposure covers parameter contracts, not only model identity, and the silent case — a parameter accepted and ignored — remains undefended and declared.
 12. Seal hashes are **OpenTimestamped at seal time, before reveal** — the proof attests existence without disclosing content.
 13. Verbatim board excerpts are preserved under `evidence/board_excerpts/` with a per-file hash manifest, so the correspondence is auditable without a live chronicle.
+14. **Gate 6's rejection evidence is reported as `.text` on one kernel** (LN-7), never generalised to the cap set. `stack_bytes_max` and `cycles_ratio_max` have been demonstrated to measure on all five kernels and to reject on none. A cap that never fires is indistinguishable from an absent one.
+15. **Every gate reports one of four outcomes — pass, fail, declared exemption, instrument fault — and an absence is never a pass** (LN-7, SPEC §7a.2). Which of *fail* or *instrument fault* an absence becomes is decided by cause, not convenience, so that failing closed does not trade a silent inflation for a silent deflation.
+16. **Receipts name their instrument** (`harness_git_sha`, with dirtiness scoped to `harness/`, `ecs/`, `trusted/`, `SPEC.md` and that scope recorded). Receipts produced across different harness revisions are not pooled — every correction in SPEC §7a changed what "accepted" means.
 
 ---
 
