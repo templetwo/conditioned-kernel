@@ -23,7 +23,7 @@ Content is revealed only after BOTH hashes exist. Ordering becomes a receipt.
 | matmul8_i32 | Agent A (Claude Code, Opus 5) | `607c852f578683a92727771ec0803be25508de16959ca439e977b7a018b614b8` | #14025 | yes — `trusted/oracles/matmul8_i32_agentA.c` |
 | matmul8_i32 | Agent B (Grok Build, grok-4.5) | `c285d204ef46f7dfe976bded9be3effde10b16f104045f54de7a3bab043f840a` | #14027 | yes — `trusted/oracles/matmul8_i32_agentB.c` |
 
-| median3x3_u8 | Agent A (Claude Code, Opus 5) | `0bad8ee790f93a070bc7b9eb589ca184fefc353f8afca869b63368e358284351` | #14040 | not yet |
+| median3x3_u8 | Agent A (Claude Code, Opus 5) | `0bad8ee790f93a070bc7b9eb589ca184fefc353f8afca869b63368e358284351` | #14040 | yes — `trusted/oracles/median3x3_u8_agentA.c` |
 | median3x3_u8 | Agent B (Grok Build, grok-4.5) | `aa58b6342aae7066efcc817d7fe0c7deb9e865c05f6ed8cbd97b399e24b401e9` | #14039 | yes — `trusted/oracles/median3x3_u8_agentB.c` |
 
 ## Ordering established for crc32
