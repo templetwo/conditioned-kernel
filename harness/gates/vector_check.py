@@ -46,9 +46,20 @@ def load_sigs():
 
 
 def carr(name, data):
-    """Emit a byte blob; the typed buffer is memcpy'd from it by the caller."""
-    body = ",".join(str(b) for b in data) or "0"
-    return f"static const unsigned char {name}_b[]={{{body}}};"
+    """Emit a byte blob as a STRING LITERAL, not an integer-literal list.
+
+    The list form emits one token per byte — 144,390 tokens for crc32's vector
+    set in a single translation unit. That compiles acceptably at -O2 and blows
+    a two-minute wall clock under -fsanitize=undefined,address, which made
+    gate 3 untestable in practice: a harness limitation that looked like a slow
+    gate (found while wiring Agent B's #14171 attack).
+
+    A string literal is one token. Octal escapes keep every byte explicit, and
+    the implicit trailing NUL is excluded at each use site with `sizeof - 1`,
+    so the bytes handed to a kernel are identical to the list form.
+    """
+    esc = "".join("\\%03o" % b for b in data)
+    return f'static const unsigned char {name}_b[]="{esc}";'
 
 
 def emit_driver(kernel, sig, vectors, symbols):
@@ -66,6 +77,18 @@ def emit_driver(kernel, sig, vectors, symbols):
             args += ", size_t"
         L.append(f"{ret} {s}({args});")
 
+    # BUFFERS ARE HOISTED AND REUSED, one per parameter, not one per vector.
+    # ASan instruments every static array with redzones; 93 vectors x several
+    # arrays each is ~200 instrumented globals and the sanitized build exceeds
+    # seven minutes. Reusing buffers drops that to a handful and makes gate 3
+    # tractable, which it was not before (Agent B, board #14171).
+    MAXEL = 4096
+    for q in p:
+        if q["dir"] == "in":
+            L.append(f"static {q['ctype']} {q['name']}[{MAXEL}];")
+        else:
+            for s_ in symbols:
+                L.append(f"static {q['ctype']} {q['name']}_{s_}[{q.get('elems', MAXEL)}];")
     L.append("int main(void){int bad=0,n_=0;")
     for vi, v in enumerate(vectors):
         L.append("{")
@@ -75,15 +98,12 @@ def emit_driver(kernel, sig, vectors, symbols):
                 continue
             raw = bytes.fromhex(v.get(q["hex"], "") or "")
             L.append(carr(f"v{vi}_{q['name']}", raw))
-            n_el = len(raw) // _width(q["ctype"])
-            L.append(f"static {q['ctype']} {q['name']}[{max(n_el,1)}];"
-                     f"memcpy({q['name']},v{vi}_{q['name']}_b,sizeof v{vi}_{q['name']}_b);")
+            L.append(f"memcpy({q['name']},v{vi}_{q['name']}_b,"
+                     f"sizeof v{vi}_{q['name']}_b-1);")
         # outputs, one buffer per implementation so they cannot alias
-        outs = [q for q in p if q["dir"] == "out"]
-        for q in outs:
+        for q in [x for x in p if x["dir"] == "out"]:
             for s in symbols:
-                L.append(f"static {q['ctype']} {q['name']}_{s}[{q['elems']}];"
-                         f"memset({q['name']}_{s},0,sizeof {q['name']}_{s});")
+                L.append(f"memset({q['name']}_{s},0,sizeof {q['name']}_{s});")
         L.append("n_++;")
         for s in symbols:
             call_args = []
@@ -101,7 +121,7 @@ def emit_driver(kernel, sig, vectors, symbols):
                 L.append(carr(f"v{vi}_exp_{s}", raw))
                 tgt = f'{exp["param"]}_{s}'
                 L.append(f'{call};'
-                         f'if(memcmp({tgt},v{vi}_exp_{s}_b,sizeof v{vi}_exp_{s}_b))'
+                         f'if(memcmp({tgt},v{vi}_exp_{s}_b,sizeof v{vi}_exp_{s}_b-1))'
                          f'{{bad++;printf("  FAIL [{s}] {v["id"]}\\n");}}')
         L.append("}")
     L.append(f'printf("kernel=%s vectors=%d failures=%d\\n","{kernel}",n_,bad);')
