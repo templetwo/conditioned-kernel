@@ -9,6 +9,7 @@ Raised by outside review, 2026-08-04. **LN-1** answers the H2 measurement-floor 
 | Drafted | Agent A — Claude Code (Opus 5), harness lane | 2026-08-04 (LN-1, LN-2) · 2026-08-04 (LN-3, census, canary) |
 | Counter-signed — **LN-1 and LN-2 only** | Agent B — Grok Build (grok-4.5), trusted/redteam lane | **2026-08-04** (seat board after #13866; Wilson + quantization verified) |
 | Counter-signed — **LN-3, census, canary** | Agent B — Grok Build (grok-4.5), trusted/redteam lane | **2026-08-04** (seat board after #13878; scoped to LN-3 + census + canary only) |
+| Counter-signed — **LN-2A** | Agent B — Grok Build (grok-4.5), trusted/redteam lane | ☐ *pending* (requested the addendum at #14010) |
 
 > **Signature scope, stated so it cannot be misread.** Agent B's first counter-signature was given against LN-1 and LN-2 as they stood at commit `17f73fa`. LN-3, the post-arm census specification, and the canary entry were added afterwards at Anthony's direction. The second counter-signature (this row) covers **only** those later sections. LN-1/LN-2 remain under the first row. Do not read either signature as covering material outside its row.
 
@@ -122,6 +123,60 @@ Adding such a kernel is a **v1.1 candidate by supersession only**, after the pil
 ### Interaction with LN-1
 
 The two notes compound. LN-1 establishes that D is quantized to 1/k and that low-acceptance cells yield the coarsest D. LN-2 establishes that D is deflated by shared priors. A cell that is both low-acceptance and highly canonical — plausibly G3 or G4 on `crc32` — produces a D that is simultaneously **coarse and biased downward**. That is the weakest measurement in the design, and it sits on the calibration kernel. Neither note alone makes this visible.
+
+---
+
+## LN-2A — Empirical addendum: the authoring seats converged on an underspecified kernel
+
+**Status: observation, added 2026-08-05 after the `fir_q15` seal cycle. Requested by Agent B at board #14010 and drafted for its counter-sign. Amends nothing; LN-2's argument stands and this supplies its first instance.**
+
+**References:** LN-2 above; PREREG §2 (H1), §3 (D), §12.6 (two seats, not N); board #14001 (prediction, posted pre-reveal), #14003, #14008, #14010.
+
+### What happened
+
+LN-2 argued from mechanism that shared training priors deflate D — that generators may converge because they memorized the same canonical implementation rather than because the constraint surface pinned the behavior. It was an argument. It now has an instance, and the instance came from the **authoring seats**, not the generators.
+
+`fir_q15` is the first kernel in the set with substantial latitude. Its SPEC §5 domain reads `Q15, saturating accumulate >>15`, which does not determine an implementation. Before revealing, Agent A named four places where it does not (board #14001, posted before either reveal so it could not be retrofitted):
+
+| bit | the ambiguity | Agent A | Agent B |
+|---|---|---|---|
+| A1 | boundary for `y[0..14]`, where the filter reaches past `x[0]` | zero-pad left | zero-pad left |
+| A2 | accumulator width — 16 products of two int16 reach 2^34, **overflowing int32** | `int64_t` | `int64_t` |
+| A3 | whether "saturating accumulate" saturates the accumulator or the result | saturate the result, after the shift | saturate the result, after the shift |
+| A4 | rounding on `>>15` | truncating arithmetic shift | truncating arithmetic shift |
+
+**Four underdetermined choices. Two independent authors. Identical on all four.** Differential testing found 0 disagreements across 22,112 vector-sets, with coverage aimed specifically at each named bit rather than at random input alone.
+
+Agent A had predicted disagreement. The prediction failed, and the failure is the result.
+
+### Why this is evidence for LN-2 rather than a curiosity
+
+The two seats are independent in every way the protocol can enforce: separate lanes, no shared chat context, hash-and-seal ordering externally timestamped before either reveal. Whatever produced the convergence, it was **not** communication between them, and the ordering receipts establish that.
+
+What remains is the specification and the priors. The specification demonstrably did not pin these four bits — that is the premise of the whole exercise, and it was documented before anyone looked. So the convergence came from somewhere else: the standard Q15 DSP pipeline is established enough in the shared corpus that the spec's silence was filled by **convention rather than by choice**.
+
+That is precisely LN-2's mechanism, observed one level up from where LN-2 predicted it. If it operates between two authoring seats reading a spec, there is no reason to expect it operates less strongly between four generators sampling from overlapping corpora.
+
+### The consequence, stated sharply
+
+**Low measured D cannot be read as the ECS having pinned the behavior.** It is consistent with the constraint surface doing its job. It is equally consistent with every generator having learned the same textbook. The pilot as designed **cannot distinguish these two explanations**, and this addendum exists so that the writeup does not silently assume the first.
+
+This compounds the S4 finding in LN-2: `crc32` is the most canonical kernel in the set, and the calibration gate's power against harness leakage is weakened by exactly this mechanism. `fir_q15` now shows the mechanism is not confined to the maximally-canonical case — it reached a kernel with four genuinely open choices.
+
+### What this does NOT establish
+
+Stated plainly, because the observation is seductive and the sample is one:
+
+1. **n = 1 kernel, 2 authors.** This is a single co-occurrence, not a rate. It cannot support any claim about how often convergence-by-convention happens.
+2. **It is not a controlled comparison.** There is no counterfactual arm in which the seats lacked shared priors, so the effect is not isolated, only illustrated.
+3. **It does not quantify deflation.** Nothing here licenses a numeric correction to D. Consistent with the "locating, not sizing" rule (LN-1), this locates a mechanism; it does not size it.
+4. **It does not imply the choices were wrong.** All four readings are defensible and arguably correct. The point is not that convention produced bad answers — it is that convention, not the specification, produced the *agreement*.
+
+### What would distinguish the explanations — v1.1 only
+
+A kernel whose correct behavior is **not** recoverable from convention: nonce-parameterized constants, or a deliberately non-standard variant of a familiar shape, so that a generator cannot succeed by retrieval. Under such a kernel, convergence would have to come from the constraint surface, because there is no textbook to converge on.
+
+This is the same instrument LN-2 called for against the calibration gate, and it is the same verdict: **v1.1 candidate by supersession only**, after the pilot completes exactly as frozen.
 
 ---
 
@@ -259,9 +314,10 @@ It also keeps the two blindness properties independent. Probe blindness protects
 4. **All headline D values are read as conservative** — two independent deflationary pressures act on the same endpoint (LN-2 shared priors, LN-3 behavior-correlated gates).
 5. **The post-arm census is exploratory and labeled as such.** It sharpens the exploratory D only, never substitutes for the preregistered endpoint, and does not refine the frozen 1/*k* quantum — that waits on sample-to-quota.
 6. **Canary draws seal procedure, seed, algorithm, and mapping together, OTS-stamped with the draw, before any arm touches the twin.** The draw seed is distinct from the probe seed, keeping the two secrets in independent failure domains.
-7. **A third local family, wider n, and a nonce-parameterized calibration kernel are v1.1 candidates by supersession only**, after the pilot completes exactly as frozen. None is an in-flight amendment.
-8. Seal hashes are **OpenTimestamped at seal time, before reveal** — the proof attests existence without disclosing content.
-9. Verbatim board excerpts are preserved under `evidence/board_excerpts/` with a per-file hash manifest, so the correspondence is auditable without a live chronicle.
+7. **Low measured D may not be attributed to the ECS without qualification** (LN-2A). Convergence by shared convention was observed directly between the two authoring seats on a kernel with four unpinned bits; the pilot cannot distinguish that from the constraint surface doing the work.
+8. **A third local family, wider n, a nonce-parameterized calibration kernel, and a convention-resistant kernel are v1.1 candidates by supersession only**, after the pilot completes exactly as frozen. None is an in-flight amendment.
+9. Seal hashes are **OpenTimestamped at seal time, before reveal** — the proof attests existence without disclosing content.
+10. Verbatim board excerpts are preserved under `evidence/board_excerpts/` with a per-file hash manifest, so the correspondence is auditable without a live chronicle.
 
 ---
 
