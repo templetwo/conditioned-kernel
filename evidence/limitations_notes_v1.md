@@ -358,7 +358,7 @@ SPEC §7 gate 4 asks CBMC for two things: **memory safety** and **bounded equiva
 |---|---|---|---|
 | `crc32` | **SUCCESSFUL** | included | n ≤ 6, unwind 60, ~5 s |
 | `sat_add_u8` | **SUCCESSFUL** | included | n ≤ 4, unwind 10, seconds |
-| `matmul8_i32` | incomplete | incomplete | >10 min at unwind 65; >20 min for safety alone at unwind 70 |
+| `matmul8_i32` | incomplete | incomplete | >10 min at unwind 65; safety alone terminated at **>35 min**, unwind 70 |
 | `fir_q15` | not attempted | incomplete | >10 min at unwind 300 |
 | `median3x3_u8` | not attempted | not attempted | abandoned after the above |
 

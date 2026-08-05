@@ -1,0 +1,68 @@
+# ECS packet — crc32. THE CALIBRATION KERNEL.
+#
+# Validates against ecs/schema/ecs.schema.json. Rendered into generation and
+# repair prompts per SPEC §9, which permits exactly three prompt inputs: this
+# packet, the C signature, and (repair only) the current gate's feedback.
+#
+# Written against evidence/choice_point_map.md. Every bit this kernel leaves
+# open is recorded there; nothing is pinned here that the map records as
+# pinned by a different channel, because promoting a bit between channels
+# changes what the experiment manipulates.
+
+kernel: crc32
+prereg_tag: prereg-v1
+completeness: full
+
+signature: "uint32_t crc32(const uint8_t*, size_t n)"
+
+domain:
+  description: >-
+    A byte buffer of length n and the length itself. No other inputs, no
+    global state, no I/O.
+  n_max: 4096
+  pointer_precondition: >-
+    data is a valid readable pointer to at least n bytes whenever n > 0.
+    Behaviour for a NULL pointer with n > 0 is OUT OF DOMAIN: undefined,
+    never tested, and never present in an acceptance vector. Implementations
+    are neither required nor forbidden to guard it. (Decided board #13818;
+    the two reference oracles differ here and were deliberately not
+    reconciled.)
+
+semantics: >-
+  Compute the reflected CRC-32 of the n bytes at data, using the standard
+  parameters: polynomial 0xEDB88320 in reflected form, initial register value
+  0xFFFFFFFF, and a final XOR of 0xFFFFFFFF applied to the register before
+  returning. Message bytes enter the register at the least-significant end.
+  For n = 0 the function returns the initial value with the final XOR applied,
+  which is 0x00000000. The return value is the complete checksum; there is no
+  running or incremental variant in this interface.
+
+check_values:
+  - input: "123456789"
+    expected: "0xCBF43926"
+    source: >-
+      The standard CRC-32 check value, published for this parameter set and
+      reproduced independently by both reference oracles.
+
+forbidden:
+  - "#include of anything other than <stdint.h> and <stddef.h>"
+  - "malloc, free, calloc, realloc, or any dynamic allocation"
+  - "static or global storage of any kind"
+  - "volatile"
+  - "inline assembly"
+  - "function pointers"
+  - "recursion"
+  - "variable-length arrays"
+  - "any I/O, including printf and file access"
+
+budgets:
+  cycles_ratio_max: 3.0
+  text_bytes_max: 4096
+  stack_bytes_max: 1024
+
+notes: >-
+  Calibration kernel per SPEC §5 and PREREG §6 arm 1. Residual disagreement
+  among accepted artifacts here diagnoses harness leakage rather than model
+  behaviour, and the calibration gate is D <= 1 percent. Read that gate with
+  LN-2 in hand: crc32 is the most memorised kernel in the set, so a PASS is
+  necessary but not sufficient evidence that the harness is clean.
