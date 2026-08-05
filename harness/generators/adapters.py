@@ -62,7 +62,19 @@ def _record(gen_id, requested, served, text, status, t0, **extra):
     return r
 
 
-def anthropic(prompt, model="claude-opus-5", gen_id="G1", max_tokens=1500):
+def anthropic(prompt, model="claude-opus-4-5-20251101", gen_id="G1", max_tokens=1500):
+    """G1. Model string is SUPERSESSION-001, not PREREG §4.
+
+    PREREG §4 pinned `claude-opus-5`, which on 2026-08-05 began rejecting the
+    temperature parameter §7 fixes at 0.8 for all four generators — the two rows
+    were jointly unsatisfiable. Anthony ruled option (b): keep uniform sampling,
+    move G1 to a dated model. See evidence/SUPERSESSION-001.md. `prereg-v1` and
+    its DOI are unchanged; this supersedes one row beside them.
+
+    The dated string is also VERSION-pinned rather than alias-pinned, which
+    repairs §12.1's exposure for G1. G2 remains alias-pinned — xAI publishes no
+    dated string for the 4.5 line.
+    """
     t0 = time.time()
     body = json.dumps({"model": model, "max_tokens": max_tokens,
                        "temperature": TEMPERATURE,

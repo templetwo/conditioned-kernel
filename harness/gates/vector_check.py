@@ -31,7 +31,11 @@ Exit 0 iff every implementation matches every in-domain vector.
 """
 import json, os, subprocess, sys, tempfile
 
-CC = ["gcc", "-std=c11", "-O2", "-w"]
+# Default build. Gates 3 and 5 MUST override this — they are different builds
+# by SPEC §7, and an earlier version ignored the caller's flags entirely, which
+# made gate 3 and gate 5 isomorphic and the sanitizers never fire (Agent B,
+# board #14171). Flags are now an explicit parameter, not an environment hint.
+CC_DEFAULT = ["gcc", "-std=c11", "-O2", "-w"]
 HERE = os.path.dirname(os.path.abspath(__file__))
 SIGS = os.path.join(HERE, "kernel_signatures.json")
 
@@ -128,7 +132,8 @@ def in_domain(v, domain, sig):
     return True, ""
 
 
-def main(argv):
+def main(argv, cc=None):
+    cc = cc or CC_DEFAULT
     if len(argv) < 2:
         print(__doc__)
         return 2
@@ -158,7 +163,7 @@ def main(argv):
         objs = []
         for i, path in enumerate(impls):
             o = os.path.join(td, f"i{i}.o")
-            r = subprocess.run(CC + [f"-D{kernel}={symbols[i]}", "-c", path, "-o", o],
+            r = subprocess.run(cc + [f"-D{kernel}={symbols[i]}", "-c", path, "-o", o],
                                capture_output=True, text=True)
             if r.returncode:
                 print(f"COMPILE FAIL {path}\n{r.stderr[:400]}")
@@ -167,7 +172,7 @@ def main(argv):
         drv = os.path.join(td, "drv.c")
         open(drv, "w").write(emit_driver(kernel, sig, usable, symbols))
         exe = os.path.join(td, "drv")
-        r = subprocess.run(CC + ["-o", exe, drv] + objs, capture_output=True, text=True)
+        r = subprocess.run(cc + ["-o", exe, drv] + objs, capture_output=True, text=True)
         if r.returncode:
             print(f"LINK FAIL\n{r.stderr[:600]}")
             return 1
@@ -179,4 +184,12 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    # --cc "flag flag flag" overrides the build, so gates 3 and 5 can be the
+    # different builds SPEC §7 says they are.
+    argv = sys.argv[1:]
+    cc = None
+    if "--cc" in argv:
+        i = argv.index("--cc")
+        cc = ["gcc", "-std=c11"] + argv[i + 1].split()
+        argv = argv[:i] + argv[i + 2:]
+    sys.exit(main(argv, cc))

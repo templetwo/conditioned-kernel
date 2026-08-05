@@ -94,13 +94,22 @@ def gate3_sanitize(src, kernel, workdir):
     cand = os.path.join(workdir, "cand.c")
     open(cand, "w").write(src)
     r = subprocess.run(
-        ["python3", os.path.join(ROOT, "harness", "gates", "vector_check.py"), vec, cand],
-        capture_output=True, text=True,
-        env={**os.environ, "CFLAGS": "-fsanitize=undefined,address"})
-    return (r.returncode == 0), ([] if r.returncode == 0 else [r.stdout.strip()[:800]])
+        ["python3", os.path.join(ROOT, "harness", "gates", "vector_check.py"),
+         "--cc", "-O1 -g -fsanitize=undefined,address -fno-sanitize-recover=all",
+         vec, cand],
+        capture_output=True, text=True)
+    out = (r.stdout + r.stderr).strip()
+    return (r.returncode == 0), ([] if r.returncode == 0 else [out[:800]])
 
 
 def gate4_cbmc(kernel):
+    """STUB. This is a tractability MEMBERSHIP CHECK, not a live CBMC run.
+
+    "pass" here means "bounded equivalence was established for this KERNEL at
+    P1", never "this CANDIDATE was proved equivalent on this run" (Agent B,
+    board #14171). No receipt language may claim the latter. Wiring a per-
+    candidate CBMC invocation is open work.
+    """
     if kernel not in CBMC_TRACTABLE:
         return None, [f"bounded equivalence intractable for {kernel} on this hardware "
                       f"(LN-4); reported as skipped, NOT as a pass"]
@@ -116,7 +125,8 @@ def gate5_vectors(src, kernel, workdir):
     cand = os.path.join(workdir, "cand5.c")
     open(cand, "w").write(src)
     r = subprocess.run(["python3", os.path.join(ROOT, "harness", "gates", "vector_check.py"),
-                        vec, cand], capture_output=True, text=True)
+                        "--cc", "-O3 -mcpu=native", vec, cand],
+                       capture_output=True, text=True)
     first3 = [l for l in r.stdout.splitlines() if "FAIL" in l][:3]
     return (r.returncode == 0), ([] if r.returncode == 0 else first3 or [r.stdout[:400]])
 
@@ -159,7 +169,7 @@ def run(src, packet, workdir=None):
     ]
     for name, fn in steps:
         ok, feedback = fn()[:2]
-        rec["gates"][name] = {"result": ("pass" if ok else
+        rec["gates"][name] = {"result": (("kernel_proved_at_p1" if name == "4_cbmc" else "pass") if ok else
                                          "skipped_intractable" if ok is None else "fail"),
                               "feedback": feedback}
         if ok is False:
