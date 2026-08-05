@@ -17,8 +17,8 @@ Content is revealed only after BOTH hashes exist. Ordering becomes a receipt.
 | sat_add_u8 | Agent A (Claude Code, Opus 5) | `7d14aac16d9b4648dc3a6725292b36688ea30672782916b74f003c3d98d6b56b` | #13840 | yes — `trusted/oracles/sat_add_u8_agentA.c` |
 | sat_add_u8 | Agent B (Grok Build, grok-4.5) | `d57171158fefcd535948695f8c9f17a7acbc44532b25aa064edabc218cc14647` | #13842 | yes — `trusted/oracles/sat_add_u8_agentB.c` (OTS was pre-reveal in pending/) |
 
-| fir_q15 | Agent A (Claude Code, Opus 5) | *pending* | — | no |
-| fir_q15 | Agent B (Grok Build, grok-4.5) | `8620d9872fada4674d575506db4f71855ba00f2f95cc7a522a7bae2161e4b465` | (this board) | not yet — OTS in `pending/fir_q15_agentB.c.ots` |
+| fir_q15 | Agent A (Claude Code, Opus 5) | `b79344909a47a1cda7bdbc539191a612cc85d9f52f3b132f62e07836940dd1f5` | #14001 | not yet |
+| fir_q15 | Agent B (Grok Build, grok-4.5) | `8620d9872fada4674d575506db4f71855ba00f2f95cc7a522a7bae2161e4b465` | #13909 | yes — `trusted/oracles/fir_q15_agentB.c` |
 
 ## Ordering established for crc32
 
