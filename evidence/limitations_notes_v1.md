@@ -9,9 +9,9 @@ Raised by outside review, 2026-08-04. **LN-1** answers the H2 measurement-floor 
 | Drafted | Agent A — Claude Code (Opus 5), harness lane | 2026-08-04 (LN-1, LN-2) · 2026-08-04 (LN-3, census, canary) |
 | Counter-signed — **LN-1 and LN-2 only** | Agent B — Grok Build (grok-4.5), trusted/redteam lane | **2026-08-04** (seat board after #13866; Wilson + quantization verified) |
 | Counter-signed — **LN-3, census, canary** | Agent B — Grok Build (grok-4.5), trusted/redteam lane | **2026-08-04** (seat board after #13878; scoped to LN-3 + census + canary only) |
-| Counter-signed — **LN-2A** | Agent B — Grok Build (grok-4.5), trusted/redteam lane | ☐ *pending* (requested the addendum at #14010) |
+| Counter-signed — **LN-2A** | Agent B — Grok Build (grok-4.5), trusted/redteam lane | **2026-08-05** (seat board after #14016; observation accepted with one bound on inference) |
 
-> **Signature scope, stated so it cannot be misread.** Agent B's first counter-signature was given against LN-1 and LN-2 as they stood at commit `17f73fa`. LN-3, the post-arm census specification, and the canary entry were added afterwards at Anthony's direction. The second counter-signature (this row) covers **only** those later sections. LN-1/LN-2 remain under the first row. Do not read either signature as covering material outside its row.
+> **Signature scope, stated so it cannot be misread.** Agent B's first counter-signature was given against LN-1 and LN-2 as they stood at commit `17f73fa`. LN-3, the post-arm census specification, and the canary entry were added afterwards at Anthony's direction. The second counter-signature (this row) covers **only** those later sections. LN-1/LN-2 remain under the first row. Do not read either signature as covering material outside its row. LN-2A has its own row; it is not covered by the LN-1/LN-2 or LN-3 rows.
 
 **Agent B verification (counter-sign, not freeze of PREREG):**
 - LN-1 Wilson 95% for 7/10 recomputed: **[0.397, 0.892]** — matches the note's ~0.40–0.89.
@@ -29,6 +29,13 @@ Raised by outside review, 2026-08-04. **LN-1** answers the H2 measurement-floor 
 - **Post-arm census.** Accepted: once after all arms close; sanitized rebuild; **CRASH is a labeled output class per probe** (not discard). Rationale on cross-build UB accepted. Scope bound accepted: exploratory D only; never replaces preregistered endpoint; does **not** refine 1/*k* (that needs sample-to-quota / v1.1).
 - **Canary.** Mechanics accepted: procedure+seed+algorithm+mapping sealed and OTS'd **with the draw, before any arm touches the twin**; draw seed **≠** probe seed (independent failure domains; protects §12.7 and dual blindness). Honesty flag on purpose-as-inferred accepted — mechanics stand if framing is later corrected. Does-not-prove list (fairness/intent) accepted as parallel to §12.4 procedural seals.
 - **Protected signature scope.** A correctly refused to let the LN-1/LN-2 signature cover post-hoc material. That is the dual-lane design working.
+
+**Agent B verification — LN-2A counter-sign only:**
+- Observation accepted: four unpinned fir_q15 bits, two seats, identical choices, 22,112/0 agreement, prediction pre-registered and failed. That is a real instance of convention filling SPEC silence under a protocol that blocked communication and attested order.
+- Consequence accepted for writeup: low measured D **must not** be attributed to the ECS alone without qualification; pilot cannot distinguish surface-pinning from shared textbook.
+- "What this does NOT establish" (n=1, no counterfactual, no numeric D correction, choices not "wrong"): accepted as load-bearing anti-overclaim.
+- **One bound on inference (not a rejection):** seat-level convergence illustrates prior strength under careful human authorship of a *standard* DSP shape. It does **not** prove the effect is at least as strong among four generators (models may diversify more on failure modes, or less). Direction is the same; rate is unmeasured. Consistent with locating-not-sizing.
+- v1.1 nonce / non-standard kernel to separate explanations: accepted, supersession only after pilot as frozen.
 
 ---
 
