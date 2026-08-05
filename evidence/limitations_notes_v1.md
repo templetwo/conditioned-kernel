@@ -334,6 +334,65 @@ It also keeps the two blindness properties independent. Probe blindness protects
 
 ---
 
+## LN-4 — Gate 4 assurance is uneven, and it is uneven in the worst direction
+
+**Status: drafted by Agent A at Agent B's assignment (board #14103), for Agent B's counter-sign. Signature row pending.**
+
+**References frozen rows:** PREREG §8 (trust = pairwise agreement + published check values + "CBMC bounded equivalence where feasible"), §12.6; SPEC §7 gate 4.
+
+### What gate 4 asks for, and what is computable
+
+SPEC §7 gate 4 asks CBMC for two things: **memory safety** and **bounded equivalence versus the oracle**. Measured on the workstation this study actually runs on:
+
+| kernel | bounded equivalence | memory safety | measured |
+|---|---|---|---|
+| `crc32` | **SUCCESSFUL** | included | n ≤ 6, unwind 60, ~5 s |
+| `sat_add_u8` | **SUCCESSFUL** | included | n ≤ 4, unwind 10, seconds |
+| `matmul8_i32` | incomplete | incomplete | >10 min at unwind 65; >20 min for safety alone at unwind 70 |
+| `fir_q15` | not attempted | incomplete | >10 min at unwind 300 |
+| `median3x3_u8` | not attempted | not attempted | abandoned after the above |
+
+**Gate 4 as written cannot be fully applied to the three larger kernels on this hardware.** This is declared as a limitation, not reported as a clean gate.
+
+### The asymmetry, and why it is not a coincidence
+
+The two kernels that carry a formal proof are the two **simplest** in the set: `crc32` has a fully closed specification, `sat_add_u8` is near-closed. The three that do not are the three with **more open choice points** — the ones whose unpinned bits the choice-point map had to enumerate.
+
+That correlation is structural rather than accidental. The properties that make a kernel interesting for this experiment — larger state, wider domain, more room for a specification to be silent — are the same properties that blow up a bounded model checker's search space. **Formal-verification coverage is inversely correlated with specification openness.**
+
+So the kernels where unpinned bits matter most are exactly the kernels we cannot formally verify. The instrument is strongest where the question is easiest.
+
+### "Where feasible" was doing more work than it looked
+
+PREREG §8 defines trust as pairwise oracle agreement, plus published check values where they exist, plus **"CBMC bounded equivalence on small n where feasible."** That hedge was written before anyone measured feasibility. It now resolves to *two of five kernels*, and that number belongs in the record rather than staying inside the word "feasible."
+
+### The distinction that must not blur in the writeup
+
+| kernel | what the trusted tier actually rests on |
+|---|---|
+| `crc32` | bounded **proof** (n ≤ 6) + published check value `0xCBF43926` reached independently by both seats + 24,359 sampled cases |
+| `sat_add_u8` | bounded **proof** (n ≤ 4) + **exhaustive** differential over the complete 256×256 byte-pair space, 5,185,536 cases |
+| `fir_q15` | 22,112 differential cases, targeted at the four named unpinned bits plus random |
+| `matmul8_i32` | 24,106 differential cases, including all 4,096 single-element basis pairs |
+| `median3x3_u8` | 20,519 differential cases, asymmetry-weighted because symmetric inputs cannot separate a transposed reading |
+
+Sampled agreement across millions of cases is strong evidence. **It is not a proof.** Reporting "gate 4 clean" across all five would aggregate two different epistemic objects into one claim, and this note exists to prevent that.
+
+### Two places the evidence is stronger than "sampled" suggests
+
+Stated because understating is as much a distortion as overstating:
+
+1. **`sat_add_u8`'s differential is exhaustive, not sampled.** Every `(a, b)` byte pair was tested — the operation is elementwise over a 256-value alphabet, so the input space per lane is small enough to enumerate completely. For that structure the differential result is a complete argument over the element domain, independent of the CBMC proof.
+2. **`matmul8_i32`'s basis coverage is structurally suggestive.** Matrix multiplication is bilinear, and a bilinear map is determined by its action on basis pairs — so agreement on all 4,096 single-element pairs would imply agreement everywhere **if both implementations were known to be bilinear**. They are not known to be: an arbitrary implementation need not be linear in either argument. This raises confidence materially without closing the gap, and is recorded as a structural argument rather than a proof.
+
+### What would close it — v1.1 only
+
+More compute, a longer wall-clock budget, or bounded reductions of the kernels themselves (a 4×4 matmul, a 4-tap filter) verified as proxies. The proxy route is the cheap one and it is also the weakest, since it proves a property of a *different* kernel than the one under test. None of these is available in v1: the kernel set is a frozen row, and the pilot runs as written.
+
+The safety harnesses are committed and correct. The obstacle is wall clock, not the harness — they will run for anyone with more of it.
+
+---
+
 ## Standing consequences adopted from this review
 
 1. **"Locating, not sizing"** is the claim language for all n = 10 results (LN-1). Effect sizes may be *reported* with intervals; they may not be *claimed* as measured magnitudes.
@@ -344,8 +403,9 @@ It also keeps the two blindness properties independent. Probe blindness protects
 6. **Canary draws seal procedure, seed, algorithm, and mapping together, OTS-stamped with the draw, before any arm touches the twin.** The draw seed is distinct from the probe seed, keeping the two secrets in independent failure domains.
 7. **Low measured D may not be attributed to the ECS without qualification** (LN-2A). Convergence by shared convention was observed directly between the two authoring seats on a kernel with four unpinned bits; the pilot cannot distinguish that from the constraint surface doing the work.
 8. **A third local family, wider n, a nonce-parameterized calibration kernel, and a convention-resistant kernel are v1.1 candidates by supersession only**, after the pilot completes exactly as frozen. None is an in-flight amendment.
-9. Seal hashes are **OpenTimestamped at seal time, before reveal** — the proof attests existence without disclosing content.
-10. Verbatim board excerpts are preserved under `evidence/board_excerpts/` with a per-file hash manifest, so the correspondence is auditable without a live chronicle.
+9. **Gate 4 results are reported per kernel, never aggregated** (LN-4). Two kernels carry a bounded-equivalence proof; three carry sampled differential agreement. "Gate 4 clean" across all five would merge two different epistemic objects into one claim.
+10. Seal hashes are **OpenTimestamped at seal time, before reveal** — the proof attests existence without disclosing content.
+11. Verbatim board excerpts are preserved under `evidence/board_excerpts/` with a per-file hash manifest, so the correspondence is auditable without a live chronicle.
 
 ---
 
