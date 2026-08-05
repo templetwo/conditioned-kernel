@@ -55,7 +55,7 @@ declared intractable (LN-4). This module reports gate 4 as "skipped_intractable"
 for those kernels rather than as a pass, because reporting "gate 4 clean"
 across all five would merge a proof and an absence into one claim.
 """
-import os, re, subprocess, tempfile, time
+import os, re, subprocess, sys, tempfile, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 CBMC_TRACTABLE = {"crc32", "sat_add_u8"}          # LN-4, measured not assumed
@@ -148,23 +148,87 @@ def gate5_vectors(src, kernel, workdir):
     return (r.returncode == 0), ([] if r.returncode == 0 else first3 or [r.stdout[:400]])
 
 
-def gate6_budget(src, workdir, budgets):
-    """Caps are sanity bounds, not optimisation targets (SPEC §7). Actuals are
-    recorded either way. Direction of gate 6's effect on D is UNRESOLVED per
-    LN-3, so the runner co-reports budget-only rejections without a sign."""
+def gate6_budget(src, workdir, budgets, kernel):
+    """ALL declared budgets, enforced on device. SPEC §7 gate 6.
+
+    Anthony directed that every declared budget be enforced; an earlier version
+    checked only .text and silently ignored cycles_ratio_max and
+    stack_bytes_max, which are declared in every full packet. A cap that is
+    declared and unenforced is worse than no cap: the packet claims a
+    constraint the instrument does not apply.
+
+    Caps are sanity bounds, not optimisation targets. Actuals are recorded
+    either way, and per LN-3 a budget-only rejection is co-reported with its
+    direction on D left UNRESOLVED — gate 6 inflates D when it removes a
+    largest-cluster member and deflates it when it removes a minority one.
+    """
     if not budgets:
         return True, [], {"note": "no budgets declared (weak arm)"}
-    ok, _ = _cc(src, ["-O3", "-mcpu=native"], workdir, out="b.o")
-    if not ok:
-        return False, ["measurement build failed"], {}
-    size = subprocess.run(["size", os.path.join(workdir, "b.o")],
-                          capture_output=True, text=True).stdout.splitlines()
-    text_bytes = int(size[1].split()[0]) if len(size) > 1 else None
-    actual = {"text_bytes": text_bytes}
+
+    remote = f"~/ecs/gatework/budget_{kernel}"
+    script = [
+        "set -e", f"rm -rf {remote}", f"mkdir -p {remote}", f"cd {remote}",
+        "cat > c.c <<'__ECS_EOF__'", src, "__ECS_EOF__",
+        # measurement build, plus stack usage accounting
+        "gcc -std=c11 -O3 -mcpu=native -fstack-usage -c c.c -o c.o 2>/dev/null",
+        "echo TEXT=$(size c.o | awk 'NR==2{print $1}')",
+        "echo STACK=$(awk -F'\t' '{print $2}' c.su 2>/dev/null | sort -n | tail -1)",
+    ]
+    r = subprocess.run(["ssh", "-o", "BatchMode=yes", DEVICE, "bash -s"],
+                       input="\n".join(script), capture_output=True, text=True,
+                       timeout=300)
+    if r.returncode != 0:
+        return False, [f"measurement build failed on device: {r.stderr[:300]}"], {}
+    actual = {}
+    for line in r.stdout.splitlines():
+        if line.startswith("TEXT="):
+            actual["text_bytes"] = int(line[5:] or 0)
+        elif line.startswith("STACK="):
+            actual["stack_bytes"] = int(line[6:] or 0) if line[6:].strip() else None
+
     fails = []
     cap = budgets.get("text_bytes_max")
-    if cap and text_bytes and text_bytes > cap:
-        fails.append(f".text {text_bytes} exceeds cap {cap}")
+    if cap and actual.get("text_bytes", 0) > cap:
+        fails.append(f".text {actual['text_bytes']} exceeds cap {cap}")
+    cap = budgets.get("stack_bytes_max")
+    if cap and actual.get("stack_bytes") and actual["stack_bytes"] > cap:
+        fails.append(f"stack {actual['stack_bytes']} exceeds cap {cap}")
+
+    cap = budgets.get("cycles_ratio_max")
+    if cap:
+        # SPEC §8 protocol on device: pinned clocks, isolated core, same-batch
+        # baseline. Baseline is the FASTER oracle, measured back to back with
+        # the candidate under one pin so inter-batch drift cannot enter the
+        # ratio — drift reached 15% on this board when the power mode differed.
+        import glob
+        oracles = sorted(glob.glob(os.path.join(ROOT, "trusted", "oracles",
+                                                f"{kernel}_agent*.c")))
+        if len(oracles) < 2:
+            actual["cycles_status"] = "no oracle pair available"
+        else:
+            sys.path.insert(0, os.path.join(ROOT, "harness", "measure"))
+            import cycles as cyc
+            fastest = None
+            for o in oracles:
+                m = cyc.measure(open(o).read(), open(oracles[0]).read(), kernel)
+                if m.get("status") == "ok":
+                    if fastest is None or m["candidate_ns"] < fastest[1]:
+                        fastest = (o, m["candidate_ns"])
+            if fastest is None:
+                actual["cycles_status"] = "baseline measurement unusable"
+            else:
+                m = cyc.measure(src, open(fastest[0]).read(), kernel)
+                actual["cycles_measure"] = m
+                if m.get("status") == "discard_refreq":
+                    # instrument fault, NOT a slow candidate. SPEC §8 discards.
+                    actual["cycles_status"] = "DISCARDED (core frequency moved)"
+                elif m.get("status") != "ok":
+                    actual["cycles_status"] = f"infra_fault: {m.get('error','')[:120]}"
+                else:
+                    actual["cycles_ratio"] = m["ratio"]
+                    actual["cycles_status"] = "measured"
+                    if m["ratio"] > cap:
+                        fails.append(f"cycles ratio {m['ratio']:.3f} exceeds cap {cap}")
     return (not fails), fails, actual
 
 
@@ -193,7 +257,7 @@ def run(src, packet, workdir=None):
             rec["stopped_at"] = name
             rec["elapsed_ms"] = round((time.time() - t0) * 1000)
             return rec
-    ok, feedback, actual = gate6_budget(src, workdir, packet.get("budgets") or {})
+    ok, feedback, actual = gate6_budget(src, workdir, packet.get("budgets") or {}, kernel)
     rec["gates"]["6_budget"] = {"result": "pass" if ok else "fail",
                                 "feedback": feedback, "actual": actual}
     if not ok:
