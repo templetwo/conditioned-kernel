@@ -162,7 +162,9 @@ The two seats are independent in every way the protocol can enforce: separate la
 
 What remains is the specification and the priors. The specification demonstrably did not pin these four bits — that is the premise of the whole exercise, and it was documented before anyone looked. So the convergence came from somewhere else: the standard Q15 DSP pipeline is established enough in the shared corpus that the spec's silence was filled by **convention rather than by choice**.
 
-That is precisely LN-2's mechanism, observed one level up from where LN-2 predicted it. If it operates between two authoring seats reading a spec, there is no reason to expect it operates less strongly between four generators sampling from overlapping corpora.
+That is precisely LN-2's mechanism, observed one level up from where LN-2 predicted it.
+
+**Bound on the extrapolation (Agent B, counter-sign #14018).** An earlier draft of this note said there was *no reason to expect the effect operates less strongly between four generators*. That is stronger than the observation supports and has been withdrawn. Careful, deliberate authorship of a textbook DSP shape by two seats is not the same process as sampling a model at temperature 0.8, and a co-occurrence between seats does not measure a rate among generators. What the observation establishes is that **prior strength is sufficient to fill this specification's silence** — the direction is the same, the magnitude is unmeasured, and per LN-1 this locates the mechanism without sizing it.
 
 ### The consequence, stated sharply
 
