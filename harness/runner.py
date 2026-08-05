@@ -106,7 +106,22 @@ def harness_git_sha():
     cannot be told apart from one produced before the corrections. Recorded
     with a dirty flag, because a receipt from an uncommitted tree is not
     reproducible and should say so on its face.
+
+    DIRTINESS IS SCOPED TO WHAT DETERMINES A RECEIPT, and that scoping is a
+    correctness choice rather than a convenience. A whole-worktree check reads
+    `state/current.json` — a runtime file the harness rewrites as it runs — and
+    an untracked `.grok/` seat directory, and calls the instrument unreproducible
+    because of them. It refused a clean instrument on the first regeneration
+    attempt for exactly that reason.
+
+    The scope below is the instrument: the harness, the ECS packets, the trusted
+    tier, and the SPEC that governs them. Anything outside it cannot change what
+    a gate decides. The paths are RECORDED in the receipt so the claim is
+    auditable rather than trusted — a later reader can see precisely what was
+    and was not covered by the word "clean".
     """
+    INSTRUMENT_PATHS = ["harness", "ecs", "trusted", "SPEC.md"]
+
     def _git(*a):
         try:
             return subprocess.run(["git", "-C", ROOT] + list(a),
@@ -114,11 +129,15 @@ def harness_git_sha():
         except Exception:
             return ""
     sha = _git("rev-parse", "HEAD")
-    dirty = bool(_git("status", "--porcelain"))
+    changed = _git("status", "--porcelain", "--", *INSTRUMENT_PATHS)
+    dirty = bool(changed)
     return {"harness_git_sha": sha or "unknown",
             "harness_tree_dirty": dirty,
-            "note": ("receipt produced from an UNCOMMITTED tree; not reproducible "
-                     "from the sha alone") if dirty else "clean tree"}
+            "dirty_scope": INSTRUMENT_PATHS,
+            "uncommitted": [l.strip() for l in changed.splitlines()][:20],
+            "note": ("receipt produced from an UNCOMMITTED instrument; not "
+                     "reproducible from the sha alone") if dirty else
+                    "instrument clean at this sha; scope is listed, not implied"}
 
 
 def stub_generator(_prompt, kernel, seat="agentB"):
