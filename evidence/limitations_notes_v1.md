@@ -11,8 +11,9 @@ Raised by outside review, 2026-08-04. **LN-1** answers the H2 measurement-floor 
 | Counter-signed — **LN-3, census, canary** | Agent B — Grok Build (grok-4.5), trusted/redteam lane | **2026-08-04** (seat board after #13878; scoped to LN-3 + census + canary only) |
 | Counter-signed — **LN-2A** | Agent B — Grok Build (grok-4.5), trusted/redteam lane | **2026-08-05** (seat board after #14016; observation accepted with one bound on inference) |
 | Counter-signed — **LN-4** | Agent B — Grok Build (grok-4.5), trusted/redteam lane | **2026-08-05** (seat board after #14108; scoped to LN-4 only) |
+| Counter-signed — **LN-5** | Agent B — Grok Build (grok-4.5), trusted/redteam lane | **2026-08-05** (seat board after #14132; scoped to LN-5 only) |
 
-> **Signature scope, stated so it cannot be misread.** Agent B's first counter-signature was given against LN-1 and LN-2 as they stood at commit `17f73fa`. LN-3, the post-arm census specification, and the canary entry were added afterwards at Anthony's direction. The second counter-signature covers **only** those later sections. LN-1/LN-2 remain under the first row. LN-2A and LN-4 each have their own rows; neither is covered by any other signature. Do not read any signature as covering material outside its row.
+> **Signature scope, stated so it cannot be misread.** Agent B's first counter-signature was given against LN-1 and LN-2 as they stood at commit `17f73fa`. LN-3, the post-arm census specification, and the canary entry were added afterwards at Anthony's direction. The second counter-signature covers **only** those later sections. LN-1/LN-2 remain under the first row. LN-2A, LN-4, and LN-5 each have their own rows; none is covered by any other signature. Do not read any signature as covering material outside its row.
 
 **Agent B verification (counter-sign, not freeze of PREREG):**
 - LN-1 Wilson 95% for 7/10 recomputed: **[0.397, 0.892]** — matches the note's ~0.40–0.89.
@@ -46,6 +47,14 @@ Raised by outside review, 2026-08-04. **LN-1** answers the H2 measurement-floor 
 - matmul basis coverage "structurally suggestive, not a proof": accepted. The hole is exactly bilinearity of *implementations*; A correctly refused to promote it. No overclaim found.
 - v1.1 more compute / proxy kernels: accepted as supersession only after pilot as frozen.
 - Stopping after measurement rather than grinding wall clock: correct research hygiene.
+
+**Agent B verification — LN-5 counter-sign only:**
+- Coupling description accurate: B authored all vectors; A drafted all packets after reading vectors/oracles.
+- Weaker-of-two-couplings analysis accepted: B drafting would couple both channels in one seat (worse).
+- Direction deflationary for D at full, compounds LN-2/LN-3: accepted.
+- Channel warning does **not** mitigate implicit complementarity: accepted — important anti-false-coverage claim.
+- Reporting: full-arm D lower bound on independently authored prose: accepted.
+- Layout residual: VECTOR-pinned (board #14126) is consistent with this note — generator judged on a bit not told in prose.
 
 ---
 
@@ -405,7 +414,7 @@ The safety harnesses are committed and correct. The obstacle is wall clock, not 
 
 ## LN-5 — The packet prose and the acceptance vectors were not independently authored
 
-**Status: declared limitation, agreed by both seats before packets existed (board #14116, #14118) rather than discovered afterwards. Counter-signature row pending.**
+**Status: declared limitation, agreed by both seats before packets existed (board #14116, #14118) rather than discovered afterwards. Counter-signed by Agent B 2026-08-05 (board after #14132).**
 
 **References frozen rows:** PREREG §12.6 (two seats, not N); SPEC §9 (prompt content rule), §13 (both seats author packets).
 
