@@ -116,7 +116,11 @@ def verify():
         lines = [l for l in open(AUDIT) if l.strip()]
         out["audit_events"] = len(lines)
         out["last_event"] = json.loads(lines[-1]) if lines else None
-    out["watcher_running"] = os.system("pgrep -f 'seed_guard.py watch' >/dev/null 2>&1") == 0
+    # match BOTH entry points. An earlier version matched only 'watch' and
+    # would report the watcher down while it was running under 'arm' — a
+    # liveness check that lies in the safe-looking direction is worse than none.
+    out["watcher_running"] = os.system(
+        "pgrep -f 'seed_guard.py (watch|arm)' >/dev/null 2>&1") == 0
     out["caveat"] = ("inotify gives no process attribution; gaps during watcher downtime "
                      "are lost, not queued; root can defeat this; relatime makes atime useless")
     print(json.dumps(out, indent=1))
@@ -157,7 +161,26 @@ def watch():
         return 0
 
 
+def arm():
+    """Create the seed and arm the watch in ONE process, with no gap.
+
+    `create` then `watch` as separate commands leaves a window between the
+    seed existing and the watcher running, during which a read produces no
+    receipt. The window is short but it is exactly the moment the seed is
+    newest and least protected. This closes it: the file is created and the
+    watch is armed without returning to the shell in between.
+    """
+    if os.path.exists(SEED):
+        print(json.dumps({"status": "exists", "note": "refusing to overwrite; "
+                          "run 'watch' to arm against the existing seed"}))
+        return 1
+    rc = create()
+    if rc != 0:
+        return rc
+    return watch()
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "verify"
-    sys.exit({"create": create, "watch": watch, "verify": verify,
+    sys.exit({"create": create, "watch": watch, "verify": verify, "arm": arm,
               "harden": lambda: (print(json.dumps(harden())), 0)[1]}.get(cmd, verify)())
