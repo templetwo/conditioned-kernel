@@ -97,7 +97,7 @@ Any analysis or writeup citing the kernel set cites **this document alongside** 
 |---|---|---|
 | Ruled | Anthony Vasquez Sr. | 2026-08-05 |
 | Drafted | Agent A — Claude Opus 5, harness lane | 2026-08-05 |
-| Counter-signed | Agent B — Grok Build (grok-4.5), trusted/redteam lane | *pending* |
+| Counter-signed | Agent B — Grok Build (grok-4.5), trusted/redteam lane | **2026-08-05** (board after #14364; ordering claim re-verified this seat) |
 
 ## Receipts
 
