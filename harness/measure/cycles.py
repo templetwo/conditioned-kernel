@@ -31,7 +31,7 @@ import remote as rmt
 DEVICE = "jetson"
 REMOTE = "~/ecs/gatework/cycles"
 
-DRIVER = r'''
+PRELUDE = r'''
 #define _POSIX_C_SOURCE 199309L
 #include <stdint.h>
 #include <stddef.h>
@@ -39,9 +39,6 @@ DRIVER = r'''
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
-uint32_t cand(const uint8_t *, size_t);
-uint32_t base(const uint8_t *, size_t);
 
 #define WARMUP 200
 #define MEASURED 1000
@@ -52,32 +49,122 @@ static int cmp_d(const void *a, const void *b){
 static double median(double *v,int n){ qsort(v,(size_t)n,sizeof(double),cmp_d);
     return (n&1)?v[n/2]:0.5*(v[n/2-1]+v[n/2]); }
 
-static double bench(uint32_t (*f)(const uint8_t*,size_t), const uint8_t *b, size_t n){
-    volatile uint32_t sink=0;
-    for(int i=0;i<WARMUP;i++) sink^=f(b,n);
+/* Kernels differ in arity and return type, so the thing benched is a
+   zero-argument thunk generated per kernel rather than one fixed function
+   pointer type. See emit_driver. */
+static double bench(void (*f)(void)){
+    for(int i=0;i<WARMUP;i++) f();
     static double s[MEASURED];
     for(int i=0;i<MEASURED;i++){
         struct timespec t0,t1;
         clock_gettime(CLOCK_MONOTONIC_RAW,&t0);
-        sink^=f(b,n);
+        f();
         clock_gettime(CLOCK_MONOTONIC_RAW,&t1);
         s[i]=(double)(t1.tv_sec-t0.tv_sec)*1e9+(double)(t1.tv_nsec-t0.tv_nsec);
     }
-    (void)sink;
     return median(s,MEASURED);
 }
+'''
 
+EPILOGUE = r'''
 int main(void){
-    static uint8_t buf[NB];
-    for(int i=0;i<NB;i++) buf[i]=(uint8_t)(i*31+7);
+    init_inputs();
     /* SAME BATCH: baseline and candidate measured back to back under one pin. */
-    double b = bench(base, buf, NB);
-    double c = bench(cand, buf, NB);
+    double b = bench(call_base);
+    double c = bench(call_cand);
     printf("{\"baseline_ns\":%.1f,\"candidate_ns\":%.1f,\"ratio\":%.4f}\n",
            b, c, (b>0.0)? c/b : -1.0);
     return 0;
 }
 '''
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+SIGS = os.path.join(os.path.dirname(HERE), "gates", "kernel_signatures.json")
+
+
+def emit_driver(kernel):
+    """Generate the bench driver for THIS kernel from the shared signature file.
+
+    GENERALISED 2026-08-05, and the reason is a finding rather than tidiness.
+    The original driver hardcoded crc32's shape:
+
+        uint32_t cand(const uint8_t *, size_t);
+
+    which is the only one of the five kernels it fits. For the other four the
+    driver could not compile, `measure()` returned infra_fault, and gate 6 —
+    before the §7a.2 corrections — recorded "baseline measurement unusable" as a
+    status string and PASSED. So a declared `cycles_ratio_max` went unevaluated
+    on four of five kernels while their receipts read green.
+
+    That is precisely the failure class Anthony held P2 open for, and it stayed
+    invisible until the gate stopped passing what it could not measure. The
+    fail-closed correction did not create this problem; it revealed it. Worth
+    keeping in the writeup: the instrument's silence was the bug, and the four
+    green receipts it produced were the evidence that looked most like success.
+
+    Signatures come from the same kernel_signatures.json vector_check.py uses,
+    so a kernel cannot be benched under a shape that disagrees with the shape it
+    is verified under.
+    """
+    with open(SIGS) as f:
+        sigs = {k: v for k, v in json.load(f).items() if not k.startswith("_")}
+    if kernel not in sigs:
+        raise KeyError(f"no signature for {kernel} in kernel_signatures.json")
+    sig = sigs[kernel]
+    p, ret, tn = sig["params"], sig["returns"], sig.get("trailing_n", False)
+
+    L = [PRELUDE]
+    # forward declarations for both implementations
+    for sym in ("cand", "base"):
+        args = ", ".join(("const " if q["dir"] == "in" else "") + q["ctype"] + " *"
+                         for q in p)
+        if tn:
+            args += ", size_t"
+        L.append(f"{ret} {sym}({args});")
+
+    # One input set, shared by both implementations so neither is measured on
+    # different data. Outputs are per-implementation so they cannot alias.
+    n_bench = None
+    for q in p:
+        elems = q.get("elems", 4096)
+        if q["dir"] == "in":
+            L.append(f"static {q['ctype']} {q['name']}[{elems}];")
+            if n_bench is None:
+                n_bench = elems
+        else:
+            for sym in ("cand", "base"):
+                L.append(f"static {q['ctype']} {q['name']}_{sym}[{elems}];")
+    L.append("static volatile uint64_t sink;")
+
+    # Deterministic, identical on every run and every seat. Not random: a bench
+    # whose inputs vary between the baseline and candidate batches would put
+    # that variation into the ratio.
+    L.append("static void init_inputs(void){")
+    for q in p:
+        if q["dir"] == "in":
+            elems = q.get("elems", 4096)
+            L.append(f"  for(size_t i=0;i<{elems};i++) "
+                     f"{q['name']}[i]=({q['ctype']})(i*31u+7u);")
+    L.append("}")
+
+    for sym in ("cand", "base"):
+        call_args = [q["name"] if q["dir"] == "in" else f"{q['name']}_{sym}" for q in p]
+        if tn:
+            call_args.append(str(n_bench or 4096))
+        call = f"{sym}({','.join(call_args)})"
+        L.append(f"static void call_{sym}(void){{")
+        if ret == "void":
+            # The optimiser cannot elide a call that writes an observable buffer,
+            # but the read keeps the dependency explicit at -O3.
+            out = next((q for q in p if q["dir"] == "out"), None)
+            L.append(f"  {call};")
+            if out:
+                L.append(f"  sink ^= (uint64_t){out['name']}_{sym}[0];")
+        else:
+            L.append(f"  sink ^= (uint64_t){call};")
+        L.append("}")
+    L.append(EPILOGUE)
+    return "\n".join(L)
 
 
 def measure(candidate_src, oracle_src, kernel="crc32", device=DEVICE):
@@ -91,7 +178,7 @@ def measure(candidate_src, oracle_src, kernel="crc32", device=DEVICE):
         "sudo -n jetson_clocks >/dev/null 2>&1 || true",
         "echo PRE=$(cat /sys/devices/system/cpu/cpu3/cpufreq/scaling_cur_freq)",
     ] + rmt.put("cand.c", candidate_src) + rmt.put("base.c", oracle_src) \
-      + rmt.put("drv.c", DRIVER) + [
+      + rmt.put("drv.c", emit_driver(kernel)) + [
         f"gcc -std=c11 -O3 -mcpu=native -D{kernel}=cand -c cand.c -o cand.o",
         f"gcc -std=c11 -O3 -mcpu=native -D{kernel}=base -c base.c -o base.o",
         "gcc -std=c11 -O3 -mcpu=native -c drv.c -o drv.o",
