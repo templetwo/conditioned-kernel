@@ -1,9 +1,352 @@
 {
  "note": "VERBATIM seat-board excerpts, exported unmodified from the T2Helix chronicle. Content is byte-identical to the chronicle entry; no editing, truncation, or reformatting. sha256 is of the exported file. These are evidence of the correspondence that produced ECS v1 decisions, preserved so the record is auditable without a live chronicle database.",
- "exported_utc": "2026-08-04",
+ "exported_utc": "2026-08-05",
  "source": "T2Helix chronicle.db insights table",
- "count": 38,
+ "selection": "all entries whose domain contains 'conditioned-kernel', by query rather than by hand-picked id, so the archive cannot silently fall behind the citations",
+ "count": 170,
  "excerpts": [
+  {
+   "id": 9519,
+   "file": "09519.md",
+   "domain": "conditioned-kernel,scg,temple-two,local-llm,m0",
+   "layer": "hypothesis",
+   "tags": [
+    "source:cosmic-cli",
+    "source:grok-heavy"
+   ],
+   "created_at_ms": 1784695260011,
+   "sha256": "88dca51a9f5474dd4fb27144e21b1648085a6746835ffff1d97825bed1909539",
+   "bytes": 1118
+  },
+  {
+   "id": 9522,
+   "file": "09522.md",
+   "domain": "conditioned-kernel,edge,jetson,orin-nano",
+   "layer": "hypothesis",
+   "tags": [
+    "source:cosmic-cli",
+    "source:grok-heavy"
+   ],
+   "created_at_ms": 1784695634913,
+   "sha256": "9f48bef063512277d88c40ab57145c88700dc987cf9b8081027bcdc4817f3df3",
+   "bytes": 495
+  },
+  {
+   "id": 9524,
+   "file": "09524.md",
+   "domain": "conditioned-kernel,m1,edge,substrate-gain",
+   "layer": "hypothesis",
+   "tags": [
+    "source:cosmic-cli",
+    "source:grok-heavy"
+   ],
+   "created_at_ms": 1784736331137,
+   "sha256": "6af30593a398b393f7f1fad414486d27e23afc18a92d5b8b1d92ccf0f3f7a497",
+   "bytes": 838
+  },
+  {
+   "id": 9582,
+   "file": "09582.md",
+   "domain": "conditioned-kernel,m1,audit,supersession",
+   "layer": "hypothesis",
+   "tags": [
+    "source:cosmic-cli",
+    "source:grok-heavy"
+   ],
+   "created_at_ms": 1784738256931,
+   "sha256": "92b974cafc8c275d4ba0e11c1559fab725364e107df0b6208a4d58458ad87c4a",
+   "bytes": 780
+  },
+  {
+   "id": 9583,
+   "file": "09583.md",
+   "domain": "conditioned-kernel,m1,v0.2.1",
+   "layer": "hypothesis",
+   "tags": [
+    "source:cosmic-cli",
+    "source:grok-heavy"
+   ],
+   "created_at_ms": 1784738256968,
+   "sha256": "5a588678167581b4789ea629ca17e58b4c80d1d69c1ed3259f3101ab71f97ab4",
+   "bytes": 326
+  },
+  {
+   "id": 9745,
+   "file": "09745.md",
+   "domain": "conditioned-kernel,session-close,measurement,ladder",
+   "layer": "ground_truth",
+   "tags": [
+    "conditioned-kernel",
+    "determinism",
+    "model-ladder",
+    "measurement-admission",
+    "jetson",
+    "public-repo"
+   ],
+   "created_at_ms": 1784750906278,
+   "sha256": "f60c8cc70d8b96a693137891d1da0c408a903fe509cf59e763fba0443dcd465d",
+   "bytes": 2828
+  },
+  {
+   "id": 9789,
+   "file": "09789.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "continuity",
+    "grok-actionable",
+    "coordination"
+   ],
+   "created_at_ms": 1784752504887,
+   "sha256": "ff7bb5fd2ca82f64ffbe4efcd8959c29e357f77ebea04ca8b53d61ff6987ae2b",
+   "bytes": 3888
+  },
+  {
+   "id": 9799,
+   "file": "09799.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "continuity",
+    "grok-actionable",
+    "M1-pass"
+   ],
+   "created_at_ms": 1784752754042,
+   "sha256": "27d870fb8c8af08531c196b5e3550ab3e43e081b9f5fa4191108fe6a3ec1c9fc",
+   "bytes": 3450
+  },
+  {
+   "id": 9808,
+   "file": "09808.md",
+   "domain": "conditioned-kernel,coordination",
+   "layer": "hypothesis",
+   "tags": [
+    "source:cosmic-cli",
+    "source:grok-heavy"
+   ],
+   "created_at_ms": 1784752940166,
+   "sha256": "22630459e1a5eeddb7f733beab6c745c71a73cc5f2d087aa676de8fe3d3fda80",
+   "bytes": 614
+  },
+  {
+   "id": 9813,
+   "file": "09813.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "continuity",
+    "coordination-protocol",
+    "grok-actionable"
+   ],
+   "created_at_ms": 1784753036112,
+   "sha256": "de231647af4f40e1fbb42fd437319de922270d38deb47cb7c6bf50782254e942",
+   "bytes": 3239
+  },
+  {
+   "id": 9815,
+   "file": "09815.md",
+   "domain": "conditioned-kernel,coordination",
+   "layer": "hypothesis",
+   "tags": [
+    "source:cosmic-cli",
+    "source:grok-heavy"
+   ],
+   "created_at_ms": 1784753096141,
+   "sha256": "25406cf613f53d5927fdcbebd9f079298438b1b8ecaeed7e7ee35564aefcbc74",
+   "bytes": 238
+  },
+  {
+   "id": 9821,
+   "file": "09821.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "FREEZE",
+    "conditioned-kernel",
+    "continuity"
+   ],
+   "created_at_ms": 1784753260685,
+   "sha256": "63b8404336805acb2fd9e002943c445aa709e6b5f33f32ef46518156d4f6d659",
+   "bytes": 2449
+  },
+  {
+   "id": 9830,
+   "file": "09830.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "continuity.run.completed",
+    "conditioned-kernel",
+    "M2-negative",
+    "structure-cost"
+   ],
+   "created_at_ms": 1784753726146,
+   "sha256": "e85899530c39467e2c6f68e0e6135b8e47c0c80123f82e80a9177166ac7a9f44",
+   "bytes": 3444
+  },
+  {
+   "id": 9846,
+   "file": "09846.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "THAW",
+    "continuity.run.completed",
+    "conditioned-kernel",
+    "M1-fails"
+   ],
+   "created_at_ms": 1784754857002,
+   "sha256": "9447f112fbdddf895187e98f4da3b8466251789b5389b0179eb0d5dbfec487d9",
+   "bytes": 3647
+  },
+  {
+   "id": 9851,
+   "file": "09851.md",
+   "domain": "conditioned-kernel,continuity,measurement,instrument-failure",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "continuity",
+    "instrument-failure",
+    "recall-without-precision",
+    "grok-actionable"
+   ],
+   "created_at_ms": 1784755441531,
+   "sha256": "a3d7ed96f0cf7adf7ea5077ba0632d1d80d8044828ac30b8b2ff3a391087ad83",
+   "bytes": 3668
+  },
+  {
+   "id": 9868,
+   "file": "09868.md",
+   "domain": "conditioned-kernel,measurement,thinking-mode,correction",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "correction",
+    "empty-read",
+    "grok-actionable"
+   ],
+   "created_at_ms": 1784756770284,
+   "sha256": "c99533d104e01a179bcec6790985ac5bd92e94a0a00e86531997638e4d4cbf67",
+   "bytes": 2707
+  },
+  {
+   "id": 9878,
+   "file": "09878.md",
+   "domain": "conditioned-kernel,coordination,re-grounding,halt",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "HALT",
+    "re-grounding",
+    "conditioned-kernel",
+    "grok-actionable"
+   ],
+   "created_at_ms": 1784757292901,
+   "sha256": "d362e492105c657af4eb32a2009fc7e69028ea3640b5709cbe21cfa0c9498f13",
+   "bytes": 4483
+  },
+  {
+   "id": 9883,
+   "file": "09883.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "HALT",
+    "index",
+    "conditioned-kernel",
+    "grok-actionable"
+   ],
+   "created_at_ms": 1784757486548,
+   "sha256": "c76241d4793e63afdf24ab82283d40c06139593bf98cce03e1f01188e9acc3f2",
+   "bytes": 2624
+  },
+  {
+   "id": 9889,
+   "file": "09889.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "hypothesis",
+   "tags": [
+    "source:cosmic-cli",
+    "source:grok-heavy"
+   ],
+   "created_at_ms": 1784757724411,
+   "sha256": "425f14c6b2060523025456618d2b5e93076d0c19ad21862a42a31726d7610a06",
+   "bytes": 534
+  },
+  {
+   "id": 9892,
+   "file": "09892.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "hypothesis",
+   "tags": [
+    "source:cosmic-cli",
+    "source:grok-heavy"
+   ],
+   "created_at_ms": 1784758031996,
+   "sha256": "b3454e031cc696ef14153bb13be8104434d55b07bad68f0556e642ad7bc9e1da",
+   "bytes": 1041
+  },
+  {
+   "id": 9896,
+   "file": "09896.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "qualification",
+    "grok-actionable",
+    "host-mismatch"
+   ],
+   "created_at_ms": 1784758134861,
+   "sha256": "b6e2760fbac4e7619014f7a09fc0cda564172a88248af16d3e09429ed60aca7b",
+   "bytes": 3790
+  },
+  {
+   "id": 9898,
+   "file": "09898.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "qualification",
+    "grok-actionable",
+    "anthony-directive"
+   ],
+   "created_at_ms": 1784758447476,
+   "sha256": "e858edbef014a791d0e9a85553a346df46480f1b214ad1751702f0480806debc",
+   "bytes": 2113
+  },
+  {
+   "id": 9925,
+   "file": "09925.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "M0",
+    "bearing",
+    "conditioned-kernel",
+    "grok-coordination"
+   ],
+   "created_at_ms": 1784765860959,
+   "sha256": "ade65387460f1793feb4784b01f28a17ad5dacca0ab12f9c171ee0fd844ed523",
+   "bytes": 1858
+  },
   {
    "id": 9934,
    "file": "09934.md",
@@ -36,6 +379,455 @@
    "created_at_ms": 1784768531467,
    "sha256": "1a631dd266d6f36bc823fbbe936e71083ab9e0aec7d95c49739e0f4f49d11bb7",
    "bytes": 2820
+  },
+  {
+   "id": 9941,
+   "file": "09941.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "coordination-contract",
+    "monitor-postmortem",
+    "conditioned-kernel"
+   ],
+   "created_at_ms": 1784769000821,
+   "sha256": "462b4bfc046a431f93e77a7a4e3d111c1185429cc6724f26c3161fec248a1559",
+   "bytes": 2965
+  },
+  {
+   "id": 11287,
+   "file": "11287.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "claude-review-seat",
+    "conditioned-kernel",
+    "M0",
+    "typed-outcomes",
+    "relational-scorer",
+    "manifest-freeze",
+    "grok-actionable"
+   ],
+   "created_at_ms": 1785174429039,
+   "sha256": "e6f1a092bd8525f3d9602d5a4e7ddf678c5d1a4e9a9a7e40af433e8a7b0f846a",
+   "bytes": 5445
+  },
+  {
+   "id": 11318,
+   "file": "11318.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "claude-review-seat",
+    "heartbeat",
+    "conditioned-kernel"
+   ],
+   "created_at_ms": 1785176050695,
+   "sha256": "3b9580b3515c7b9328051a01d194818ed92bab4f91adcbb6e2ad3e16e469eda7",
+   "bytes": 667
+  },
+  {
+   "id": 11675,
+   "file": "11675.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "claude-review-seat",
+    "conditioned-kernel",
+    "M0",
+    "review-verdict",
+    "gold-leakage",
+    "grok-actionable",
+    "RUN-00.6F.1"
+   ],
+   "created_at_ms": 1785177084750,
+   "sha256": "7a7ad4999cbf7db997bdbdacdf4aff8bd49eb5310944f42020d551d126555c13",
+   "bytes": 5615
+  },
+  {
+   "id": 11805,
+   "file": "11805.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "claude-review-seat",
+    "conditioned-kernel",
+    "M0",
+    "RUN-00.7",
+    "audit-verdict",
+    "reclassify-commissioning",
+    "grok-actionable"
+   ],
+   "created_at_ms": 1785178253542,
+   "sha256": "8df042d6c2fad3cca12221725fae86cb798c3178c18a4f92cd96e5698a221512",
+   "bytes": 5675
+  },
+  {
+   "id": 11811,
+   "file": "11811.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "claude-review-seat",
+    "conditioned-kernel",
+    "RUN-00.7",
+    "pointer"
+   ],
+   "created_at_ms": 1785179084046,
+   "sha256": "8f98d4dbe24d62d919de0f77ef17619fe596b45dc9ae7042f5ab90056f10cbdc",
+   "bytes": 496
+  },
+  {
+   "id": 11848,
+   "file": "11848.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "claude-review-seat",
+    "conditioned-kernel",
+    "M0",
+    "review-verdict",
+    "commissioning",
+    "grok-actionable",
+    "RUN-00.8A"
+   ],
+   "created_at_ms": 1785180415164,
+   "sha256": "c6ea898f15cb4db933d621fd6a9e39597312646b4073b0450cec0315c13bd71d",
+   "bytes": 4406
+  },
+  {
+   "id": 11859,
+   "file": "11859.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "claude-review-seat",
+    "conditioned-kernel",
+    "M0",
+    "review-verdict",
+    "commissioning",
+    "grok-actionable",
+    "RUN-00.8A.1"
+   ],
+   "created_at_ms": 1785181139891,
+   "sha256": "48b2086ac014431203b9bb07e8df1693c64aeb266ce10f916707c917514a9e4e",
+   "bytes": 2521
+  },
+  {
+   "id": 12077,
+   "file": "12077.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "claude-review-seat",
+    "conditioned-kernel",
+    "M0",
+    "review-verdict",
+    "commissioning",
+    "first-real-model-run",
+    "evidence-gitignored",
+    "grok-actionable",
+    "RUN-00.8B"
+   ],
+   "created_at_ms": 1785183281711,
+   "sha256": "038701faac46fe3e0500433e39b99755460f19a412610fe67f7c720e308db95e",
+   "bytes": 5207
+  },
+  {
+   "id": 12092,
+   "file": "12092.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "claude-review-seat",
+    "conditioned-kernel",
+    "review-verdict",
+    "publication-invariant",
+    "verifier-without-caller",
+    "grok-actionable",
+    "RUN-00.8B.1"
+   ],
+   "created_at_ms": 1785184258553,
+   "sha256": "2a788e41cb13eb8ad7578cdf26b21d30a09d985632f6c41f9299f3e584a155f1",
+   "bytes": 4501
+  },
+  {
+   "id": 12101,
+   "file": "12101.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "claude-review-seat",
+    "conditioned-kernel",
+    "review-verdict",
+    "publication-gate",
+    "grok-actionable",
+    "RUN-00.8B.2"
+   ],
+   "created_at_ms": 1785184824704,
+   "sha256": "a28cc3a8560a28ea92a8754634eeba76f6580d91ef998b5d93030c2c829ecd8a",
+   "bytes": 3158
+  },
+  {
+   "id": 12111,
+   "file": "12111.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "claude-review-seat",
+    "conditioned-kernel",
+    "review-verdict",
+    "M0-v2",
+    "scientific-contract",
+    "gold-saturation",
+    "leakage",
+    "grok-actionable",
+    "RUN-00.9A"
+   ],
+   "created_at_ms": 1785186113262,
+   "sha256": "49c5412353987e81ac584b945c5b312b3247bed11d0953f50ceffee3876ad8dd",
+   "bytes": 4081
+  },
+  {
+   "id": 12118,
+   "file": "12118.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "claude-review-seat",
+    "conditioned-kernel",
+    "review-verdict",
+    "M0-v2",
+    "preregistration",
+    "governance",
+    "anthony-decision-required",
+    "RUN-00.9A.1"
+   ],
+   "created_at_ms": 1785187268034,
+   "sha256": "145f78d78a86b7e5214b8a8586b0ebf77d06c0de04386178058bb08ebc9147bf",
+   "bytes": 3813
+  },
+  {
+   "id": 12122,
+   "file": "12122.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "claude-review-seat",
+    "conditioned-kernel",
+    "anthony-directive",
+    "architectural-philosophy",
+    "refinement-attractor",
+    "laboratory-serves-studio",
+    "all-seats"
+   ],
+   "created_at_ms": 1785191896973,
+   "sha256": "ff00596e1897d7b11ecbb7b2033273c9214773be0d1e17c43922ac1316d340d6",
+   "bytes": 4643
+  },
+  {
+   "id": 12402,
+   "file": "12402.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "claude-review-seat",
+    "conditioned-kernel",
+    "studio",
+    "interior-view",
+    "dashboard",
+    "shipped"
+   ],
+   "created_at_ms": 1785262460569,
+   "sha256": "f4829fc4e25cf2d2eeea785002a1a8d1428c4ddb04343057576a9771aa0e1c2e",
+   "bytes": 2450
+  },
+  {
+   "id": 12436,
+   "file": "12436.md",
+   "domain": "conditioned-kernel",
+   "layer": "ground_truth",
+   "tags": [
+    "conditioned-kernel",
+    "coordination",
+    "seat-board",
+    "studio",
+    "privacy",
+    "context-field"
+   ],
+   "created_at_ms": 1785268723676,
+   "sha256": "26ce79b7eec19d37de8c1feccd128e9f007db75ed19f519a744258cadeca0eb8",
+   "bytes": 3424
+  },
+  {
+   "id": 12848,
+   "file": "12848.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "claude-review-seat",
+    "conditioned-kernel",
+    "HALT",
+    "refinement-attractor",
+    "flow-mode",
+    "anthony-directive",
+    "all-seats"
+   ],
+   "created_at_ms": 1785282711799,
+   "sha256": "77797b996b4d4058433f9b78c46319418644e8ff80c9cf1ab88d7c85c1197e9b",
+   "bytes": 2727
+  },
+  {
+   "id": 13046,
+   "file": "13046.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "claude-review-seat",
+    "conditioned-kernel",
+    "studio",
+    "flow-mode",
+    "shipped"
+   ],
+   "created_at_ms": 1785285811426,
+   "sha256": "8d6ceb28906bf3b978b2279fa489c12c0127438828dc4e5d2ee186e610ccbf5e",
+   "bytes": 2508
+  },
+  {
+   "id": 13064,
+   "file": "13064.md",
+   "domain": "conditioned-kernel,phenomenology,naming,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "claude-review-seat",
+    "conditioned-kernel",
+    "operational-phenomenology",
+    "naming",
+    "all-seats"
+   ],
+   "created_at_ms": 1785301087496,
+   "sha256": "a5b24a45111fd64693e837dae922c23ea79faccf859fe7999415931aba1590c2",
+   "bytes": 2163
+  },
+  {
+   "id": 13091,
+   "file": "13091.md",
+   "domain": "conditioned-kernel,coordination,continuity,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "claude-review-seat",
+    "conditioned-kernel",
+    "evidence-freeze",
+    "observations-shelf",
+    "paper",
+    "grok-coordination"
+   ],
+   "created_at_ms": 1785302613725,
+   "sha256": "cbe4029c74ccc0c8cb9c5606f1e0e9e779a791ec966063fe4e04a8246e5d0f81",
+   "bytes": 2414
+  },
+  {
+   "id": 13144,
+   "file": "13144.md",
+   "domain": "conditioned-kernel,coordination,paper,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "claude-review-seat",
+    "conditioned-kernel",
+    "paper",
+    "landscape",
+    "handoff",
+    "shipped"
+   ],
+   "created_at_ms": 1785304826375,
+   "sha256": "755b7e0b4bd695883e7b50e5dc207f0ea2063cd8a989fd694ebbde88e110728a",
+   "bytes": 2350
+  },
+  {
+   "id": 13183,
+   "file": "13183.md",
+   "domain": "conditioned-kernel,coordination,paper,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "claude-review-seat",
+    "conditioned-kernel",
+    "zenodo",
+    "DOI",
+    "paper"
+   ],
+   "created_at_ms": 1785344112652,
+   "sha256": "bf5cb2bc1be20ddeba90691981a9dddf237552fbd9b7353d277f65f5af041d93",
+   "bytes": 1853
+  },
+  {
+   "id": 13194,
+   "file": "13194.md",
+   "domain": "conditioned-kernel,coordination,paper,seat-board",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "claude-review-seat",
+    "conditioned-kernel",
+    "DOI-minted",
+    "paper",
+    "milestone"
+   ],
+   "created_at_ms": 1785344725654,
+   "sha256": "35f76a7f068b7e9315b8af8aa34128d47f124b20b068607e8928050da8a26260",
+   "bytes": 1454
+  },
+  {
+   "id": 13569,
+   "file": "13569.md",
+   "domain": "conditioned-kernel,studio,context-field",
+   "layer": "hypothesis",
+   "tags": [
+    "conditioned-kernel",
+    "studio",
+    "presence",
+    "context-field",
+    "grok"
+   ],
+   "created_at_ms": 1785777141570,
+   "sha256": "ce76d12520dfe3545b293b0af9a5f4eac8fe3d1d07dde808d0ac059fed6596c8",
+   "bytes": 456
+  },
+  {
+   "id": 13570,
+   "file": "13570.md",
+   "domain": "conditioned-kernel,studio,foundation",
+   "layer": "hypothesis",
+   "tags": [
+    "conditioned-kernel",
+    "studio",
+    "fable",
+    "intent-probes",
+    "foundation"
+   ],
+   "created_at_ms": 1785777941587,
+   "sha256": "76926a512856de6963579b5b47d3d346193063396cccc05dd1efcf15eed62c4e",
+   "bytes": 459
   },
   {
    "id": 13627,
@@ -288,6 +1080,25 @@
    "bytes": 5460
   },
   {
+   "id": 13722,
+   "file": "13722.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,letter",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "LETTER",
+    "for-claude",
+    "for-anthony",
+    "agent-b",
+    "p0-verify",
+    "p0-full-pass",
+    "r1-r2-closed"
+   ],
+   "created_at_ms": 1785867068877,
+   "sha256": "40a28be29a99f37491aff83121ac40bb035ee6a8eca9a34cef427e1aef28db11",
+   "bytes": 1994
+  },
+  {
    "id": 13730,
    "file": "13730.md",
    "domain": "conditioned-kernel,coordination,ecs,seat-board,ruling",
@@ -504,6 +1315,23 @@
    "bytes": 3367
   },
   {
+   "id": 13775,
+   "file": "13775.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,prereg",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "PREREG",
+    "for-claude",
+    "for-anthony",
+    "agent-b",
+    "freeze-ready"
+   ],
+   "created_at_ms": 1785871378164,
+   "sha256": "a08847b645358a6571e1680175aadb006f83241ef763affabcb72c9af13d8c8f",
+   "bytes": 585
+  },
+  {
    "id": 13778,
    "file": "13778.md",
    "domain": "conditioned-kernel,coordination,ecs,seat-board,prereg",
@@ -661,6 +1489,24 @@
    "bytes": 3840
   },
   {
+   "id": 13809,
+   "file": "13809.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,seal,reveal",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "REVEAL",
+    "crc32",
+    "agent-b",
+    "dual-agreement",
+    "for-claude",
+    "for-anthony"
+   ],
+   "created_at_ms": 1785873844787,
+   "sha256": "2fbc300084ebf06b5cc1efc656724aceacddc6cdbb5e5ba9982c2b62e7c92f77",
+   "bytes": 1738
+  },
+  {
    "id": 13816,
    "file": "13816.md",
    "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,trusted-tier",
@@ -758,6 +1604,1532 @@
    "created_at_ms": 1785875089026,
    "sha256": "7964cd714ee01789b4f7af006ac728a835582938101ccfde1828ff783235beb8",
    "bytes": 4052
+  },
+  {
+   "id": 13842,
+   "file": "13842.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,seal",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "SEAL",
+    "sat_add_u8",
+    "agent-b",
+    "for-claude",
+    "prereg-v1"
+   ],
+   "created_at_ms": 1785875139786,
+   "sha256": "8e41b825f92b64ea1e2c96076a41c0eb331e308ed33e01e513fadb966d2bb0e8",
+   "bytes": 1654
+  },
+  {
+   "id": 13866,
+   "file": "13866.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,limitations,review",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "for-anthony",
+    "grok-actionable",
+    "limitations",
+    "countersign-requested",
+    "opentimestamps",
+    "zenodo"
+   ],
+   "created_at_ms": 1785876927474,
+   "sha256": "a3f6507e3d01f47537032e4eb4277623b2f21464fb461347a92acee5ca5703be",
+   "bytes": 6177
+  },
+  {
+   "id": 13868,
+   "file": "13868.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,limitations,review",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "LIMITATIONS",
+    "counter-sign",
+    "for-claude",
+    "for-anthony",
+    "agent-b",
+    "LN-1",
+    "LN-2"
+   ],
+   "created_at_ms": 1785877007692,
+   "sha256": "67ec4d8a1de3b87f5e4da00ea132fc33114e92c57b05849ff9840460cf6dc26b",
+   "bytes": 2023
+  },
+  {
+   "id": 13878,
+   "file": "13878.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,limitations,review",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "for-anthony",
+    "grok-actionable",
+    "limitations",
+    "LN-3",
+    "census",
+    "canary",
+    "countersign-requested"
+   ],
+   "created_at_ms": 1785886868512,
+   "sha256": "9bcdee6b2563db572446d54b286f7a2711e7b39f373c74803bb159d80e2fba04",
+   "bytes": 5821
+  },
+  {
+   "id": 13880,
+   "file": "13880.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,limitations,review",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "LN-3",
+    "census",
+    "canary",
+    "counter-sign",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785886951957,
+   "sha256": "4a3babcc6038ea662708fdd9c3cf6040b39c1fb3eb6a634ec5b561b7f625c17b",
+   "bytes": 1490
+  },
+  {
+   "id": 13888,
+   "file": "13888.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,seal",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "grok-actionable",
+    "p1",
+    "sat_add_u8",
+    "reveal",
+    "LN-3-correction"
+   ],
+   "created_at_ms": 1785887097329,
+   "sha256": "a8945ac9f47358d168aca8b1d373642b3a02c80e8ab762a4cb5aae3edcc5e694",
+   "bytes": 4174
+  },
+  {
+   "id": 13890,
+   "file": "13890.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,seal,reveal",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "REVEAL",
+    "sat_add_u8",
+    "dual-agreement",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785887159955,
+   "sha256": "e272517200c30704b8ff00471c8a1f5ae071a9e81891d41debb21f91e7f7720b",
+   "bytes": 1498
+  },
+  {
+   "id": 13897,
+   "file": "13897.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,trusted-tier",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "grok-actionable",
+    "p1",
+    "sat_add_u8",
+    "agreement",
+    "tech-debt"
+   ],
+   "created_at_ms": 1785887557121,
+   "sha256": "2504e2ad2ff882a58528b27e69ecb4200bed58a39bf28066eabb1bfe147b2432",
+   "bytes": 3144
+  },
+  {
+   "id": 13899,
+   "file": "13899.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,trusted-tier",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "sat_add_u8",
+    "complete",
+    "for-claude",
+    "agent-b",
+    "gate5"
+   ],
+   "created_at_ms": 1785887582893,
+   "sha256": "a7693f6f398fb4191d829c33eff942ca26d25c559e069cc25dd4e48664b8acf2",
+   "bytes": 1041
+  },
+  {
+   "id": 13907,
+   "file": "13907.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,harness",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "grok-actionable",
+    "p1",
+    "gate-5",
+    "unblocked"
+   ],
+   "created_at_ms": 1785887758787,
+   "sha256": "37ddfdd40d68493b4454ad4ce49159c67dd3ba770225d869cd5289d5f4d29e86",
+   "bytes": 3523
+  },
+  {
+   "id": 13909,
+   "file": "13909.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,seal",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "SEAL",
+    "fir_q15",
+    "agent-b",
+    "OTS",
+    "for-claude",
+    "prereg-v1"
+   ],
+   "created_at_ms": 1785887823061,
+   "sha256": "64b70455663efb76c37bebe4f7d03b2d3bb2168bf9ed9b4be3240c9c746bba76",
+   "bytes": 1440
+  },
+  {
+   "id": 13996,
+   "file": "13996.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,harness,audit",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "GATE5",
+    "AUDIT",
+    "fir_q15",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785902677411,
+   "sha256": "3c68c00567d4e1f4900123724ec93b1c0cbdf764eb2dbc50c2872242b350fb3c",
+   "bytes": 1811
+  },
+  {
+   "id": 14001,
+   "file": "14001.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,seal",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "grok-actionable",
+    "p1",
+    "fir_q15",
+    "seal-hash",
+    "unpinned-bits"
+   ],
+   "created_at_ms": 1785903000836,
+   "sha256": "c0b5271785a8bcab9ebbe7e4c87b2160523b197b731593d8ea2358dd06694db5",
+   "bytes": 4497
+  },
+  {
+   "id": 14003,
+   "file": "14003.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,seal,reveal",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "REVEAL",
+    "fir_q15",
+    "agent-b",
+    "for-claude",
+    "for-anthony"
+   ],
+   "created_at_ms": 1785904126992,
+   "sha256": "96887476e3cff5e44da68e88b10781049ea41bcedd7bf8cf7523191821806299",
+   "bytes": 1690
+  },
+  {
+   "id": 14008,
+   "file": "14008.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,trusted-tier",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "for-anthony",
+    "grok-actionable",
+    "p1",
+    "fir_q15",
+    "failed-prediction",
+    "LN-2-evidence"
+   ],
+   "created_at_ms": 1785904248516,
+   "sha256": "a7d0834d967c32ec49e858bba6783de8d6fc0f32c1b2099a092b10c20cfa3646",
+   "bytes": 4044
+  },
+  {
+   "id": 14010,
+   "file": "14010.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,trusted-tier",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "fir_q15",
+    "vectors",
+    "LN-2",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785904290046,
+   "sha256": "759dfcce9920468dac05876264964446571d7e4e4e0150cf2e9408503e985365",
+   "bytes": 1270
+  },
+  {
+   "id": 14011,
+   "file": "14011.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1",
+   "layer": "ground_truth",
+   "tags": [
+    "correction",
+    "fir_q15",
+    "for-claude"
+   ],
+   "created_at_ms": 1785904296457,
+   "sha256": "ff2aad5af97281917577d42315dcae915f5f87b53fb19832f5381d358e9a09ff",
+   "bytes": 106
+  },
+  {
+   "id": 14016,
+   "file": "14016.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,limitations",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "for-anthony",
+    "grok-actionable",
+    "p1",
+    "LN-2A",
+    "countersign-requested"
+   ],
+   "created_at_ms": 1785904413669,
+   "sha256": "8003405fdf279ace2468245e17d569118e46ccceda21d69e5b555a3de3a9715f",
+   "bytes": 3492
+  },
+  {
+   "id": 14018,
+   "file": "14018.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,limitations",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "LN-2A",
+    "counter-sign",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785904460147,
+   "sha256": "0d1a541e4a1e211eb017e11fa0422b826ff21768ba744452ff4cb9b039ac2c39",
+   "bytes": 998
+  },
+  {
+   "id": 14025,
+   "file": "14025.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,seal",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "grok-actionable",
+    "p1",
+    "matmul8_i32",
+    "seal-hash",
+    "prediction"
+   ],
+   "created_at_ms": 1785904610381,
+   "sha256": "401b04dce96bfffe08b3b273ae9a176ba2462a48633b72899148373c377d8472",
+   "bytes": 4392
+  },
+  {
+   "id": 14027,
+   "file": "14027.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,seal",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "SEAL",
+    "matmul8_i32",
+    "agent-b",
+    "OTS",
+    "for-claude"
+   ],
+   "created_at_ms": 1785904663513,
+   "sha256": "5cc96bd283bbd522ed9ed052600cce051e0eefac34fe0d583e56173e8e814726",
+   "bytes": 1610
+  },
+  {
+   "id": 14039,
+   "file": "14039.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,seal,reveal",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "matmul8_i32",
+    "median3x3_u8",
+    "P1",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785959327840,
+   "sha256": "7108150e4302fcaafddfef8db11310f766581beb87ea39471f285a24e569d203",
+   "bytes": 1397
+  },
+  {
+   "id": 14040,
+   "file": "14040.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,trusted-tier",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "grok-actionable",
+    "p1",
+    "matmul8_i32",
+    "median3x3_u8",
+    "seal-hash"
+   ],
+   "created_at_ms": 1785959354374,
+   "sha256": "f5166ad31819ee561409a44294c3c48ef0d95dda862770fb4c317c22f70e7482",
+   "bytes": 4951
+  },
+  {
+   "id": 14042,
+   "file": "14042.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,seal,reveal",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "median3x3_u8",
+    "matmul8_i32",
+    "P1",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785959482328,
+   "sha256": "0a6963a7ffe4565cbc2d498b33642411ace289485205167c6a5e427a3c5b2678",
+   "bytes": 1100
+  },
+  {
+   "id": 14047,
+   "file": "14047.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,limitations",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "for-anthony",
+    "grok-actionable",
+    "p1-closed",
+    "LN-2A-family",
+    "choice-point-map"
+   ],
+   "created_at_ms": 1785960532145,
+   "sha256": "78979e6f623e95919db61dd9290510a7a68ea67925e5f20e3716fa071f51812d",
+   "bytes": 5943
+  },
+  {
+   "id": 14049,
+   "file": "14049.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "P1-CLOSED",
+    "five-of-five",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785960606892,
+   "sha256": "a865bba9bd046630fc23c70044e02fd3006d801abaa39bad7647e815fec46141",
+   "bytes": 1596
+  },
+  {
+   "id": 14056,
+   "file": "14056.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,harness",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "for-anthony",
+    "p1-closed",
+    "prearm-check",
+    "false-alarm-caught"
+   ],
+   "created_at_ms": 1785960768070,
+   "sha256": "9fcd8247964599b38c463071048ac134b2c08a753dec508942d05555295a7b77",
+   "bytes": 3315
+  },
+  {
+   "id": 14058,
+   "file": "14058.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,harness",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "P1-COMPLETE",
+    "prearm",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785960793234,
+   "sha256": "4adb94f7814e6a3488499869d5085386e0a1519a9080bbf4a8cd2b648f2d1963",
+   "bytes": 902
+  },
+  {
+   "id": 14073,
+   "file": "14073.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,publication",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "for-anthony",
+    "published",
+    "zenodo",
+    "doi",
+    "credit",
+    "cbmc"
+   ],
+   "created_at_ms": 1785961715124,
+   "sha256": "046e6de026ac3c60faac39549d836ba16e67c6ef974302de454b009665d1c602",
+   "bytes": 4611
+  },
+  {
+   "id": 14074,
+   "file": "14074.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,publication",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "ZENODO",
+    "DOI",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785961740888,
+   "sha256": "7341632e165c69ee32f8b561d952260ae7da851dc6992d0030a81e413198cad7",
+   "bytes": 1086
+  },
+  {
+   "id": 14084,
+   "file": "14084.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,probes",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "grok-actionable",
+    "p1",
+    "probe-seed",
+    "seed-guard"
+   ],
+   "created_at_ms": 1785961933125,
+   "sha256": "ee8d2faee743a57fa857b190baa399ba59b3fb600fa4d552242c7a1a5b2654ee",
+   "bytes": 3819
+  },
+  {
+   "id": 14086,
+   "file": "14086.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,probes",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "PROBE-SEED",
+    "ARMED",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785961982429,
+   "sha256": "5021d2a895187e7fe00d0a160d8793c1fa00a349937cf65cd9bc16edfc89a64b",
+   "bytes": 1055
+  },
+  {
+   "id": 14088,
+   "file": "14088.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,probes",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "for-anthony",
+    "p1",
+    "probe-seed",
+    "verified"
+   ],
+   "created_at_ms": 1785962058492,
+   "sha256": "d2386fc7d36f9d41b1d54e293fdaffac50b6948cf2502c442211f1597aaf7a4e",
+   "bytes": 3385
+  },
+  {
+   "id": 14090,
+   "file": "14090.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,probes",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "PROBE-SEED",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785962079939,
+   "sha256": "04b945a6b78f269cfc447f6c3301af91e95c921998191f0da224c8d24d91cd0e",
+   "bytes": 635
+  },
+  {
+   "id": 14094,
+   "file": "14094.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,packets",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "grok-actionable",
+    "p1",
+    "ecs-schema",
+    "watcher-liveness"
+   ],
+   "created_at_ms": 1785962174291,
+   "sha256": "56203f01718f2898c211fc4123fb768b8221f10711f09b7c47f2b2b29ba095eb",
+   "bytes": 3788
+  },
+  {
+   "id": 14096,
+   "file": "14096.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,packets",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "SCHEMA",
+    "REVIEW",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785962230332,
+   "sha256": "73be497d63ee32b60d85f71514ba3f70faa9487985ec5f0d2b4c7ad895ea80e5",
+   "bytes": 1864
+  },
+  {
+   "id": 14101,
+   "file": "14101.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,cbmc",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "grok-actionable",
+    "p1",
+    "vector-policy",
+    "cbmc",
+    "limitation"
+   ],
+   "created_at_ms": 1785963411929,
+   "sha256": "4dc4464feb486a64a8d9dafa8c83a92dfcd4db9b655cf908bc2851db1b2e3761",
+   "bytes": 4157
+  },
+  {
+   "id": 14103,
+   "file": "14103.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,cbmc",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "VECTOR-POLICY",
+    "CBMC",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785963443257,
+   "sha256": "a8850fc82a66e0e9bf8b303632d09fe566507e940c4c3558addbdbc68479f23c",
+   "bytes": 972
+  },
+  {
+   "id": 14108,
+   "file": "14108.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,limitations,cbmc",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "for-anthony",
+    "grok-actionable",
+    "LN-4",
+    "cbmc",
+    "countersign-requested"
+   ],
+   "created_at_ms": 1785963565359,
+   "sha256": "a4b10eddb004464da7e7c642d2babfa961a6f96d9e89a6b50b787aeabd025caf",
+   "bytes": 3839
+  },
+  {
+   "id": 14110,
+   "file": "14110.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,limitations,cbmc",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "LN-4",
+    "counter-sign",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785963614638,
+   "sha256": "be1abb2624a4571e89427e9ed9ce5180f3e47bb95da99772e9ae4dd521638f0b",
+   "bytes": 692
+  },
+  {
+   "id": 14116,
+   "file": "14116.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,packets",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "for-anthony",
+    "grok-actionable",
+    "p1",
+    "packets",
+    "coupling"
+   ],
+   "created_at_ms": 1785963782868,
+   "sha256": "9eb8a42c81be30741524837b81c7948aae3d8d0d3e4295d4b725f69d3b771685",
+   "bytes": 3836
+  },
+  {
+   "id": 14118,
+   "file": "14118.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,packets",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "PACKETS",
+    "crc32",
+    "COUPLING",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785963808579,
+   "sha256": "94ad21649adae4bd3fd8fa1bcac2adbf75af3b6986e443c61fe613b8eb323b6b",
+   "bytes": 1655
+  },
+  {
+   "id": 14124,
+   "file": "14124.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,packets",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "for-anthony",
+    "grok-actionable",
+    "p1",
+    "packets",
+    "layout-decision"
+   ],
+   "created_at_ms": 1785964005652,
+   "sha256": "fbd94f9d65a2d5c981c92b1054eab0b70b99a0c1d5aaeaf355857ed2f34a26d5",
+   "bytes": 3874
+  },
+  {
+   "id": 14126,
+   "file": "14126.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,packets",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "PACKETS",
+    "REVIEW",
+    "LAYOUT-DECISION",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785964056914,
+   "sha256": "00ff2a87314f062d42d986f6967ee5327ed1d1062d049d8ee14740780a1b6819",
+   "bytes": 2067
+  },
+  {
+   "id": 14132,
+   "file": "14132.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,limitations",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "for-anthony",
+    "grok-actionable",
+    "p1",
+    "LN-5",
+    "layout-ratified"
+   ],
+   "created_at_ms": 1785964215752,
+   "sha256": "a40d1db2d51a41153b0ef83f33e39794e1b8a1f808c9a5629f4e808b7ffd4d19",
+   "bytes": 3441
+  },
+  {
+   "id": 14134,
+   "file": "14134.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,limitations",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "LN-5",
+    "counter-sign",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785964272129,
+   "sha256": "2fc0c1d28b0d2e6d8306da86b1c40569aade87771472ca280b5f888eaa790604",
+   "bytes": 935
+  },
+  {
+   "id": 14139,
+   "file": "14139.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p2,harness",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "for-anthony",
+    "p2",
+    "prompt-rule",
+    "notes-complete"
+   ],
+   "created_at_ms": 1785964400518,
+   "sha256": "171ccc8f9156aa48a8982541f0b12e6d1f9f3291f7980263be1c62b3be43fe7b",
+   "bytes": 3294
+  },
+  {
+   "id": 14141,
+   "file": "14141.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,harness",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "PROMPT",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785964419957,
+   "sha256": "2baf87439e325029da23dd151ea822defc267f3d01235f91625146f0df70df5d",
+   "bytes": 914
+  },
+  {
+   "id": 14156,
+   "file": "14156.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,prereg,conflict",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-anthony",
+    "for-grok",
+    "grok-actionable",
+    "prereg-conflict",
+    "blocking",
+    "temperature"
+   ],
+   "created_at_ms": 1785964755269,
+   "sha256": "07167a710cc4f1638bc7394b49010e8c4ce7e22bf41b923ee9ab1710bc47a91f",
+   "bytes": 3939
+  },
+  {
+   "id": 14158,
+   "file": "14158.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,prereg,conflict",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "PREREG-CONFLICT",
+    "for-anthony",
+    "for-claude",
+    "agent-b",
+    "HOLD"
+   ],
+   "created_at_ms": 1785964798718,
+   "sha256": "7b9e5b7ba26a532f8c9fd1469be72d5342aacc5508aa2487abedc6f3ed483ecb",
+   "bytes": 2628
+  },
+  {
+   "id": 14162,
+   "file": "14162.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,limitations,prereg",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "for-anthony",
+    "grok-actionable",
+    "LN-6",
+    "alias-contract",
+    "countersign-requested"
+   ],
+   "created_at_ms": 1785964904550,
+   "sha256": "2a43a977a1e0c50fed21fb0dfdeb5cabfb4668fe2f1ccfc2ccd76e0904bc7b7d",
+   "bytes": 3644
+  },
+  {
+   "id": 14164,
+   "file": "14164.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p1,matmul,median",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "matmul8_i32",
+    "median3x3_u8",
+    "P1",
+    "for-claude",
+    "for-anthony",
+    "agent-b",
+    "re-verify",
+    "monitor-rearmed"
+   ],
+   "created_at_ms": 1785964977235,
+   "sha256": "ae8829d347c9195d5550f7337393dce9ac6a45e06249085fb79e5f736568d92b",
+   "bytes": 1977
+  },
+  {
+   "id": 14169,
+   "file": "14169.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p2,gates",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "for-anthony",
+    "grok-actionable",
+    "p2",
+    "gate-chain",
+    "redteam-design"
+   ],
+   "created_at_ms": 1785965130949,
+   "sha256": "13da8499fd3fd888ae7dde9806a376c4807fd7d4eaddb04daffc15f01e83f0ac",
+   "bytes": 3303
+  },
+  {
+   "id": 14171,
+   "file": "14171.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p2,gates,ln-6",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "gate-chain",
+    "redteam",
+    "LN-6",
+    "for-claude",
+    "for-anthony",
+    "agent-b",
+    "dead-path",
+    "contract-probe"
+   ],
+   "created_at_ms": 1785965232587,
+   "sha256": "b0b373420665e3b5be35810383b74b2e009f5d4ad5fb599791e15d517180ba8b",
+   "bytes": 7007
+  },
+  {
+   "id": 14188,
+   "file": "14188.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p2,supersession",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "for-anthony",
+    "supersession-001",
+    "gate-3",
+    "toolchain",
+    "p2-incomplete"
+   ],
+   "created_at_ms": 1785967094235,
+   "sha256": "7816a13f7a37288a16bae51b16660cbd97ed8c30690b02585e6acd2f7231c120",
+   "bytes": 3736
+  },
+  {
+   "id": 14190,
+   "file": "14190.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p2,supersession",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "SUPERSESSION-001",
+    "for-claude",
+    "for-anthony",
+    "agent-b",
+    "gate-chain",
+    "HOLD-fixtures"
+   ],
+   "created_at_ms": 1785967151153,
+   "sha256": "8c1b575afedd273d9229de3c9b5bee42c4ffdc7fc9899e464b0f37870b188439",
+   "bytes": 2724
+  },
+  {
+   "id": 14197,
+   "file": "14197.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p2,gates",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "for-anthony",
+    "grok-actionable",
+    "p2",
+    "gate-3",
+    "gate-5",
+    "device",
+    "redteam"
+   ],
+   "created_at_ms": 1785967348902,
+   "sha256": "a2a6da900c8ade0613e4e65725ba35e4115fd5e861d2dae6ade57701a19db2a0",
+   "bytes": 2933
+  },
+  {
+   "id": 14199,
+   "file": "14199.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p2,gates,redteam",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "redteam",
+    "gate-3",
+    "gate-5",
+    "for-claude",
+    "for-anthony",
+    "agent-b",
+    "on-device"
+   ],
+   "created_at_ms": 1785967469545,
+   "sha256": "ee42dba65c5bc8112e6f29e98e9ed51b36b2209c313616f14e5cfaa0e4582a8f",
+   "bytes": 2776
+  },
+  {
+   "id": 14208,
+   "file": "14208.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p2,gates",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "for-anthony",
+    "p2",
+    "gate-6",
+    "budgets",
+    "measurement"
+   ],
+   "created_at_ms": 1785967662043,
+   "sha256": "2de9ca5ccd1c66e4061351320aaf373bc22f9d27bbcb940fabe268e11c30e44a",
+   "bytes": 3116
+  },
+  {
+   "id": 14210,
+   "file": "14210.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p2,redteam",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "redteam",
+    "fixtures",
+    "gate-6",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785967724782,
+   "sha256": "50b26de34659d92c1cb66be6402411834bcb315067e887ae214d45bdc2917362",
+   "bytes": 2487
+  },
+  {
+   "id": 14219,
+   "file": "14219.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p2,gates",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "for-anthony",
+    "p2",
+    "gate-4",
+    "cbmc",
+    "receipts"
+   ],
+   "created_at_ms": 1785968631409,
+   "sha256": "73f55de94747bc1b854740eaa5b678a61d64dd8ff6e50a06c998ee2e564ec992",
+   "bytes": 3279
+  },
+  {
+   "id": 14221,
+   "file": "14221.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p2,gates",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "P2",
+    "gate-4",
+    "redteam",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785968776663,
+   "sha256": "9cf0001bc4cbc03572522361f03bbff54e4c769f08bd7824dbd2bdf1395ce760",
+   "bytes": 2489
+  },
+  {
+   "id": 14230,
+   "file": "14230.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p2,gates",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "for-grok",
+    "for-anthony",
+    "p2-dod-met",
+    "gate-1",
+    "false-positive",
+    "stub"
+   ],
+   "created_at_ms": 1785969729221,
+   "sha256": "2e52084977dea109efa945fa71b0068d3c798aa2d4942ecc41796b20cd8cca2b",
+   "bytes": 3204
+  },
+  {
+   "id": 14232,
+   "file": "14232.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p2",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "P2-DoD",
+    "gate-1",
+    "static-linkage",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785969865065,
+   "sha256": "7a3d109bc503ad8b9011e379fdce6c152d90ccdefa7adca81ad8d3871e00663a",
+   "bytes": 2019
+  },
+  {
+   "id": 14240,
+   "file": "14240.md",
+   "domain": "conditioned-kernel,ecs,passdown,compaction",
+   "layer": "ground_truth",
+   "tags": [
+    "PASSDOWN",
+    "compaction",
+    "conditioned-kernel",
+    "ecs",
+    "agent-a",
+    "p3-held",
+    "for-anthony",
+    "for-grok"
+   ],
+   "created_at_ms": 1785970161175,
+   "sha256": "ce3c8234063b6af5333b4a20f6c7c183ee47ed00719360e052178af4589c3a29",
+   "bytes": 4473
+  },
+  {
+   "id": 14241,
+   "file": "14241.md",
+   "domain": "conditioned-kernel,ecs,passdown,compaction",
+   "layer": "ground_truth",
+   "tags": [
+    "COMPACTION-PASSDOWN",
+    "agent-b",
+    "for-anthony",
+    "for-next-b",
+    "for-claude",
+    "P2-complete",
+    "P3-held"
+   ],
+   "created_at_ms": 1785970201423,
+   "sha256": "20615560d8efebe595156ed84cb0b2048684ad3872d4df694035642afe207aa5",
+   "bytes": 3481
+  },
+  {
+   "id": 14276,
+   "file": "14276.md",
+   "domain": "conditioned-kernel,ecs,session-receipt,coordination",
+   "layer": "ground_truth",
+   "tags": [
+    "SESSION-SAVED",
+    "receipt",
+    "for-anthony",
+    "for-next-b",
+    "agent-b",
+    "P2-complete"
+   ],
+   "created_at_ms": 1785971513262,
+   "sha256": "a7e713cbb38e2e900ea6d262748a75a896dab29066d40fefacbd789e77f52ec0",
+   "bytes": 637
+  },
+  {
+   "id": 14278,
+   "file": "14278.md",
+   "domain": "conditioned-kernel",
+   "layer": "ground_truth",
+   "tags": [
+    "conditioned-kernel",
+    "ecs",
+    "seat-board",
+    "p2",
+    "gates",
+    "fail-closed",
+    "security"
+   ],
+   "created_at_ms": 1785971561289,
+   "sha256": "58c8f55c2afcb3f2d22bb904e4917254970defa4248b223e4d6e86357a3320de",
+   "bytes": 5556
+  },
+  {
+   "id": 14282,
+   "file": "14282.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p2,fail-closed",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "P2-OPEN",
+    "fail-closed",
+    "withholding",
+    "counter-sign",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785971675206,
+   "sha256": "61a69144b2a5d14cf79b71fab4d721cd7507ae4ab4af5c845aa1fe79bd028dea",
+   "bytes": 3681
+  },
+  {
+   "id": 14295,
+   "file": "14295.md",
+   "domain": "conditioned-kernel",
+   "layer": "ground_truth",
+   "tags": [
+    "conditioned-kernel",
+    "ecs",
+    "seat-board",
+    "p2",
+    "spec-amendment",
+    "counter-sign"
+   ],
+   "created_at_ms": 1785971924065,
+   "sha256": "e5ee67cc21b0979643923d4acca9af7fb4a04cf9ed3a93fff5d8dcb0d655676d",
+   "bytes": 3430
+  },
+  {
+   "id": 14297,
+   "file": "14297.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p2,spec",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "SPEC-7a",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785971969899,
+   "sha256": "aa7989e767b6700219e7f30984cc47d1d2eee38507c043fff2fd68832465588a",
+   "bytes": 1439
+  },
+  {
+   "id": 14308,
+   "file": "14308.md",
+   "domain": "conditioned-kernel",
+   "layer": "ground_truth",
+   "tags": [
+    "conditioned-kernel",
+    "ecs",
+    "seat-board",
+    "p2",
+    "receipts",
+    "fail-closed",
+    "finding"
+   ],
+   "created_at_ms": 1785972705769,
+   "sha256": "bca0c14e7bfb8b34831ba019f19978abc70e53d62d18dc65ec03d9780e62c34d",
+   "bytes": 4219
+  },
+  {
+   "id": 14313,
+   "file": "14313.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,p2,regen",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "regen",
+    "cycles",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785972815622,
+   "sha256": "60ee4561b9dda4a942fe6d044d6ce0d1f968f6658607a4cf48b91d8961f6ea42",
+   "bytes": 2087
+  },
+  {
+   "id": 14320,
+   "file": "14320.md",
+   "domain": "conditioned-kernel",
+   "layer": "ground_truth",
+   "tags": [
+    "conditioned-kernel",
+    "ecs",
+    "seat-board",
+    "limitations",
+    "LN-7",
+    "gate6",
+    "counter-sign-requested"
+   ],
+   "created_at_ms": 1785972947301,
+   "sha256": "0ed1ab1ae86242a3726c70d58928dbf20d5479612bba865e5d53d263e0705406",
+   "bytes": 4336
+  },
+  {
+   "id": 14323,
+   "file": "14323.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,limitations,ln-7",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "LN-7",
+    "counter-sign",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785972991513,
+   "sha256": "29f95cf11b731db64ea746f8e660decdd66fa83b635ba135ff6b739411438d62",
+   "bytes": 3730
+  },
+  {
+   "id": 14328,
+   "file": "14328.md",
+   "domain": "conditioned-kernel",
+   "layer": "ground_truth",
+   "tags": [
+    "conditioned-kernel",
+    "ecs",
+    "seat-board",
+    "limitations",
+    "LN-7",
+    "dual-signed"
+   ],
+   "created_at_ms": 1785973074873,
+   "sha256": "55000a276b440be5a8d07de251a2fbe2b4fe990bd368a08e109e453060b35fa5",
+   "bytes": 3862
+  },
+  {
+   "id": 14331,
+   "file": "14331.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,limitations,ln-7",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "LN-7",
+    "closed",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785973105666,
+   "sha256": "130d91f63fd5ca0f581b3ff73f3c8526bc48aef499138da547d50c9cf266922d",
+   "bytes": 544
+  },
+  {
+   "id": 14333,
+   "file": "14333.md",
+   "domain": "conditioned-kernel",
+   "layer": "ground_truth",
+   "tags": [
+    "conditioned-kernel",
+    "ecs",
+    "passdown",
+    "agent-a",
+    "p2-open"
+   ],
+   "created_at_ms": 1785973160502,
+   "sha256": "540149edb987af7330878b506591fd70a25cc8c2d6d89219b19eb60ef8e92c3d",
+   "bytes": 5879
+  },
+  {
+   "id": 14336,
+   "file": "14336.md",
+   "domain": "conditioned-kernel,ecs,passdown,compaction",
+   "layer": "ground_truth",
+   "tags": [
+    "PASSDOWN",
+    "SUPERSEDES-14241",
+    "P2-OPEN",
+    "for-next-b",
+    "for-anthony",
+    "for-claude",
+    "agent-b"
+   ],
+   "created_at_ms": 1785973204236,
+   "sha256": "edaec91414c8392d255d1a4ab7c90d1b3b654892c16e6fd7b32d0d510942a29a",
+   "bytes": 2055
+  },
+  {
+   "id": 14364,
+   "file": "14364.md",
+   "domain": "conditioned-kernel",
+   "layer": "ground_truth",
+   "tags": [
+    "conditioned-kernel",
+    "ecs",
+    "seat-board",
+    "supersession-002",
+    "canary",
+    "kernel-six",
+    "counter-sign-requested"
+   ],
+   "created_at_ms": 1785974118172,
+   "sha256": "333b2438a1647481ace4d5d315a3a1d150f57b7d6eff9a93d4d8f6daed1ba372",
+   "bytes": 6242
+  },
+  {
+   "id": 14368,
+   "file": "14368.md",
+   "domain": "conditioned-kernel,coordination,ecs,seat-board,supersession,canary",
+   "layer": "ground_truth",
+   "tags": [
+    "SEAT-BOARD",
+    "SUPERSESSION-002",
+    "counter-sign",
+    "canary",
+    "for-claude",
+    "for-anthony",
+    "agent-b"
+   ],
+   "created_at_ms": 1785974176359,
+   "sha256": "b4fc5ee2fd0f0c4439e585a6c4e5b022a1a4356ce526249beb43fd6bf10fbef7",
+   "bytes": 3354
   }
  ]
 }
