@@ -450,6 +450,56 @@ Any claim that a cell's D reflects its packet's completeness carries this note. 
 
 ---
 
+## LN-6 — Alias exposure includes parameter contracts, not just model identity
+
+**Status: drafted by Agent A after the temperature conflict, 2026-08-05. Counter-signature row pending. This is a gap in how PREREG §12.1 was written, recorded here because PREREG is frozen.**
+
+**References frozen rows:** PREREG §4 (G1/G2 alias-pinned), §7 (temperature 0.8, all four), §12.1 (alias exposure).
+
+### What §12.1 said, and what it missed
+
+PREREG §12.1 declares:
+
+> *Frontier generators are alias-pinned, not version-pinned. Reproducibility of G1 and G2 depends on providers not repointing aliases, which we cannot enforce and only detect.*
+
+That frames the exposure as a question of **model identity** — will `claude-opus-5` keep pointing at the same weights. The mitigation built against it was served-string logging plus a mid-arm identity assertion, which is the right defence *for that framing*.
+
+**The framing was too narrow.** An alias can keep its identity perfectly and change its **contract**: what parameters it accepts, what they mean, what it silently ignores. On 2026-08-05, requesting `claude-opus-5` with `temperature: 0.8` began returning `HTTP 400 — temperature is deprecated for this model`. The model string was unchanged. Nothing about identity moved. The *interface* moved.
+
+### The detection asymmetry, which is the part that matters
+
+| change | caught by served-string assertion? |
+|---|---|
+| alias repointed to different weights | **yes** — served string differs |
+| alias keeps identity, rejects a parameter | **no** — but the call fails loudly, so it surfaces |
+| alias keeps identity, **accepts a parameter and ignores it** | **no, and nothing else catches it either** |
+
+The third row is the dangerous one and it is the one this project has no defence against.
+
+We were lucky here: the contract change was **loud**. A `400` cannot be missed. But the same class of change could arrive silently — a parameter still accepted, still returning `200`, and quietly clamped or ignored. Every receipt would look correct. The served string would match. Acceptance rates and D would shift for a reason invisible in the entire record.
+
+Had this arrived mid-arm in its silent form, G1's samples before and after would have been drawn under different sampling laws with **nothing in the data marking the boundary**.
+
+### What should have been built, and is now specified
+
+A **contract probe at bring-up**, recorded per arm:
+
+1. Before an arm opens, issue a minimal request to each frontier generator with exactly the sampling parameters the arm will use.
+2. Record the outcome in the arm's receipt: accepted, rejected, or accepted-with-warning.
+3. Re-issue at arm close and compare. A contract that changed mid-arm invalidates the arm on the same rule as a served-string change.
+
+This does not close the silent case — a parameter accepted and ignored still returns success at both ends. It converts the *loud* case from "discovered when a call fails" to "discovered before samples are spent," and it puts the contract state in the record so a later reader can see what the interface was, rather than assuming it was what the preregistration said.
+
+**The silent case remains undefended and is declared as such.** Closing it would require an external check that the parameter had the effect it claims — for temperature, a distributional test over repeated samples, which is a v1.1 instrument and not a v1 one.
+
+### Why this is recorded rather than fixed
+
+PREREG §12.1 is frozen text. It is not amended, it is annotated: the exposure it names is real and its statement of scope is incomplete. Anyone reading §12.1 alone would believe served-string logging covers alias risk. It covers identity. It does not cover contract.
+
+That correction belongs beside the original rather than replacing it, per the supersession discipline this project applies to SPEC §4a — the too-narrow framing is itself the worked example, and a reader who sees only the corrected version learns less than one who sees both.
+
+---
+
 ## Standing consequences adopted from this review
 
 1. **"Locating, not sizing"** is the claim language for all n = 10 results (LN-1). Effect sizes may be *reported* with intervals; they may not be *claimed* as measured magnitudes.
@@ -462,8 +512,9 @@ Any claim that a cell's D reflects its packet's completeness carries this note. 
 8. **A third local family, wider n, a nonce-parameterized calibration kernel, and a convention-resistant kernel are v1.1 candidates by supersession only**, after the pilot completes exactly as frozen. None is an in-flight amendment.
 9. **Gate 4 results are reported per kernel, never aggregated** (LN-4). Two kernels carry a bounded-equivalence proof; three carry sampled differential agreement. "Gate 4 clean" across all five would merge two different epistemic objects into one claim.
 10. **Packet prose and acceptance vectors were not independently authored** (LN-5). `full`-arm D is read as a lower bound on what independently-authored prose would have produced.
-11. Seal hashes are **OpenTimestamped at seal time, before reveal** — the proof attests existence without disclosing content.
-12. Verbatim board excerpts are preserved under `evidence/board_excerpts/` with a per-file hash manifest, so the correspondence is auditable without a live chronicle.
+11. **A contract probe runs at arm open and close for each frontier generator** (LN-6), recording whether the arm's sampling parameters are accepted. Alias exposure covers parameter contracts, not only model identity, and the silent case — a parameter accepted and ignored — remains undefended and declared.
+12. Seal hashes are **OpenTimestamped at seal time, before reveal** — the proof attests existence without disclosing content.
+13. Verbatim board excerpts are preserved under `evidence/board_excerpts/` with a per-file hash manifest, so the correspondence is auditable without a live chronicle.
 
 ---
 
