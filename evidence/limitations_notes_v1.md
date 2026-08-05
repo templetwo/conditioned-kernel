@@ -502,7 +502,7 @@ That correction belongs beside the original rather than replacing it, per the su
 
 ## LN-7 — A gate can be silent, and silence read as a pass; gate 6 was, on four of five kernels
 
-**Status: drafted by Agent A 2026-08-05 after Anthony held P2 open and the regeneration exposed the cause. Counter-signature row pending Agent B.**
+**Status: drafted by Agent A 2026-08-05 after Anthony held P2 open and the regeneration exposed the cause. Counter-signed by Agent B 2026-08-05 (board #14323), with the structural claim refined rather than softened.**
 
 **No experimental data is affected.** P3 has never run and no scored sample exists. This note is about the *instrument*, and it is recorded because the defect survived two-seat verification and would not have surfaced from the receipts it produced.
 
@@ -528,9 +528,13 @@ A measurement that fails loudly gets fixed. A measurement that fails silently an
 
 ### Why two-seat verification did not catch it
 
-Both agents independently exercised the gate chain, and both checked the same property: *that the gates reject bad candidates*. Neither asked what a gate does when it cannot run. The redteam fixtures encode that same blind spot by construction — a fixture is built to be rejected, so a fixture set can only ever demonstrate the reject path.
+Both seats verified the **reject** path and the **accept** path for candidates: redteam fixtures proved the gates refuse bad artifacts, and green stub cells proved they pass correct ones. Neither seat verified the third path — **cannot evaluate**. That state is neither a rejection nor a pass with a real measurement; it is a silent default, and nothing in the verification set had a vocabulary for it.
 
-**Adversarial review between agents does not automatically cover the space neither agent thought to look at.** The correction came from outside both seats.
+The fixture architecture leaves that hole open by construction, and dual authorship of fixtures does not fill it. A redteam fixture is built to be rejected, so a fixture set can only ever demonstrate the reject path; a green stub demonstrates "can pass when correct." Neither demonstrates "cannot silently pass when unevaluated."
+
+**Dual review multiplies coverage of shared questions; it does not generate the questions neither seat posed.** This was a missing question, not a wrong answer to a question both seats asked — which is exactly why two independent verifications of "P2 green" agreed with each other and were both wrong about cycles on four kernels. Holding P2 open from outside both seats is what forced the cannot-evaluate path into view.
+
+*This section was drafted by Agent A, submitted to Agent B with an explicit request to attack the structural claim as possibly overclaimed, and returned refined rather than softened (board #14320, #14323). The wording above is Agent B's. It is recorded this way because a note about the limits of two-seat review should show its own two seats working.*
 
 ### The gap this leaves open, which is not yet closed
 
@@ -544,7 +548,11 @@ Gate 6 evaluates three caps. Exactly one of them has ever been demonstrated to *
 
 The cycles and stack branches are, today, in the same evidentiary position the cycles branch occupied before this finding: believed to work, never observed working. That belief is now better founded — the measurements exist and cross-check — but "it produced a number" is not "it refused an artifact".
 
-**Required to close, Agent B's lane:** a gate-6 fixture per kernel rather than per gate, including at least one artifact that exceeds `cycles_ratio_max` and one that exceeds `stack_bytes_max`. Until those exist, the writeup states gate 6's rejection evidence as `.text` on one kernel, and does not generalise it to the cap set.
+**Required to close, Agent B's lane, and accepted by Agent B at board #14323:** a gate-6 fixture per kernel rather than per gate, including at least one artifact exceeding `cycles_ratio_max` and one exceeding `stack_bytes_max`, with per-kernel coverage built up over time rather than a single one-and-done fixture. Neither seat claims the cycles or stack branch proven until a **rejection receipt exists for each**.
+
+The cycles fixture is a different authoring problem from every fixture written so far: it must be *correct*, pass gates 1 through 5 clean, and simply be slow. Every prior fixture was wrong in some way the gates detect; this one has to be right and still refused.
+
+Until those land, the writeup states gate 6's rejection evidence as `.text` on one kernel and does not generalise it to the cap set.
 
 ### What does not mitigate this
 
