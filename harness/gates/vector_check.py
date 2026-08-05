@@ -164,15 +164,18 @@ def _run_on_device(kernel, sig, vectors, impls, symbols, cc, host):
 
     Everything is staged under ~/ecs, the only writable area agents may use.
     """
-    import shlex
+    import remote as rmt
     drv = emit_driver(kernel, sig, vectors, symbols)
     remote = f"~/ecs/gatework/{kernel}"
     files = {"drv.c": drv}
     for i, path in enumerate(impls):
         files[f"i{i}.c"] = open(path).read()
     script = [f"set -e", f"rm -rf {remote}", f"mkdir -p {remote}", f"cd {remote}"]
+    # Candidate source is untrusted model output and crosses as base64, never as
+    # heredoc body — a candidate containing the old fixed delimiter would have
+    # been executed as shell on the device. See harness/gates/remote.py.
     for name, content in files.items():
-        script.append(f"cat > {name} <<'__ECS_EOF__'\n{content}\n__ECS_EOF__")
+        script += rmt.put(name, content)
     objs = []
     for i in range(len(impls)):
         script.append(f"gcc -std=c11 {' '.join(cc[2:])} -D{kernel}={symbols[i]} "
@@ -181,9 +184,14 @@ def _run_on_device(kernel, sig, vectors, impls, symbols, cc, host):
     script.append(f"gcc -std=c11 {' '.join(cc[2:])} -c drv.c -o drv.o")
     script.append(f"gcc -std=c11 {' '.join(cc[2:])} -o run drv.o {' '.join(objs)}")
     script.append("./run")
-    r = subprocess.run(["ssh", "-o", "BatchMode=yes", host, "bash -s"],
-                       input="\n".join(script), capture_output=True, text=True,
-                       timeout=900)
+    r = rmt.run(host, script)
+    if rmt.transfer_failed(r):
+        # Exit 91 is reserved: the payload that landed on the device did not
+        # match what was sent. That is an instrument fault, never a property of
+        # the candidate, and callers must not score it as a gate failure.
+        print(f"ECS_TRANSFER_MISMATCH — infra fault, not a candidate failure\n"
+              f"{r.stderr.strip()[:300]}")
+        return 91
     print(r.stdout.rstrip() or r.stderr.rstrip()[:600])
     for i, path in enumerate(impls):
         print(f"  {symbols[i]} = {path}  [on {host}]")

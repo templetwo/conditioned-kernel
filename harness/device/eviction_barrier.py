@@ -104,5 +104,19 @@ def run_cycle(seq, table, prompt="return the single word ok"):
 
 if __name__ == "__main__":
     table = load_table()
+    # --barrier-for <model>: run the barrier ONCE and report, for the runner's
+    # per-cell boundary call (SPEC 4a.1). Compact single-line JSON so the caller
+    # can parse it out of an ssh stream without guessing where it ends.
+    if "--barrier-for" in sys.argv:
+        m = sys.argv[sys.argv.index("--barrier-for") + 1]
+        if m not in table:
+            print(json.dumps({"barrier_ok": False, "model": m,
+                              "error": "model absent from generators.json; no "
+                                       "threshold of record, so FAILED CLOSED"}))
+            sys.exit(0)
+        out = barrier(table[m]["memfree_needed_mb"])
+        out.update(model=m, threshold_source="generators.json")
+        print(json.dumps(out))
+        sys.exit(0)
     seq = sys.argv[1:] or ["qwen2.5-coder:3b", "granite4:micro", "qwen2.5-coder:3b"]
     print(json.dumps(run_cycle(seq, table), indent=1))

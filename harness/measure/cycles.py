@@ -22,7 +22,11 @@ the point of "same-batch": a ratio built from two separately-pinned runs would
 carry the drift between them, which on this board was measured at up to 15%
 when the power mode differed (P0 receipt).
 """
-import json, subprocess, sys
+import json, os, subprocess, sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__))), "gates"))
+import remote as rmt
 
 DEVICE = "jetson"
 REMOTE = "~/ecs/gatework/cycles"
@@ -86,9 +90,8 @@ def measure(candidate_src, oracle_src, kernel="crc32", device=DEVICE):
         "sudo -n nvpmodel -m 2 >/dev/null 2>&1 || true",
         "sudo -n jetson_clocks >/dev/null 2>&1 || true",
         "echo PRE=$(cat /sys/devices/system/cpu/cpu3/cpufreq/scaling_cur_freq)",
-        "cat > cand.c <<'__EOF__'", candidate_src, "__EOF__",
-        "cat > base.c <<'__EOF__'", oracle_src, "__EOF__",
-        "cat > drv.c <<'__EOF__'", DRIVER, "__EOF__",
+    ] + rmt.put("cand.c", candidate_src) + rmt.put("base.c", oracle_src) \
+      + rmt.put("drv.c", DRIVER) + [
         f"gcc -std=c11 -O3 -mcpu=native -D{kernel}=cand -c cand.c -o cand.o",
         f"gcc -std=c11 -O3 -mcpu=native -D{kernel}=base -c base.c -o base.o",
         "gcc -std=c11 -O3 -mcpu=native -c drv.c -o drv.o",
@@ -96,9 +99,10 @@ def measure(candidate_src, oracle_src, kernel="crc32", device=DEVICE):
         "taskset -c 3 ./run",
         "echo POST=$(cat /sys/devices/system/cpu/cpu3/cpufreq/scaling_cur_freq)",
     ]
-    r = subprocess.run(["ssh", "-o", "BatchMode=yes", device, "bash -s"],
-                       input="\n".join(script), capture_output=True, text=True,
-                       timeout=900)
+    r = rmt.run(device, script)
+    if rmt.transfer_failed(r):
+        return {"status": "infra_fault", "error": "ECS_TRANSFER_MISMATCH: "
+                                                  "payload digest mismatch on device"}
     if r.returncode != 0:
         return {"status": "infra_fault", "error": r.stderr[-300:]}
     pre = post = None

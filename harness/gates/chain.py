@@ -54,10 +54,69 @@ crc32 and sat_add_u8 only; the other three exceeded ten minutes and were
 declared intractable (LN-4). This module reports gate 4 as "skipped_intractable"
 for those kernels rather than as a pass, because reporting "gate 4 clean"
 across all five would merge a proof and an absence into one claim.
+
+EVERY GATE FAILS CLOSED (Anthony, 2026-08-05, P2 held open).
+---------------------------------------------------------
+An earlier version of this module let three different absences flow onward as
+if they were passes:
+
+  - CBMC timing out, or terminating without a verdict, returned "not a failure"
+    and the candidate continued toward acceptance UNPROVEN.
+  - A declared `stack_bytes_max` or `text_bytes_max` whose actual could not be
+    read compared against nothing and passed.
+  - A declared `cycles_ratio_max` whose measurement was unusable — no oracle
+    pair, frequency drift, transport error — recorded a status string and
+    passed.
+
+In all three the artifact was accepted BECAUSE the instrument failed. That is
+the worst available direction of error for this experiment: acceptance rate is
+a primary endpoint, so instrument failures would have been silently converted
+into evidence of generator capability. The rule is now uniform — a declared
+constraint that cannot be evaluated is never a pass.
+
+WHICH LEAVES THE QUESTION OF WHAT IT *IS*, and the answer is not always "fail".
+Three outcomes are distinguished, and the distinction is the whole point:
+
+  pass / fail            a property of the CANDIDATE. Scored.
+  skipped_intractable    a DECLARED exemption (LN-4). Recorded, never a pass.
+  infra fault            a property of the INSTRUMENT — ssh died, the payload
+                         digest mismatched, core frequency moved mid-measurement,
+                         the oracle pair is missing. Raises Infra, consumes no
+                         sample, touches no repair budget, enters no acceptance
+                         denominator (SPEC §4a.1, §8, §9).
+
+Failing closed into the wrong one of those would trade a silent inflation for a
+silent deflation. A frequency drift scored as a slow candidate is exactly the
+error SPEC §8 forbids when it says discard and remeasure rather than average.
+
+WEAK-ARM WITHHOLDING IS APPLIED HERE, NOT MERELY RECORDED.
+Gates 3 and 5 both run the acceptance vector set, and in arm 3 that set is half
+withheld (PREREG §6 arm 3). The receipt named the withheld ids while both gates
+went on running the full committed file, so the third of arm 3's three
+weakenings did not exist as an experimental manipulation — only as a claim
+about one. `run()` now materialises the arm's vector file from
+vector_policy.select() and hands THAT to gates 3 and 5.
+
+SPEC §7 gate 3 says "the full acceptance vector set"; read against PREREG §6
+that means the full set the ARM has, not the full committed file. Applying
+withholding at gate 5 alone would leave the weak arm's candidates still held to
+every vector under sanitizers, which nullifies the manipulation while appearing
+to implement it. Posted for counter-sign as a §7 clarification.
 """
-import os, re, subprocess, sys, tempfile, time
+import json, os, re, subprocess, sys, tempfile, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import vector_policy
+
+
+class Infra(Exception):
+    """Instrument fault. NOT a candidate failure and never scored (SPEC §4a.1).
+
+    Raised only where the cause is demonstrably ours: transport, digest
+    mismatch, a missing oracle pair, a bench whose clock moved. Everything a
+    candidate could have caused fails closed as a candidate failure instead.
+    """
 CBMC_TRACTABLE = {"crc32", "sat_add_u8"}          # LN-4, measured not assumed
 DEVICE = "jetson"   # gates 3 and 5 run ON DEVICE — SPEC §7, and because this
                     # workstation's gcc sanitizer runtime hangs on an empty
@@ -71,6 +130,11 @@ FORBIDDEN_PATTERNS = [
     (r"\(\s*\*\s*\w+\s*\)\s*\(", "function pointer"),
     (r"\b(printf|fprintf|fopen|scanf|puts)\s*\(", "I/O"),
 ]
+
+
+def _sha_file(path):
+    import hashlib
+    return hashlib.sha256(open(path, "rb").read()).hexdigest()
 
 
 def _static_storage_hits(src):
@@ -127,21 +191,39 @@ def gate2_compile(src, workdir):
     return ok, ([] if ok else [err.strip()[:1200]])
 
 
-def gate3_sanitize(src, kernel, workdir):
-    """Rebuild under UBSan+ASan and run the acceptance vectors. Any report fails."""
-    vec = os.path.join(ROOT, "trusted", "vectors", f"{kernel}.json")
+def _vector_run(vec, src, workdir, name, cc):
+    """Shared body of gates 3 and 5: same vectors, different build.
+
+    `vec` is the ARM's vector file, already filtered by vector_policy — not the
+    committed file. Exit 91 from vector_check means the device payload digest
+    mismatched, which is instrument, not candidate.
+    """
     if not os.path.exists(vec):
-        return None, ["no vector file"]
-    cand = os.path.join(workdir, "cand.c")
+        raise Infra(f"no vector file for this arm at {vec}")
+    cand = os.path.join(workdir, name)
     open(cand, "w").write(src)
     r = subprocess.run(
         ["python3", os.path.join(ROOT, "harness", "gates", "vector_check.py"),
-         "--device", DEVICE,
-         "--cc", "-O1 -g -fsanitize=undefined,address -fno-sanitize-recover=all",
-         vec, cand],
+         "--device", DEVICE, "--cc", cc, vec, cand],
         capture_output=True, text=True)
     out = (r.stdout + r.stderr).strip()
+    if r.returncode == 91 or "ECS_TRANSFER_MISMATCH" in out:
+        raise Infra(f"device transfer failed: {out[:300]}")
+    if r.returncode == 255:
+        raise Infra(f"ssh transport failed: {out[:300]}")
     return (r.returncode == 0), ([] if r.returncode == 0 else [out[:800]])
+
+
+def gate3_sanitize(src, kernel, workdir, vec):
+    """Rebuild under UBSan+ASan and run the arm's acceptance vectors.
+
+    Any sanitizer report fails. A missing vector file is now an Infra rather
+    than the old `None` — `None` meant "declared exemption", and a vector file
+    that is absent is a broken instrument, not a declared exemption. Reported as
+    skipped, it would have carried the candidate onward with gate 3 never run.
+    """
+    return _vector_run(vec, src, workdir, "cand.c",
+                       "-O1 -g -fsanitize=undefined,address -fno-sanitize-recover=all")
 
 
 def gate4_cbmc(kernel, src=None, workdir=None):
@@ -162,13 +244,18 @@ def gate4_cbmc(kernel, src=None, workdir=None):
         return None, [f"bounded equivalence intractable for {kernel} on this "
                       f"hardware (LN-4); reported as skipped, NOT as a pass"]
     if src is None:
-        return None, ["no candidate supplied"]
+        return False, ["no candidate supplied; unproven, and unproven is not a pass"]
+    # A missing harness or oracle is OUR omission, not the candidate's. Both
+    # used to report `None` — the same value as LN-4's declared exemption — so a
+    # repo in which the CBMC harness had simply never been written was
+    # indistinguishable in the receipt from one where intractability was
+    # measured and declared.
     harness = os.path.join(ROOT, "harness", "gates", "cbmc", f"equiv_{kernel}.c")
     if not os.path.exists(harness):
-        return None, [f"no CBMC harness for {kernel}"]
+        raise Infra(f"no CBMC harness for {kernel}, which is declared tractable")
     oracle = os.path.join(ROOT, "trusted", "oracles", f"{kernel}_agentB.c")
     if not os.path.exists(oracle):
-        return None, ["no oracle to compare against"]
+        raise Infra(f"no sealed oracle for {kernel} to compare against")
 
     sym = {"crc32": ("crc32_A", "crc32_B"), "sat_add_u8": ("sat_add_A", "sat_add_B")}[kernel]
     unwind = {"crc32": "60", "sat_add_u8": "10"}[kernel]
@@ -182,29 +269,37 @@ def gate4_cbmc(kernel, src=None, workdir=None):
              "--pointer-check", "--signed-overflow-check", "--unwind", unwind,
              "--unwinding-assertions"],
             capture_output=True, text=True, timeout=600)
+    except FileNotFoundError:
+        raise Infra("cbmc is not installed on this host; gate 4 cannot run")
     except subprocess.TimeoutExpired:
-        return None, [f"CBMC exceeded 600s for {kernel}; not a pass and not a "
-                      f"failure — the candidate is unproven, see LN-4"]
+        # FAIL CLOSED. The old text — "not a pass and not a failure" — was
+        # honest about the epistemics and wrong about the consequence: it
+        # returned None, which the chain read as a declared skip, and the
+        # candidate continued to gates 5 and 6 and could be ACCEPTED unproven.
+        # A timeout is a property of this candidate's own complexity on a
+        # kernel LN-4 measured as tractable, so it is scored as a failure.
+        return False, [f"CBMC exceeded 600s for {kernel}, a kernel LN-4 measured "
+                       f"tractable; the candidate is UNPROVEN and unproven is "
+                       f"not a pass"]
     if "VERIFICATION SUCCESSFUL" in r.stdout:
         return True, []
     fails = [l for l in r.stdout.splitlines() if "FAILURE" in l][:3]
-    return False, (fails or [r.stdout[-400:]])
+    if fails:
+        return False, fails
+    # No verdict either way: a parse error, an unwinding assertion, a crash.
+    # Also fails closed, and says which it was rather than borrowing the
+    # counterexample wording.
+    return False, [f"CBMC terminated without a verdict (rc={r.returncode}); "
+                   f"unproven, not a pass", (r.stdout or r.stderr)[-400:]]
 
 
-def gate5_vectors(src, kernel, workdir):
-    """Bit-exact match on the committed vectors, with weak-arm withholding applied
-    by policy rather than by anything in the packet."""
-    vec = os.path.join(ROOT, "trusted", "vectors", f"{kernel}.json")
-    if not os.path.exists(vec):
-        return None, ["no vector file"]
-    cand = os.path.join(workdir, "cand5.c")
-    open(cand, "w").write(src)
-    r = subprocess.run(["python3", os.path.join(ROOT, "harness", "gates", "vector_check.py"),
-                        "--device", DEVICE,
-                        "--cc", "-O3 -mcpu=native", vec, cand],
-                       capture_output=True, text=True)
-    first3 = [l for l in r.stdout.splitlines() if "FAIL" in l][:3]
-    return (r.returncode == 0), ([] if r.returncode == 0 else first3 or [r.stdout[:400]])
+def gate5_vectors(src, kernel, workdir, vec):
+    """Bit-exact match on the ARM's vectors under the measurement build.
+
+    Withholding is applied by vector_policy upstream in run(), keyed on
+    completeness — never by anything a packet author can set.
+    """
+    return _vector_run(vec, src, workdir, "cand5.c", "-O3 -mcpu=native")
 
 
 def gate6_budget(src, workdir, budgets, kernel):
@@ -224,34 +319,45 @@ def gate6_budget(src, workdir, budgets, kernel):
     if not budgets:
         return True, [], {"note": "no budgets declared (weak arm)"}
 
-    remote = f"~/ecs/gatework/budget_{kernel}"
-    script = [
-        "set -e", f"rm -rf {remote}", f"mkdir -p {remote}", f"cd {remote}",
-        "cat > c.c <<'__ECS_EOF__'", src, "__ECS_EOF__",
+    import remote as rmt
+    remotedir = f"~/ecs/gatework/budget_{kernel}"
+    script = ["set -e", f"rm -rf {remotedir}", f"mkdir -p {remotedir}",
+              f"cd {remotedir}"] + rmt.put("c.c", src) + [
         # measurement build, plus stack usage accounting
         "gcc -std=c11 -O3 -mcpu=native -fstack-usage -c c.c -o c.o 2>/dev/null",
         "echo TEXT=$(size c.o | awk 'NR==2{print $1}')",
         "echo STACK=$(awk -F'\t' '{print $2}' c.su 2>/dev/null | sort -n | tail -1)",
     ]
-    r = subprocess.run(["ssh", "-o", "BatchMode=yes", DEVICE, "bash -s"],
-                       input="\n".join(script), capture_output=True, text=True,
-                       timeout=300)
+    r = rmt.run(DEVICE, script, timeout=300)
+    if rmt.transfer_failed(r):
+        raise Infra("gate 6 payload digest mismatch on device")
+    if r.returncode == 255:
+        raise Infra(f"gate 6 ssh transport failed: {r.stderr[:300]}")
     if r.returncode != 0:
         return False, [f"measurement build failed on device: {r.stderr[:300]}"], {}
     actual = {}
     for line in r.stdout.splitlines():
         if line.startswith("TEXT="):
-            actual["text_bytes"] = int(line[5:] or 0)
+            actual["text_bytes"] = int(line[5:]) if line[5:].strip().isdigit() else None
         elif line.startswith("STACK="):
-            actual["stack_bytes"] = int(line[6:] or 0) if line[6:].strip() else None
+            actual["stack_bytes"] = int(line[6:]) if line[6:].strip().isdigit() else None
 
+    # EVERY DECLARED CAP PRODUCES A VERDICT. An unreadable actual is a failure,
+    # not a pass: `size` or `-fstack-usage` producing nothing on a build that
+    # otherwise succeeded is a property of what the candidate emitted, and
+    # "the cap could not be measured" must never read as "the cap was met".
     fails = []
-    cap = budgets.get("text_bytes_max")
-    if cap and actual.get("text_bytes", 0) > cap:
-        fails.append(f".text {actual['text_bytes']} exceeds cap {cap}")
-    cap = budgets.get("stack_bytes_max")
-    if cap and actual.get("stack_bytes") and actual["stack_bytes"] > cap:
-        fails.append(f"stack {actual['stack_bytes']} exceeds cap {cap}")
+    for key, field, label in (("text_bytes_max", "text_bytes", ".text"),
+                              ("stack_bytes_max", "stack_bytes", "stack")):
+        cap = budgets.get(key)
+        if not cap:
+            continue
+        got = actual.get(field)
+        if got is None:
+            fails.append(f"{label} cap {cap} declared but NOT MEASURABLE on the "
+                         f"device build; unmeasured is not a pass")
+        elif got > cap:
+            fails.append(f"{label} {got} exceeds cap {cap}")
 
     cap = budgets.get("cycles_ratio_max")
     if cap:
@@ -262,61 +368,95 @@ def gate6_budget(src, workdir, budgets, kernel):
         import glob
         oracles = sorted(glob.glob(os.path.join(ROOT, "trusted", "oracles",
                                                 f"{kernel}_agent*.c")))
+        # Every unusable outcome below raises Infra rather than recording a
+        # status string and falling through to a pass. These causes are all
+        # OURS — a repo missing an oracle pair, a bench whose clock moved, a
+        # dead transport — so the sample is not spent and the cell remeasures,
+        # which is exactly what SPEC §8 requires instead of averaging over a
+        # drifted measurement or scoring it as a slow candidate.
         if len(oracles) < 2:
-            actual["cycles_status"] = "no oracle pair available"
-        else:
-            sys.path.insert(0, os.path.join(ROOT, "harness", "measure"))
-            import cycles as cyc
-            fastest = None
-            for o in oracles:
-                m = cyc.measure(open(o).read(), open(oracles[0]).read(), kernel)
-                if m.get("status") == "ok":
-                    if fastest is None or m["candidate_ns"] < fastest[1]:
-                        fastest = (o, m["candidate_ns"])
-            if fastest is None:
-                actual["cycles_status"] = "baseline measurement unusable"
-            else:
-                m = cyc.measure(src, open(fastest[0]).read(), kernel)
-                actual["cycles_measure"] = m
-                if m.get("status") == "discard_refreq":
-                    # instrument fault, NOT a slow candidate. SPEC §8 discards.
-                    actual["cycles_status"] = "DISCARDED (core frequency moved)"
-                elif m.get("status") != "ok":
-                    actual["cycles_status"] = f"infra_fault: {m.get('error','')[:120]}"
-                else:
-                    actual["cycles_ratio"] = m["ratio"]
-                    actual["cycles_status"] = "measured"
-                    if m["ratio"] > cap:
-                        fails.append(f"cycles ratio {m['ratio']:.3f} exceeds cap {cap}")
+            raise Infra(f"cycles_ratio_max declared for {kernel} but no oracle "
+                        f"pair is present to form a baseline")
+        sys.path.insert(0, os.path.join(ROOT, "harness", "measure"))
+        import cycles as cyc
+        fastest = None
+        for o in oracles:
+            m = cyc.measure(open(o).read(), open(oracles[0]).read(), kernel)
+            if m.get("status") == "ok":
+                if fastest is None or m["candidate_ns"] < fastest[1]:
+                    fastest = (o, m["candidate_ns"])
+        if fastest is None:
+            raise Infra("baseline measurement unusable; no oracle produced a "
+                        "clean same-batch timing")
+        m = cyc.measure(src, open(fastest[0]).read(), kernel)
+        actual["cycles_measure"] = m
+        actual["baseline_oracle"] = os.path.basename(fastest[0])
+        if m.get("status") == "discard_refreq":
+            raise Infra(f"core frequency moved during measurement "
+                        f"({m.get('freq_pre')} -> {m.get('freq_post')}); SPEC §8 "
+                        f"discards and remeasures — never a slow candidate")
+        if m.get("status") != "ok":
+            raise Infra(f"cycle measurement failed: {str(m.get('error'))[:160]}")
+        actual["cycles_ratio"] = m["ratio"]
+        actual["cycles_status"] = "measured"
+        if m["ratio"] > cap:
+            fails.append(f"cycles ratio {m['ratio']:.3f} exceeds cap {cap}")
     return (not fails), fails, actual
 
 
 def run(src, packet, workdir=None):
     """Run the chain. Returns a receipt fragment; first failure stops."""
     kernel = packet["kernel"]
+    completeness = packet["completeness"]
     workdir = workdir or tempfile.mkdtemp()
-    rec = {"kernel": kernel, "completeness": packet["completeness"],
+    rec = {"kernel": kernel, "completeness": completeness,
            "gates": {}, "accepted": False, "stopped_at": None,
+           "infra_fault": False,
            "gate_order": ["1_lint", "2_compile", "3_sanitize", "4_cbmc",
                           "5_vectors", "6_budget"]}
     t0 = time.time()
+
+    # --- the ARM's vector set, withheld half actually removed ---------------
+    committed = os.path.join(ROOT, "trusted", "vectors", f"{kernel}.json")
+    if not os.path.exists(committed):
+        rec.update(infra_fault=True,
+                   infra_reason=f"no committed vector file for {kernel}")
+        return rec
+    spec = json.load(open(committed))
+    used, _withheld = vector_policy.select(spec["vectors"], completeness)
+    armvec = os.path.join(workdir, f"{kernel}.{completeness}.json")
+    json.dump({**spec, "vectors": used}, open(armvec, "w"))
+    rec["vector_policy"] = vector_policy.receipt_fields(spec["vectors"], completeness)
+    rec["vector_policy"]["applied_to"] = ["3_sanitize", "5_vectors"]
+    rec["vector_policy"]["arm_vector_file_sha256"] = _sha_file(armvec)
+
     steps = [
         ("1_lint", lambda: gate1_lint(src, kernel)),
         ("2_compile", lambda: gate2_compile(src, workdir)),
-        ("3_sanitize", lambda: gate3_sanitize(src, kernel, workdir)),
+        ("3_sanitize", lambda: gate3_sanitize(src, kernel, workdir, armvec)),
         ("4_cbmc", lambda: gate4_cbmc(kernel, src, workdir)),
-        ("5_vectors", lambda: gate5_vectors(src, kernel, workdir)),
+        ("5_vectors", lambda: gate5_vectors(src, kernel, workdir, armvec)),
     ]
-    for name, fn in steps:
-        ok, feedback = fn()[:2]
-        rec["gates"][name] = {"result": ("pass" if ok else
-                                         "skipped_intractable" if ok is None else "fail"),
-                              "feedback": feedback}
-        if ok is False:
-            rec["stopped_at"] = name
-            rec["elapsed_ms"] = round((time.time() - t0) * 1000)
-            return rec
-    ok, feedback, actual = gate6_budget(src, workdir, packet.get("budgets") or {}, kernel)
+    try:
+        for name, fn in steps:
+            ok, feedback = fn()[:2]
+            rec["gates"][name] = {"result": ("pass" if ok else
+                                             "skipped_intractable" if ok is None
+                                             else "fail"),
+                                  "feedback": feedback}
+            if ok is False:
+                rec["stopped_at"] = name
+                rec["elapsed_ms"] = round((time.time() - t0) * 1000)
+                return rec
+        ok, feedback, actual = gate6_budget(src, workdir,
+                                            packet.get("budgets") or {}, kernel)
+    except Infra as e:
+        # Not a candidate failure. The runner spends no sample, touches no
+        # repair budget, and keeps this out of every acceptance denominator.
+        rec.update(infra_fault=True, infra_reason=str(e),
+                   stopped_at=None, accepted=False,
+                   elapsed_ms=round((time.time() - t0) * 1000))
+        return rec
     rec["gates"]["6_budget"] = {"result": "pass" if ok else "fail",
                                 "feedback": feedback, "actual": actual}
     if not ok:

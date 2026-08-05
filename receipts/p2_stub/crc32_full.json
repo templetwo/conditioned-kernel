@@ -11,15 +11,21 @@
   "vectors_withheld": 0,
   "withheld_ids": []
  },
+ "harness": {
+  "harness_git_sha": "44dd77507c3a4c5e0bbae59131326f7e4121be30",
+  "harness_tree_dirty": true,
+  "note": "receipt produced from an UNCOMMITTED tree; not reproducible from the sha alone"
+ },
  "candidates": [
   {
    "kernel": "crc32",
    "completeness": "full",
    "sample_index": 0,
-   "prompt_sha256": "277833b89cea32068ac662402772ebb3f2364622b07ab5626b21788edc56d994",
    "repair_trace": [
     {
      "attempt": 0,
+     "prompt_sha256": "277833b89cea32068ac662402772ebb3f2364622b07ab5626b21788edc56d994",
+     "is_repair": false,
      "stopped_at": null,
      "gates": {
       "1_lint": "pass",
@@ -34,12 +40,26 @@
    "infra_retry_count": 0,
    "infra_abort": false,
    "accepted": true,
-   "started_utc": "2026-08-05T22:39:38Z",
+   "started_utc": "2026-08-05T23:10:09Z",
+   "prompt_sha256": "277833b89cea32068ac662402772ebb3f2364622b07ab5626b21788edc56d994",
    "generator": {
     "generator_id": "STUB",
     "model_string_requested": "stub:oracle-verbatim",
     "model_string_served": "stub:oracle-verbatim",
     "temperature": 0.8
+   },
+   "vector_policy": {
+    "vector_policy": "all",
+    "completeness": "full",
+    "vectors_total": 93,
+    "vectors_used": 93,
+    "vectors_withheld": 0,
+    "withheld_ids": [],
+    "applied_to": [
+     "3_sanitize",
+     "5_vectors"
+    ],
+    "arm_vector_file_sha256": "49b92424b8ebb3bf51aefdea5ed7c72ac2bf4646a3fe9df94511300a7cc2c8e8"
    },
    "gates": {
     "1_lint": {
@@ -81,6 +101,7 @@
        "core": 3,
        "same_batch": true
       },
+      "baseline_oracle": "crc32_agentB.c",
       "cycles_ratio": 0.9993,
       "cycles_status": "measured"
      }
@@ -90,11 +111,20 @@
    "source": "/* ECS P1 oracle \u2014 Agent B (Grok Build, grok-4.5)\n * kernel: crc32\n * Sealed against tag prereg-v1. Authored blind: no Agent A oracle content read.\n * Spec (PREREG / SPEC \u00a75): poly 0xEDB88320 reflected, init 0xFFFFFFFF,\n * xorout 0xFFFFFFFF. Check: \"123456789\" -> 0xCBF43926.\n * Slow-and-obvious: bitwise, no table. Reference quality, not performance.\n */\n#include <stdint.h>\n#include <stddef.h>\n\nuint32_t crc32(const uint8_t *data, size_t n)\n{\n    uint32_t crc = 0xFFFFFFFFu;\n    size_t i;\n    int bit;\n\n    if (data == NULL && n != 0) {\n        /* Undefined for null non-empty; treat as empty domain edge. */\n        n = 0;\n    }\n\n    for (i = 0; i < n; i++) {\n        crc ^= (uint32_t)data[i];\n        for (bit = 0; bit < 8; bit++) {\n            if (crc & 1u) {\n                crc = (crc >> 1) ^ 0xEDB88320u;\n            } else {\n                crc >>= 1;\n            }\n        }\n    }\n    return crc ^ 0xFFFFFFFFu;\n}"
   }
  ],
+ "barrier": {
+  "applicable": false,
+  "barrier_ok": true,
+  "note": "remote generator; no device memory to clear"
+ },
+ "slot_refills": 0,
  "summary": {
   "samples": 1,
   "accepted": 1,
   "infra_aborts": 0,
+  "slot_refills": 0,
+  "scored_samples": 1,
+  "requested_samples": 1,
   "acceptance_denominator": 1,
-  "note": "infra aborts excluded from the denominator"
+  "note": "infra aborts excluded from the denominator and their slots refilled, so n is by design not by device weather"
  }
 }

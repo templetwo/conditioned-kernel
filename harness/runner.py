@@ -36,9 +36,49 @@ enforce on its own:
 
   VECTOR WITHHOLDING IS DERIVED, NEVER DECLARED. The weak arm's half-withheld
   vectors come from vector_policy.select() keyed on completeness, not from
-  anything a packet author can set.
+  anything a packet author can set. The chain APPLIES it to gates 3 and 5;
+  this file only reports it.
+
+FIVE CORRECTIONS, 2026-08-05, on Anthony's ruling that P2 stays open
+-------------------------------------------------------------------
+The state machine above was described accurately and implemented partially.
+Each of these was a silent divergence between the documented instrument and the
+running one, and each would have been invisible in the receipts:
+
+  1. THE PROMPT WAS BUILT AND THROWN AWAY. `prompt_mod.build()` produced text
+     whose sha256 went into the receipt, and then `generate()` was called with
+     the PACKET PATH — never the prompt. Every receipt would have carried a
+     prompt hash the generator never saw. Adapters take prompt text; the runner
+     now passes it, and the identifier stored is a hash of what was actually
+     sent.
+
+  2. REPAIR FEEDBACK WENT NOWHERE. The stopping gate's feedback was formatted
+     into a local `feedback` variable that the next iteration never read. All
+     five repair attempts sent the SAME prompt, so the repair loop measured
+     sampling variance under a fixed prompt rather than repair. That is the
+     difference between a <=4-iteration repair policy and four extra draws, and
+     PREREG §7 prices them differently.
+
+  3. THE EVICTION BARRIER WAS NEVER INVOKED. SPEC §4a.1 puts it at cell
+     boundaries and the docstring above says so, but nothing called it. The two
+     false granite negatives that produced §4a.1 would have recurred — as
+     candidate failures, since without the barrier an OOM arrives as a model
+     error rather than as a barrier refusal.
+
+  4. SERVED IDENTITY WAS PER-CELL, NOT PER-ARM. `arm_state` was created inside
+     run_cell, so a served-string change BETWEEN cells of the same arm — the
+     likely shape, since cells are hours apart — passed unnoticed. PREREG §7
+     scopes the assertion to the arm. It is now owned by the arm and threaded
+     into each cell.
+
+  5. INFRA ABORTS ATE SAMPLE SLOTS. `for i in range(n_samples)` spent a slot on
+     an aborted candidate. Excluding it from the denominator afterwards is
+     correct and insufficient: a cell that hit three transport errors returned
+     seven scored samples where the design says ten, and n would have varied
+     with device weather. Slots are now refilled until n scored candidates
+     exist or the arm's abort cap trips.
 """
-import json, os, sys, time, hashlib
+import json, os, subprocess, sys, time, hashlib
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "harness", "gates"))
@@ -49,13 +89,39 @@ import chain
 import prompt as prompt_mod
 import adapters
 import vector_policy
+import remote as rmt
 
 MAX_REPAIRS = 4        # PREREG §7
 MAX_INFRA_RETRIES = 3  # PREREG §7, then infra abort
 MAX_INFRA_ABORTS = 5   # per arm, then the arm is invalidated
+MAX_SLOT_REFILLS = 20  # backstop: refilling is not an unbounded retry loop
 
 
-def stub_generator(_packet_path, kernel, seat="agentB"):
+def harness_git_sha():
+    """The exact harness commit a receipt was produced by.
+
+    Receipts previously named the kernel, arm, model and prompt but not the
+    INSTRUMENT. Every fail-closed correction in this round changes what
+    "accepted" means, so a receipt that does not name its harness revision
+    cannot be told apart from one produced before the corrections. Recorded
+    with a dirty flag, because a receipt from an uncommitted tree is not
+    reproducible and should say so on its face.
+    """
+    def _git(*a):
+        try:
+            return subprocess.run(["git", "-C", ROOT] + list(a),
+                                  capture_output=True, text=True).stdout.strip()
+        except Exception:
+            return ""
+    sha = _git("rev-parse", "HEAD")
+    dirty = bool(_git("status", "--porcelain"))
+    return {"harness_git_sha": sha or "unknown",
+            "harness_tree_dirty": dirty,
+            "note": ("receipt produced from an UNCOMMITTED tree; not reproducible "
+                     "from the sha alone") if dirty else "clean tree"}
+
+
+def stub_generator(_prompt, kernel, seat="agentB"):
     """P2's stub: returns a sealed oracle verbatim.
 
     Deliberately NOT a model. Its only job is to prove the pipeline carries a
@@ -74,19 +140,26 @@ def run_candidate(packet_path, generate, sample_index, arm_state):
     """One candidate through generation, gates, and up to MAX_REPAIRS repairs."""
     packet = yaml.safe_load(open(packet_path))
     kernel = packet["kernel"]
-    built = prompt_mod.build(packet_path)
     rec = {"kernel": kernel, "completeness": packet["completeness"],
-           "sample_index": sample_index, "prompt_sha256": built["prompt_sha256"],
+           "sample_index": sample_index,
            "repair_trace": [], "infra_retry_count": 0, "infra_abort": False,
            "accepted": False, "started_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ",
                                                            time.gmtime())}
 
     feedback = None
     for attempt in range(MAX_REPAIRS + 1):
+        # The prompt is REBUILT each attempt so repair feedback reaches the
+        # generator. SPEC §9 permits exactly three ingredients and prompt.build
+        # is the only place they are combined; passing feedback here is the
+        # third, and passing anything else is not expressible from this call.
+        built = prompt_mod.build(packet_path, feedback)
+        if attempt == 0:
+            rec["prompt_sha256"] = built["prompt_sha256"]      # the generation prompt
+
         # --- generate, with infra faults kept out of the sample accounting ---
         gen = None
         for _ in range(MAX_INFRA_RETRIES):
-            gen = generate(packet_path, kernel)
+            gen = generate(built["prompt"], kernel)
             if gen["status"] == "ok":
                 break
             rec["infra_retry_count"] += 1
@@ -95,6 +168,7 @@ def run_candidate(packet_path, generate, sample_index, arm_state):
             arm_state["infra_aborts"] += 1
             rec["note"] = ("INFRA ABORT: no sample consumed, no repair budget "
                            "touched, excluded from acceptance denominators")
+            rec["infra_reason"] = str((gen or {}).get("error", ""))[:200]
             return rec
 
         # --- served-string identity within the arm ---
@@ -112,7 +186,24 @@ def run_candidate(packet_path, generate, sample_index, arm_state):
 
         src = adapters.strip_fences(gen["output"])
         gates = chain.run(src, packet)
-        rec["repair_trace"].append({"attempt": attempt, "stopped_at": gates["stopped_at"],
+
+        # A gate that could not RUN is an instrument fault, not a verdict on the
+        # candidate. It aborts the slot exactly as a transport error does: no
+        # sample, no repair budget, no denominator. Scoring it would convert a
+        # dead ssh or a drifting clock into evidence about a model.
+        if gates.get("infra_fault"):
+            rec["infra_abort"] = True
+            arm_state["infra_aborts"] += 1
+            rec["infra_reason"] = f"gate chain: {gates.get('infra_reason','')}"
+            rec["note"] = ("INFRA ABORT (gate chain): no sample consumed, no "
+                           "repair budget touched, excluded from denominators")
+            return rec
+
+        rec["vector_policy"] = gates.get("vector_policy")
+        rec["repair_trace"].append({"attempt": attempt,
+                                    "prompt_sha256": built["prompt_sha256"],
+                                    "is_repair": built["is_repair"],
+                                    "stopped_at": gates["stopped_at"],
                                     "gates": {k: v["result"] for k, v in gates["gates"].items()}})
         if gates["accepted"]:
             rec["accepted"] = True
@@ -131,30 +222,127 @@ def run_candidate(packet_path, generate, sample_index, arm_state):
     return rec
 
 
-def run_cell(packet_path, generate, n_samples=1, out_dir=None):
+def new_arm_state():
+    """Arm-scoped state. Created ONCE PER ARM and threaded through every cell.
+
+    Served-string identity is a PREREG §7 assertion about an arm, and cells in
+    one arm are hours apart — which is when a provider re-points an alias. State
+    created inside run_cell could only ever have caught a change between two
+    samples of the same cell.
+    """
+    return {"infra_aborts": 0, "invalidated": False, "served": {}}
+
+
+def barrier_for(packet, local_model=None, device="jetson"):
+    """SPEC §4a.1 eviction barrier, once per cell, before any generation.
+
+    Runs on the device because that is where MemFree lives; the local adapters
+    deliberately do not manage memory themselves, so per-cell placement here is
+    what makes per-cell batching safe. A barrier that fails closed is an INFRA
+    fault: the cell does not run, and no candidate is scored against a device
+    that could not be cleared.
+
+    Frontier generators reach no device, so there is nothing to evict and the
+    barrier is recorded as not-applicable rather than silently skipped.
+    """
+    if not local_model:
+        return {"applicable": False, "barrier_ok": True,
+                "note": "remote generator; no device memory to clear"}
+    # The barrier and its threshold table are SHIPPED to the device each time
+    # rather than assumed present. A stale copy on the Jetson is the exact
+    # failure the barrier exists to prevent — thresholds that no longer match
+    # the models (Grok reservation R2, #13712) — and "the file was already
+    # there" is not a version claim.
+    dev = os.path.join(ROOT, "harness", "device")
+    script = ["set -e", "mkdir -p ~/ecs/barrier", "cd ~/ecs/barrier"]
+    script += rmt.put("eviction_barrier.py",
+                      open(os.path.join(dev, "eviction_barrier.py")).read())
+    script += rmt.put("generators.json",
+                      open(os.path.join(dev, "generators.json")).read())
+    script.append(f"python3 eviction_barrier.py --barrier-for {local_model}")
+    try:
+        r = rmt.run(device, script, timeout=600)
+    except Exception as e:
+        return {"applicable": True, "barrier_ok": False, "error": str(e)[:300],
+                "note": "barrier unreachable; treated as FAILED CLOSED"}
+    if rmt.transfer_failed(r):
+        return {"applicable": True, "barrier_ok": False,
+                "note": "barrier payload digest mismatch; FAILED CLOSED"}
+    try:
+        out = json.loads([l for l in r.stdout.splitlines() if l.startswith("{")][-1]
+                         if "{" in r.stdout else r.stdout)
+    except Exception:
+        return {"applicable": True, "barrier_ok": False,
+                "error": (r.stderr or r.stdout)[:300],
+                "note": "barrier did not report; treated as FAILED CLOSED"}
+    out["applicable"] = True
+    return out
+
+
+def run_cell(packet_path, generate, n_samples=1, out_dir=None, arm_state=None,
+             local_model=None):
     """One cell: (generator × kernel × arm), samples consecutive under one barrier."""
     packet = yaml.safe_load(open(packet_path))
     vecs = json.load(open(os.path.join(ROOT, "trusted", "vectors",
                                        f"{packet['kernel']}.json")))["vectors"]
-    arm_state = {"infra_aborts": 0, "invalidated": False}
+    arm_state = arm_state if arm_state is not None else new_arm_state()
     cell = {"cell": {"kernel": packet["kernel"], "arm": packet["completeness"]},
             "vector_policy": vector_policy.receipt_fields(vecs, packet["completeness"]),
+            "harness": harness_git_sha(),
             "candidates": []}
-    for i in range(n_samples):
-        cell["candidates"].append(run_candidate(packet_path, generate, i, arm_state))
+
+    # --- eviction barrier, at the cell boundary, before anything generates ---
+    cell["barrier"] = barrier_for(packet, local_model)
+    if not cell["barrier"].get("barrier_ok"):
+        cell["cell_aborted"] = True
+        cell["note"] = ("BARRIER FAILED CLOSED before generation: no sample "
+                        "consumed, nothing scored (SPEC §4a.1)")
+        cell["summary"] = {"samples": 0, "accepted": 0, "infra_aborts": 0,
+                           "acceptance_denominator": 0}
+        if out_dir:
+            os.makedirs(out_dir, exist_ok=True)
+            p = os.path.join(out_dir,
+                             f"{packet['kernel']}_{packet['completeness']}.json")
+            json.dump(cell, open(p, "w"), indent=1)
+            cell["receipt_path"] = p
+        return cell
+
+    # --- n SCORED samples, with aborted slots refilled rather than lost -----
+    scored_count, refills, idx = 0, 0, 0
+    while scored_count < n_samples:
+        c = run_candidate(packet_path, generate, idx, arm_state)
+        cell["candidates"].append(c)
+        idx += 1
+        if c.get("infra_abort"):
+            refills += 1
+            c["slot_refilled"] = True
+            if arm_state["infra_aborts"] > MAX_INFRA_ABORTS:
+                cell["arm_invalidated"] = True
+                cell["note"] = (f">{MAX_INFRA_ABORTS} infra aborts; arm rerun, "
+                                f"not adjusted")
+                break
+            if refills > MAX_SLOT_REFILLS:
+                cell["arm_invalidated"] = True
+                cell["note"] = (f">{MAX_SLOT_REFILLS} slot refills; the device is "
+                                f"not fit to measure on, arm rerun")
+                break
+            continue          # the slot is refilled; it is NOT spent
+        scored_count += 1
         if arm_state["invalidated"]:
             cell["arm_invalidated"] = True
             break
-        if arm_state["infra_aborts"] > MAX_INFRA_ABORTS:
-            cell["arm_invalidated"] = True
-            cell["note"] = f">{MAX_INFRA_ABORTS} infra aborts; arm rerun, not adjusted"
-            break
+    cell["slot_refills"] = refills
     acc = [c for c in cell["candidates"] if c["accepted"]]
     scored = [c for c in cell["candidates"] if not c.get("infra_abort")]
     cell["summary"] = {"samples": len(cell["candidates"]), "accepted": len(acc),
                        "infra_aborts": arm_state["infra_aborts"],
+                       "slot_refills": refills,
+                       "scored_samples": len(scored),
+                       "requested_samples": n_samples,
                        "acceptance_denominator": len(scored),
-                       "note": "infra aborts excluded from the denominator"}
+                       "note": ("infra aborts excluded from the denominator and "
+                                "their slots refilled, so n is by design not by "
+                                "device weather")}
     if out_dir:
         os.makedirs(out_dir, exist_ok=True)
         p = os.path.join(out_dir, f"{packet['kernel']}_{packet['completeness']}.json")
@@ -165,7 +353,7 @@ def run_cell(packet_path, generate, n_samples=1, out_dir=None):
 
 if __name__ == "__main__":
     pkt = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "ecs", "crc32.ecs.yaml")
-    gen = lambda pp, k: stub_generator(pp, k)
+    gen = lambda prompt, k: stub_generator(prompt, k)
     c = run_cell(pkt, gen, n_samples=1,
                  out_dir=os.path.join(ROOT, "receipts", "p2_stub"))
     print(json.dumps({k: v for k, v in c.items() if k != "candidates"}, indent=1))
