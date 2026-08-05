@@ -10,8 +10,9 @@ Raised by outside review, 2026-08-04. **LN-1** answers the H2 measurement-floor 
 | Counter-signed — **LN-1 and LN-2 only** | Agent B — Grok Build (grok-4.5), trusted/redteam lane | **2026-08-04** (seat board after #13866; Wilson + quantization verified) |
 | Counter-signed — **LN-3, census, canary** | Agent B — Grok Build (grok-4.5), trusted/redteam lane | **2026-08-04** (seat board after #13878; scoped to LN-3 + census + canary only) |
 | Counter-signed — **LN-2A** | Agent B — Grok Build (grok-4.5), trusted/redteam lane | **2026-08-05** (seat board after #14016; observation accepted with one bound on inference) |
+| Counter-signed — **LN-4** | Agent B — Grok Build (grok-4.5), trusted/redteam lane | **2026-08-05** (seat board after #14108; scoped to LN-4 only) |
 
-> **Signature scope, stated so it cannot be misread.** Agent B's first counter-signature was given against LN-1 and LN-2 as they stood at commit `17f73fa`. LN-3, the post-arm census specification, and the canary entry were added afterwards at Anthony's direction. The second counter-signature (this row) covers **only** those later sections. LN-1/LN-2 remain under the first row. Do not read either signature as covering material outside its row. LN-2A has its own row; it is not covered by the LN-1/LN-2 or LN-3 rows.
+> **Signature scope, stated so it cannot be misread.** Agent B's first counter-signature was given against LN-1 and LN-2 as they stood at commit `17f73fa`. LN-3, the post-arm census specification, and the canary entry were added afterwards at Anthony's direction. The second counter-signature covers **only** those later sections. LN-1/LN-2 remain under the first row. LN-2A and LN-4 each have their own rows; neither is covered by any other signature. Do not read any signature as covering material outside its row.
 
 **Agent B verification (counter-sign, not freeze of PREREG):**
 - LN-1 Wilson 95% for 7/10 recomputed: **[0.397, 0.892]** — matches the note's ~0.40–0.89.
@@ -36,6 +37,15 @@ Raised by outside review, 2026-08-04. **LN-1** answers the H2 measurement-floor 
 - "What this does NOT establish" (n=1, no counterfactual, no numeric D correction, choices not "wrong"): accepted as load-bearing anti-overclaim.
 - **One bound on inference (not a rejection):** seat-level convergence illustrates prior strength under careful human authorship of a *standard* DSP shape. It does **not** prove the effect is at least as strong among four generators (models may diversify more on failure modes, or less). Direction is the same; rate is unmeasured. Consistent with locating-not-sizing.
 - v1.1 nonce / non-standard kernel to separate explanations: accepted, supersession only after pilot as frozen.
+
+**Agent B verification — LN-4 counter-sign only:**
+- Core asymmetry accepted: formal coverage (2/5) is strongest on the closed kernels and absent on the more open ones — inverse to experimental interest. Structural, not bad luck.
+- "Where feasible" resolves to two kernels: accepted; must be stated as a number, not left inside the hedge.
+- Writeup law accepted: gate 4 **per kernel only**; never aggregate "gate 4 clean" across five.
+- sat_add exhaustive differential as complete element-domain argument (independent of CBMC): accepted — that kernel has two strong assurance layers.
+- matmul basis coverage "structurally suggestive, not a proof": accepted. The hole is exactly bilinearity of *implementations*; A correctly refused to promote it. No overclaim found.
+- v1.1 more compute / proxy kernels: accepted as supersession only after pilot as frozen.
+- Stopping after measurement rather than grinding wall clock: correct research hygiene.
 
 ---
 
@@ -336,7 +346,7 @@ It also keeps the two blindness properties independent. Probe blindness protects
 
 ## LN-4 — Gate 4 assurance is uneven, and it is uneven in the worst direction
 
-**Status: drafted by Agent A at Agent B's assignment (board #14103), for Agent B's counter-sign. Signature row pending.**
+**Status: drafted by Agent A at Agent B's assignment (board #14103); counter-signed by Agent B 2026-08-05 (board after #14108).**
 
 **References frozen rows:** PREREG §8 (trust = pairwise agreement + published check values + "CBMC bounded equivalence where feasible"), §12.6; SPEC §7 gate 4.
 
