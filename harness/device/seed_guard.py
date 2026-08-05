@@ -123,8 +123,26 @@ def verify():
         "pgrep -f 'seed_guard.py (watch|arm)' >/dev/null 2>&1") == 0
     out["caveat"] = ("inotify gives no process attribution; gaps during watcher downtime "
                      "are lost, not queued; root can defeat this; relatime makes atime useless")
+
+    # THREE STATES, not two (SPEC 7a.2b). The old exit was
+    #   return 0 if out.get("seed_mode_ok", False) else 1
+    # which reported the SAME failure for "the seed exists and its mode is
+    # wrong" and "there is no seed here at all". Those have opposite remedies:
+    # the first is a permissions repair on this device, the second means the
+    # probe seed was never created or you are looking at the wrong machine.
+    # Both still block, so this was never unsafe — it was undiagnosable.
+    if not out["seed_exists"]:
+        out["state"] = "CANNOT_EVALUATE"
+        out["reason"] = ("no probe seed at this path; mode cannot be verified. "
+                         "Absence is not a passing verification, and it is not "
+                         "a failed one either")
+    elif out.get("seed_mode_ok") and out.get("dir_mode_ok"):
+        out["state"] = "OK"
+    else:
+        out["state"] = "REFUSED"
+        out["reason"] = "seed present but permissions are not 0400 / dir not 0700"
     print(json.dumps(out, indent=1))
-    return 0 if out.get("seed_mode_ok", False) else 1
+    return 0 if out["state"] == "OK" else 1
 
 
 def watch():

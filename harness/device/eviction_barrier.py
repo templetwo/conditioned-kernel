@@ -19,9 +19,20 @@ def load_table(path=None):
         return json.load(f)["generators"]
 
 def meminfo(k):
-    for l in open("/proc/meminfo"):
-        if l.startswith(k + ":"):
-            return int(l.split()[1]) // 1024
+    """MB for a /proc/meminfo key, or None if it cannot be read.
+
+    None is a REAL return value here and callers must handle it. The old
+    version fell off the end and returned None implicitly, and the caller then
+    evaluated `None >= need_mb`, which raises TypeError on Python 3 - so an
+    unreadable meminfo surfaced as a crash rather than as a state.
+    """
+    try:
+        for l in open("/proc/meminfo"):
+            if l.startswith(k + ":"):
+                return int(l.split()[1]) // 1024
+    except Exception:
+        return None
+    return None
 
 def ps():
     return json.loads(urllib.request.urlopen(API + "/api/ps", timeout=30).read()).get("models", [])
@@ -33,11 +44,17 @@ def post(p, b, t=300):
 
 def reclaim(target_mb, rounds=4):
     """Evict page cache by faulting in anonymous pages, then releasing. No root needed."""
-    if meminfo("MemFree") >= target_mb:
+    mf = meminfo("MemFree")
+    if mf is None:
+        return 0, False          # unreadable: barrier() classifies, not this
+    if mf >= target_mb:
         return 0, False
     t0, did = time.time(), False
     for _ in range(rounds):
-        n = max(500, meminfo("MemAvailable") - 500)
+        avail = meminfo("MemAvailable")
+        if avail is None:
+            break
+        n = max(500, avail - 500)
         try:
             m = mmap.mmap(-1, n * 1024 * 1024)
             for off in range(0, n * 1024 * 1024, 4096):
@@ -47,29 +64,68 @@ def reclaim(target_mb, rounds=4):
         except Exception:
             pass
         time.sleep(1.5)
-        if meminfo("MemFree") >= target_mb:
+        now = meminfo("MemFree")
+        if now is None or now >= target_mb:
             break
     return round((time.time() - t0) * 1000), did
 
 def barrier(need_mb, settle_s=1.5):
     """Evict all resident models, verify ps empty, reclaim to MemFree>=need, settle.
 
-    Returns a dict whose barrier_ok MUST gate the subsequent load. barrier_ok
-    False is an INFRASTRUCTURE FAULT per SPEC 9: not a candidate failure, no
-    sample consumed, no repair budget touched.
+    barrier_ok MUST gate the subsequent load. barrier_ok False is an
+    INFRASTRUCTURE FAULT per SPEC 9: not a candidate failure, no sample
+    consumed, no repair budget touched.
+
+    THREE STATES, not two (SPEC 7a.2b, standing policy 2026-08-05). The old
+    version returned a bare barrier_ok bool, which collapsed two different
+    things into one False:
+
+      REFUSED       the barrier ran, measured, and the device does not have the
+                    memory. A real answer.
+      CANNOT_EVALUATE   the barrier could not tell - ollama unreachable, so the
+                    resident set is unknown, or /proc/meminfo unreadable, so
+                    MemFree is unknown.
+
+    Both still block the load, so the old code was not unsafe. It was
+    UNDIAGNOSABLE: an operator reading a receipt could not tell "this device is
+    too small for this model" from "this device did not answer", and those have
+    opposite remedies. `state` and `reason` are now carried alongside
+    barrier_ok, which keeps every existing caller correct.
     """
     t0 = time.time()
-    for r in ps():
-        post("/api/generate", {"model": r["name"], "prompt": "", "keep_alive": 0, "stream": False})
-    while time.time() - t0 < 120 and ps():
-        time.sleep(0.5)
+    try:
+        resident = ps()
+        for r in resident:
+            post("/api/generate", {"model": r["name"], "prompt": "", "keep_alive": 0,
+                                   "stream": False})
+        while time.time() - t0 < 120 and ps():
+            time.sleep(0.5)
+        empty = not ps()
+    except Exception as e:
+        return {"barrier_ok": False, "state": "CANNOT_EVALUATE", "need_mb": need_mb,
+                "reason": f"ollama unreachable ({type(e).__name__}); resident set "
+                          f"unknown, so eviction is unverified",
+                "evict_ms": round((time.time() - t0) * 1000)}
     evict_ms = round((time.time() - t0) * 1000)
     reclaim_ms, reclaimed = reclaim(need_mb)
     time.sleep(settle_s)
-    mf, empty = meminfo("MemFree"), not ps()
-    return {"evict_ms": evict_ms, "ps_empty": empty, "reclaim_ms": reclaim_ms,
-            "reclaimed": reclaimed, "need_mb": need_mb, "memfree_before_load_mb": mf,
-            "memavailable_mb": meminfo("MemAvailable"), "barrier_ok": empty and mf >= need_mb}
+    mf = meminfo("MemFree")
+    out = {"evict_ms": evict_ms, "ps_empty": empty, "reclaim_ms": reclaim_ms,
+           "reclaimed": reclaimed, "need_mb": need_mb, "memfree_before_load_mb": mf,
+           "memavailable_mb": meminfo("MemAvailable")}
+    if mf is None:
+        out.update(barrier_ok=False, state="CANNOT_EVALUATE",
+                   reason="/proc/meminfo unreadable; MemFree unknown, and an "
+                          "unknown MemFree is not a satisfied threshold")
+    elif not empty:
+        out.update(barrier_ok=False, state="REFUSED",
+                   reason="models still resident after eviction window")
+    elif mf < need_mb:
+        out.update(barrier_ok=False, state="REFUSED",
+                   reason=f"MemFree {mf}MB below required {need_mb}MB")
+    else:
+        out.update(barrier_ok=True, state="OK", reason="")
+    return out
 
 def run_cycle(seq, table, prompt="return the single word ok"):
     out = {"spec": "4a", "metric": "MemFree", "sequence": seq,
