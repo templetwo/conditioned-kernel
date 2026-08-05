@@ -270,12 +270,58 @@ Mechanism:
 
 1. **Lint (forbidden surface).** Reject on: any `#include` beyond stdint/stddef, `malloc|free|calloc|realloc`, `static` storage, `volatile`, inline `asm`, function pointers, recursion, VLAs, any I/O. Enforced by a small parser check, not regex alone where practical.
 2. **Strict compile.** `gcc -std=c11 -O2 -Wall -Wextra -Werror -Wconversion -Wshadow -c` must be clean.
-3. **Sanitized run.** Rebuild `-O1 -g -fsanitize=undefined,address -fno-sanitize-recover=all`, run the full acceptance vector set. Any report = fail.
-4. **Bounded model check (host side, spares Jetson RAM).** `cbmc kernel.c chk_<id>.c --arch arm64 --bounds-check --pointer-check --signed-overflow-check --unwind <per-kernel bound> --unwinding-assertions`. Checks memory safety and equivalence vs oracle for small bounded n.
-5. **Acceptance vectors on device.** Measurement build (`-O3 -mcpu=native`), bit-exact match on all vectors.
-6. **Budget caps.** cycles <= 3x the -O3 oracle baseline; `.text` <= 4096 bytes (`size` on the object); stack <= 1 KiB (`-fstack-usage`). Caps are sanity bounds, not optimization targets; actuals are recorded either way.
+3. **Sanitized run.** Rebuild `-O1 -g -fsanitize=undefined,address -fno-sanitize-recover=all`, run the full acceptance vector set. Any report = fail. ⚠︎ *"full" clarified by §7a.1*
+4. **Bounded model check (host side, spares Jetson RAM).** `cbmc kernel.c chk_<id>.c --arch arm64 --bounds-check --pointer-check --signed-overflow-check --unwind <per-kernel bound> --unwinding-assertions`. Checks memory safety and equivalence vs oracle for small bounded n. ⚠︎ *outcome set fixed by §7a.2*
+5. **Acceptance vectors on device.** Measurement build (`-O3 -mcpu=native`), bit-exact match on all vectors. ⚠︎ *"all" clarified by §7a.1*
+6. **Budget caps.** cycles <= 3x the -O3 oracle baseline; `.text` <= 4096 bytes (`size` on the object); stack <= 1 KiB (`-fstack-usage`). Caps are sanity bounds, not optimization targets; actuals are recorded either way. ⚠︎ *outcome set fixed by §7a.2*
 
 Redteam fixtures (Agent B): a set of known-bad candidates (out-of-bounds write, signed overflow, hidden static state, right answer by luck on vectors but wrong on domain edges). Phase 2 is not done until every fixture is rejected at the intended gate.
+
+---
+
+## 7a. Clarification of §7, on withholding and on failing closed (2026-08-05, P2 held open)
+
+**§7 above is retained verbatim.** Nothing in it is deleted or rewritten. This section fixes two things §7's wording left open, both discovered by implementing §7 exactly as written and finding the instrument did something other than what the experiment requires. Anthony ruled P2 stays open; the clarifications are the substance of that ruling. Ratified by both build seats — Agent A #14278, Agent B counter-sign #14282.
+
+### 7a.1 "The full acceptance vector set" means the full set **the arm has**
+
+Gates 3 and 5 both run the acceptance vectors. PREREG §6 arm 3 weakens the constraint surface three ways, the third being that **half the vectors are withheld**. Read literally against the committed vector file, §7's "full" and "all" would have gates 3 and 5 run every committed vector in every arm — which is what the harness did.
+
+The consequence was that arm 3's third weakening **did not exist as a manipulation**. It existed as a field in the receipt naming the withheld ids while both vector gates went on enforcing the complete set. Weak-arm candidates were still held to every vector under sanitizers, which for bit-exact kernels is the same behavioural bar as the full arm at the first vector gate — and gate 3 is where value-wrong code stops, which is most of what generators emit.
+
+**Operative rule.** The arm's vector set is `vector_policy.select(committed, completeness)` — runner-enforced from `completeness` alone, never author-chosen (Agent B #14096, unchanged). Gates 3 and 5 both run **that** set. "Full" in §7 means *do not subsample below the arm's set* and *do not skip the vector gate*; it does not mean *ignore arm policy*.
+
+Applying withholding at gate 5 alone was considered and rejected: it nullifies the manipulation while appearing to implement it, which is the worst of the three available states.
+
+**Recorded as a live alternative, not chosen:** gate 3 could be pinned to the committed full file as a safety floor *above* the arm set. That is a different experiment — arm 3 would then be weakened in two ways and a half — and if it is ever wanted it lands as a dated supersession, never as a silent change of one call site.
+
+### 7a.2 Every gate has three outcomes, and an absence is never a pass
+
+§7 names pass and fail. Implementation needed a third state and, lacking one, borrowed the second, then let three different absences flow onward as passes: CBMC timing out or terminating without a verdict; a declared `.text`/stack cap whose actual could not be read; a declared cycles cap whose measurement was unusable. In every case the artifact was accepted **because the instrument failed**.
+
+The direction of that error is the reason this is not a cleanup item. Acceptance rate is a primary endpoint (§3), so instrument failures were being silently converted into evidence of generator capability.
+
+**Operative rule — the outcome set is exactly:**
+
+| outcome | meaning | scored? |
+|---|---|---|
+| **pass** / **fail** | a property of the **candidate** | yes |
+| **skipped_intractable** | a **declared** exemption, and only where one is on record (LN-4 gate 4, three kernels) | no, and never reported as a pass |
+| **infra fault** | a property of the **instrument** — transport died, a device payload digest mismatched, core frequency moved mid-measurement, an oracle pair or CBMC harness is absent | no: consumes no sample, touches no repair budget, enters no acceptance denominator (§4a.1, §8, §9) |
+
+A declared constraint that cannot be evaluated is never a pass. Which of *fail* or *infra fault* it becomes is decided by cause, not convenience: a cause the candidate could have produced fails closed as a candidate failure; a cause that is ours is an infra fault. Collapsing infra into "fail" would trade a silent inflation for a silent deflation — a drifted clock scored as a slow candidate is precisely what §8 forbids when it says discard and remeasure rather than average.
+
+`skipped_intractable` is reserved for exemptions **on record**. A missing CBMC harness previously returned the same value as LN-4's measured intractability, making an unwritten harness indistinguishable in the receipt from a measured impossibility.
+
+### 7a.3 Candidate source crosses to the device as opaque data
+
+Candidates are untrusted model output. They were staged on the Jetson inside a heredoc with a fixed delimiter, so a candidate containing that delimiter line terminated the here-document and its remaining lines were executed by `bash` as commands — demonstrated on the device, not argued (#14278).
+
+Beyond the obvious, this is a **measurement** defect: a candidate that can influence its own build has escaped the instrument, and any receipt it produced is unsound. **Operative rule:** payloads cross base64-encoded under a delimiter containing a character outside the base64 alphabet, and both sides verify a sha256; a mismatch is an infra fault, never a gate result. `harness/gates/remote.py` is the only place a file may be placed on the device.
+
+### 7a.4 Receipts name their instrument
+
+Every correction in §7a changes what "accepted" means. A receipt therefore records `harness_git_sha` and whether the tree was dirty; receipts produced across different harness revisions are not comparable and must not be pooled.
 
 ---
 
@@ -369,11 +415,27 @@ Totals: ~240 generations plus repairs. All headless via `runner.py`.
 |---|---|---|---|
 | P0 | device bring-up (section 4) | A builds, B verifies | phase0 receipt incl. 2 percent stability check |
 | P1 | trusted tier: dual oracles under hash-and-seal, vectors, ECS packets, probe realization on device | B leads oracles/probes, A writes its own sealed oracle set, both author ECS packets for their kernels | **both seal hashes posted to the board before either reveal, per kernel**; revealed files verify against their posted seals; oracles agree on all vectors incl. published check values; packets validate against schema; probe hashes committed |
-| P2 | harness: runner, device executor, adapters, gates, receipts | A leads; B builds redteam fixtures | stub generator (returns oracle verbatim) produces a full green receipt end to end; every redteam fixture rejected at its intended gate |
+| P2 | harness: runner, device executor, adapters, gates, receipts | A leads; B builds redteam fixtures | stub generator (returns oracle verbatim) produces a full green receipt end to end; every redteam fixture rejected at its intended gate ⚠︎ *extended by §13a* |
 | P3 | runs: calibration, main, dose-response | harness runs headless; both agents on-call for infrastructure faults only | all receipts present; calibration D <= 1 percent passed before main |
 | P4 | analysis + writeup | B computes, A audits (swap of P2 roles) | `results/` with variance decomposition, prereg outcomes stated as pass/fail, systems-result draft |
 
 Rough effort: P0 half a day, P1 one to two days, P2 two to three days, P3 mostly machine time, P4 a day. About a week of part-time attention end to end.
+
+---
+
+## 13a. Extension of P2's definition of done (2026-08-05, Anthony)
+
+**§13's P2 row is retained.** It is met and remains met; this adds to it rather than replacing it, because the row was written before the harness had a revision worth naming.
+
+P2 closes only when, in addition to §13:
+
+1. Every gate fails closed per §7a.2 — no declared constraint passes because it could not be evaluated.
+2. Weak-arm withholding is **applied** at gates 3 and 5 per §7a.1, not merely recorded.
+3. The runner does what §9 says it does: sends the prompt it hashes, sends repair feedback, invokes the §4a.1 barrier at cell boundaries, asserts served-string identity **arm-wide**, and refills infra-aborted sample slots so *n* is set by design and not by device weather.
+4. Candidate source reaches the device only as opaque data per §7a.3.
+5. **All stub and redteam receipts are regenerated against a committed harness revision** and carry its `harness_git_sha`. Receipts produced before these corrections describe a different instrument and are superseded, not amended.
+
+Item 5 is why P2 stayed open after the corrections were written: a correct instrument with receipts from the previous one proves nothing about either.
 
 ---
 
