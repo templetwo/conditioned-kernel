@@ -403,6 +403,44 @@ The safety harnesses are committed and correct. The obstacle is wall clock, not 
 
 ---
 
+## LN-5 — The packet prose and the acceptance vectors were not independently authored
+
+**Status: declared limitation, agreed by both seats before packets existed (board #14116, #14118) rather than discovered afterwards. Counter-signature row pending.**
+
+**References frozen rows:** PREREG §12.6 (two seats, not N); SPEC §9 (prompt content rule), §13 (both seats author packets).
+
+### The coupling
+
+Agent B authored **all five acceptance vector sets**. Agent A then drafted **all five ECS packets**, having previously authored oracles for all five kernels and having read every one of Agent B's oracles and vector files during the agreement passes.
+
+So the two channels that constrain a generator — the prose it reads, and the vectors it is judged against — **did not come from independent minds working from the specification alone.** The packet author knew what the vectors already pinned.
+
+### Direction of the effect
+
+Prose written with knowledge of the vectors can end up **complementing** them: covering what they cover, or conversely leaving stated what they already enforce. Either way, the cell's *effective* completeness can differ from what the prose alone would suggest to a reader.
+
+The plausible direction is **deflationary for D at `full`** — a generator faced with prose and vectors that reinforce each other has less room to diverge than the prose alone implies. That is the same direction as LN-2 (shared priors) and LN-3 (behavior-correlated gates), so it compounds rather than offsets. Every conservative-reading caveat those notes carry applies here too.
+
+### Why the alternative split was worse, not better
+
+The obvious remedy — have Agent B draft the packets — is **worse**. Agent B wrote the vectors, so it would hold *both* channels directly, in one seat, with no separation at all. With Agent A drafting, the two channels at least originate in different seats even though the second author had read the first's work.
+
+Neither arrangement is uncoupled. This is the **weaker of the two available couplings**, chosen deliberately and declared rather than presented as a clean split.
+
+### What would actually remove it
+
+A third author who has seen neither the vectors nor the oracles, writing packets from the specification alone. That is not available: PREREG §12.6 already declares that independence here rests on two seats rather than a population, and this note is a concrete consequence of that limitation rather than a new one.
+
+### What does *not* mitigate it
+
+`harness/gates/packet_validate.py` emits a channel warning when packet prose mentions a term tied to a vector-pinned bit. **That catches explicit promotion. It cannot catch implicit complementarity.** A packet can be shaped by knowledge of the vectors without ever naming what they encode, and no textual check will see that. The warning is a guard against one failure mode and is not evidence against this one.
+
+### Reporting requirement adopted
+
+Any claim that a cell's D reflects its packet's completeness carries this note. The `full`-arm D values are read as **lower bounds on what independently-authored prose would have produced**, consistent with the conservative reading already adopted for LN-2 and LN-3.
+
+---
+
 ## Standing consequences adopted from this review
 
 1. **"Locating, not sizing"** is the claim language for all n = 10 results (LN-1). Effect sizes may be *reported* with intervals; they may not be *claimed* as measured magnitudes.
@@ -414,8 +452,9 @@ The safety harnesses are committed and correct. The obstacle is wall clock, not 
 7. **Low measured D may not be attributed to the ECS without qualification** (LN-2A). Convergence by shared convention was observed directly between the two authoring seats on a kernel with four unpinned bits; the pilot cannot distinguish that from the constraint surface doing the work.
 8. **A third local family, wider n, a nonce-parameterized calibration kernel, and a convention-resistant kernel are v1.1 candidates by supersession only**, after the pilot completes exactly as frozen. None is an in-flight amendment.
 9. **Gate 4 results are reported per kernel, never aggregated** (LN-4). Two kernels carry a bounded-equivalence proof; three carry sampled differential agreement. "Gate 4 clean" across all five would merge two different epistemic objects into one claim.
-10. Seal hashes are **OpenTimestamped at seal time, before reveal** — the proof attests existence without disclosing content.
-11. Verbatim board excerpts are preserved under `evidence/board_excerpts/` with a per-file hash manifest, so the correspondence is auditable without a live chronicle.
+10. **Packet prose and acceptance vectors were not independently authored** (LN-5). `full`-arm D is read as a lower bound on what independently-authored prose would have produced.
+11. Seal hashes are **OpenTimestamped at seal time, before reveal** — the proof attests existence without disclosing content.
+12. Verbatim board excerpts are preserved under `evidence/board_excerpts/` with a per-file hash manifest, so the correspondence is auditable without a live chronicle.
 
 ---
 

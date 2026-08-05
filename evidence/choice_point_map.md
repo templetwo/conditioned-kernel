@@ -34,9 +34,9 @@ The VECTOR row is the one worth staring at. A vector-pinned bit is invisible to 
 | fir_q15 | [A3] saturation placement | **none** | **contested** | saturating accumulator vs saturating result are both standard |
 | fir_q15 | [A4] rounding on `>>15` | **none** | **contested** | truncate vs round-to-nearest; round-to-nearest is widespread |
 | matmul8_i32 | element range / overflow | **TEXT** | — | domain bound stated, and the note says why |
-| matmul8_i32 | **memory layout** | **VECTOR** | **near-default** | prose silent; Agent B's 46 vectors encode row-major, so gate 5 enforces it |
+| matmul8_i32 | **memory layout** | **VECTOR** | **near-default** | prose silent; Agent B's 46 vectors encode row-major, so gate 5 enforces it. **Ratified 2026-08-05 (#14126): stays VECTOR, not promoted to TEXT.** |
 | median3x3_u8 | boundary policy | **SHAPE** | — | 16×16 → 14×14 makes the 1px margin arithmetic; no padding convention needed |
-| median3x3_u8 | [D1] memory layout | **VECTOR** | **near-default** | same as matmul; transposed reading diverges on asymmetric input |
+| median3x3_u8 | [D1] memory layout | **VECTOR** | **near-default** | same as matmul; transposed reading diverges on asymmetric input. **Ratified 2026-08-05 (#14126): stays VECTOR.** |
 | median3x3_u8 | implementation strategy | **HINT** | — | "sorting-network friendly" — see §4 |
 
 ---
@@ -98,3 +98,19 @@ That is a confound in the direction that **flatters H1**: it compresses the deno
 ## 5. Standing use
 
 Before each kernel's first generation arm, its row in this map is re-checked against the frozen packet — extending Agent B's standing signature rule (#13996) from the C prototype to the choice points. A bit that silently changes channel between P1 and P3 would change what D is measuring without changing D's definition.
+
+---
+
+## 6. Ratified: what "full" means on this design
+
+Decided 2026-08-05, board #14126, trusted-tier lead with the principal investigator free to override.
+
+**`completeness: full` means full on the channels the design manipulates — not "every pinnable bit stated in TEXT."**
+
+The matmul8_i32 and median3x3_u8 layout bits could have been written into packet prose, which would have promoted them VECTOR → TEXT. They were not, deliberately:
+
+- SPEC §11 defines the dose-response manipulation as forbidden / budgets / vectors. Semantics is not a manipulated channel, so promoting a bit there changes the main arm's baseline rather than the manipulation.
+- Promoting for two of five kernels would make cross-kernel comparison of D at `full` less clean, since those two cells would sit on a different baseline from the other three.
+- The status quo predates the packets, is documented above, and is reversible now. After generation runs it is a rerun.
+
+**Consequence for reading the results, and it must be stated in the writeup:** for these two kernels, a generator is judged at gate 5 on a bit it was never told. Failures there are not specification failures — they are convention-inference failures, which is a different thing and a more interesting one. `crc32` and `sat_add_u8` have no such bit; `fir_q15`'s four are TEXT-pinned in its packet.
