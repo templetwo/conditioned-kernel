@@ -56,14 +56,23 @@ Proves: this set of hashes existed at the attested time.
 Does not prove: that either seat authored blind. Blindness remains procedural
 (PREREG §12.4) — timestamping strengthens *ordering*, not *independence*.
 
-## Zenodo deposit of the frozen tag
+## Zenodo deposit of the frozen tag — PUBLISHED
 
-Deposition `21797326`, reserved DOI **`10.5281/zenodo.21797326`**, containing the complete
-repository archive at tag `prereg-v1` plus `PREREG.md` standalone for direct readability.
+**DOI: [10.5281/zenodo.21797326](https://doi.org/10.5281/zenodo.21797326)** — published 2026-08-05, CC BY 4.0, version `prereg-v1`.
+Record: https://zenodo.org/record/21797326 · verified resolving publicly (HTTP 200 via doi.org, record readable without authentication).
 
-State at time of writing: **unsubmitted (draft)**. Publishing mints a permanent public DOI and
-is an irreversible act reserved to the principal investigator. The deposit is staged and
-verified; the publish step is deliberately not taken by an agent.
+Contents: the complete repository archive at tag `prereg-v1`, plus `PREREG.md` standalone for direct readability.
 
-Archive integrity: the `PREREG.md` extracted from the uploaded archive hashes to
-`b211d5b880c51463ff2d6667883b0ce93273fa8d0a08ed71ef77c76ec1f86b3f`, matching the frozen tag.
+Integrity: `PREREG.md` extracted from the uploaded archive hashes to
+`b211d5b880c51463ff2d6667883b0ce93273fa8d0a08ed71ef77c76ec1f86b3f`, matching the frozen tag, and the
+repository working copy was verified byte-stable against that tag immediately before publication.
+
+**What the DOI fixes.** The preregistration is now externally archived under a permanent identifier,
+independent of this repository, this chronicle, and either seat. It was published **before any
+experimental arm had been executed** — no generator had been called at deposit or at publication.
+That ordering is the artifact's entire value and it is checkable: the archive contains no results,
+because none existed.
+
+Publication was performed on Anthony Vasquez Sr.'s explicit instruction. The deposit had been staged
+and deliberately left unsubmitted, because minting a permanent public DOI is not an act an agent
+should take on its own initiative.
