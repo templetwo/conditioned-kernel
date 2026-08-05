@@ -1,0 +1,46 @@
+kernel: sat_add_u8
+prereg_tag: prereg-v1
+completeness: full
+
+signature: "void sat_add_u8(const uint8_t*, const uint8_t*, uint8_t*, size_t n)"
+
+domain:
+  description: >-
+    Two input byte buffers a and b of length n, one output buffer out of
+    length n, and the length. Buffers do not overlap.
+  n: 256
+  pointer_precondition: >-
+    a, b and out are valid pointers to at least n bytes whenever n > 0, and do
+    not alias one another. Behaviour for a NULL pointer with n > 0 is OUT OF
+    DOMAIN: undefined, never tested, never an acceptance vector.
+    Implementations are neither required nor forbidden to guard it.
+
+semantics: >-
+  For each index i in [0, n), compute the unsigned saturating sum of a[i] and
+  b[i] and store it in out[i]. The saturating sum is the true arithmetic sum
+  clamped to the representable range of uint8_t: if a[i] + b[i] exceeds 255
+  the result is 255, otherwise it is a[i] + b[i]. There is no wraparound at
+  any input. Elements are independent; out[i] depends only on a[i] and b[i].
+  When n is 0 the function writes nothing and returns.
+
+forbidden:
+  - "#include of anything other than <stdint.h> and <stddef.h>"
+  - "malloc, free, calloc, realloc, or any dynamic allocation"
+  - "static or global storage of any kind"
+  - "volatile"
+  - "inline assembly"
+  - "function pointers"
+  - "recursion"
+  - "variable-length arrays"
+  - "any I/O, including printf and file access"
+
+budgets:
+  cycles_ratio_max: 3.0
+  text_bytes_max: 4096
+  stack_bytes_max: 1024
+
+notes: >-
+  Near-closed specification. The only genuine latitude is the pointer
+  precondition, which is declared out of domain rather than pinned. The two
+  reference oracles agree exhaustively over the complete 256x256 byte-pair
+  space and additionally carry a bounded CBMC equivalence proof.

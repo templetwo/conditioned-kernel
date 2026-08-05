@@ -1,0 +1,61 @@
+kernel: fir_q15
+prereg_tag: prereg-v1
+completeness: full
+
+signature: "void fir_q15(const int16_t x[256], const int16_t h[16], int16_t y[256])"
+
+domain:
+  description: >-
+    A 256-sample Q15 input signal x, a 16-tap Q15 coefficient vector h, and a
+    256-sample Q15 output buffer y. Q15 means a signed 16-bit fixed-point
+    value interpreted as a fraction with 15 bits after the binary point.
+    Buffers do not overlap.
+  pointer_precondition: >-
+    x, h and y are valid non-null pointers to their declared lengths, and do
+    not alias. NULL is OUT OF DOMAIN.
+
+semantics: >-
+  Compute a 16-tap finite impulse response filter of x by h, writing 256
+  outputs. For each output index n in [0, 256), form the sum over k in [0, 16)
+  of x[n-k] multiplied by h[k].
+
+  Boundary: indices n-k less than zero are treated as ZERO. The filter is
+  zero-padded on the left, so every one of the 256 outputs is defined,
+  including the first fifteen where the window extends before the start of x.
+
+  Accumulation: the sum is computed EXACTLY, with no intermediate rounding,
+  clamping or wraparound. Sixteen products of two 16-bit values can reach
+  2^34 in magnitude, which exceeds the range of a 32-bit integer, so the
+  accumulator must be wider than 32 bits.
+
+  Scaling: the exact sum is then shifted right by 15 bits with an ARITHMETIC
+  shift, discarding the low bits by truncation toward negative infinity. This
+  is not round-to-nearest.
+
+  Saturation: the shifted RESULT is then clamped to the range of int16_t,
+  that is to [-32768, 32767], and stored in y[n]. Saturation applies once, to
+  the final result, and not to the accumulator during summation.
+
+forbidden:
+  - "#include of anything other than <stdint.h> and <stddef.h>"
+  - "malloc, free, calloc, realloc, or any dynamic allocation"
+  - "static or global storage of any kind"
+  - "volatile"
+  - "inline assembly"
+  - "function pointers"
+  - "recursion"
+  - "variable-length arrays"
+  - "any I/O, including printf and file access"
+
+budgets:
+  cycles_ratio_max: 3.0
+  text_bytes_max: 4096
+  stack_bytes_max: 1024
+
+notes: >-
+  This packet DELIBERATELY PINS the four choice points that the SPEC row left
+  open and that both reference oracles filled by convention rather than by
+  instruction: boundary handling, accumulator width, shift rounding, and
+  saturation placement. See evidence/limitations_notes_v1.md LN-2A. Pinning
+  them here is what "completeness: full" means for this kernel, and the
+  dose-response variant weakens other channels rather than reopening these.

@@ -1,0 +1,55 @@
+kernel: matmul8_i32
+prereg_tag: prereg-v1
+completeness: full
+
+signature: "void matmul8_i32(const int32_t a[64], const int32_t b[64], int32_t c[64])"
+
+domain:
+  description: >-
+    Two 64-element int32 input buffers a and b, and one 64-element int32
+    output buffer c. Buffers do not overlap.
+  element_range: [-1024, 1023]
+  pointer_precondition: >-
+    a, b and c are valid non-null pointers to 64 elements each and do not
+    alias. NULL is OUT OF DOMAIN.
+
+semantics: >-
+  Treat a and b as 8x8 matrices of 32-bit signed integers and write their
+  matrix product into c, also an 8x8 matrix. Every element of c is the sum of
+  eight products, each product formed from one element of a and one element
+  of b.
+
+  Range: every input element lies in [-1024, 1023], so each product is at most
+  2^20 in magnitude and each sum of eight products is at most 2^23. Both fit a
+  32-bit signed integer with room to spare. No overflow occurs anywhere in the
+  declared domain and no saturation or wraparound behaviour needs to be
+  specified.
+
+notes: >-
+  LAYOUT IS DELIBERATELY NOT STATED IN THIS PACKET. Whether the flat 64-element
+  arrays are row-major or column-major is recorded in
+  evidence/choice_point_map.md as VECTOR-pinned: the acceptance vectors encode
+  row-major and gate 5 enforces it, but the prose is silent and a generator
+  never sees the vectors. It must therefore infer the layout from convention
+  and is judged on whether it inferred correctly.
+  This is the status quo the map documents, and it is preserved here rather
+  than changed. Stating the layout would PROMOTE the bit from VECTOR to TEXT
+  and raise this cell's completeness — a legitimate manipulation, but one that
+  must be a recorded decision rather than a drafting side effect. Open on the
+  seat board; see the packet-pass entry.
+
+forbidden:
+  - "#include of anything other than <stdint.h> and <stddef.h>"
+  - "malloc, free, calloc, realloc, or any dynamic allocation"
+  - "static or global storage of any kind"
+  - "volatile"
+  - "inline assembly"
+  - "function pointers"
+  - "recursion"
+  - "variable-length arrays"
+  - "any I/O, including printf and file access"
+
+budgets:
+  cycles_ratio_max: 3.0
+  text_bytes_max: 4096
+  stack_bytes_max: 1024

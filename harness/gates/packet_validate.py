@@ -49,8 +49,16 @@ def main(argv):
             continue
 
         kernel = pkt.get("kernel", "")
+        # SCAN ONLY PROMPT-RENDERED FIELDS. `notes` is defined by the schema as
+        # non-normative and never rendered into a prompt, so a term appearing
+        # there cannot reach a generator and cannot promote a channel. An
+        # earlier version scanned notes too and fired on the matmul and median
+        # packets — whose notes exist precisely to DOCUMENT that layout was not
+        # promoted. A warning that fires on the documentation of a
+        # non-promotion is the cry-wolf failure this project has already been
+        # bitten by once, in prearm_check.
         prose = " ".join(str(pkt.get(k, "")) for k in
-                         ("semantics", "notes", "implementation_hint")).lower()
+                         ("semantics", "implementation_hint")).lower()
         hits = [t for t in VECTOR_PINNED_TERMS.get(kernel, []) if t.lower() in prose]
         flag = ""
         if hits:

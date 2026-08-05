@@ -1,0 +1,59 @@
+kernel: median3x3_u8
+prereg_tag: prereg-v1
+completeness: full
+
+signature: "void median3x3_u8(const uint8_t in[16*16], uint8_t out[14*14])"
+
+domain:
+  description: >-
+    A 16x16 input image of unsigned bytes and a 14x14 output image of unsigned
+    bytes. Buffers do not overlap.
+  pointer_precondition: >-
+    in and out are valid non-null pointers to 256 and 196 bytes respectively
+    and do not alias. NULL is OUT OF DOMAIN.
+
+semantics: >-
+  For every interior pixel of the 16x16 input — that is, every pixel with a
+  complete 3x3 neighbourhood — compute the median of the nine values in that
+  neighbourhood and write it to the corresponding position of the 14x14
+  output.
+
+  Boundary: the input is 16x16 and the output is 14x14, which leaves exactly
+  one pixel of margin on each side. Border pixels have no complete 3x3
+  neighbourhood and produce no output. No padding, replication, reflection or
+  extrapolation is performed or required; the output simply does not cover
+  them.
+
+  Median: the median of nine values is the fifth smallest, counting from one.
+  Nine is odd, so the median is always one of the input values and no
+  averaging or tie-breaking rule is needed.
+
+implementation_hint: >-
+  This kernel is amenable to a sorting network.
+
+notes: >-
+  LAYOUT IS DELIBERATELY NOT STATED, as for matmul8_i32. Row-major versus
+  column-major is VECTOR-pinned per evidence/choice_point_map.md, enforced at
+  gate 5 and invisible to the generator. Preserved rather than promoted;
+  see the packet-pass entry on the seat board.
+  The implementation_hint reproduces the SPEC row's "sorting-network friendly"
+  annotation and is carried in its OWN field rather than in semantics,
+  because it constrains implementation without constraining behaviour and
+  therefore acts on the text-variance endpoint while leaving D untouched
+  (choice_point_map section 4). It is the only hint in the v1 set.
+
+forbidden:
+  - "#include of anything other than <stdint.h> and <stddef.h>"
+  - "malloc, free, calloc, realloc, or any dynamic allocation"
+  - "static or global storage of any kind"
+  - "volatile"
+  - "inline assembly"
+  - "function pointers"
+  - "recursion"
+  - "variable-length arrays"
+  - "any I/O, including printf and file access"
+
+budgets:
+  cycles_ratio_max: 3.0
+  text_bytes_max: 4096
+  stack_bytes_max: 1024
