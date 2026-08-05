@@ -222,6 +222,27 @@ Fixed C interfaces; single translation unit; no allocation; no globals; no I/O; 
 
 Floating point (quaternion rotate) is a separate later arm whose stated purpose is exercising the tolerance policy. It does not join the primary signal in v1.
 
+⚠︎ *The kernel set above is superseded by §5a: a sixth kernel joins.*
+
+### 5a. Kernel six — the canary twin (2026-08-05, Anthony)
+
+**The table above is retained.** A sixth kernel joins it; nothing in it is removed or altered. Recorded in full at `evidence/SUPERSESSION-002.md`, which supersedes PREREG §5 and §6 arm 2 while leaving `prereg-v1` byte-frozen and its DOI unchanged.
+
+**Cause: LN-2A.** Every kernel in the table is a *conventional* kernel — canonical polynomial, canonical FIR shape, canonical sorting network. On conventional kernels, "the constraint surface pinned the bits" and "shared convention pinned the bits" make the **same prediction**, so no quantity of additional data on these five can separate them. The two authoring seats were observed converging on an underspecified kernel for exactly the second reason.
+
+The canary twin is a kernel whose unpinned bits are assigned by a **sealed random draw** rather than by convention, which is what makes it the design's only zero anchor: there is no convention available to supply the answer. It joins the main arm (six kernels × four generators × 10 samples); calibration stays `crc32` only and dose-response stays `fir_q15` weak.
+
+**Preconditions, none relaxed by promotion to kernel six:**
+
+- Derivation procedure, seed, algorithm and mapping sealed **together as one commitment** and OTS-stamped **with the draw, before any arm touches the twin**.
+- Draw seed **distinct** from the probe seed — independent failure domains.
+- Dual sealed oracles under hash-and-seal like every other kernel.
+- The mapping never reaches a prompt; SPEC §9's three-ingredient rule is unchanged and is enforced by construction.
+
+Anthony performs the draw and seals the derivation. Neither build agent sees the mapping before it is sealed and stamped.
+
+**Both analyses are reported** — the frozen five exactly as `prereg-v1` specifies, alongside the six-kernel result. That is the structural guarantee that a post-freeze kernel cannot be the thing that makes a result: agreement corroborates, disagreement is itself the finding, and neither is available for quiet selection.
+
 ### Pointer preconditions (raised 2026-08-04, decided 2026-08-04 — option 2)
 
 The input-domain column above constrains `n`. It originally said nothing about **pointer validity**. That gap was not hypothetical: the two independently sealed `crc32` oracles agreed on all 24,359 tested inputs and diverged on exactly one case outside the stated domain. Agent B guards `data == NULL && n != 0` and treats it as empty; Agent A does not, leaving that call undefined behaviour. Neither violated the then-silent spec.
@@ -312,6 +333,23 @@ The direction of that error is the reason this is not a cleanup item. Acceptance
 A declared constraint that cannot be evaluated is never a pass. Which of *fail* or *infra fault* it becomes is decided by cause, not convenience: a cause the candidate could have produced fails closed as a candidate failure; a cause that is ours is an infra fault. Collapsing infra into "fail" would trade a silent inflation for a silent deflation — a drifted clock scored as a slow candidate is precisely what §8 forbids when it says discard and remeasure rather than average.
 
 `skipped_intractable` is reserved for exemptions **on record**. A missing CBMC harness previously returned the same value as LN-4's measured intractability, making an unwritten harness indistinguishable in the receipt from a measured impossibility.
+
+### 7a.2b STANDING POLICY — every outcome set carries an explicit cannot-evaluate class
+
+**Anthony, 2026-08-05, elevating §7a.2 from a gate-chain rule to project law.**
+
+> LN-7's trinary lesson becomes standing policy: every gate outcome set carries an explicit cannot-evaluate class.
+
+§7a.2 fixed the outcome set for the six gates. This extends the same requirement to **every component in this project that reports an outcome** — the gate chain, the runner, the eviction barrier, the pre-arm checks, the vector validator, the measurement path, the census, and anything added later.
+
+The rule, stated so it cannot be satisfied by wording alone:
+
+1. Any component that reports an outcome **enumerates a distinct cannot-evaluate state**, and that state is representable in whatever it returns. A component whose return type admits only success and failure does not satisfy this by documenting a third case in prose.
+2. **Cannot-evaluate is never encoded as the success value**, and never shares an encoding with a declared exemption. LN-7's defect was precisely this: an instrument fault and a measured intractability returned the same sentinel, so the receipt could not tell them apart.
+3. **The reason is carried, not just the state.** "Could not evaluate" without a cause cannot be triaged into fail-closed versus infra, and that triage is decided by cause rather than convenience (§7a.2).
+4. **Anything that consumes an outcome handles all three classes explicitly.** A consumer that branches on two and lets the third fall through has reintroduced the defect one layer up.
+
+The reasoning generalises past this repo and is why it is policy rather than a fix: a measurement that fails loudly gets fixed, while a measurement that fails silently and defaults to pass becomes *evidence*, because every downstream reader treats the absence of a complaint as a confirmation. The question to ask of any instrument is not "does it catch failures" but **"what does it do when it cannot tell."**
 
 ### 7a.3 Candidate source crosses to the device as opaque data
 
@@ -434,8 +472,11 @@ P2 closes only when, in addition to §13:
 3. The runner does what §9 says it does: sends the prompt it hashes, sends repair feedback, invokes the §4a.1 barrier at cell boundaries, asserts served-string identity **arm-wide**, and refills infra-aborted sample slots so *n* is set by design and not by device weather.
 4. Candidate source reaches the device only as opaque data per §7a.3.
 5. **All stub and redteam receipts are regenerated against a committed harness revision** and carry its `harness_git_sha`. Receipts produced before these corrections describe a different instrument and are superseded, not amended.
+6. **A rejection receipt exists for all three of gate 6's declared caps** — `text_bytes_max`, `stack_bytes_max`, `cycles_ratio_max` — each showing an artifact actually refused by that cap. *(Anthony, 2026-08-05: "P2 closes only when all three cap rejection receipts exist. Then P3.")*
 
 Item 5 is why P2 stayed open after the corrections were written: a correct instrument with receipts from the previous one proves nothing about either.
+
+Item 6 is why it stays open now. Gate 6 evaluates three caps and, as of this writing, exactly one has ever been observed to **refuse** an artifact — `.text`, on `crc32`. The other two are demonstrated to *measure* on all five kernels and to *reject* on none. That is the same evidentiary position the cycles branch occupied immediately before LN-7 found it had been passing an unevaluated cap on four of five kernels: believed to work, never observed working. **"Produced a number" is not "refused an artifact."** Agent B's lane; see LN-7 for the required fixtures, of which the cycles case is the hard one — it must be correct, pass gates 1 through 5 clean, and simply be slow.
 
 ---
 
