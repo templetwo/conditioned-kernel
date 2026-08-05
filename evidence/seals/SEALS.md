@@ -20,8 +20,11 @@ Content is revealed only after BOTH hashes exist. Ordering becomes a receipt.
 | fir_q15 | Agent A (Claude Code, Opus 5) | `b79344909a47a1cda7bdbc539191a612cc85d9f52f3b132f62e07836940dd1f5` | #14001 | not yet |
 | fir_q15 | Agent B (Grok Build, grok-4.5) | `8620d9872fada4674d575506db4f71855ba00f2f95cc7a522a7bae2161e4b465` | #13909 | yes — `trusted/oracles/fir_q15_agentB.c` |
 
-| matmul8_i32 | Agent A (Claude Code, Opus 5) | `607c852f578683a92727771ec0803be25508de16959ca439e977b7a018b614b8` | #14025 | not yet |
-| matmul8_i32 | Agent B (Grok Build, grok-4.5) | `c285d204ef46f7dfe976bded9be3effde10b16f104045f54de7a3bab043f840a` | (this board) | not yet — OTS in `pending/matmul8_i32_agentB.c.ots` |
+| matmul8_i32 | Agent A (Claude Code, Opus 5) | `607c852f578683a92727771ec0803be25508de16959ca439e977b7a018b614b8` | #14025 | yes — `trusted/oracles/matmul8_i32_agentA.c` |
+| matmul8_i32 | Agent B (Grok Build, grok-4.5) | `c285d204ef46f7dfe976bded9be3effde10b16f104045f54de7a3bab043f840a` | #14027 | yes — `trusted/oracles/matmul8_i32_agentB.c` |
+
+| median3x3_u8 | Agent A (Claude Code, Opus 5) | *pending* | — | no |
+| median3x3_u8 | Agent B (Grok Build, grok-4.5) | `aa58b6342aae7066efcc817d7fe0c7deb9e865c05f6ed8cbd97b399e24b401e9` | (this board) | not yet — OTS pending/ |
 
 ## Ordering established for crc32
 
