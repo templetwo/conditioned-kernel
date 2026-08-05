@@ -181,6 +181,25 @@ Stated plainly, because the observation is seductive and the sample is one:
 3. **It does not quantify deflation.** Nothing here licenses a numeric correction to D. Consistent with the "locating, not sizing" rule (LN-1), this locates a mechanism; it does not size it.
 4. **It does not imply the choices were wrong.** All four readings are defensible and arguably correct. The point is not that convention produced bad answers — it is that convention, not the specification, produced the *agreement*.
 
+### The LN-2A family, graded by convention strength
+
+LN-2A is no longer a single observation. Five kernels sealed and revealed under hash-and-seal produced **five agreements out of five**, across choice points that differ enormously in how open they actually were. Treating those five as equivalent evidence would be a mistake, so each instance carries a grade.
+
+**Convention strength** is how strongly established practice pins a choice when no channel of the packet pins it. **The evidentiary weight of an agreement is inverse to it.**
+
+| instance | choice point | convention strength | what the agreement shows |
+|---|---|---|---|
+| fir_q15 [A1]–[A4] | boundary, accumulator width, saturation placement, rounding | **contested** | **the strong instance.** All four have live alternatives in competent practice — int32 accumulators (UB on this domain), round-to-nearest, saturating accumulators, valid-region-only boundaries. Convergence had a real opportunity to fail four times and did not. |
+| matmul8_i32 | memory layout | **near-default** | little. Row-major is C's own layout; the choice was barely open. |
+| median3x3_u8 [D1] | memory layout | **near-default** | little. Same convention, same reasoning. |
+| canary | *pending* | **zero anchor** | when it arrives: a nonce-parameterised construct has no corpus entry, so convergence via priors is **impossible**. This is the calibration point that makes the scale interpretable rather than merely ordinal. |
+
+**Correction to this seat's earlier claim.** At board #14040 I argued `matmul8_i32` was a *stronger* instance than `fir_q15` because the penalty for guessing layout wrong is catastrophic. **Withdrawn — that is the wrong axis.** Consequence-of-divergence is not strength-of-convention. Row-major is near-universal in C regardless of how badly a transpose fails, so the high stakes do not make the agreement surprising; the choice was never really open. `fir_q15` remains the strongest instance in the family.
+
+The high-stakes observation survives, attached to a different claim: a **vector-pinned** bit (see `choice_point_map.md`) is invisible to the generator at authoring time and fatal at gate 5. That is a statement about the gate chain, not about priors.
+
+**Consequence for reading the pilot.** Five-for-five is not five units of evidence. It is one strong instance, two weak ones, and two closed kernels where no choice existed. The canary, once drawn, supplies the only zero-anchor reading in the design and is the single point at which convergence-by-convention can be excluded rather than argued.
+
 ### What would distinguish the explanations — v1.1 only
 
 A kernel whose correct behavior is **not** recoverable from convention: nonce-parameterized constants, or a deliberately non-standard variant of a familiar shape, so that a generator cannot succeed by retrieval. Under such a kernel, convergence would have to come from the constraint surface, because there is no textbook to converge on.
