@@ -118,6 +118,11 @@ class Infra(Exception):
     candidate could have caused fails closed as a candidate failure instead.
     """
 CBMC_TRACTABLE = {"crc32", "sat_add_u8"}          # LN-4, measured not assumed
+# The exemption is DECLARED, per kernel, never inherited by absence. A kernel
+# in neither set has no measured tractability on record; under §7a.2b that is
+# cannot-evaluate (infra), not an exemption. fir_q15_canary enters one of
+# these sets only after its own LN-4-discipline measurement (SUPERSESSION-002).
+CBMC_INTRACTABLE_DECLARED = {"fir_q15", "matmul8_i32", "median3x3_u8"}  # LN-4
 DEVICE = "jetson"   # gates 3 and 5 run ON DEVICE — SPEC §7, and because this
                     # workstation's gcc sanitizer runtime hangs on an empty
                     # main() while the Jetson runs the same build in 7.5s
@@ -240,9 +245,14 @@ def gate4_cbmc(kernel, src=None, workdir=None):
     where cbmc is installed. Unlike gates 3 and 5, nothing about CBMC needs the
     device.
     """
-    if kernel not in CBMC_TRACTABLE:
+    if kernel in CBMC_INTRACTABLE_DECLARED:
         return None, [f"bounded equivalence intractable for {kernel} on this "
                       f"hardware (LN-4); reported as skipped, NOT as a pass"]
+    if kernel not in CBMC_TRACTABLE:
+        raise Infra(f"gate 4 has no measured tractability verdict for {kernel}: "
+                    f"neither declared tractable nor declared intractable (LN-4). "
+                    f"Measure it and declare it; an exemption is never inherited "
+                    f"by absence (§7a.2b)")
     if src is None:
         return False, ["no candidate supplied; unproven, and unproven is not a pass"]
     # A missing harness or oracle is OUR omission, not the candidate's. Both
