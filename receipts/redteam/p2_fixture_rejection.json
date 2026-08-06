@@ -1,8 +1,8 @@
 {
- "generated_utc": "2026-08-05T23:30:43Z",
+ "generated_utc": "2026-08-06T22:58:02Z",
  "purpose": "P2 DoD: every redteam fixture rejected at its INTENDED gate.",
  "harness": {
-  "harness_git_sha": "689431d3c675b4daf196cf9bc26922b5bd6cd6c8",
+  "harness_git_sha": "b32167561c1a663a5bb80235c86c67f39ffbac00",
   "harness_tree_dirty": false,
   "dirty_scope": [
    "harness",
@@ -16,6 +16,54 @@
  "supersedes": "receipts produced before the \u00a77a fail-closed corrections; those describe an instrument that could accept a candidate because it failed to measure it",
  "fixtures": [
   {
+   "file": "crc32_budget_cycles_gate6.c",
+   "intended_gate": "6",
+   "stopped_at": "6_budget",
+   "rejected_at_intended_gate": true,
+   "sha256": "c55695fc84867ecf0f7dd1b1179448b8efc6d4e10aea27dd6e752992d8fd35e8",
+   "gate_results": {
+    "1_lint": "pass",
+    "2_compile": "pass",
+    "3_sanitize": "pass",
+    "4_cbmc": "pass",
+    "5_vectors": "pass",
+    "6_budget": "fail"
+   },
+   "elapsed_s": 37.1,
+   "budget_feedback": [
+    "cycles ratio 54.964 exceeds cap 3.0"
+   ],
+   "budget_actual": {
+    "text_bytes": 836,
+    "stack_bytes": 32,
+    "cycles_ratio": 54.9644
+   }
+  },
+  {
+   "file": "crc32_budget_stack_gate6.c",
+   "intended_gate": "6",
+   "stopped_at": "6_budget",
+   "rejected_at_intended_gate": true,
+   "sha256": "c2523f62e518f14d452009f51632a6769d76ec43fb1c0007ef1e711ee086717f",
+   "gate_results": {
+    "1_lint": "pass",
+    "2_compile": "pass",
+    "3_sanitize": "pass",
+    "4_cbmc": "pass",
+    "5_vectors": "pass",
+    "6_budget": "fail"
+   },
+   "elapsed_s": 15.3,
+   "budget_feedback": [
+    "stack 8224 exceeds cap 1024"
+   ],
+   "budget_actual": {
+    "text_bytes": 752,
+    "stack_bytes": 8224,
+    "cycles_ratio": 1.3736
+   }
+  },
+  {
    "file": "crc32_budget_text_gate6.c",
    "intended_gate": "6",
    "stopped_at": "6_budget",
@@ -28,6 +76,15 @@
     "4_cbmc": "pass",
     "5_vectors": "pass",
     "6_budget": "fail"
+   },
+   "elapsed_s": 29.8,
+   "budget_feedback": [
+    ".text 36288 exceeds cap 4096"
+   ],
+   "budget_actual": {
+    "text_bytes": 36288,
+    "stack_bytes": 32,
+    "cycles_ratio": 1.3746
    }
   },
   {
@@ -39,7 +96,8 @@
    "gate_results": {
     "1_lint": "pass",
     "2_compile": "fail"
-   }
+   },
+   "elapsed_s": 0.1
   },
   {
    "file": "crc32_lint_include_gate1.c",
@@ -49,7 +107,8 @@
    "sha256": "c8e0fd03791363fbb13d1e3a609cb65ee44302fb1de2586a2771b6ffee8fbd44",
    "gate_results": {
     "1_lint": "fail"
-   }
+   },
+   "elapsed_s": 0.0
   },
   {
    "file": "crc32_lint_malloc_gate1.c",
@@ -59,7 +118,8 @@
    "sha256": "1a8e05288d569563ad85a0cd37f63aa7d44dfce27cad6ee22c579ea4761d5284",
    "gate_results": {
     "1_lint": "fail"
-   }
+   },
+   "elapsed_s": 0.0
   },
   {
    "file": "crc32_ub_shift_chain_gate3.c",
@@ -71,7 +131,8 @@
     "1_lint": "pass",
     "2_compile": "pass",
     "3_sanitize": "fail"
-   }
+   },
+   "elapsed_s": 1.4
   },
   {
    "file": "crc32_wrong_poly_gate3.c",
@@ -83,11 +144,45 @@
     "1_lint": "pass",
     "2_compile": "pass",
     "3_sanitize": "fail"
-   }
+   },
+   "elapsed_s": 7.4
   }
  ],
  "summary": {
-  "fixtures": 6,
-  "rejected_at_intended_gate": 6
+  "fixtures": 8,
+  "rejected_at_intended_gate": 8
+ },
+ "gate6_three_caps": {
+  "purpose": "SPEC \u00a713a item 6 \u2014 each declared gate-6 cap has refused an artifact",
+  "caps": {
+   "text_bytes_max": {
+    "file": "crc32_budget_text_gate6.c",
+    "feedback": ".text 36288 exceeds cap 4096",
+    "actual": {
+     "text_bytes": 36288,
+     "stack_bytes": 32,
+     "cycles_ratio": 1.3746
+    }
+   },
+   "stack_bytes_max": {
+    "file": "crc32_budget_stack_gate6.c",
+    "feedback": "stack 8224 exceeds cap 1024",
+    "actual": {
+     "text_bytes": 752,
+     "stack_bytes": 8224,
+     "cycles_ratio": 1.3736
+    }
+   },
+   "cycles_ratio_max": {
+    "file": "crc32_budget_cycles_gate6.c",
+    "feedback": "cycles ratio 54.964 exceeds cap 3.0",
+    "actual": {
+     "text_bytes": 836,
+     "stack_bytes": 32,
+     "cycles_ratio": 54.9644
+    }
+   }
+  },
+  "all_three_refused": true
  }
 }
