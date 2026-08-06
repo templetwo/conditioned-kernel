@@ -38,6 +38,7 @@ The VECTOR row is the one worth staring at. A vector-pinned bit is invisible to 
 | median3x3_u8 | boundary policy | **SHAPE** | — | 16×16 → 14×14 makes the 1px margin arithmetic; no padding convention needed |
 | median3x3_u8 | [D1] memory layout | **VECTOR** | **near-default** | same as matmul; transposed reading diverges on asymmetric input. **Ratified 2026-08-05 (#14126): stays VECTOR.** |
 | median3x3_u8 | implementation strategy | **HINT** | — | "sorting-network friendly" — see §4 |
+| fir_q15_canary | [C1]–[C5] boundary, accumulator, saturation placement, rounding, shift | **sealed draw** (channel pending PINNING-RULING.md; TEXT proposed) | **zero anchor** | kernel six (SUPERSESSION-002). Values assigned by `evidence/canary/DRAW.md`, composition per COMPOSITION.md; unread by any agent context as of 2026-08-06 |
 
 ---
 

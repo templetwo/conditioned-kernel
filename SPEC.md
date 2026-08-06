@@ -219,6 +219,7 @@ Fixed C interfaces; single translation unit; no allocation; no globals; no I/O; 
 | fir_q15 | `void fir_q15(const int16_t x[256], const int16_t h[16], int16_t y[256])` | Q15, saturating accumulate >>15 | classic DSP shape |
 | matmul8_i32 | `void matmul8_i32(const int32_t a[64], const int32_t b[64], int32_t c[64])` | entries in [-1024, 1023] | domain bound keeps products in range, no UB ambiguity |
 | median3x3_u8 | `void median3x3_u8(const uint8_t in[16*16], uint8_t out[14*14])` | interior only | perf-interesting, sorting-network friendly |
+| fir_q15_canary | `void fir_q15_canary(const int16_t x[256], const int16_t h[16], int16_t y[256])` | Q15-style; behaviour per the sealed draw (`evidence/canary/DRAW.md`) under `evidence/canary/COMPOSITION.md` semantics | kernel six per SUPERSESSION-002; zero-anchor twin of fir_q15; drawn bits are stated nowhere in this table by design — pinning channel pending `evidence/canary/PINNING-RULING.md`. Acceptance reported separately, never pooled into the frozen five. |
 
 Floating point (quaternion rotate) is a separate later arm whose stated purpose is exercising the tolerance policy. It does not join the primary signal in v1.
 
