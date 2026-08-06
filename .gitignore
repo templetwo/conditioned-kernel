@@ -64,3 +64,4 @@ logs/dashboard/
 # Explicit nested path (same boundary as logs/dashboard/)
 logs/dashboard/turns/
 state/flow_field.json
+.grok/
