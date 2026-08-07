@@ -2,7 +2,7 @@
 """ECS runner — the SPEC §9 state machine.
 
     load ECS packet -> build prompt -> generate -> LINT -> COMPILE -> SANITIZE
-       -> CBMC -> VECTORS(device) -> BUDGET -> ACCEPT -> receipt
+       -> CBMC -> VECTORS(device) -> BUDGET -> ACCEPT -> measure -> probe -> receipt
     any gate failure -> repair (<= 4 iterations) -> re-enter at LINT
     repair budget exhausted -> REJECT -> receipt (full trace kept)
     generation transport error / runner termination (OOM class)
@@ -155,8 +155,24 @@ def stub_generator(_prompt, kernel, seat="agentB"):
             "stub_source": os.path.relpath(p, ROOT)}
 
 
-def run_candidate(packet_path, generate, sample_index, arm_state):
-    """One candidate through generation, gates, and up to MAX_REPAIRS repairs."""
+def _real_post_accept(src, packet, gates):
+    """SPEC §9's measure and probe stages, resolved lazily so importing the
+    runner never touches the measurement path. There is no `None means skip`:
+    a caller either provides its own stage (tests mock the device boundary
+    here) or gets the real one. A probe battery that cannot run raises
+    chain.Infra and the slot is refilled — never a silent skip (§7a.2b)."""
+    sys.path.insert(0, os.path.join(ROOT, "harness", "measure"))
+    import post_accept as pa
+    return pa.run(src, packet, gates)
+
+
+def run_candidate(packet_path, generate, sample_index, arm_state,
+                  post_accept=None):
+    """One candidate through generation, gates, and up to MAX_REPAIRS repairs.
+
+    An ACCEPTED candidate then runs the post-accept stages (measure, probe)
+    before its record returns; acceptance without a probe record would leave
+    the cell's D uncomputable while the receipt read green."""
     packet = yaml.safe_load(open(packet_path))
     kernel = packet["kernel"]
     rec = {"kernel": kernel, "completeness": packet["completeness"],
@@ -225,10 +241,29 @@ def run_candidate(packet_path, generate, sample_index, arm_state):
                                     "stopped_at": gates["stopped_at"],
                                     "gates": {k: v["result"] for k, v in gates["gates"].items()}})
         if gates["accepted"]:
+            # --- SPEC §9: ACCEPT -> measure -> probe, before the receipt ----
+            # A stage failure here is an INSTRUMENT fault: the candidate is
+            # already accepted, so nothing the measure/probe path does is a
+            # verdict on it. The slot aborts and refills exactly as a
+            # transport error does — an accepted-but-unprobed artifact must
+            # not enter a cell, because D is computed over accepted artifacts
+            # and a missing probe record would poison the whole cell's D.
+            try:
+                extra = (post_accept or _real_post_accept)(src, packet, gates)
+            except chain.Infra as e:
+                rec["infra_abort"] = True
+                arm_state["infra_aborts"] += 1
+                rec["infra_reason"] = f"post-accept: {str(e)[:200]}"
+                rec["note"] = ("INFRA ABORT (measure/probe stage): candidate "
+                               "was accepted but the instrument could not "
+                               "measure or probe it; no sample consumed, slot "
+                               "refilled (SPEC §7a.2b, §9)")
+                return rec
             rec["accepted"] = True
             rec["gates"] = gates["gates"]
             rec["candidate_sha256"] = hashlib.sha256(src.encode()).hexdigest()
             rec["source"] = src
+            rec.update(extra)
             return rec
 
         # --- repair feedback is the STOPPING gate's, and only that ---
@@ -299,7 +334,7 @@ def barrier_for(packet, local_model=None, device="jetson"):
 
 
 def run_cell(packet_path, generate, n_samples=1, out_dir=None, arm_state=None,
-             local_model=None):
+             local_model=None, post_accept=None):
     """One cell: (generator × kernel × arm), samples consecutive under one barrier."""
     packet = yaml.safe_load(open(packet_path))
     vecs = json.load(open(os.path.join(ROOT, "trusted", "vectors",
@@ -329,7 +364,8 @@ def run_cell(packet_path, generate, n_samples=1, out_dir=None, arm_state=None,
     # --- n SCORED samples, with aborted slots refilled rather than lost -----
     scored_count, refills, idx = 0, 0, 0
     while scored_count < n_samples:
-        c = run_candidate(packet_path, generate, idx, arm_state)
+        c = run_candidate(packet_path, generate, idx, arm_state,
+                          post_accept=post_accept)
         cell["candidates"].append(c)
         idx += 1
         if c.get("infra_abort"):
