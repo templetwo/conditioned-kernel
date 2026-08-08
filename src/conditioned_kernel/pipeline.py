@@ -20,6 +20,13 @@ from conditioned_kernel.outcomes import (
     classify_product_decision,
     outcome_from_inference,
 )
+from conditioned_kernel.executable_authority import (
+    COMPILE_POLICY_VERSION,
+    GATE_VERSION,
+    apply_executable_authority,
+    build_operating_point,
+    finalize_authority_decision,
+)
 from conditioned_kernel.return_path.accept import accept_candidate
 from conditioned_kernel.return_path.assess import assess
 from conditioned_kernel.return_path.parse import parse_candidate
@@ -161,6 +168,14 @@ def run_turn(
                 execution_outcome=eo,
             )
 
+        # Step 0: policy versions + optional executable gates on the packet
+        packet = dict(packet)
+        packet["compile_policy"] = getattr(prof, "compile_policy", None) or COMPILE_POLICY_VERSION
+        packet["gate_version"] = getattr(prof, "gate_version", None) or GATE_VERSION
+        # State may declare a mechanical gate (Job 04-style coverage, etc.)
+        ea = state.current.get("executable_authority")
+        if isinstance(ea, dict) and ea:
+            packet["executable_authority"] = ea
         last_packet = packet
 
         if is_dry:
@@ -244,8 +259,35 @@ def run_turn(
             )
             packet["authoritative_reasons"] = list(auth_reasons)
         receipt = validate_candidate(candidate, packet)
+        # Executable authority: gate outranks model prose (Step 0 / Job 04 lesson)
+        receipt = apply_executable_authority(receipt, candidate, packet)
         receipt = assess(receipt, pass_index=pass_index, max_repair=repairs)
+        receipt = finalize_authority_decision(receipt)
         receipt["profile_id"] = prof.profile_id
+        # Operating point provenance (Step 0 DoD D)
+        use_ctx = prof.num_ctx if num_ctx is None else num_ctx
+        runtime_ver = None
+        if not is_dry:
+            try:
+                import httpx
+
+                rv = httpx.get(f"{ollama.base_url}/api/version", timeout=3.0)
+                if rv.status_code < 400:
+                    runtime_ver = str(rv.json().get("version") or "")
+            except Exception:
+                runtime_ver = None
+        op = build_operating_point(
+            profile=prof,
+            model=use_model,
+            think=bool(prof.think),
+            num_ctx=int(use_ctx),
+            host=getattr(prof, "target_device", None),
+            runtime_version=runtime_ver,
+            model_digest=getattr(prof, "digest_prefix", None) or None,
+            tool_surface=getattr(prof, "tool_surface", None),
+        )
+        receipt["operating_point"] = op
+        receipt["runtime_tuple"] = op
         if obligation is not None:
             receipt["authoritative_kind"] = obligation.kind
             receipt["authoritative_fallback"] = bool(
