@@ -47,6 +47,15 @@ class EdgeProfile:
     # Ollama chat/generate "think" flag. False disables reasoning channel for
     # thinking-capable kernels (e.g. qwen3.5). Never treated as the final answer.
     think: bool = False
+    # Step 0 runtime tuple (optional; survival profiles fill these)
+    base_model: str = ""
+    quant: str = ""
+    digest_prefix: str = ""
+    backend: str = "ollama"
+    tool_surface: str = "local_only"
+    compile_policy: str = "static-v0"
+    gate_version: str = "step0-gate-v1"
+    think_profile: str = "ordinary"  # ordinary | deliberate (default name for this file)
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "EdgeProfile":
@@ -93,6 +102,14 @@ class EdgeProfile:
             notes=str(data.get("notes") or ""),
             # Default False: Studio path disables thinking for thinking-capable models.
             think=bool(data["think"]) if data.get("think") is not None else False,
+            base_model=str(data.get("base_model") or ""),
+            quant=str(data.get("quant") or ""),
+            digest_prefix=str(data.get("digest_prefix") or ""),
+            backend=str(data.get("backend") or "ollama"),
+            tool_surface=str(data.get("tool_surface") or "local_only"),
+            compile_policy=str(data.get("compile_policy") or "static-v0"),
+            gate_version=str(data.get("gate_version") or "step0-gate-v1"),
+            think_profile=str(data.get("think_profile") or "ordinary"),
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -124,6 +141,48 @@ class EdgeProfile:
             "estimated_model_ram_mb": self.estimated_model_ram_mb,
             "estimated_substrate_ram_mb": self.estimated_substrate_ram_mb,
             "notes": self.notes,
+            "base_model": self.base_model,
+            "quant": self.quant,
+            "digest_prefix": self.digest_prefix,
+            "backend": self.backend,
+            "tool_surface": self.tool_surface,
+            "compile_policy": self.compile_policy,
+            "gate_version": self.gate_version,
+            "think_profile": self.think_profile,
+        }
+
+    def with_think_profile(self, think_profile: str) -> "EdgeProfile":
+        """Same model identity; only ordinary vs deliberate thinking changes."""
+        tp = (think_profile or "ordinary").strip().lower()
+        if tp not in ("ordinary", "deliberate", "off", "on"):
+            raise ValueError(
+                f"think_profile must be ordinary|deliberate (got {think_profile!r})"
+            )
+        think = tp in ("deliberate", "on")
+        name = "deliberate" if think else "ordinary"
+        d = self.to_dict()
+        d["think"] = think
+        d["think_profile"] = name
+        return EdgeProfile.from_dict(d)
+
+    def runtime_tuple(self) -> dict[str, Any]:
+        """Qualified operating-point fields (Step 0 DoD A/D)."""
+        return {
+            "profile_id": self.profile_id,
+            "model": self.model,
+            "base_model": self.base_model,
+            "quant": self.quant,
+            "digest_prefix": self.digest_prefix,
+            "backend": self.backend,
+            "num_ctx": self.num_ctx,
+            "think": self.think,
+            "think_profile": self.think_profile,
+            "tool_surface": self.tool_surface,
+            "compile_policy": self.compile_policy,
+            "gate_version": self.gate_version,
+            "target_device": self.target_device,
+            "arch": self.arch,
+            "ram_gb": self.ram_gb,
         }
 
     @property
@@ -165,6 +224,12 @@ _OBSERVABILITY_PACKET_KEYS = frozenset(
         "evidence_pool_selected",
         "intents",
         "prior_accepted_answer_control",
+        # Step 0 provenance: attached after compile, never rendered into the
+        # prompt (build_model_input reads an explicit key allowlist), so these
+        # are not inference tokens and must not move the edge byte count.
+        "compile_policy",
+        "gate_version",
+        "executable_authority",
     }
 )
 
