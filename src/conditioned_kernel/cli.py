@@ -28,7 +28,12 @@ from conditioned_kernel.state import SubstrateState
 
 
 def _resolve_profile(args: argparse.Namespace):
-    return load_profile(getattr(args, "profile", None) or DEFAULT_PROFILE_ID)
+    prof = load_profile(getattr(args, "profile", None) or DEFAULT_PROFILE_ID)
+    # Step 0 DoD B: ordinary vs deliberate without changing model identity
+    tp = getattr(args, "think_profile", None)
+    if tp:
+        prof = prof.with_think_profile(str(tp))
+    return prof
 
 
 def _apply_profile_defaults(args: argparse.Namespace) -> Any:
@@ -67,6 +72,14 @@ def _cmd_status(args: argparse.Namespace) -> int:
         f"edge:    ctx={report['num_ctx']}  packet≤{report['max_packet_bytes']}B  "
         f"keep_alive={report['keep_alive']}  one_model={report['one_model_only']}"
     )
+    rt = prof.runtime_tuple()
+    if rt.get("quant") or rt.get("digest_prefix") or prof.profile_id.startswith("macbook"):
+        print(
+            f"op:      model={rt.get('model')}  quant={rt.get('quant') or '—'}  "
+            f"digest~{rt.get('digest_prefix') or '—'}  think={rt.get('think_profile')}  "
+            f"ctx={rt.get('num_ctx')}  gate={rt.get('gate_version')}  "
+            f"compile={rt.get('compile_policy')}"
+        )
     print(
         f"budget:  est working set ~{report['estimated_working_set_mb']}MB  "
         f"headroom ~{report['estimated_headroom_mb']}MB on {report['ram_gb_budget']}GB class"
@@ -440,6 +453,33 @@ def _cmd_smoke(args: argparse.Namespace) -> int:
     return 0 if result.ok else 1
 
 
+def _cmd_act1(args: argparse.Namespace) -> int:
+    """Live ACT-1 Authority Crossover TUI (or headless screen). Real Ollama only."""
+    from pathlib import Path
+
+    from conditioned_kernel.act1.runner import Act1Config, run_act1
+    from conditioned_kernel.act1.state import Act1LiveState
+    from conditioned_kernel.act1.tui import run_tui
+
+    cells = tuple(
+        c.strip().upper()
+        for c in (getattr(args, "cells", None) or "A,B,C,D").split(",")
+        if c.strip()
+    )
+    out = getattr(args, "out_dir", None)
+    cfg = Act1Config(
+        max_cases=getattr(args, "max_cases", None),
+        cells=cells,
+        out_dir=Path(out) if out else None,
+    )
+    if getattr(args, "no_tui", False):
+        state = Act1LiveState()
+        summary = run_act1(state, cfg)
+        print(json.dumps(summary, indent=2))
+        return 0 if summary.get("primary_pass") else 1
+    return run_tui(cfg)
+
+
 def _cmd_dashboard(args: argparse.Namespace) -> int:
     """Serve the Interior View observability dashboard.
 
@@ -506,6 +546,15 @@ def _runtime_parent(*, include_mode: bool = True) -> argparse.ArgumentParser:
         "--profile",
         default=DEFAULT_PROFILE_ID,
         help=f"Edge profile (default: {DEFAULT_PROFILE_ID})",
+    )
+    parent.add_argument(
+        "--think-profile",
+        choices=["ordinary", "deliberate", "off", "on"],
+        default=None,
+        help=(
+            "Step 0: ordinary/think-off vs deliberate/think-on without swapping the model. "
+            "Same weights; only the thinking channel changes."
+        ),
     )
     parent.add_argument("--model", default=None, help="Override profile model")
     if include_mode:
@@ -622,6 +671,38 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     dp.set_defaults(func=_cmd_dashboard)
+
+    # ACT-1 — Authority Crossover live TUI (Step 0 validation; not a ladder test)
+    a1 = sub.add_parser(
+        "act1",
+        help=(
+            "ACT-1 Authority Crossover — live terminal TUI against real Ollama models. "
+            "MODEL vs KERNEL finalization across Q4/Q2 × think-off/on. "
+            "Not a ladder test. Not Step 1. No synthetic/demo path."
+        ),
+    )
+    a1.add_argument(
+        "--max-cases",
+        type=int,
+        default=None,
+        help="Limit corpus size (default: full 8-case ACT-1 corpus)",
+    )
+    a1.add_argument(
+        "--cells",
+        default="A,B,C,D",
+        help="Comma cells to run (default A,B,C,D = Q4-off,Q4-on,Q2-off,Q2-on)",
+    )
+    a1.add_argument(
+        "--out-dir",
+        default=None,
+        help="Receipt directory (default: ~/.grok/docs/run01-survival/act1_runs/<timestamp>)",
+    )
+    a1.add_argument(
+        "--no-tui",
+        action="store_true",
+        help="Headless runner only (print summary; still writes receipts)",
+    )
+    a1.set_defaults(func=_cmd_act1)
 
     # RUN 00.8B.2 — publication gate (no Ollama required)
     vp = sub.add_parser(
