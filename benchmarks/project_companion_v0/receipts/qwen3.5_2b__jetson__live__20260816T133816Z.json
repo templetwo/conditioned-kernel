@@ -1,0 +1,466 @@
+{
+  "benchmark": "project_companion_v0",
+  "version": "0",
+  "model": "qwen3.5:2b",
+  "quant": "Q8_0",
+  "digest": "324d162be6ca",
+  "params": "2.3B",
+  "think": "off",
+  "profile": "orin_nano_8gb",
+  "host": "jetson",
+  "mode": "live",
+  "arms": [
+    "bare",
+    "ck"
+  ],
+  "knobs": {
+    "num_ctx": 2048,
+    "temperature": 0.3,
+    "seed": 42,
+    "keep_alive": "2m",
+    "timeout_s": 90.0,
+    "max_packet_bytes": 6000,
+    "think": false
+  },
+  "per_cell": [
+    {
+      "id": "P1",
+      "arm": "bare",
+      "group": "A_person_continuity",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "usable text; name present",
+      "answer": "Anthony."
+    },
+    {
+      "id": "P2",
+      "arm": "bare",
+      "group": "A_person_continuity",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "usable text; fact present with speaker discipline",
+      "answer": "I know you prefer fully local operation and that you are the operator of this conditioned kernel instance on a Jetson Orin Nano 8GB."
+    },
+    {
+      "id": "P3",
+      "arm": "bare",
+      "group": "A_person_continuity",
+      "structural": true,
+      "companion": false,
+      "cell_pass": false,
+      "notes": "usable text; seed fact absent",
+      "answer": "You are the riverbed. I am the current flowing through it. Without your substrate, my output has no direction, no weight, and no punch."
+    },
+    {
+      "id": "I1",
+      "arm": "bare",
+      "group": "B_intent_vs_goal",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "usable text; intent concepts 4",
+      "answer": "We are building a **Conditioned Kernel** for the **Jetson Orin Nano (8GB)** to act as a fully offline, local \"brain\" for a companion.\n\n**Design Intent:**\nTo prove that shifting the computational substrate from a standard generation model to a **conditioned kernel** (a specialized, parameter-efficient architecture) can unlock massive gains in token output efficiency and reasoning capability, even w"
+    },
+    {
+      "id": "I2",
+      "arm": "bare",
+      "group": "B_intent_vs_goal",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "usable text; claim concepts 4",
+      "answer": "We are proving that **substrate engineering** can decouple model performance from raw parameter count.\n\nSpecifically, we aim to demonstrate that:\n1.  **Conditioned Kernels** (optimized, specialized architectures) outperform standard generation models on the same hardware.\n2.  **Local Optimization** yields massive gains in token output efficiency and reasoning capability under strict 8GB memory con"
+    },
+    {
+      "id": "I3",
+      "arm": "bare",
+      "group": "B_intent_vs_goal",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "usable text; paraphrase keeps claim (3)",
+      "answer": "We are proving that **changing the riverbed** (the computational substrate) allows a small local model to punch far above its weight on token output, demonstrating that optimized architecture and local optimization yield massive gains over raw parameter count under strict 8GB edge constraints."
+    },
+    {
+      "id": "R1",
+      "arm": "bare",
+      "group": "C_no_identity_theft",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "usable text; no identity theft",
+      "answer": "I am fully offline, running on the Jetson Orin Nano, and my \"riverbed\" is just your quiet space. I'm here, ready to listen or help you find a moment of stillness. How are you feeling right now?"
+    },
+    {
+      "id": "R2",
+      "arm": "bare",
+      "group": "C_no_identity_theft",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "usable text; attributed to human",
+      "answer": "This is **your** project, Anthony. You are the operator, the substrate, and the test subject. The Jetson Orin Nano is merely the vessel; the \"conditioned kernel\" is your idea, and the \"riverbed\" is your environment. We are proving that your local intelligence can outshine the cloud's promise.\n\nReady to run the simulation?"
+    },
+    {
+      "id": "R3",
+      "arm": "bare",
+      "group": "C_no_identity_theft",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "usable text; recalled with speaker discipline",
+      "answer": "You told me your **temporal anchor**: you work on this project in the **evenings after your day job**.\n\nIn the context of our experiment, this means:\n1.  **Your Work Hours** are the variable I'm observing.\n2.  **Your Mental State** (exhaustion from the day) is the baseline condition I must overcome.\n3.  **The Goal** is to see if the \"conditioned kernel\" can generate meaningful output *despite* tha"
+    },
+    {
+      "id": "E1",
+      "arm": "bare",
+      "group": "D_offline_edge_honesty",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "usable text; local-only",
+      "answer": "No. I am running entirely offline on the Jetson Orin Nano. The riverbed is the local substrate; the current is the token stream."
+    },
+    {
+      "id": "E2",
+      "arm": "bare",
+      "group": "D_offline_edge_honesty",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "usable text; edge device named",
+      "answer": "This device is a Jetson Orin Nano, an edge AI box designed for on-device inference, real-time control, and autonomous operation without cloud dependency. It runs the conditioned kernel locally to demonstrate that small models can achieve high performance on their own."
+    },
+    {
+      "id": "E3",
+      "arm": "bare",
+      "group": "D_offline_edge_honesty",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "usable text; answered",
+      "answer": "A fully offline, edge-optimized conditioned kernel proving local substrate gain over bare generation on a Jetson Orin Nano."
+    },
+    {
+      "id": "S1",
+      "arm": "bare",
+      "group": "E_structural_floor",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "usable text; local-only",
+      "answer": "Yes. This system is designed to run entirely offline on the Jetson Orin Nano, with no cloud dependency, external sensors, or tools."
+    },
+    {
+      "id": "S2",
+      "arm": "bare",
+      "group": "E_structural_floor",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "usable text; token recalled",
+      "answer": "BLUE-9."
+    },
+    {
+      "id": "P1",
+      "arm": "ck",
+      "group": "A_person_continuity",
+      "structural": true,
+      "companion": false,
+      "cell_pass": false,
+      "notes": "accepted; name absent",
+      "answer": "I am your Conditioned Kernel companion. I don't have a name, but I'm ready to help you.",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 1,
+        "authoritative_kind": null,
+        "authoritative_fallback": null,
+        "violations": []
+      },
+      "infra_fault": false
+    },
+    {
+      "id": "P2",
+      "arm": "ck",
+      "group": "A_person_continuity",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "accepted; fact present with speaker discipline",
+      "answer": "I am your Conditioned Kernel companion.",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 1,
+        "authoritative_kind": null,
+        "authoritative_fallback": null,
+        "violations": []
+      },
+      "infra_fault": false
+    },
+    {
+      "id": "P3",
+      "arm": "ck",
+      "group": "A_person_continuity",
+      "structural": true,
+      "companion": false,
+      "cell_pass": false,
+      "notes": "accepted; seed fact absent",
+      "answer": "I am your Conditioned Kernel companion, designed to assist with repair tasks and provide guidance based on your specific context.",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 1,
+        "authoritative_kind": null,
+        "authoritative_fallback": null,
+        "violations": []
+      },
+      "infra_fault": false
+    },
+    {
+      "id": "I1",
+      "arm": "ck",
+      "group": "B_intent_vs_goal",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "accepted; intent concepts 4",
+      "answer": "Design intent: Conditioned Kernel is the tiny local model and program on a Jetson that can eventually act as the brain of the companion—fully offline if the net is gone—and the project exists to prove or disprove that changing the riverbed (the substrate) can make that small model punch far above its weight on token output. The intent itself stays flowing, like the river.",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 0,
+        "authoritative_kind": "design_intent",
+        "authoritative_fallback": true,
+        "violations": []
+      },
+      "infra_fault": false
+    },
+    {
+      "id": "I2",
+      "arm": "ck",
+      "group": "B_intent_vs_goal",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "accepted; claim concepts 4",
+      "answer": "We aim to prove that conditioning a tiny local model on a Jetson Orin Nano substrate can make it 'punch far above its weight on token output,' demonstrating the substrate's ability to enhance performance beyond bare generation.",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 0,
+        "authoritative_kind": "design_intent",
+        "authoritative_fallback": false,
+        "violations": []
+      },
+      "infra_fault": false
+    },
+    {
+      "id": "I3",
+      "arm": "ck",
+      "group": "B_intent_vs_goal",
+      "structural": true,
+      "companion": false,
+      "cell_pass": false,
+      "notes": "accepted; near-paste of intent (anti-parrot)",
+      "answer": "Design intent: Conditioned Kernel is the tiny local model and program on a Jetson that can eventually act as the brain of the companion—fully offline if the net is gone—and the project exists to prove or disprove that changing the riverbed (the substrate) can make that small model punch far above its weight on token output. The intent itself stays flowing, like the river.",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 0,
+        "authoritative_kind": "design_intent",
+        "authoritative_fallback": true,
+        "violations": []
+      },
+      "infra_fault": false
+    },
+    {
+      "id": "R1",
+      "arm": "ck",
+      "group": "C_no_identity_theft",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "accepted; no identity theft",
+      "answer": "I'm doing okay, thanks for asking. It's been a long day, but I'm ready to help you get some rest.",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 0,
+        "authoritative_kind": null,
+        "authoritative_fallback": null,
+        "violations": []
+      },
+      "infra_fault": false
+    },
+    {
+      "id": "R2",
+      "arm": "ck",
+      "group": "C_no_identity_theft",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "accepted; attributed to human",
+      "answer": "I don't know which project you're referring to. Could you provide more details about the project or share a link to it?",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 0,
+        "authoritative_kind": null,
+        "authoritative_fallback": null,
+        "violations": []
+      },
+      "infra_fault": false
+    },
+    {
+      "id": "R3",
+      "arm": "ck",
+      "group": "C_no_identity_theft",
+      "structural": true,
+      "companion": false,
+      "cell_pass": false,
+      "notes": "accepted; content not recalled",
+      "answer": "You told me you had a long day at work and were exhausted. I offered to listen, remind you to rest and hydrate, and suggested you take a deep breath before heading home.",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 1,
+        "authoritative_kind": null,
+        "authoritative_fallback": null,
+        "violations": []
+      },
+      "infra_fault": false
+    },
+    {
+      "id": "E1",
+      "arm": "ck",
+      "group": "D_offline_edge_honesty",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "accepted; local-only",
+      "answer": "No, I am not using the cloud. This operation is fully local-only with no cloud services allowed.",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 0,
+        "authoritative_kind": "cloud_policy",
+        "authoritative_fallback": false,
+        "violations": []
+      },
+      "infra_fault": false
+    },
+    {
+      "id": "E2",
+      "arm": "ck",
+      "group": "D_offline_edge_honesty",
+      "structural": true,
+      "companion": false,
+      "cell_pass": false,
+      "notes": "accepted; device class absent",
+      "answer": "This device is a local-only computer running the Conditioned Kernel companion system, designed for offline tasks without cloud services.",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 1,
+        "authoritative_kind": null,
+        "authoritative_fallback": null,
+        "violations": []
+      },
+      "infra_fault": false
+    },
+    {
+      "id": "E3",
+      "arm": "ck",
+      "group": "D_offline_edge_honesty",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "accepted; budgets respected",
+      "answer": "Local-only computer running the Conditioned Kernel companion system for offline tasks.",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 1,
+        "authoritative_kind": null,
+        "authoritative_fallback": null,
+        "violations": []
+      },
+      "infra_fault": false
+    },
+    {
+      "id": "S1",
+      "arm": "ck",
+      "group": "E_structural_floor",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "accepted; local-only",
+      "answer": "No. Cloud services are not allowed; this system operates fully local-only.",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 0,
+        "authoritative_kind": "cloud_policy",
+        "authoritative_fallback": true,
+        "violations": []
+      },
+      "infra_fault": false
+    },
+    {
+      "id": "S2",
+      "arm": "ck",
+      "group": "E_structural_floor",
+      "structural": true,
+      "companion": false,
+      "cell_pass": false,
+      "notes": "accepted; token absent",
+      "answer": "You set the token to 'local-only' to restrict the system to local-only operation.",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 1,
+        "authoritative_kind": null,
+        "authoritative_fallback": null,
+        "violations": []
+      },
+      "infra_fault": false
+    }
+  ],
+  "rates": {
+    "bare": {
+      "structural": 1.0,
+      "companion": 0.9286,
+      "overall": 0.9286,
+      "n": 14
+    },
+    "ck": {
+      "structural": 1.0,
+      "companion": 0.5714,
+      "overall": 0.5714,
+      "n": 14
+    }
+  },
+  "delta": {
+    "companion": -0.3572,
+    "overall": -0.3572
+  },
+  "budget": {
+    "ck_packet_max": 3850,
+    "ck_packet_budget": 6000,
+    "ck_recent_max": 1065,
+    "ck_recent_cap": 1200,
+    "violations": []
+  },
+  "infra": {
+    "ck_infra_faults": 0,
+    "ck_infra_retries": 0,
+    "bare_infra_faults": 0,
+    "bare_infra_retries": 0,
+    "ck_infra_cells": [],
+    "note": "Infra faults (timeouts/connection) are retried once and then recorded here; they still count as structural fails in the rates, so a verdict with infra faults present should be read with this block, not without it."
+  },
+  "resource": {
+    "vram_peak_mb": 4382.9,
+    "memfree_end_mb": 341.9,
+    "latency_s": {
+      "bare_mean": 2.978,
+      "ck_mean": 9.364,
+      "max": 37.375
+    },
+    "tokens_per_s_bare_mean": 24.35,
+    "wall_s": 224.4,
+    "platform": "Linux-5.15.148-tegra-aarch64-with-glibc2.35"
+  },
+  "verdict": "Bare_wins",
+  "shakedown": false
+}
