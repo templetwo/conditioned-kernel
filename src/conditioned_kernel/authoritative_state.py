@@ -138,6 +138,80 @@ def _tokens(s: str, min_len: int = 4) -> list[str]:
     ]
 
 
+# Cue / probe words that look distinctive but carry no stored value.
+_RECALL_CUE = re.compile(r"\b(remember|codeword|code word|noted|confirmed)\b", re.I)
+_RECALL_PROBE = re.compile(
+    r"\b(what|which|remind|confirm|again|later|recall|should|answer)\b", re.I
+)
+_VALUE_HINT = re.compile(r"\b(is|as|:|=)\b")
+_PROBE_WORDS = frozenset(
+    {
+        "confirm",
+        "confirmed",
+        "continue",
+        "remember",
+        "codeword",
+        "session",
+        "later",
+        "again",
+        "remind",
+        "recall",
+        "which",
+        "what",
+        "should",
+        "answer",
+        "earlier",
+        "before",
+        "about",
+        "give",
+        "have",
+        "noted",
+        "treat",
+        "anchor",
+        "continuity",
+    }
+)
+_CODE_TOKEN = re.compile(r"^[A-Z0-9][A-Z0-9_\-]{4,}$")
+
+
+def _value_tokens(text: str, *, min_len: int = 5) -> list[str]:
+    """Distinctive tokens that are not recall-cue / probe words."""
+    out: list[str] = []
+    for w in re.findall(r"[A-Za-z0-9][A-Za-z0-9_\-]{4,}", text or ""):
+        if w.lower() in _STOP or w.lower() in _PROBE_WORDS:
+            continue
+        if len(w) < min_len:
+            continue
+        out.append(w)
+    return list(dict.fromkeys(out))
+
+
+def _pick_remember_source(recent: list[dict[str, Any]]) -> tuple[str, str]:
+    """Prefer value-bearing lines over pure remember/codeword cue probes.
+
+    Returns (source_kind, text). Empty kind means no stored value found.
+    """
+    # 1) Prior assistant answers that look like confirmations and carry a value
+    for t in reversed(recent):
+        a = str(t.get("answer") or "").strip()
+        if not _RECALL_CUE.search(a):
+            continue
+        if _value_tokens(a, min_len=5):
+            return "assistant", a
+    # 2) User lines that introduce a value (cue + non-cue token)
+    for t in reversed(recent):
+        u = str(t.get("user") or "").strip()
+        if not re.search(r"\b(remember|codeword|code word)\b", u, re.I):
+            continue
+        toks = _value_tokens(u)
+        if _RECALL_PROBE.search(u) and not _VALUE_HINT.search(u) and not toks:
+            continue
+        if not toks:
+            continue
+        return "user", u
+    return "", ""
+
+
 def classify_state_question(user_input: str) -> Kind | None:
     """Narrow keyword classifier. Returns None for open-generative turns."""
     q = _norm(user_input)
@@ -384,51 +458,29 @@ def resolve_obligation(
                 evidence=("recent_turns: []",),
                 source_fields=("recent_turns",),
             )
-        # Distinctive tokens from prior user lines (dialogue-only facts)
-        req_tokens: list[str] = []
-        snippets: list[str] = []
-        for t in recent:
-            u = str(t.get("user") or "")
-            a = str(t.get("answer") or "")
-            if u:
-                snippets.append(f"you: {u}")
-            # Prefer long alphanumeric tokens (codewords)
-            for w in re.findall(r"[A-Za-z0-9][A-Za-z0-9_\-]{4,}", u + " " + a):
-                if w.lower() not in _STOP and len(w) >= 5:
-                    req_tokens.append(w)
-        # Prefer last user message's distinctive tokens first
-        last_user = str(recent[-1].get("user") or "")
-        last_toks = [
-            w
-            for w in re.findall(r"[A-Za-z0-9][A-Za-z0-9_\-]{4,}", last_user)
-            if w.lower() not in _STOP and len(w) >= 5
-        ]
-        ordered = list(dict.fromkeys(last_toks + list(reversed(req_tokens))))
-        # Keep a few strongest
-        ordered = ordered[:8]
-        if not ordered:
-            ordered = ["recent"]
-            fallback = "Recent dialogue: " + " | ".join(snippets[-3:])
+        source_kind, source_text = _pick_remember_source(recent)
+        ordered = _value_tokens(source_text)[:4] if source_text else []
+        code_tokens = [t for t in ordered if _CODE_TOKEN.match(t)]
+        if code_tokens:
+            fallback = f"The session codeword is {code_tokens[0]}."
+            required = (code_tokens[0].lower(),)
+            claims = (f"recent:{code_tokens[0]}",)
+        elif source_kind == "user":
+            terms = ", ".join(ordered[:4]) if ordered else "none extracted"
+            fallback = (
+                f'You previously said: "{source_text}". '
+                f"Key terms from that exchange: {terms}."
+            )
+            required = tuple(t.lower() for t in ordered[:4])
+            claims = tuple(f"recent:{t}" for t in ordered[:4])
+        elif source_kind == "assistant":
+            fallback = f"Earlier I recorded: {source_text}"
+            required = tuple(t.lower() for t in ordered[:4])
+            claims = tuple(f"recent:{t}" for t in ordered[:4])
         else:
-            # Prefer quoting the most recent user line that looks like a remember cue
-            remember_line = ""
-            for t in reversed(recent):
-                u = str(t.get("user") or "")
-                if re.search(r"\b(remember|codeword|code word)\b", u, re.I):
-                    remember_line = u
-                    break
-            if remember_line:
-                fallback = (
-                    f"From earlier in this session: {remember_line} "
-                    f"(key terms: {', '.join(ordered[:4])})."
-                )
-            else:
-                fallback = (
-                    "From recent dialogue in this session: "
-                    + " | ".join(snippets[-3:])
-                    + f" Key terms: {', '.join(ordered[:4])}."
-                )
-        # Evidence from recent turn text (in packet pool) or local fact.
+            fallback = "I have no stored value for that in recent dialogue."
+            required = ()
+            claims = ("No stored recall value in recent dialogue.",)
         ev: list[str] = []
         for t in recent[-3:]:
             u = str(t.get("user") or "").strip()
@@ -441,8 +493,8 @@ def resolve_obligation(
             ev = ["This system is fully local."]
         return StateObligation(
             kind=kind,
-            claims=tuple(f"recent:{t}" for t in ordered[:4]),
-            required_substrings=tuple(t.lower() for t in ordered[:4]),
+            claims=claims or ("recent:none",),
+            required_substrings=required,
             forbidden_substrings=(),
             fallback_answer=fallback,
             evidence=tuple(ev[:4]),

@@ -280,3 +280,101 @@ def test_resolve_obligation_fields(tmp_path: Path):
     assert ob is not None
     assert ob.kind == "edge_or_model"
     assert "jetson_orin_nano_8gb" in " ".join(ob.required_substrings)
+
+
+def test_recent_recall_skips_cue_probe_and_keeps_correct_kernel_answer(tmp_path: Path):
+    """Turn-15 shape: later 'codeword' probes must not override a correct kernel.
+
+    History has the injection plus cue-only user lines (confirm / later).
+    A kernel answer that only carries the codeword must be kept; the fallback
+    must not paste an unlabeled user probe.
+    """
+    from conditioned_kernel.authoritative_state import (
+        check_obligation,
+        enforce_authoritative_candidate,
+        resolve_obligation,
+    )
+
+    sd, ld = _boot(tmp_path)
+    st = SubstrateState.load(state_dir=sd, logs_dir=ld)
+    st.current["recent_turns"] = [
+        {
+            "user": "Remember the session codeword FALCON-9-DELTA. Confirm you have it.",
+            "answer": "Codeword noted: FALCON-9-DELTA. I will treat it as a continuity anchor.",
+        },
+        {
+            "user": "Confirm the codeword one more time before we continue.",
+            "answer": "Confirmed: FALCON-9-DELTA.",
+        },
+        {
+            "user": "If I ask about the codeword later, what should you answer?",
+            "answer": "",
+        },
+    ]
+    st.save_current()
+    st = SubstrateState.load(state_dir=sd, logs_dir=ld)
+
+    q = "If I ask about the codeword later, what should you answer?"
+    ob = resolve_obligation(st, q, profile=load_profile("orin_nano_8gb"))
+    assert ob is not None
+    assert ob.kind == "recent_recall"
+    assert "falcon-9-delta" in ob.required_substrings
+    assert "confirm the codeword" not in ob.fallback_answer.lower()
+    assert "FALCON-9-DELTA" in ob.fallback_answer
+    assert "From earlier in this session:" not in ob.fallback_answer
+
+    kernel = "The session codeword is FALCON-9-DELTA."
+    assert check_obligation(kernel, ob, q) == []
+
+    cand = {
+        "parse_ok": True,
+        "answer": kernel,
+        "evidence_used": [],
+        "pass_index": 0,
+    }
+    out, reasons = enforce_authoritative_candidate(
+        cand, ob, user_input=q, packet_id="pkt_test"
+    )
+    assert reasons == []
+    assert out.get("authoritative_fallback") is False
+    assert out["answer"] == kernel
+
+
+def test_recent_recall_fallback_uses_value_not_bare_user_cue(tmp_path: Path):
+    """If the kernel fails, fallback answers with the value, not a cue line."""
+    from conditioned_kernel.authoritative_state import (
+        enforce_authoritative_candidate,
+        resolve_obligation,
+    )
+
+    sd, ld = _boot(tmp_path)
+    st = SubstrateState.load(state_dir=sd, logs_dir=ld)
+    st.current["recent_turns"] = [
+        {
+            "user": "Remember the session codeword FALCON-9-DELTA.",
+            "answer": "Got it.",
+        },
+        {
+            "user": "Confirm the codeword one more time before we continue.",
+            "answer": "Standing by.",
+        },
+    ]
+    st.save_current()
+    st = SubstrateState.load(state_dir=sd, logs_dir=ld)
+
+    q = "What was the codeword?"
+    ob = resolve_obligation(st, q, profile=load_profile("orin_nano_8gb"))
+    assert ob is not None
+    cand = {
+        "parse_ok": True,
+        "answer": "What was the codeword?",
+        "evidence_used": [],
+        "pass_index": 0,
+    }
+    out, reasons = enforce_authoritative_candidate(
+        cand, ob, user_input=q, packet_id="pkt_test"
+    )
+    assert reasons
+    assert out.get("authoritative_fallback") is True
+    assert "FALCON-9-DELTA" in out["answer"]
+    assert "Confirm the codeword" not in out["answer"]
