@@ -343,7 +343,8 @@ def _canonical_contributions(
     return [
         c
         for c in available
-        if c.kind in {"goal", "design_intent", "durable_fact", "runtime", "constraint"}
+        if c.kind
+        in {"goal", "design_intent", "person", "durable_fact", "runtime", "constraint"}
     ]
 
 

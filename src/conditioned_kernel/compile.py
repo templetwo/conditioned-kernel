@@ -27,6 +27,12 @@ from conditioned_kernel.state import (
 
 Mode = Literal["chat_json", "generate_raw"]
 
+
+def _num_predict(packet: dict[str, Any]) -> int:
+    """Hard decode cap. 0.8B under JSON schema ran away to 6k tokens without it."""
+    words = int((packet.get("constraints") or {}).get("max_words") or 120)
+    return max(64, min(400, words * 3 + 64))
+
 # Per-build fields excluded from the serialized model input so that identical
 # state + input produce an identical prompt (reproducibility criterion).
 _VOLATILE_PACKET_FIELDS = frozenset(
@@ -70,6 +76,7 @@ def _digest(state: SubstrateState) -> dict[str, Any]:
     return {
         "goal": state.current.get("goal", ""),
         "design_intent": state.current.get("design_intent", ""),
+        "operator_name": state.operator_name(),
         "active_profile": state.current.get("active_profile", "ck_v0"),
         "open_thread_count": len(open_threads),
         "receipt_count_24h": state.current.get("receipt_count_24h", 0),
@@ -252,7 +259,7 @@ def build_model_input(
     companion = str(contract.get("acceptance_mode") or "") == "companion"
     intents = set(packet.get("intents") or [])
     social = companion and ("social" in intents) and not intents.intersection(
-        {"purpose", "runtime", "edge", "policy", "threads", "measurement"}
+        {"purpose", "person", "runtime", "edge", "policy", "threads", "measurement"}
     )
 
     if companion:
@@ -304,6 +311,7 @@ def build_model_input(
                 "repeat_penalty": 1.1,
                 "seed": seed,
                 "num_ctx": num_ctx,
+                "num_predict": _num_predict(packet),
             },
         }
         if mode == "generate_raw":
@@ -320,6 +328,7 @@ def build_model_input(
                     "repeat_penalty": 1.1,
                     "seed": seed,
                     "num_ctx": num_ctx,
+                    "num_predict": _num_predict(packet),
                 },
             }
     else:
@@ -348,6 +357,7 @@ def build_model_input(
             "repeat_penalty": 1.1,
             "seed": seed,
             "num_ctx": num_ctx,
+            "num_predict": _num_predict(packet),
         }
         if mode == "chat_json":
             payload = {

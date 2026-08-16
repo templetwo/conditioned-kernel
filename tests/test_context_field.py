@@ -24,6 +24,13 @@ def _boot(tmp_path: Path) -> SubstrateState:
                     "on a small local model under Jetson Orin Nano 8GB edge budgets."
                 ),
                 "design_intent": DEFAULT_DESIGN_INTENT,
+                "operator": {
+                    "name": "Anthony",
+                    "durable_facts": [
+                        "Operator of this Conditioned Kernel instance",
+                        "Prefers fully local operation",
+                    ],
+                },
                 "active_profile": "orin_nano_8gb",
                 "session_id": "sess_cf",
                 "receipt_count_24h": 0,
@@ -79,6 +86,7 @@ def test_social_greeting_withholds_project_state(tmp_path: Path):
     assert "state.edge.target" not in ids
     assert "state.goal" not in ids
     assert "state.design_intent" not in ids
+    assert "state.operator" not in ids
     assert "state.runtime.repair_budget" not in ids
     assert not any(i.startswith("state.thread.") for i in ids)
     assert packet["facts"] == []
@@ -93,6 +101,16 @@ def test_emotional_statement_withholds_hardware(tmp_path: Path):
     ids = _selected_ids(packet)
     assert "state.edge.target" not in ids
     assert "state.goal" not in ids
+
+
+def test_name_question_selects_operator(tmp_path: Path):
+    st = _boot(tmp_path)
+    packet = build_arrival_packet(
+        st, "What is my name?", acceptance_mode="companion"
+    )
+    ids = _selected_ids(packet)
+    assert "state.operator" in ids
+    assert any("Anthony" in f for f in (packet.get("facts") or []))
 
 
 def test_design_intent_question_selects_intent_slot(tmp_path: Path):

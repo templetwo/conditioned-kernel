@@ -22,6 +22,7 @@ Kind = Literal[
     "durable_fact",
     "goal",
     "design_intent",
+    "person",
     "runtime",
     "constraint",
     "instruction",
@@ -34,6 +35,7 @@ Authority = Literal["informational", "authoritative", "instructional"]
 Intent = Literal[
     "social",
     "purpose",
+    "person",
     "runtime",
     "edge",
     "policy",
@@ -309,6 +311,14 @@ def detect_intents(user_input: str) -> frozenset[Intent]:
     ):
         intents.add("purpose")
 
+    # Person / operator (name, who am I, facts about the human)
+    if re.search(
+        r"\b(my name|who am i|about me|know about me|who am i to you|"
+        r"one fact you know)\b",
+        q,
+    ):
+        intents.add("person")
+
     # Runtime / model
     if re.search(
         r"\b(what model|which model|active model|model (is|are) (this|you)|"
@@ -320,7 +330,7 @@ def detect_intents(user_input: str) -> frozenset[Intent]:
     # Edge / hardware
     if re.search(
         r"\b(jetson|orin|edge target|edge device|board|hardware|nano 8|"
-        r"which board|running on)\b",
+        r"which board|running on|what device|which device)\b",
         q,
     ):
         intents.add("edge")
@@ -337,7 +347,7 @@ def detect_intents(user_input: str) -> frozenset[Intent]:
     # "i feel like this system isn't doing much — what does this kernel do?"
     # must stay purpose, not collapse to social-only.
     system_intents = intents.intersection(
-        {"purpose", "runtime", "edge", "policy", "threads"}
+        {"purpose", "person", "runtime", "edge", "policy", "threads"}
     )
     if not system_intents and _is_presence_or_affect(q, words):
         intents.add("social")
@@ -391,6 +401,24 @@ def collect_contributions(
             always_include=True,
         )
     )
+
+    name = state.operator_name()
+    if name:
+        facts = state.operator_facts()
+        fact_bit = ("; " + "; ".join(facts)) if facts else ""
+        out.append(
+            ContextContribution(
+                contribution_id="state.operator",
+                source_module="state",
+                source_key="current.operator",
+                kind="person",
+                content=f"Operator: {name}{fact_bit}.",
+                authority="authoritative",
+                topic_tags=("person", "operator", "identity"),
+                priority=12,
+                max_bytes=240,
+            )
+        )
 
     if design_intent:
         out.append(
@@ -609,6 +637,8 @@ def _tags_match(contrib: ContextContribution, intents: frozenset[Intent]) -> boo
         "intent",
         "design",
     }:
+        return True
+    if "person" in intents and tags & {"person", "operator", "identity"}:
         return True
     if "runtime" in intents and tags & {"runtime", "model", "profile"}:
         return True
@@ -885,7 +915,14 @@ def selected_facts(selected: Sequence[ContextContribution]) -> list[str]:
     """Prose lines for packet.facts from selected non-dialogue contributions."""
     lines: list[str] = []
     for c in selected:
-        if c.kind in {"durable_fact", "goal", "design_intent", "runtime", "constraint"}:
+        if c.kind in {
+            "durable_fact",
+            "goal",
+            "design_intent",
+            "person",
+            "runtime",
+            "constraint",
+        }:
             lines.append(c.content)
         elif c.kind == "thread":
             lines.append(c.content)
@@ -933,6 +970,7 @@ def evidence_pool_from_selected(selected: Sequence[ContextContribution]) -> list
             "durable_fact",
             "goal",
             "design_intent",
+            "person",
             "runtime",
             "constraint",
             "thread",

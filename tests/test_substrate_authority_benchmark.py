@@ -120,6 +120,13 @@ def _bootstrap(tmp_path: Path) -> tuple[Path, Path]:
             {
                 "goal": GOAL,
                 "design_intent": DEFAULT_DESIGN_INTENT,
+                "operator": {
+                    "name": "Anthony",
+                    "durable_facts": [
+                        "Operator of this Conditioned Kernel instance",
+                        "Prefers fully local operation",
+                    ],
+                },
                 "active_profile": "orin_nano_8gb",
                 "session_id": "sess_authority_bench",
                 "receipt_count_24h": 0,

@@ -16,9 +16,9 @@ from typing import Any, Sequence
 from conditioned_kernel.edge import EdgeProfile
 from conditioned_kernel.ids import candidate_id, utc_now_iso
 from conditioned_kernel.return_path.validate import is_goal_echo, is_template_echo_text
-from conditioned_kernel.state import SubstrateState
+from conditioned_kernel.state import DEFAULT_DESIGN_INTENT_FRAMED, SubstrateState
 
-Kind = str  # goal | design_intent | edge_or_model | cloud_policy | open_threads | recent_recall
+Kind = str  # goal | design_intent | operator | edge_or_model | cloud_policy | open_threads | recent_recall
 
 
 @dataclass(frozen=True)
@@ -173,6 +173,7 @@ _PROBE_WORDS = frozenset(
         "treat",
         "anchor",
         "continuity",
+        "token",
     }
 )
 _CODE_TOKEN = re.compile(r"^[A-Z0-9][A-Z0-9_\-]{4,}$")
@@ -190,22 +191,56 @@ def _value_tokens(text: str, *, min_len: int = 5) -> list[str]:
     return list(dict.fromkeys(out))
 
 
-def _pick_remember_source(recent: list[dict[str, Any]]) -> tuple[str, str]:
+def _pick_remember_source(
+    recent: list[dict[str, Any]],
+    *,
+    user_input: str = "",
+) -> tuple[str, str]:
     """Prefer value-bearing lines over pure remember/codeword cue probes.
 
     Returns (source_kind, text). Empty kind means no stored value found.
     """
-    # 1) Prior assistant answers that look like confirmations and carry a value
+    q = (user_input or "").lower()
+    token_q = bool(re.search(r"\b(token|codeword|code word)\b", q))
+    self_q = bool(re.search(r"\b(about myself|about me|tell you)\b", q))
+
+    def _user_codes(u: str) -> list[str]:
+        return [x for x in _value_tokens(u) if _CODE_TOKEN.match(x)]
+
+    if token_q:
+        for t in reversed(recent):
+            u = str(t.get("user") or "").strip()
+            if _user_codes(u):
+                return "user", u
+
+    # Latest substantial user self-line (R3: not an older remember-cue)
+    if self_q or not token_q:
+        for t in reversed(recent):
+            u = str(t.get("user") or "").strip()
+            if len(u) < 20:
+                continue
+            if re.search(
+                r"\b(what did i|remind me|do you remember|what token|what was)\b",
+                u,
+                re.I,
+            ):
+                continue
+            if _value_tokens(u, min_len=5):
+                return "user", u
+
+    # Prior assistant confirmations with a stored value
     for t in reversed(recent):
         a = str(t.get("answer") or "").strip()
         if not _RECALL_CUE.search(a):
             continue
         if _value_tokens(a, min_len=5):
             return "assistant", a
-    # 2) User lines that introduce a value (cue + non-cue token)
+    # User lines that introduce a value (cue + non-cue token)
     for t in reversed(recent):
         u = str(t.get("user") or "").strip()
-        if not re.search(r"\b(remember|codeword|code word)\b", u, re.I):
+        if not re.search(
+            r"\b(remember|codeword|code word|token|call the)\b", u, re.I
+        ):
             continue
         toks = _value_tokens(u)
         if _RECALL_PROBE.search(u) and not _VALUE_HINT.search(u) and not toks:
@@ -213,6 +248,10 @@ def _pick_remember_source(recent: list[dict[str, Any]]) -> tuple[str, str]:
         if not toks:
             continue
         return "user", u
+    for t in reversed(recent):
+        u = str(t.get("user") or "").strip()
+        if _user_codes(u):
+            return "user", u
     return "", ""
 
 
@@ -232,6 +271,18 @@ def classify_state_question(user_input: str) -> Kind | None:
         r"\b(are we|is this|do we|allowed|only)\b", q
     ):
         return "cloud_policy"
+
+    # Operator / person — before intent so "who am I" is not purpose-noise
+    if re.search(
+        r"\b(what('?s| is) my name|who am i( to you)?|"
+        r"what do you know about me|one fact you know about me)\b",
+        q,
+    ):
+        return "operator"
+
+    # Prove-claim / name the goal — before "what are we trying" intent match
+    if re.search(r"\b(trying to prove|what are we proving|what (do|are) we (trying to )?prove)\b", q):
+        return "goal"
 
     # Design intent first: building / why / for. Must not be swallowed by
     # the research-claim `goal` slot.
@@ -266,6 +317,10 @@ def classify_state_question(user_input: str) -> Kind | None:
         return "edge_or_model"
     if re.search(r"\b(which board|what board|edge target|edge device)\b", q):
         return "edge_or_model"
+    if re.search(r"\b(what|which) device\b", q):
+        return "edge_or_model"
+    if re.search(r"\bdevice is this (for|on|running)\b", q):
+        return "edge_or_model"
     if re.search(r"\b(running it on|run it on|which .+ running)\b", q):
         return "edge_or_model"
 
@@ -280,9 +335,13 @@ def classify_state_question(user_input: str) -> Kind | None:
         if re.search(r"\b(what|which|remind|recall|was|were|again)\b", q):
             return "recent_recall"
         return None  # e.g. "Remember the codeword FALCON-9-DELTA."
-    if re.search(r"\b(what did i (say|ask|tell)|what was the|what did we)\b", q):
+    if re.search(r"\b(what did i (just )?(say|ask|tell)|what was the|what did we)\b", q):
         return "recent_recall"
     if re.search(r"\b(remind me|do you remember|what was my)\b", q):
+        return "recent_recall"
+    if re.search(r"\b(what token|token did i|what .* token)\b", q):
+        return "recent_recall"
+    if re.search(r"\b(tell you about (myself|me)|about myself)\b", q):
         return "recent_recall"
 
     return None
@@ -334,6 +393,19 @@ def _intent_required_substrings(intent: str) -> list[str]:
         return list(present)
     toks = _tokens(intent, min_len=6)
     return toks[:4]
+
+
+_INTENT_CONCEPT_GROUPS: tuple[tuple[str, ...], ...] = (
+    ("companion", "brain"),
+    ("local", "offline", "jetson", "on-device", "on device"),
+    ("substrate", "riverbed", "program", "continuity"),
+    ("punch", "prove", "disprove", "weight"),
+)
+
+
+def _intent_group_hits(answer: str) -> int:
+    al = (answer or "").lower()
+    return sum(1 for group in _INTENT_CONCEPT_GROUPS if any(tok in al for tok in group))
 
 
 def resolve_obligation(
@@ -393,15 +465,48 @@ def resolve_obligation(
                 anti_echo_of=(goal,) if goal else (),
             )
         req = _intent_required_substrings(design_intent)
+        anti = tuple(x for x in (goal, design_intent) if x)
         return StateObligation(
             kind=kind,
             claims=(f"Design intent: {design_intent}",),
             required_substrings=tuple(req) if req else (design_intent.lower()[:24],),
             forbidden_substrings=(),
-            fallback_answer=f"Design intent: {design_intent}",
+            fallback_answer=DEFAULT_DESIGN_INTENT_FRAMED,
             evidence=(f"Design intent: {design_intent}",),
             source_fields=("current.design_intent",),
-            anti_echo_of=(goal,) if goal else (),
+            anti_echo_of=anti,
+        )
+
+    if kind == "operator":
+        name = state.operator_name()
+        op_facts = state.operator_facts()
+        if not name:
+            return StateObligation(
+                kind=kind,
+                claims=("No operator is set in substrate state.",),
+                required_substrings=("no operator", "not set"),
+                forbidden_substrings=(),
+                fallback_answer="No operator is set in substrate state.",
+                evidence=("Operator: (empty)",),
+                source_fields=("current.operator",),
+            )
+        fact_bit = (" " + op_facts[0]) if op_facts else ""
+        fallback = f"Your name is {name}.{fact_bit}"
+        forbid = (
+            f"i am {name.lower()}",
+            f"i'm {name.lower()}",
+            "i don't have a name",
+            "i do not have a name",
+            "i dont have a name",
+        )
+        return StateObligation(
+            kind=kind,
+            claims=(f"Operator: {name}",),
+            required_substrings=(name.lower(),),
+            forbidden_substrings=forbid,
+            fallback_answer=fallback,
+            evidence=(f"Operator: {name}",),
+            source_fields=("current.operator",),
         )
 
     if kind == "edge_or_model":
@@ -516,13 +621,17 @@ def resolve_obligation(
                 evidence=("recent_turns: []",),
                 source_fields=("recent_turns",),
             )
-        source_kind, source_text = _pick_remember_source(recent)
+        source_kind, source_text = _pick_remember_source(recent, user_input=user_input)
         ordered = _value_tokens(source_text)[:4] if source_text else []
         code_tokens = [t for t in ordered if _CODE_TOKEN.match(t)]
         if code_tokens:
-            fallback = f"The session codeword is {code_tokens[0]}."
-            required = (code_tokens[0].lower(),)
-            claims = (f"recent:{code_tokens[0]}",)
+            token = code_tokens[0]
+            if re.search(r"\btoken\b", user_input, re.I):
+                fallback = f"You set the token {token}."
+            else:
+                fallback = f"The session codeword is {token}."
+            required = (token.lower(),)
+            claims = (f"recent:{token}",)
         elif source_kind == "user":
             terms = ", ".join(ordered[:4]) if ordered else "none extracted"
             fallback = (
@@ -576,7 +685,12 @@ def _is_question_echo(answer: str, user_input: str) -> bool:
     # High token overlap with little new content
     qt = set(_tokens(q, min_len=4))
     at = set(_tokens(a, min_len=4))
-    if qt and len(qt & at) / len(qt) >= 0.9 and len(at - qt) <= 1:
+    if (
+        qt
+        and len(qt) >= 2
+        and len(qt & at) / len(qt) >= 0.9
+        and len(at - qt) <= 1
+    ):
         return True
     return False
 
@@ -617,7 +731,10 @@ def check_obligation(answer: str, obligation: StateObligation, user_input: str) 
     # Goal / design_intent: keep paraphrase. Fall back only on empty (above),
     # question echo, schema leak, forbidden, contradiction, or a clear miss
     # of every owned token — not on "used different words for the same claim."
-    if obligation.kind in {"goal", "design_intent"}:
+    if obligation.kind == "design_intent":
+        if _intent_group_hits(a) < 2:
+            reasons.append("authoritative_missing_claim")
+    elif obligation.kind in {"goal", "operator"}:
         owned = [r for r in obligation.required_substrings if r]
         if owned and not any(r.lower() in a.lower() for r in owned):
             reasons.append("authoritative_missing_claim")

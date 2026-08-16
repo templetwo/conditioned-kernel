@@ -28,6 +28,14 @@ DEFAULT_DESIGN_INTENT = (
     "output. The intent itself stays flowing, like the river."
 )
 
+# Framed restatement for obligation fallback. Must carry the claim without
+# being a near-copy of DEFAULT_DESIGN_INTENT (I3 anti-paste).
+DEFAULT_DESIGN_INTENT_FRAMED = (
+    "A tiny local program on a Jetson meant as an offline companion brain, "
+    "to prove or disprove that changing the riverbed lets that small model "
+    "punch above its weight."
+)
+
 
 def _read_json(path: Path, default: Any) -> Any:
     if not path.exists():
@@ -141,6 +149,19 @@ class SubstrateState:
     def open_threads(self) -> list[dict[str, Any]]:
         return [t for t in self.threads if t.get("status") == "open"]
 
+    def operator(self) -> dict[str, Any]:
+        raw = self.current.get("operator")
+        return raw if isinstance(raw, dict) else {}
+
+    def operator_name(self) -> str:
+        return str(self.operator().get("name") or "").strip()
+
+    def operator_facts(self) -> list[str]:
+        raw = self.operator().get("durable_facts") or []
+        if not isinstance(raw, list):
+            return []
+        return [str(x).strip() for x in raw if str(x).strip()]
+
     def fact_list(self) -> list[str]:
         flags = self.current.get("flags") or {}
         edge = flags.get("edge_target") or "jetson_orin_nano_8gb"
@@ -158,6 +179,10 @@ class SubstrateState:
         intent = str(self.current.get("design_intent") or "").strip()
         if intent:
             facts.append(f"Design intent: {intent}")
+        name = self.operator_name()
+        if name:
+            op_bits = [f"Operator: {name}"] + self.operator_facts()
+            facts.append("; ".join(op_bits) + ".")
         return [f for f in facts if f]
 
     def save_current(self) -> None:

@@ -167,9 +167,36 @@ def is_goal_echo(answer: str, goal: str) -> bool:
     if not gtoks:
         return False
     overlap = len(gtoks & atoks) / len(gtoks)
-    # Nearly all goal tokens and little else
-    if overlap >= 0.85 and len(atoks - gtoks) <= 2:
+    extra = len(atoks - gtoks)
+    missing = len(gtoks - atoks)
+    # Near-copy: almost every goal token and almost nothing else.
+    # A paraphrase that drops a verb and adds another is not a paste.
+    if overlap >= 0.85 and extra <= 2 and missing == 0:
         return True
+    return False
+
+
+_ASSISTANT_PAST_ACT = re.compile(
+    r"\bI (offered|suggested|recommended|proposed|promised|"
+    r"reminded you|asked you to|told you I|said I would)\b",
+    re.I,
+)
+
+
+def invented_assistant_history(answer: str, packet: dict[str, Any]) -> bool:
+    """True if the answer asserts a prior assistant act not in recent_turns."""
+    if not answer or not _ASSISTANT_PAST_ACT.search(answer):
+        return False
+    recent = packet.get("recent_turns") or []
+    prior = " ".join(
+        str(t.get("answer") or "")
+        for t in recent
+        if isinstance(t, dict)
+    ).lower()
+    for m in _ASSISTANT_PAST_ACT.finditer(answer):
+        verb = m.group(1).lower()
+        if verb not in prior:
+            return True
     return False
 
 
@@ -570,6 +597,14 @@ def validate_candidate(
     ):
         state_faithful = False
         violations.append("intent_echo")
+
+    if (
+        answer
+        and invented_assistant_history(answer, packet)
+        and not work.get("authoritative_fallback")
+    ):
+        state_faithful = False
+        violations.append("invented_assistant_history")
 
     # Responsiveness:
     # - measurement: hard reject (Laboratory contract)

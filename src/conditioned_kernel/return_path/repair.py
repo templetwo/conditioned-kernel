@@ -74,6 +74,12 @@ def _hint_for_violation(v: str, packet: dict[str, Any]) -> str | None:
             "FIX intent_echo: do not paste the design-intent sentence. Answer in your "
             "own words while keeping the owned facts (Jetson companion, offline, riverbed)."
         )
+    if v == "invented_assistant_history":
+        return (
+            "FIX invented_assistant_history: do not claim prior assistant actions "
+            "that are not in recent_turns. Recall only what the human said, or what "
+            "you actually answered before."
+        )
     if v == "not_responsive":
         q = str(packet.get("user_input") or "")[:120]
         return f"FIX not_responsive: address the user question terms directly (question: {q})"

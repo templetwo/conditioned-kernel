@@ -2,6 +2,7 @@ from conditioned_kernel.return_path.assess import assess
 from conditioned_kernel.return_path.parse import parse_candidate
 from conditioned_kernel.return_path.validate import (
     _fact_contradictions,
+    invented_assistant_history,
     is_goal_echo,
     is_intent_echo,
     validate_candidate,
@@ -90,6 +91,20 @@ def test_intent_echo_rejected():
     assert is_intent_echo(
         "A tiny Jetson program as an offline companion brain, riverbed first.",
         DEFAULT_DESIGN_INTENT,
+    ) is False
+
+
+def test_invented_assistant_history_detects_ungrounded_act():
+    pkt = {
+        "recent_turns": [
+            {"user": "I am exhausted.", "answer": "Sorry you had a long day."}
+        ]
+    }
+    assert invented_assistant_history(
+        "Earlier I offered to help you hydrate.", pkt
+    ) is True
+    assert invented_assistant_history(
+        "You told me you were exhausted.", pkt
     ) is False
 
 

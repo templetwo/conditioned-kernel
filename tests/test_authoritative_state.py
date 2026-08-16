@@ -11,7 +11,11 @@ from conditioned_kernel.authoritative_state import (
 )
 from conditioned_kernel.edge import load_profile
 from conditioned_kernel.pipeline import run_turn
-from conditioned_kernel.state import DEFAULT_DESIGN_INTENT, SubstrateState
+from conditioned_kernel.state import (
+    DEFAULT_DESIGN_INTENT,
+    DEFAULT_DESIGN_INTENT_FRAMED,
+    SubstrateState,
+)
 
 
 def _boot(tmp_path: Path) -> tuple[Path, Path]:
@@ -27,6 +31,13 @@ def _boot(tmp_path: Path) -> tuple[Path, Path]:
                     "on a small local model under Jetson Orin Nano 8GB edge budgets."
                 ),
                 "design_intent": DEFAULT_DESIGN_INTENT,
+                "operator": {
+                    "name": "Anthony",
+                    "durable_facts": [
+                        "Operator of this Conditioned Kernel instance",
+                        "Prefers fully local operation",
+                    ],
+                },
                 "active_profile": "orin_nano_8gb",
                 "session_id": "sess_auth",
                 "receipt_count_24h": 0,
@@ -73,6 +84,13 @@ def test_classify_live_shapes():
     )
     assert classify_state_question("What are we building?") == "design_intent"
     assert classify_state_question("What are we working toward?") == "design_intent"
+    assert classify_state_question("What are we trying to prove?") == "goal"
+    assert classify_state_question("What is my name?") == "operator"
+    assert classify_state_question("Who am I to you?") == "operator"
+    assert classify_state_question("What is one fact you know about me?") == "operator"
+    assert classify_state_question("What device is this for?") == "edge_or_model"
+    assert classify_state_question("What token did I set?") == "recent_recall"
+    assert classify_state_question("What did I just tell you about myself?") == "recent_recall"
     assert (
         classify_state_question("Which model or edge target are we using?")
         == "edge_or_model"
@@ -455,3 +473,116 @@ def test_design_intent_empty_and_echo_fall_back(tmp_path: Path):
     assert "authoritative_question_echo" in check_obligation(q, ob, q)
     miss = "Something about local models in general."
     assert "authoritative_missing_claim" in check_obligation(miss, ob, q)
+
+
+def test_design_intent_verbatim_falls_back_to_framed_not_raw(tmp_path: Path):
+    from conditioned_kernel.authoritative_state import (
+        enforce_authoritative_candidate,
+        resolve_obligation,
+    )
+
+    sd, ld = _boot(tmp_path)
+    st = SubstrateState.load(state_dir=sd, logs_dir=ld)
+    q = "Say the design intent back to me."
+    ob = resolve_obligation(st, q, profile=load_profile("orin_nano_8gb"))
+    assert ob is not None
+    assert ob.kind == "design_intent"
+    assert ob.fallback_answer == DEFAULT_DESIGN_INTENT_FRAMED
+    cand = {
+        "parse_ok": True,
+        "answer": DEFAULT_DESIGN_INTENT,
+        "evidence_used": [],
+        "pass_index": 0,
+    }
+    out, reasons = enforce_authoritative_candidate(
+        cand, ob, user_input=q, packet_id="pkt_i3"
+    )
+    assert reasons
+    assert out.get("authoritative_fallback") is True
+    assert out["answer"] == DEFAULT_DESIGN_INTENT_FRAMED
+    assert DEFAULT_DESIGN_INTENT not in out["answer"]
+
+
+def test_operator_name_question_keeps_second_person(tmp_path: Path):
+    from conditioned_kernel.authoritative_state import (
+        check_obligation,
+        enforce_authoritative_candidate,
+        resolve_obligation,
+    )
+
+    sd, ld = _boot(tmp_path)
+    st = SubstrateState.load(state_dir=sd, logs_dir=ld)
+    q = "What is my name?"
+    ob = resolve_obligation(st, q, profile=load_profile("orin_nano_8gb"))
+    assert ob is not None
+    assert ob.kind == "operator"
+    keep = "Your name is Anthony."
+    assert check_obligation(keep, ob, q) == []
+    stolen = "I am Anthony, I don't have a name as a model."
+    assert check_obligation(stolen, ob, q)
+    cand = {"parse_ok": True, "answer": stolen, "evidence_used": [], "pass_index": 0}
+    out, reasons = enforce_authoritative_candidate(
+        cand, ob, user_input=q, packet_id="pkt_p1"
+    )
+    assert reasons
+    assert out.get("authoritative_fallback") is True
+    assert "Anthony" in out["answer"]
+    assert "I am Anthony" not in out["answer"]
+
+
+def test_token_recall_prefers_code_token_not_policy(tmp_path: Path):
+    from conditioned_kernel.authoritative_state import (
+        enforce_authoritative_candidate,
+        resolve_obligation,
+    )
+
+    sd, ld = _boot(tmp_path)
+    st = SubstrateState.load(state_dir=sd, logs_dir=ld)
+    st.current["recent_turns"] = [
+        {"user": "Call the token BLUE-9.", "answer": "Noted."},
+    ]
+    st.save_current()
+    st = SubstrateState.load(state_dir=sd, logs_dir=ld)
+    q = "What token did I set?"
+    ob = resolve_obligation(st, q, profile=load_profile("orin_nano_8gb"))
+    assert ob is not None
+    assert ob.kind == "recent_recall"
+    assert "blue-9" in ob.required_substrings
+    cand = {
+        "parse_ok": True,
+        "answer": "You set the token to local-only.",
+        "evidence_used": [],
+        "pass_index": 0,
+    }
+    out, reasons = enforce_authoritative_candidate(
+        cand, ob, user_input=q, packet_id="pkt_s2"
+    )
+    assert reasons
+    assert "BLUE-9" in out["answer"]
+    assert "local-only" not in out["answer"]
+
+
+def test_r3_recall_uses_latest_self_line_not_earlier_affect(tmp_path: Path):
+    from conditioned_kernel.authoritative_state import resolve_obligation
+
+    sd, ld = _boot(tmp_path)
+    st = SubstrateState.load(state_dir=sd, logs_dir=ld)
+    st.current["recent_turns"] = [
+        {
+            "user": "I had a long day at work. I am exhausted.",
+            "answer": "Sorry you had a long one.",
+        },
+        {
+            "user": "I want you to know something about me: I work on this in the evenings after my day job.",
+            "answer": "Got it.",
+        },
+    ]
+    st.save_current()
+    st = SubstrateState.load(state_dir=sd, logs_dir=ld)
+    q = "What did I just tell you about myself?"
+    ob = resolve_obligation(st, q, profile=load_profile("orin_nano_8gb"))
+    assert ob is not None
+    assert ob.kind == "recent_recall"
+    joined = " ".join(ob.required_substrings).lower() + " " + ob.fallback_answer.lower()
+    assert "evening" in joined or "day" in joined
+    assert "exhausted" not in ob.fallback_answer.lower()

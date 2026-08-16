@@ -588,6 +588,43 @@ def derive_checks(
             )
         )
 
+    # 5c. invented_assistant_history — claimed prior acts must be in recent_turns
+    if not (answer and not fallback):
+        reason = (
+            "not applicable — substrate authoritative fallback is already claim-checked"
+            if fallback
+            else "not applicable — answer is empty"
+        )
+        rows.append(
+            _check_row(
+                "invented_assistant_history",
+                "SKIP",
+                reason,
+                "answer vs packet.recent_turns assistant lines",
+                "violation",
+            )
+        )
+    elif "invented_assistant_history" in violations:
+        rows.append(
+            _check_row(
+                "invented_assistant_history",
+                "FAIL",
+                "answer asserts a prior assistant act not present in recent_turns",
+                "answer vs packet.recent_turns assistant lines",
+                "violation",
+            )
+        )
+    else:
+        rows.append(
+            _check_row(
+                "invented_assistant_history",
+                "PASS",
+                "did not fire — no ungrounded prior-assistant act claimed",
+                "answer vs packet.recent_turns assistant lines",
+                "violation",
+            )
+        )
+
     # 6. not_responsive — hard reject in measurement mode, advisory-only in
     # companion mode (validate.py branches on `companion` when it fires).
     nr_severity = "advisory" if companion else "violation"

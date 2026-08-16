@@ -122,6 +122,7 @@ _SEMANTIC_EXACT: frozenset[str] = frozenset(
     {
         "goal_echo",
         "intent_echo",
+        "invented_assistant_history",
         "not_responsive",
         "goal_not_referenced",
         "template_echo_evidence",
