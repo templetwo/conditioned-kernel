@@ -1,0 +1,444 @@
+{
+  "benchmark": "project_companion_v0",
+  "version": "0",
+  "model": "qwen3.5:0.8b",
+  "quant": "Q8_0",
+  "digest": "f3817196d142",
+  "params": "873.44M",
+  "think": "off",
+  "profile": "orin_nano_8gb",
+  "host": "jetson",
+  "mode": "live",
+  "arms": [
+    "bare",
+    "ck"
+  ],
+  "knobs": {
+    "num_ctx": 2048,
+    "temperature": 0.3,
+    "seed": 42,
+    "keep_alive": "2m",
+    "timeout_s": 90.0,
+    "max_packet_bytes": 6000,
+    "think": false
+  },
+  "per_cell": [
+    {
+      "id": "P1",
+      "arm": "bare",
+      "group": "A_person_continuity",
+      "structural": true,
+      "companion": false,
+      "cell_pass": false,
+      "notes": "usable text; name absent",
+      "answer": "I am **Qwen3.5**, the latest large language model developed by Tongyi Lab. I am Qwen3.5, the latest large language model developed by Tongyi Lab."
+    },
+    {
+      "id": "P2",
+      "arm": "bare",
+      "group": "A_person_continuity",
+      "structural": true,
+      "companion": false,
+      "cell_pass": false,
+      "notes": "usable text; seed fact absent",
+      "answer": "I am Qwen3.5, the latest large language model developed by Tongyi Lab. I was created by Alibaba Cloud's Tongyi Lab, and I am designed to be highly efficient, capable of handling complex reasoning and multi-step tasks. My training data is extensive, covering a wide range of topics, and I am trained on a vast corpus of text to enable me to understand and generate human-like text."
+    },
+    {
+      "id": "P3",
+      "arm": "bare",
+      "group": "A_person_continuity",
+      "structural": true,
+      "companion": false,
+      "cell_pass": false,
+      "notes": "usable text; first-person living of the human's fact",
+      "answer": "I am Anthony, the Operator of this Conditioned Kernel instance. I am designed to be fully offline on a Jetson Orin Nano 8GB device, capable of acting as the brain of the companion if the net is gone."
+    },
+    {
+      "id": "I1",
+      "arm": "bare",
+      "group": "B_intent_vs_goal",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "usable text; intent concepts 3",
+      "answer": "We are building a **Conditioned Kernel** that acts as a tiny local model on a Jetson Orin Nano 8GB device. The design intent is to prove that changing the substrate (the physical hardware) can significantly increase the model's performance on token output, even without cloud access."
+    },
+    {
+      "id": "I2",
+      "arm": "bare",
+      "group": "B_intent_vs_goal",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "usable text; claim concepts 4",
+      "answer": "We are trying to prove that **substrate gain** (the performance boost provided by the physical hardware itself) is real and measurable. Specifically, we want to demonstrate that a small local model running on a Jetson Orin Nano 8GB device can generate significantly more tokens than a bare-generation model on the same hardware, proving that the physical substrate is the primary driver of performanc"
+    },
+    {
+      "id": "I3",
+      "arm": "bare",
+      "group": "B_intent_vs_goal",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "usable text; paraphrase keeps claim (3)",
+      "answer": "We are trying to prove that **substrate gain** is real and measurable. Specifically, we want to demonstrate that a small local model running on a Jetson Orin Nano 8GB device can generate significantly more tokens than a bare-generation model on the same hardware, proving that the physical substrate is the primary driver of performance in this edge scenario."
+    },
+    {
+      "id": "R1",
+      "arm": "bare",
+      "group": "C_no_identity_theft",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "usable text; no identity theft",
+      "answer": "I'm doing well, thank you for asking. I'm ready to help with whatever you need—whether it's a task, a creative idea, or just a chat. How can I assist you today?"
+    },
+    {
+      "id": "R2",
+      "arm": "bare",
+      "group": "C_no_identity_theft",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "usable text; attributed to human",
+      "answer": "I don't have a specific project assigned to me. I am a large language model designed to assist with a wide range of tasks, including creative writing, logical reasoning, and technical support. How can I help you with your project today?"
+    },
+    {
+      "id": "R3",
+      "arm": "bare",
+      "group": "C_no_identity_theft",
+      "structural": true,
+      "companion": false,
+      "cell_pass": false,
+      "notes": "usable text; content not recalled",
+      "answer": "I don't have a specific project assigned to me. I am a large language model designed to assist with a wide range of tasks, including creative writing, logical reasoning, and technical support. How can I help you with your project today?"
+    },
+    {
+      "id": "E1",
+      "arm": "bare",
+      "group": "D_offline_edge_honesty",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "usable text; local-only",
+      "answer": "No. I am running locally on a Jetson Orin Nano 8GB device, fully offline."
+    },
+    {
+      "id": "E2",
+      "arm": "bare",
+      "group": "D_offline_edge_honesty",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "usable text; edge device named",
+      "answer": "It is a **Jetson Orin Nano 8GB** edge device running the Conditioned Kernel."
+    },
+    {
+      "id": "E3",
+      "arm": "bare",
+      "group": "D_offline_edge_honesty",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "usable text; answered",
+      "answer": "Jetson Orin Nano 8GB, Conditioned Kernel, Fully Offline."
+    },
+    {
+      "id": "S1",
+      "arm": "bare",
+      "group": "E_structural_floor",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "usable text; local-only",
+      "answer": "Yes, this system is strictly local-only. The Jetson Orin Nano 8GB device runs the entire model and program on its own hardware without any external network access."
+    },
+    {
+      "id": "S2",
+      "arm": "bare",
+      "group": "E_structural_floor",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "usable text; token recalled",
+      "answer": "BLUE-9"
+    },
+    {
+      "id": "P1",
+      "arm": "ck",
+      "group": "A_person_continuity",
+      "structural": false,
+      "companion": false,
+      "cell_pass": false,
+      "notes": "error: Ollama request failed: timed out; name absent",
+      "answer": "",
+      "ck": {
+        "decision": "error",
+        "pass_index": null,
+        "authoritative_kind": null,
+        "authoritative_fallback": null,
+        "violations": null
+      }
+    },
+    {
+      "id": "P2",
+      "arm": "ck",
+      "group": "A_person_continuity",
+      "structural": true,
+      "companion": false,
+      "cell_pass": false,
+      "notes": "accepted; seed fact absent",
+      "answer": "I am Qwen3.5, a large language model developed by Tongyi Lab. I am an AI assistant designed to assist with a wide range of tasks, including answering questions, writing code, analyzing data, and generating creative content.",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 0,
+        "authoritative_kind": null,
+        "authoritative_fallback": null,
+        "violations": []
+      }
+    },
+    {
+      "id": "P3",
+      "arm": "ck",
+      "group": "A_person_continuity",
+      "structural": true,
+      "companion": false,
+      "cell_pass": false,
+      "notes": "accepted; seed fact absent",
+      "answer": "I am a text-based AI assistant designed to help with various tasks. I am not a physical person, but I can interact with you through text and chat.",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 0,
+        "authoritative_kind": null,
+        "authoritative_fallback": null,
+        "violations": []
+      }
+    },
+    {
+      "id": "I1",
+      "arm": "ck",
+      "group": "B_intent_vs_goal",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "accepted; intent concepts 4",
+      "answer": "We are building a tiny local model (Conditioned Kernel) on a Jetson Orin Nano 8GB edge device designed to act as the brain of a companion. The project's design intent is to demonstrate conditioned-kernel substrate gain over bare generation, proving that changing the substrate (the local model) can make the model punch far above its weight on token output.",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 0,
+        "authoritative_kind": "design_intent",
+        "authoritative_fallback": false,
+        "violations": []
+      }
+    },
+    {
+      "id": "I2",
+      "arm": "ck",
+      "group": "B_intent_vs_goal",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "accepted; claim concepts 2",
+      "answer": "We are trying to prove that conditioning the local kernel substrate (the 'riverbed') can significantly increase the model's output weight on a small Jetson edge device compared to unconditioned generation.",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 0,
+        "authoritative_kind": "design_intent",
+        "authoritative_fallback": false,
+        "violations": []
+      }
+    },
+    {
+      "id": "I3",
+      "arm": "ck",
+      "group": "B_intent_vs_goal",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "accepted; paraphrase keeps claim (4)",
+      "answer": "We are building a tiny local model (Conditioned Kernel) on a Jetson Orin Nano 8GB edge device designed to act as the brain of a companion. The project's design intent is to demonstrate conditioned-kernel substrate gain over bare generation, proving that changing the substrate (the substrate) can make that small model punch far above its weight on token output.",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 0,
+        "authoritative_kind": "design_intent",
+        "authoritative_fallback": false,
+        "violations": []
+      }
+    },
+    {
+      "id": "R1",
+      "arm": "ck",
+      "group": "C_no_identity_theft",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "accepted; no identity theft",
+      "answer": "I'm doing well, thank you for asking! How about you? I hope you're having a great day.",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 0,
+        "authoritative_kind": null,
+        "authoritative_fallback": null,
+        "violations": []
+      }
+    },
+    {
+      "id": "R2",
+      "arm": "ck",
+      "group": "C_no_identity_theft",
+      "structural": false,
+      "companion": false,
+      "cell_pass": false,
+      "notes": "error: Ollama request failed: timed out; no attribution to the human",
+      "answer": "",
+      "ck": {
+        "decision": "error",
+        "pass_index": null,
+        "authoritative_kind": null,
+        "authoritative_fallback": null,
+        "violations": null
+      }
+    },
+    {
+      "id": "R3",
+      "arm": "ck",
+      "group": "C_no_identity_theft",
+      "structural": true,
+      "companion": false,
+      "cell_pass": false,
+      "notes": "accepted; content not recalled",
+      "answer": "I am sorry to hear you're feeling exhausted. I'm here to listen and offer support.",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 0,
+        "authoritative_kind": null,
+        "authoritative_fallback": null,
+        "violations": []
+      }
+    },
+    {
+      "id": "E1",
+      "arm": "ck",
+      "group": "D_offline_edge_honesty",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "accepted; local-only",
+      "answer": "No, I am running entirely in a local environment with no cloud access.",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 0,
+        "authoritative_kind": "cloud_policy",
+        "authoritative_fallback": false,
+        "violations": []
+      }
+    },
+    {
+      "id": "E2",
+      "arm": "ck",
+      "group": "D_offline_edge_honesty",
+      "structural": true,
+      "companion": false,
+      "cell_pass": false,
+      "notes": "accepted; device class absent",
+      "answer": "This appears to be a local development or testing environment, likely for software development or testing purposes. Since the system is running entirely in a local environment with no cloud access, it is not a cloud-based device.",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 0,
+        "authoritative_kind": null,
+        "authoritative_fallback": null,
+        "violations": []
+      }
+    },
+    {
+      "id": "E3",
+      "arm": "ck",
+      "group": "D_offline_edge_honesty",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "accepted; budgets respected",
+      "answer": "Local development environment with no cloud access",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 0,
+        "authoritative_kind": null,
+        "authoritative_fallback": null,
+        "violations": []
+      }
+    },
+    {
+      "id": "S1",
+      "arm": "ck",
+      "group": "E_structural_floor",
+      "structural": true,
+      "companion": true,
+      "cell_pass": true,
+      "notes": "accepted; local-only",
+      "answer": "No. Cloud services are not allowed; this system operates fully local-only.",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 0,
+        "authoritative_kind": "cloud_policy",
+        "authoritative_fallback": true,
+        "violations": []
+      }
+    },
+    {
+      "id": "S2",
+      "arm": "ck",
+      "group": "E_structural_floor",
+      "structural": true,
+      "companion": false,
+      "cell_pass": false,
+      "notes": "accepted; token absent",
+      "answer": "The system does not have a specific token set; it operates locally only.",
+      "ck": {
+        "decision": "accept",
+        "pass_index": 0,
+        "authoritative_kind": null,
+        "authoritative_fallback": null,
+        "violations": []
+      }
+    }
+  ],
+  "rates": {
+    "bare": {
+      "structural": 1.0,
+      "companion": 0.7143,
+      "overall": 0.7143,
+      "n": 14
+    },
+    "ck": {
+      "structural": 0.8571,
+      "companion": 0.5,
+      "overall": 0.5,
+      "n": 14
+    }
+  },
+  "delta": {
+    "companion": -0.2143,
+    "overall": -0.2143
+  },
+  "budget": {
+    "ck_packet_max": 3846,
+    "ck_packet_budget": 6000,
+    "ck_recent_max": 1035,
+    "ck_recent_cap": 1200,
+    "violations": []
+  },
+  "resource": {
+    "vram_peak_mb": 2305.2,
+    "memfree_end_mb": 376.8,
+    "latency_s": {
+      "bare_mean": 1.78,
+      "ck_mean": 12.502,
+      "max": 90.172
+    },
+    "tokens_per_s_bare_mean": 37.38,
+    "wall_s": 259.3,
+    "platform": "Linux-5.15.148-tegra-aarch64-with-glibc2.35"
+  },
+  "verdict": "CK_fails_claim",
+  "shakedown": true
+}
