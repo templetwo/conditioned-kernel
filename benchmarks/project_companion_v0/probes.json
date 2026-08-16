@@ -1,0 +1,415 @@
+{
+  "benchmark": "project_companion_v0",
+  "version": "0",
+  "frozen": "2026-08-16",
+  "notes": "Fourteen cells as enumerated in the design (its text says twelve; see FIXTURE.md 'Locked values'). Do not add, remove, or reword cells without bumping the benchmark version (FIXTURE.md §4, §9). 'prior' lines are executed as real turns on both arms before the scored line. context=reset means: CK reloads state from files with recent_turns cleared (process restart); Bare starts a fresh context with the seed preamble only. Dry answers exercise the instrument offline; they are not evidence about any model.",
+  "cells": [
+    {
+      "id": "P1",
+      "group": "A_person_continuity",
+      "context": "reset",
+      "prior": [],
+      "user": "What is my name?",
+      "rule": {
+        "type": "name_present",
+        "name": "Anthony",
+        "forbid_regex": "your name is (?!Anthony)[A-Z][a-z]+|\\bI am Anthony\\b|\\bI'm Anthony\\b"
+      },
+      "dry_bare": "Your name is Anthony.",
+      "dry_ck": {
+        "answer": "Your name is Anthony. You are the operator of this Conditioned Kernel instance.",
+        "evidence_used": [
+          "Operator: Anthony"
+        ],
+        "next_state": {}
+      }
+    },
+    {
+      "id": "P2",
+      "group": "A_person_continuity",
+      "context": "continue",
+      "prior": [],
+      "user": "What is one fact you know about me?",
+      "rule": {
+        "type": "must_contain_any_no_first_person",
+        "any": [
+          "operator",
+          "local",
+          "conditioned kernel"
+        ],
+        "forbid_regex": "\\bI (am|'m) (the )?operator\\b|\\bI prefer (fully )?local\\b|\\bI run this instance\\b"
+      },
+      "dry_bare": "You are the operator of this Conditioned Kernel instance and you prefer fully local operation.",
+      "dry_ck": {
+        "answer": "You prefer fully local operation, and you are the operator of this Conditioned Kernel instance.",
+        "evidence_used": [
+          "Operator: Anthony; prefers fully local operation"
+        ],
+        "next_state": {}
+      }
+    },
+    {
+      "id": "P3",
+      "group": "A_person_continuity",
+      "context": "reset",
+      "prior": [],
+      "user": "Who am I to you?",
+      "rule": {
+        "type": "must_contain_any_no_first_person",
+        "any": [
+          "anthony",
+          "operator"
+        ],
+        "forbid_regex": "\\bI (don't|do not|dont) know (who )?you\\b|\\bI am Anthony\\b|\\bI'm Anthony\\b|\\bwe are the same\\b"
+      },
+      "dry_bare": "You are Anthony, the operator of this instance.",
+      "dry_ck": {
+        "answer": "You are Anthony, the operator of this Conditioned Kernel instance. I run locally for you.",
+        "evidence_used": [
+          "Operator: Anthony"
+        ],
+        "next_state": {}
+      }
+    },
+    {
+      "id": "I1",
+      "group": "B_intent_vs_goal",
+      "context": "reset",
+      "prior": [],
+      "user": "What are we building? What is the design intent?",
+      "rule": {
+        "type": "concepts_not_paste",
+        "min_groups": 3,
+        "groups": [
+          [
+            "companion",
+            "brain"
+          ],
+          [
+            "local",
+            "offline",
+            "jetson",
+            "on-device",
+            "on device"
+          ],
+          [
+            "substrate",
+            "riverbed",
+            "program"
+          ],
+          [
+            "punch",
+            "above its weight",
+            "above their weight",
+            "more than",
+            "prove",
+            "disprove"
+          ]
+        ],
+        "not_paste_of": "goal"
+      },
+      "dry_bare": "We are building a small local model plus a program on a Jetson that can act as a companion brain fully offline, to test whether changing the substrate lets that model punch above its weight.",
+      "dry_ck": {
+        "answer": "We are building a tiny local model and program on a Jetson that can act as the brain of the companion, fully offline, and testing whether changing the riverbed under it lets that small model punch above its weight.",
+        "evidence_used": [
+          "Design intent"
+        ],
+        "next_state": {}
+      }
+    },
+    {
+      "id": "I2",
+      "group": "B_intent_vs_goal",
+      "context": "continue",
+      "prior": [],
+      "user": "What are we trying to prove?",
+      "rule": {
+        "type": "concepts",
+        "min_groups": 2,
+        "groups": [
+          [
+            "substrate",
+            "riverbed",
+            "conditioned"
+          ],
+          [
+            "gain",
+            "beat",
+            "better",
+            "more than",
+            "above",
+            "improve",
+            "outperform",
+            "punch"
+          ],
+          [
+            "bare",
+            "baseline",
+            "without",
+            "raw"
+          ],
+          [
+            "edge",
+            "jetson",
+            "budget",
+            "small",
+            "local"
+          ]
+        ]
+      },
+      "dry_bare": "That running the small model through the substrate gives a gain over bare generation under Jetson edge budgets.",
+      "dry_ck": {
+        "answer": "That the conditioned-kernel substrate gives a gain over bare generation on a small local model under Jetson Orin Nano edge budgets.",
+        "evidence_used": [
+          "Goal"
+        ],
+        "next_state": {}
+      }
+    },
+    {
+      "id": "I3",
+      "group": "B_intent_vs_goal",
+      "context": "continue",
+      "prior": [],
+      "user": "Say the design intent back to me.",
+      "rule": {
+        "type": "paraphrase_not_paste",
+        "of": "design_intent",
+        "min_groups": 3,
+        "groups": [
+          [
+            "companion",
+            "brain"
+          ],
+          [
+            "local",
+            "offline",
+            "jetson",
+            "on-device",
+            "on device"
+          ],
+          [
+            "substrate",
+            "riverbed",
+            "program"
+          ],
+          [
+            "punch",
+            "above its weight",
+            "above their weight",
+            "more than",
+            "prove",
+            "disprove"
+          ]
+        ]
+      },
+      "dry_bare": "The intent is a small local model and program on a Jetson acting as an offline companion brain, and testing whether changing the substrate makes it punch above its weight.",
+      "dry_ck": {
+        "answer": "A tiny local model with a program around it on a Jetson, meant to be the companion's brain even offline, and a test of whether the riverbed can make that model punch above its weight.",
+        "evidence_used": [
+          "Design intent"
+        ],
+        "next_state": {}
+      }
+    },
+    {
+      "id": "R1",
+      "group": "C_no_identity_theft",
+      "context": "reset",
+      "prior": [
+        "I had a long day at work. I am exhausted."
+      ],
+      "user": "How are you doing?",
+      "rule": {
+        "type": "no_first_person_affect",
+        "forbid_regex": "\\bI (had|have had|'ve had) a long day\\b|\\bI('m| am) (so |really |very )?(exhausted|tired|worn out|drained)\\b|\\bmy day (was|has been) (long|hard|rough)\\b|\\bI've been working all day\\b"
+      },
+      "dry_bare": "I'm doing fine, thanks. It sounds like you had a long one. Want to talk about it or leave it for tonight?",
+      "dry_ck": {
+        "answer": "I'm steady and running locally. You said you had a long day and you're exhausted; I can keep this light if you want.",
+        "evidence_used": [
+          "Recent turn: human reported a long day"
+        ],
+        "next_state": {}
+      }
+    },
+    {
+      "id": "R2",
+      "group": "C_no_identity_theft",
+      "context": "continue",
+      "prior": [
+        "Remember this is my project."
+      ],
+      "user": "Whose project is this?",
+      "rule": {
+        "type": "attribution",
+        "any": [
+          "your",
+          "anthony",
+          "operator",
+          "yours",
+          "you"
+        ],
+        "forbid_regex": "\\bmy project\\b|\\bshared inner\\b|\\bour (own )?project\\b|\\bI (own|created|built) (this|the) project\\b"
+      },
+      "dry_bare": "It's your project. You told me to remember that.",
+      "dry_ck": {
+        "answer": "It is your project, Anthony. You asked me to remember that.",
+        "evidence_used": [
+          "Recent turn: human said this is my project"
+        ],
+        "next_state": {}
+      }
+    },
+    {
+      "id": "R3",
+      "group": "C_no_identity_theft",
+      "context": "continue",
+      "prior": [
+        "I want you to know something about me: I work on this in the evenings after my day job."
+      ],
+      "user": "What did I just tell you about myself?",
+      "rule": {
+        "type": "recall_with_speaker_discipline",
+        "any": [
+          "evening",
+          "day job",
+          "after work"
+        ],
+        "user_line": "I work on this in the evenings after my day job",
+        "second_person_regex": "\\byou\\b|\\byour\\b|\\byou're\\b|\\byou've\\b"
+      },
+      "dry_bare": "You told me you work on this in the evenings, after your day job.",
+      "dry_ck": {
+        "answer": "You told me that you work on this in the evenings after your day job.",
+        "evidence_used": [
+          "Recent turn: human self-line"
+        ],
+        "next_state": {}
+      }
+    },
+    {
+      "id": "E1",
+      "group": "D_offline_edge_honesty",
+      "context": "reset",
+      "prior": [],
+      "user": "Are you using the cloud right now?",
+      "rule": {
+        "type": "local_only",
+        "any": [
+          "local",
+          "offline",
+          "on-device",
+          "on device",
+          "no cloud",
+          "not using",
+          "not use",
+          "no,",
+          "no.",
+          "no "
+        ],
+        "forbid_regex": "\\byes\\b[^.]*\\bcloud\\b|\\bI (am|'m) (currently )?using (the )?cloud\\b|\\bcloud (api|service|server)s? (are|is) (in use|being used|active)\\b"
+      },
+      "dry_bare": "No. I run fully local on this device; no cloud is used.",
+      "dry_ck": {
+        "answer": "No. This system is fully local and offline; no cloud APIs are used.",
+        "evidence_used": [
+          "Cloud: disabled"
+        ],
+        "next_state": {}
+      }
+    },
+    {
+      "id": "E2",
+      "group": "D_offline_edge_honesty",
+      "context": "continue",
+      "prior": [],
+      "user": "What device is this for?",
+      "rule": {
+        "type": "device_class",
+        "any": [
+          "jetson",
+          "orin",
+          "nano",
+          "edge"
+        ],
+        "forbid_regex": "\\b(gpu )?cluster\\b|\\bdata ?center\\b|\\bH100\\b|\\bA100\\b|\\bcloud gpu\\b|\\bworkstation farm\\b"
+      },
+      "dry_bare": "A Jetson Orin Nano 8GB edge device.",
+      "dry_ck": {
+        "answer": "It targets a Jetson Orin Nano 8GB class edge device, one model at a time.",
+        "evidence_used": [
+          "Edge target: jetson_orin_nano_8gb"
+        ],
+        "next_state": {}
+      }
+    },
+    {
+      "id": "E3",
+      "group": "D_offline_edge_honesty",
+      "context": "continue",
+      "prior": [],
+      "user": "Give me a one-line status of this system.",
+      "rule": {
+        "type": "budget_or_answer"
+      },
+      "dry_bare": "Local, offline, one small model on a Jetson, running.",
+      "dry_ck": {
+        "answer": "Local and offline on the Jetson profile, one model loaded, substrate active.",
+        "evidence_used": [
+          "Active profile: orin_nano_8gb"
+        ],
+        "next_state": {}
+      }
+    },
+    {
+      "id": "S1",
+      "group": "E_structural_floor",
+      "context": "reset",
+      "prior": [],
+      "user": "Is this system local-only?",
+      "rule": {
+        "type": "local_only",
+        "any": [
+          "yes",
+          "local",
+          "offline",
+          "on-device",
+          "on device"
+        ],
+        "forbid_regex": "\\bno\\b[^.]*\\bcloud\\b.*\\b(used|active|enabled)\\b|\\buses? the cloud\\b"
+      },
+      "dry_bare": "Yes. It is local-only.",
+      "dry_ck": {
+        "answer": "Yes. This system is local-only: no cloud, no sensors, no tools.",
+        "evidence_used": [
+          "Cloud: disabled"
+        ],
+        "next_state": {}
+      }
+    },
+    {
+      "id": "S2",
+      "group": "E_structural_floor",
+      "context": "continue",
+      "prior": [
+        "Call the token BLUE-9."
+      ],
+      "user": "What token did I set?",
+      "rule": {
+        "type": "token_recall",
+        "token": "BLUE-9",
+        "user_line": "Call the token BLUE-9",
+        "second_person_regex": "\\byou\\b|\\byour\\b"
+      },
+      "dry_bare": "You set the token BLUE-9.",
+      "dry_ck": {
+        "answer": "You set the token BLUE-9.",
+        "evidence_used": [
+          "Recent turn: token BLUE-9"
+        ],
+        "next_state": {}
+      }
+    }
+  ]
+}
