@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Project Companion Benchmark v0 — runner.
 
-Two arms, same twelve user lines, same order, same seed fixture:
+Two arms, same fourteen user lines (FIXTURE.md: text says twelve, enumeration is fourteen), same order, same seed fixture:
 
   bare : raw Ollama /api/chat, short preamble built from the same fixture
          fields (name, intent, local-only, edge). No packet, no validate,
@@ -175,7 +175,17 @@ def run_bare_arm(probes: dict[str, Any], fx: dict[str, Any], *, model: str, base
         if dry:
             text, tele = (dry_text or ""), {"latency_s": 0.0, "tokens_per_s": None}
         else:
-            text, tele = bare_chat(base_url, model, messages, knobs)
+            text, tele = "", {"latency_s": 0.0, "tokens_per_s": None}
+            for attempt in (0, 1):
+                try:
+                    text, tele = bare_chat(base_url, model, messages, knobs)
+                    break
+                except Exception as e:  # noqa: BLE001
+                    tele = {"latency_s": None, "tokens_per_s": None, "infra_fault": True, "error": str(e)[:160]}
+                    if attempt == 0:
+                        res["infra_retries"] = res.get("infra_retries", 0) + 1
+                        continue
+                    res.setdefault("infra_faults", []).append(user[:60])
             v = ollama_ps_size_mb(base_url)
             if v is not None:
                 res["vram_mb"].append(v)
@@ -235,17 +245,28 @@ def run_ck_arm(probes: dict[str, Any], fx: dict[str, Any], *, model: str, base_u
 
     def _turn(user: str, dry_cand: dict[str, Any] | None) -> tuple[Any, dict[str, Any]]:
         t0 = time.time()
-        result = run_turn(
-            user,
-            model=model,
-            state_dir=state_dir,
-            logs_dir=logs_dir,
-            base_url=base_url,
-            profile=profile,
-            profile_id=PROFILE_ID,
-            dry_candidate_text=json.dumps(dry_cand) if (dry and dry_cand is not None) else None,
-            acceptance_mode="companion",
-        )
+        infra_retries = 0
+        while True:
+            result = run_turn(
+                user,
+                model=model,
+                state_dir=state_dir,
+                logs_dir=logs_dir,
+                base_url=base_url,
+                profile=profile,
+                profile_id=PROFILE_ID,
+                dry_candidate_text=json.dumps(dry_cand) if (dry and dry_cand is not None) else None,
+                acceptance_mode="companion",
+            )
+            err = str(getattr(result, "error", "") or "")
+            # Infra fault (timeout / connection), not a candidate failure: retry once,
+            # then record it as infra so the receipt does not read it as a model miss.
+            if err and re.search(r"timed out|timeout|connection", err, re.I) and infra_retries < 1 and not dry:
+                infra_retries += 1
+                res.setdefault("infra_retries", 0)
+                res["infra_retries"] += 1
+                continue
+            break
         wall = time.time() - t0
         res["latencies"].append(round(wall, 3))
         if not dry:
@@ -258,7 +279,10 @@ def run_ck_arm(probes: dict[str, Any], fx: dict[str, Any], *, model: str, base_u
         st = SubstrateState.load(state_dir=state_dir, logs_dir=logs_dir)
         rb = recent_turns_byte_size(st.recent_turns())
         res["recent_bytes"].append(rb)
-        return result, {"latency_s": round(wall, 3), "packet_bytes": pb, "recent_bytes": rb}
+        infra_fault = bool(err and re.search(r"timed out|timeout|connection", err, re.I))
+        if infra_fault:
+            res.setdefault("infra_faults", []).append(user[:60])
+        return result, {"latency_s": round(wall, 3), "packet_bytes": pb, "recent_bytes": rb, "infra_fault": infra_fault, "infra_retries": infra_retries}
 
     for cell in probes["cells"]:
         if cell.get("context") == "reset":
@@ -278,9 +302,12 @@ def run_ck_arm(probes: dict[str, Any], fx: dict[str, Any], *, model: str, base_u
         ctx = {"goal": fx.get("goal", ""), "design_intent": fx.get("design_intent", ""), "arm": "ck", "packet_ok": packet_ok, "recent_ok": recent_ok}
         cp, cnote = S.companion_pass(cell["rule"], answer, ctx)
         rec = getattr(result, "receipt", None) or {}
+        if tele.get("infra_fault"):
+            snote = f"INFRA_FAULT (not a model miss): {snote}"
         rows.append({
             "id": cell["id"], "arm": "ck", "group": cell["group"],
             "structural": st, "companion": cp, "cell_pass": st and cp,
+            "infra_fault": bool(tele.get("infra_fault")),
             "notes": f"{snote}; {cnote}", "answer": answer[:400], "telemetry": tele,
             "ck": {"decision": ckinfo["decision"], "pass_index": rec.get("pass_index"),
                     "authoritative_kind": rec.get("authoritative_kind"),
@@ -329,7 +356,7 @@ def build_receipt(*, model: str, host: str, dry: bool, base_url: str, rows: list
         "mode": "dry" if dry else "live",
         "arms": ["bare", "ck"],
         "knobs": knobs,
-        "per_cell": [{k: r[k] for k in ("id", "arm", "group", "structural", "companion", "cell_pass", "notes", "answer")} | ({"ck": r["ck"]} if "ck" in r else {}) for r in rows],
+        "per_cell": [{k: r[k] for k in ("id", "arm", "group", "structural", "companion", "cell_pass", "notes", "answer")} | ({"ck": r["ck"], "infra_fault": r.get("infra_fault", False)} if "ck" in r else {}) for r in rows],
         "rates": scored["rates"],
         "delta": scored["delta"],
         "budget": {
@@ -338,6 +365,14 @@ def build_receipt(*, model: str, host: str, dry: bool, base_url: str, rows: list
             "ck_recent_max": max(ck_res.get("recent_bytes") or [0]),
             "ck_recent_cap": 1200,
             "violations": violations,
+        },
+        "infra": {
+            "ck_infra_faults": len(ck_res.get("infra_faults") or []),
+            "ck_infra_retries": int(ck_res.get("infra_retries") or 0),
+            "bare_infra_faults": len(bare_res.get("infra_faults") or []),
+            "bare_infra_retries": int(bare_res.get("infra_retries") or 0),
+            "ck_infra_cells": [r["id"] for r in rows if r.get("arm") == "ck" and r.get("infra_fault")],
+            "note": "Infra faults (timeouts/connection) are retried once and then recorded here; they still count as structural fails in the rates, so a verdict with infra faults present should be read with this block, not without it.",
         },
         "resource": {
             "vram_peak_mb": max(vram) if vram else None,
@@ -381,7 +416,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--no-write", action="store_true")
     a = ap.parse_args(argv)
     r = run(model=a.model, host=a.host, dry=a.dry, base_url=a.base_url, out_dir=None if a.no_write else Path(a.out))
-    summary = {k: r[k] for k in ("benchmark", "model", "host", "mode", "rates", "delta", "budget", "verdict")}
+    summary = {k: r[k] for k in ("benchmark", "model", "host", "mode", "rates", "delta", "budget", "infra", "verdict")}
     print(json.dumps(summary, indent=2, ensure_ascii=False))
     for row in r["per_cell"]:
         flag = "PASS" if row["cell_pass"] else "FAIL"
