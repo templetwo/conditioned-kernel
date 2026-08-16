@@ -10,6 +10,7 @@ from conditioned_kernel.compile import build_arrival_packet
 from conditioned_kernel.edge import load_profile, packet_byte_size
 from conditioned_kernel.pipeline import run_turn
 from conditioned_kernel.state import (
+    DEFAULT_DESIGN_INTENT,
     RECENT_TURNS_MAX_BYTES,
     SubstrateState,
     fit_recent_turns,
@@ -29,6 +30,7 @@ def _bootstrap(tmp_path: Path) -> tuple[Path, Path]:
                     "Demonstrate conditioned-kernel substrate gain over bare generation "
                     "on a small local model under Jetson Orin Nano 8GB edge budgets."
                 ),
+                "design_intent": DEFAULT_DESIGN_INTENT,
                 "active_profile": "orin_nano_8gb",
                 "session_id": "sess_test",
                 "receipt_count_24h": 0,

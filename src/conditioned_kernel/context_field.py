@@ -21,6 +21,7 @@ Kind = Literal[
     "recent_dialogue",
     "durable_fact",
     "goal",
+    "design_intent",
     "runtime",
     "constraint",
     "instruction",
@@ -367,6 +368,7 @@ def collect_contributions(
     flags = state.current.get("flags") or {}
     edge = str(flags.get("edge_target") or "jetson_orin_nano_8gb")
     goal = str(state.current.get("goal") or "").strip()
+    design_intent = str(state.current.get("design_intent") or "").strip()
     active_profile = str(state.current.get("active_profile") or "orin_nano_8gb")
     use_model = model or (profile.model if profile else "qwen3.5:0.8b")
     think = bool(profile.think) if profile is not None else False
@@ -389,6 +391,21 @@ def collect_contributions(
             always_include=True,
         )
     )
+
+    if design_intent:
+        out.append(
+            ContextContribution(
+                contribution_id="state.design_intent",
+                source_module="state",
+                source_key="current.design_intent",
+                kind="design_intent",
+                content=f"Design intent: {design_intent}",
+                authority="informational",
+                topic_tags=("purpose", "intent", "design", "project"),
+                priority=15,
+                max_bytes=420,
+            )
+        )
 
     if goal:
         out.append(
@@ -584,7 +601,14 @@ def collect_contributions(
 
 def _tags_match(contrib: ContextContribution, intents: frozenset[Intent]) -> bool:
     tags = set(contrib.topic_tags)
-    if "purpose" in intents and tags & {"purpose", "goal", "project", "identity"}:
+    if "purpose" in intents and tags & {
+        "purpose",
+        "goal",
+        "project",
+        "identity",
+        "intent",
+        "design",
+    }:
         return True
     if "runtime" in intents and tags & {"runtime", "model", "profile"}:
         return True
@@ -861,7 +885,7 @@ def selected_facts(selected: Sequence[ContextContribution]) -> list[str]:
     """Prose lines for packet.facts from selected non-dialogue contributions."""
     lines: list[str] = []
     for c in selected:
-        if c.kind in {"durable_fact", "goal", "runtime", "constraint"}:
+        if c.kind in {"durable_fact", "goal", "design_intent", "runtime", "constraint"}:
             lines.append(c.content)
         elif c.kind == "thread":
             lines.append(c.content)
@@ -905,7 +929,14 @@ def evidence_pool_from_selected(selected: Sequence[ContextContribution]) -> list
     """Evidence strings the companion validator may accept for this turn."""
     pool: list[str] = []
     for c in selected:
-        if c.kind in {"durable_fact", "goal", "runtime", "constraint", "thread"}:
+        if c.kind in {
+            "durable_fact",
+            "goal",
+            "design_intent",
+            "runtime",
+            "constraint",
+            "thread",
+        }:
             pool.append(c.content)
         if c.kind == "recent_dialogue":
             if "User:" in c.content:

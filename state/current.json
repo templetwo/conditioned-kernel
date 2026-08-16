@@ -1,5 +1,6 @@
 {
   "goal": "Demonstrate conditioned-kernel substrate gain over bare generation on a small local model under Jetson Orin Nano 8GB edge budgets.",
+  "design_intent": "Conditioned Kernel is the tiny local model and program on a Jetson that can eventually act as the brain of the companion, fully offline if the net is gone. The project exists to prove or disprove that changing the riverbed (the substrate) can make that small model punch far above its weight on token output. The intent itself stays flowing, like the river.",
   "active_profile": "orin_nano_8gb",
   "session_id": "sess_20260728T031245",
   "open_thread_count": 2,

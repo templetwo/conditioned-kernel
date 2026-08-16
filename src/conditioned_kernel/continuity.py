@@ -74,6 +74,8 @@ def build_broken_packet(packet: dict[str, Any], *, seed: int = 42) -> dict[str, 
     digest = broken.get("state_digest") or {}
     if "goal" in digest:
         digest["goal"] = "[REDACTED]"
+    if "design_intent" in digest:
+        digest["design_intent"] = "[REDACTED]"
     broken["state_digest"] = digest
     broken["facts"] = ["[REDACTED]" for _ in (broken.get("facts") or [])]
     broken["open_threads"] = [

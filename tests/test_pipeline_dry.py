@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from conditioned_kernel.pipeline import run_turn
+from conditioned_kernel.state import DEFAULT_DESIGN_INTENT
 
 
 def test_dry_accept_writes_receipt(tmp_path: Path):
@@ -15,6 +16,7 @@ def test_dry_accept_writes_receipt(tmp_path: Path):
                     "Demonstrate conditioned-kernel substrate gain over bare generation "
                     "on a small local model under Jetson Orin Nano 8GB edge budgets."
                 ),
+                "design_intent": DEFAULT_DESIGN_INTENT,
                 "active_profile": "orin_nano_8gb",
                 "session_id": "sess_test",
                 "receipt_count_24h": 0,
@@ -108,7 +110,7 @@ def test_dry_goal_echo_rejected(tmp_path: Path):
         }
     )
     result = run_turn(
-        "State the design intent.",
+        "What is the current goal we are working toward?",
         state_dir=state_dir,
         logs_dir=logs_dir,
         dry_candidate_text=dry,

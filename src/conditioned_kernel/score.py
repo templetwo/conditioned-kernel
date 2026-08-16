@@ -90,6 +90,7 @@ def score_output(
     receipt = validate_candidate(candidate, packet)
     answer = str(candidate.get("answer") or "").strip()
     goal = str((packet.get("state_digest") or {}).get("goal") or "")
+    design_intent = str((packet.get("state_digest") or {}).get("design_intent") or "")
     user_input = str(packet.get("user_input") or (probe or {}).get("prompt") or "")
 
     parse_ok = bool(candidate.get("parse_ok"))
@@ -105,8 +106,10 @@ def score_output(
 
     state_faithful = bool(receipt.get("state_faithful"))
     goal_echo = bool(goal and is_goal_echo(answer, goal))
+    intent_echo = bool(design_intent and is_goal_echo(answer, design_intent))
+    paste_echo = goal_echo or intent_echo
     responsive = bool(user_input and is_responsive(answer, user_input))
-    goal_ref = "goal_not_referenced" not in (receipt.get("violations") or []) and not goal_echo
+    goal_ref = "goal_not_referenced" not in (receipt.get("violations") or []) and not paste_echo
 
     keys = probe_key_hits(answer, probe)
 
@@ -120,7 +123,7 @@ def score_output(
 
     # Optional external decision (CK pipeline) — still require key_ok for accept metric
     if decision is not None:
-        accept = (decision == "accept") and keys["key_ok"] and not goal_echo
+        accept = (decision == "accept") and keys["key_ok"] and not paste_echo
 
     n_pass = max(1, len(passes or []))
     first_viol = list((passes or [{}])[0].get("violations") or []) if passes else list(
@@ -134,14 +137,14 @@ def score_output(
         (1.0 if parse_ok else 0.0)
         + (1.0 if schema_ok else 0.0)
         + (1.0 if accept else 0.0)
-        + (1.0 if (answer and not goal_echo) else 0.0)
+        + (1.0 if (answer and not paste_echo) else 0.0)
     ) / 4.0
 
     # Semantic: responsive + key + state_faithful + not goal_echo
     semantic = (
         (1.0 if responsive else 0.0)
         + (1.0 if keys["key_score"] else 0.0)
-        + (1.0 if state_faithful and not goal_echo else 0.0)
+        + (1.0 if state_faithful and not paste_echo else 0.0)
         + (1.0 if goal_ref else 0.0)
     ) / 4.0
 
@@ -152,6 +155,7 @@ def score_output(
         "accept": accept,
         "goal_referenced": goal_ref,
         "goal_echo": goal_echo,
+        "intent_echo": intent_echo,
         "responsive": responsive,
         "key_ok": keys["key_ok"],
         "key_score": keys["key_score"],

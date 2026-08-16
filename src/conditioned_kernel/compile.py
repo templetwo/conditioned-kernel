@@ -69,6 +69,7 @@ def _digest(state: SubstrateState) -> dict[str, Any]:
     open_threads = state.open_threads()
     return {
         "goal": state.current.get("goal", ""),
+        "design_intent": state.current.get("design_intent", ""),
         "active_profile": state.current.get("active_profile", "ck_v0"),
         "open_thread_count": len(open_threads),
         "receipt_count_24h": state.current.get("receipt_count_24h", 0),

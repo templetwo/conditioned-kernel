@@ -21,7 +21,7 @@ from conditioned_kernel.edge import packet_byte_size
 from conditioned_kernel.observatory.compute import stage_defs
 from conditioned_kernel.observatory.trace import TurnTrace, run_traced_turn
 from conditioned_kernel.pipeline import run_turn
-from conditioned_kernel.state import SubstrateState
+from conditioned_kernel.state import DEFAULT_DESIGN_INTENT, SubstrateState
 
 _STAGE_STATUS_VOCAB = {
     "waiting",
@@ -53,6 +53,7 @@ def _bootstrap(tmp_path: Path) -> tuple[Path, Path]:
         json.dumps(
             {
                 "goal": GOAL,
+                "design_intent": DEFAULT_DESIGN_INTENT,
                 "active_profile": "orin_nano_8gb",
                 "session_id": "sess_test",
                 "receipt_count_24h": 0,
@@ -167,7 +168,7 @@ def test_stage_statuses_derived_per_spec_for_a_rejection(tmp_path):
     applied on a reject)."""
     state_dir, logs_dir = _bootstrap(tmp_path)
     trace = run_traced_turn(
-        "State the design intent.",
+        "What is the current goal we are working toward?",
         state_dir=state_dir,
         logs_dir=logs_dir,
         dry_candidate_text=_dry_candidate(GOAL),  # verbatim goal echo
@@ -288,8 +289,9 @@ def test_packet_bytes_equals_edge_packet_byte_size(tmp_path):
 
 
 def test_packet_bytes_mismatch_is_disclosed_not_hidden_for_authoritative_turns(tmp_path):
-    """"Summarize design intent." classifies as an authoritative "goal"
-    question (authoritative_state.classify_state_question). pipeline.py
+    """"Summarize design intent." classifies as an authoritative
+    "design_intent" question (authoritative_state.classify_state_question).
+    pipeline.py
     mutates the accepted packet in place afterwards — adding
     authoritative_enforced/authoritative_fallback/authoritative_reasons —
     *after* edge.enforce_packet_budget already computed and logged
@@ -363,7 +365,7 @@ def test_traced_and_untraced_runs_reach_identical_accept_decision(tmp_path):
 
 
 def test_traced_and_untraced_runs_agree_on_rejection(tmp_path):
-    prompt = "State the design intent."
+    prompt = "What is the current goal we are working toward?"
     dry = _dry_candidate(GOAL)  # echoes the goal verbatim -> goal_echo violation
 
     state_a, logs_a = _bootstrap(tmp_path / "a")

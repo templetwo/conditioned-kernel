@@ -121,6 +121,7 @@ _SCHEMA_PREFIXES: tuple[str, ...] = (
 _SEMANTIC_EXACT: frozenset[str] = frozenset(
     {
         "goal_echo",
+        "intent_echo",
         "not_responsive",
         "goal_not_referenced",
         "template_echo_evidence",

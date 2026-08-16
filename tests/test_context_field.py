@@ -10,7 +10,7 @@ from pathlib import Path
 
 from conditioned_kernel.compile import build_arrival_packet, compile_turn
 from conditioned_kernel.context_field import detect_intents
-from conditioned_kernel.state import SubstrateState
+from conditioned_kernel.state import DEFAULT_DESIGN_INTENT, SubstrateState
 
 
 def _boot(tmp_path: Path) -> SubstrateState:
@@ -23,6 +23,7 @@ def _boot(tmp_path: Path) -> SubstrateState:
                     "Demonstrate conditioned-kernel substrate gain over bare generation "
                     "on a small local model under Jetson Orin Nano 8GB edge budgets."
                 ),
+                "design_intent": DEFAULT_DESIGN_INTENT,
                 "active_profile": "orin_nano_8gb",
                 "session_id": "sess_cf",
                 "receipt_count_24h": 0,
@@ -77,6 +78,7 @@ def test_social_greeting_withholds_project_state(tmp_path: Path):
     # Must not auto-select hardware / goal / threads / repair budget
     assert "state.edge.target" not in ids
     assert "state.goal" not in ids
+    assert "state.design_intent" not in ids
     assert "state.runtime.repair_budget" not in ids
     assert not any(i.startswith("state.thread.") for i in ids)
     assert packet["facts"] == []
@@ -93,13 +95,23 @@ def test_emotional_statement_withholds_hardware(tmp_path: Path):
     assert "state.goal" not in ids
 
 
+def test_design_intent_question_selects_intent_slot(tmp_path: Path):
+    st = _boot(tmp_path)
+    packet = build_arrival_packet(
+        st, "what is the design intent right now?", acceptance_mode="companion"
+    )
+    ids = _selected_ids(packet)
+    assert "state.design_intent" in ids
+    assert any("Design intent:" in f for f in (packet.get("facts") or []))
+
+
 def test_purpose_question_selects_concise_purpose(tmp_path: Path):
     st = _boot(tmp_path)
     packet = build_arrival_packet(
         st, "what does this system do?", acceptance_mode="companion"
     )
     ids = _selected_ids(packet)
-    assert "state.identity" in ids or "state.goal" in ids
+    assert "state.identity" in ids or "state.goal" in ids or "state.design_intent" in ids
     assert "state.policy.local" in ids or "state.identity" in ids
     # Not every open experimental thread by default
     assert "state.runtime.repair_budget" not in ids

@@ -15,10 +15,10 @@ from typing import Any, Sequence
 
 from conditioned_kernel.edge import EdgeProfile
 from conditioned_kernel.ids import candidate_id, utc_now_iso
-from conditioned_kernel.return_path.validate import is_template_echo_text
+from conditioned_kernel.return_path.validate import is_goal_echo, is_template_echo_text
 from conditioned_kernel.state import SubstrateState
 
-Kind = str  # goal | edge_or_model | cloud_policy | open_threads | recent_recall
+Kind = str  # goal | design_intent | edge_or_model | cloud_policy | open_threads | recent_recall
 
 
 @dataclass(frozen=True)
@@ -32,6 +32,9 @@ class StateObligation:
     fallback_answer: str
     evidence: tuple[str, ...]
     source_fields: tuple[str, ...] = ()
+    # Near-copy of these owned strings is a wrong-claim (e.g. research goal
+    # pasted as an answer to a design-intent question).
+    anti_echo_of: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -42,6 +45,7 @@ class StateObligation:
             "fallback_answer": self.fallback_answer,
             "evidence": list(self.evidence),
             "source_fields": list(self.source_fields),
+            "anti_echo_of": list(self.anti_echo_of),
         }
 
 
@@ -229,12 +233,28 @@ def classify_state_question(user_input: str) -> Kind | None:
     ):
         return "cloud_policy"
 
-    # Goal (ask about the goal — not every sentence containing "goal")
-    if re.search(r"\bgoal\b", q) and re.search(
-        r"\b(what|which|current)\b", q
+    # Design intent first: building / why / for. Must not be swallowed by
+    # the research-claim `goal` slot.
+    if re.search(r"\bdesign intent\b", q):
+        return "design_intent"
+    if re.search(
+        r"\b("
+        r"what are we (building|trying|making)|"
+        r"what (is this|are we) (for|about)|"
+        r"why (are we|are you|do we) (building|making)|"
+        r"what is (this|the) (project|companion) for|"
+        r"what are we actually (building|doing)"
+        r")\b",
+        q,
     ):
-        return "goal"
-    if re.search(r"\b(what are we (trying|building|working)|design intent)\b", q):
+        return "design_intent"
+    if re.search(r"\bwhat are we working\b", q) and "goal" not in q:
+        return "design_intent"
+
+    # Research claim / name the goal (prove-claim questions)
+    if re.search(r"\bgoal\b", q) and re.search(
+        r"\b(what|which|current|name|primary|research|active)\b", q
+    ):
         return "goal"
 
     # Edge target / model / board — require interrogative intent, not mere mention
@@ -268,39 +288,52 @@ def classify_state_question(user_input: str) -> Kind | None:
     return None
 
 
+# Research-claim tokens. Hardware names are excluded so "the goal is the
+# Jetson" cannot count as hitting the owned claim.
+_GOAL_CLAIM_TOKENS = frozenset(
+    {
+        "demonstrate",
+        "conditioned",
+        "kernel",
+        "substrate",
+        "generation",
+        "budgets",
+        "bare",
+        "gain",
+    }
+)
+_GOAL_EDGE_FRAGMENTS = frozenset(
+    {"jetson", "orin", "nano", "edge", "jetson_orin_nano_8gb", "orin_nano"}
+)
+
+
 def _goal_required_substrings(goal: str) -> list[str]:
-    # Prefer distinctive multi-char tokens from the goal itself.
+    # Prefer distinctive research-claim tokens from the goal itself.
     toks = _tokens(goal, min_len=5)
     distinctive = [
         t
         for t in toks
-        if t
-        in {
-            "demonstrate",
-            "conditioned",
-            "kernel",
-            "substrate",
-            "generation",
-            "jetson",
-            "orin",
-            "nano",
-            "edge",
-            "budgets",
-            "bare",
-            "gain",
-            "local",
-            "model",
-        }
-        or len(t) >= 7
+        if (t in _GOAL_CLAIM_TOKENS or len(t) >= 7)
+        and t not in _GOAL_EDGE_FRAGMENTS
+        and not t.startswith("jetson")
     ]
     if not distinctive and toks:
-        distinctive = toks[:4]
-    # Also require a short contiguous snippet of the goal when short enough
+        distinctive = [t for t in toks if t not in _GOAL_EDGE_FRAGMENTS][:4]
     g = goal.strip()
     out = list(distinctive[:6])
     if 12 <= len(g) <= 80:
         out.append(g.lower()[:40])
     return out
+
+
+def _intent_required_substrings(intent: str) -> list[str]:
+    """Distinctive owned tokens — at-least-one, not majority lexicon."""
+    owned = ("jetson", "companion", "offline", "riverbed", "flowing")
+    present = [t for t in owned if t in (intent or "").lower()]
+    if present:
+        return list(present)
+    toks = _tokens(intent, min_len=6)
+    return toks[:4]
 
 
 def resolve_obligation(
@@ -316,6 +349,7 @@ def resolve_obligation(
 
     flags = state.current.get("flags") or {}
     goal = str(state.current.get("goal") or "").strip()
+    design_intent = str(state.current.get("design_intent") or "").strip()
     edge = str(flags.get("edge_target") or "jetson_orin_nano_8gb")
     active_profile = str(state.current.get("active_profile") or "orin_nano_8gb")
     use_model = model or (profile.model if profile else "qwen3.5:0.8b")
@@ -344,6 +378,30 @@ def resolve_obligation(
             fallback_answer=f"The current goal is: {goal}",
             evidence=(f"Current goal: {goal}",),
             source_fields=("current.goal",),
+        )
+
+    if kind == "design_intent":
+        if not design_intent:
+            return StateObligation(
+                kind=kind,
+                claims=("No design intent is currently set in substrate state.",),
+                required_substrings=("no design intent", "not set"),
+                forbidden_substrings=(),
+                fallback_answer="No design intent is currently set in substrate state.",
+                evidence=("Design intent: (empty)",),
+                source_fields=("current.design_intent",),
+                anti_echo_of=(goal,) if goal else (),
+            )
+        req = _intent_required_substrings(design_intent)
+        return StateObligation(
+            kind=kind,
+            claims=(f"Design intent: {design_intent}",),
+            required_substrings=tuple(req) if req else (design_intent.lower()[:24],),
+            forbidden_substrings=(),
+            fallback_answer=f"Design intent: {design_intent}",
+            evidence=(f"Design intent: {design_intent}",),
+            source_fields=("current.design_intent",),
+            anti_echo_of=(goal,) if goal else (),
         )
 
     if kind == "edge_or_model":
@@ -556,7 +614,14 @@ def check_obligation(answer: str, obligation: StateObligation, user_input: str) 
         reasons.append("authoritative_question_echo")
     if _has_schema_leak(a) or is_template_echo_text(a):
         reasons.append("authoritative_schema_leak")
-    if not _has_required(a, obligation.required_substrings):
+    # Goal / design_intent: keep paraphrase. Fall back only on empty (above),
+    # question echo, schema leak, forbidden, contradiction, or a clear miss
+    # of every owned token — not on "used different words for the same claim."
+    if obligation.kind in {"goal", "design_intent"}:
+        owned = [r for r in obligation.required_substrings if r]
+        if owned and not any(r.lower() in a.lower() for r in owned):
+            reasons.append("authoritative_missing_claim")
+    elif not _has_required(a, obligation.required_substrings):
         reasons.append("authoritative_missing_claim")
     bad = _has_forbidden(a, obligation.forbidden_substrings)
     if bad:
@@ -567,9 +632,19 @@ def check_obligation(answer: str, obligation: StateObligation, user_input: str) 
         edge_hits = sum(
             1 for frag in ("jetson_orin_nano_8gb", "orin_nano", "edge target") if frag in al
         )
-        claim_hits = sum(1 for r in obligation.required_substrings if r in al)
+        claim_hits = sum(
+            1
+            for r in obligation.required_substrings
+            if r in al and r not in _GOAL_EDGE_FRAGMENTS
+        )
         if edge_hits and claim_hits == 0:
             reasons.append("authoritative_goal_substituted")
+    # Design intent must not be answered with the research-claim string
+    if obligation.kind == "design_intent":
+        for src in obligation.anti_echo_of:
+            if src and is_goal_echo(a, src):
+                reasons.append("authoritative_wrong_claim")
+                break
     return reasons
 
 

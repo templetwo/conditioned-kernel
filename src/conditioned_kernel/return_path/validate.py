@@ -145,6 +145,8 @@ def _packet_evidence_pool(packet: dict[str, Any]) -> set[str]:
     digest = packet.get("state_digest") or {}
     if digest.get("goal"):
         pool.add(str(digest["goal"]).strip().lower())
+    if digest.get("design_intent"):
+        pool.add(str(digest["design_intent"]).strip().lower())
     return {p for p in pool if p}
 
 
@@ -169,6 +171,11 @@ def is_goal_echo(answer: str, goal: str) -> bool:
     if overlap >= 0.85 and len(atoks - gtoks) <= 2:
         return True
     return False
+
+
+def is_intent_echo(answer: str, design_intent: str) -> bool:
+    """True if answer is a near-copy of the design-intent string."""
+    return is_goal_echo(answer, design_intent)
 
 
 def is_responsive(answer: str, user_input: str) -> bool:
@@ -518,6 +525,7 @@ def validate_candidate(
 
     user_input = str(packet.get("user_input") or "")
     goal = str((packet.get("state_digest") or {}).get("goal") or "")
+    design_intent = str((packet.get("state_digest") or {}).get("design_intent") or "")
 
     if not work.get("parse_ok"):
         valid_schema = False
@@ -552,6 +560,16 @@ def validate_candidate(
     ):
         state_faithful = False
         violations.append("goal_echo")
+
+    # Same anti-paste for design intent. Fallback restates the owned sentence.
+    if (
+        answer
+        and design_intent
+        and is_intent_echo(answer, design_intent)
+        and not work.get("authoritative_fallback")
+    ):
+        state_faithful = False
+        violations.append("intent_echo")
 
     # Responsiveness:
     # - measurement: hard reject (Laboratory contract)

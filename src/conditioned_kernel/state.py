@@ -18,6 +18,16 @@ RECENT_TURNS_MAX_BYTES = 1200
 RECENT_TURN_USER_MAX_CHARS = 200
 RECENT_TURN_ANSWER_MAX_CHARS = 280
 
+# Owned design-intent sentence (Anthony, 2026-08-16). Distinct from `goal`,
+# which is the research-claim string the laboratory measures against.
+DEFAULT_DESIGN_INTENT = (
+    "Conditioned Kernel is the tiny local model and program on a Jetson that can "
+    "eventually act as the brain of the companion, fully offline if the net is gone. "
+    "The project exists to prove or disprove that changing the riverbed (the "
+    "substrate) can make that small model punch far above its weight on token "
+    "output. The intent itself stays flowing, like the river."
+)
+
 
 def _read_json(path: Path, default: Any) -> Any:
     if not path.exists():
@@ -145,6 +155,9 @@ class SubstrateState:
             f"Active profile: {self.current.get('active_profile', 'orin_nano_8gb')}.",
             f"Current goal: {self.current.get('goal', '')}".strip(),
         ]
+        intent = str(self.current.get("design_intent") or "").strip()
+        if intent:
+            facts.append(f"Design intent: {intent}")
         return [f for f in facts if f]
 
     def save_current(self) -> None:
@@ -193,7 +206,7 @@ class SubstrateState:
         return fitted
 
     def begin_new_session(self) -> str:
-        """Clear dialogue memory and bump session_id. Goal/threads stay."""
+        """Clear dialogue memory and bump session_id. Goal/intent/threads stay."""
         stamp = utc_now_iso().replace(":", "").replace("-", "")[:15]
         new_id = f"sess_{stamp}"
         self.current["session_id"] = new_id

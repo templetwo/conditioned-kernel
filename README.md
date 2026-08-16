@@ -26,6 +26,16 @@ Default runtime profile: **`orin_nano_8gb`** (Jetson Orin Nano 8 GB class).
 | **Default profile** | `orin_nano_8gb` (`configs/edge/`) |
 | **v0 target** | Measurable *substrate gain* under edge budgets |
 
+## Intent
+
+Conditioned Kernel is the tiny local model and program on a Jetson that can
+eventually act as the brain of the companion, fully offline if the net is gone.
+The project exists to prove or disprove that changing the riverbed (the
+substrate) can make that small model punch far above its weight on token
+output. The intent itself stays flowing, like the river.
+
+*— Anthony Vasquez Sr., 2026-08-16*
+
 ## Thesis
 
 Once a local model crosses a minimum linguistic threshold, **substrate design should predict system behavior more strongly than model identity does**.

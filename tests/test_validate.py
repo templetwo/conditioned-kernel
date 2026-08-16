@@ -3,8 +3,10 @@ from conditioned_kernel.return_path.parse import parse_candidate
 from conditioned_kernel.return_path.validate import (
     _fact_contradictions,
     is_goal_echo,
+    is_intent_echo,
     validate_candidate,
 )
+from conditioned_kernel.state import DEFAULT_DESIGN_INTENT
 
 GOAL = (
     "Demonstrate conditioned-kernel substrate gain over bare generation "
@@ -14,7 +16,7 @@ GOAL = (
 PACKET = {
     "packet_id": "pkt_test",
     "user_input": "State the current design intent in two sentences. Cite the goal.",
-    "state_digest": {"goal": GOAL},
+    "state_digest": {"goal": GOAL, "design_intent": DEFAULT_DESIGN_INTENT},
     "facts": [
         "This system is fully local.",
         "Sensors are out of scope for v0.",
@@ -70,6 +72,24 @@ def test_goal_echo_helper_near_copy():
     assert is_goal_echo(
         "Design intent is different: measure continuity from files only on edge.",
         GOAL,
+    ) is False
+
+
+def test_intent_echo_rejected():
+    raw = {
+        "answer": DEFAULT_DESIGN_INTENT,
+        "evidence_used": ["This system is fully local."],
+        "next_state": {},
+    }
+    import json
+
+    cand = parse_candidate(json.dumps(raw), packet_id="pkt_test")
+    receipt = validate_candidate(cand, PACKET)
+    assert "intent_echo" in receipt["violations"]
+    assert is_intent_echo(DEFAULT_DESIGN_INTENT, DEFAULT_DESIGN_INTENT) is True
+    assert is_intent_echo(
+        "A tiny Jetson program as an offline companion brain, riverbed first.",
+        DEFAULT_DESIGN_INTENT,
     ) is False
 
 

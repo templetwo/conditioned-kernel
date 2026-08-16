@@ -18,7 +18,7 @@ from pathlib import Path
 
 from conditioned_kernel.observatory.trace import PassTrace, run_traced_turn
 from conditioned_kernel.return_path.validate import _evidence_ok, _packet_evidence_pool
-from conditioned_kernel.state import SubstrateState
+from conditioned_kernel.state import DEFAULT_DESIGN_INTENT, SubstrateState
 
 GOAL = (
     "Demonstrate conditioned-kernel substrate gain over bare generation "
@@ -42,6 +42,7 @@ EXPECTED_CHECK_NAMES = [
     "template_echo",
     "template_echo_evidence",
     "goal_echo",
+    "intent_echo",
     "not_responsive",
     "stale_response_repeat",
     "required_section:answer",
@@ -71,6 +72,7 @@ _PREFIX_TO_CHECK = {
     "template_echo": "template_echo",
     "template_echo_evidence": "template_echo_evidence",
     "goal_echo": "goal_echo",
+    "intent_echo": "intent_echo",
     "not_responsive": "not_responsive",
     "stale_response_repeat": "stale_response_repeat",
     "max_words_exceeded": "max_words",
@@ -99,6 +101,7 @@ def _bootstrap(tmp_path: Path) -> tuple[Path, Path]:
         json.dumps(
             {
                 "goal": GOAL,
+                "design_intent": DEFAULT_DESIGN_INTENT,
                 "active_profile": "orin_nano_8gb",
                 "session_id": "sess_test",
                 "receipt_count_24h": 0,
@@ -245,7 +248,11 @@ def test_clean_accept_has_no_fail_or_advisory_checks(tmp_path):
 
 
 def test_goal_echo_rejection_checks_agree_with_violations(tmp_path):
-    trace = _run(tmp_path, prompt="State the design intent.", answer=GOAL)
+    trace = _run(
+        tmp_path,
+        prompt="What is the current goal we are working toward?",
+        answer=GOAL,
+    )
     pass0 = trace.passes[-1]
     assert pass0.decision == "reject"
     assert "goal_echo" in pass0.violations
@@ -353,7 +360,7 @@ def test_authoritative_obligation_absent_turn_shows_skip(tmp_path):
     """"Explain how substrate conditioning helps." does not classify as a
     narrow state question (authoritative_state.classify_state_question
     returns None — unlike "Summarize design intent.", which resolves a
-    "goal" obligation; see the tests below), so no obligation is resolved
+    "design_intent" obligation; see the tests below), so no obligation is resolved
     and the check must be SKIP, not PASS or FAIL — there is nothing for
     authoritative_state.check_obligation to have evaluated this pass."""
     trace = _run(tmp_path, prompt="Explain how substrate conditioning helps.")

@@ -11,7 +11,7 @@ from conditioned_kernel.authoritative_state import (
 )
 from conditioned_kernel.edge import load_profile
 from conditioned_kernel.pipeline import run_turn
-from conditioned_kernel.state import SubstrateState
+from conditioned_kernel.state import DEFAULT_DESIGN_INTENT, SubstrateState
 
 
 def _boot(tmp_path: Path) -> tuple[Path, Path]:
@@ -26,6 +26,7 @@ def _boot(tmp_path: Path) -> tuple[Path, Path]:
                     "Demonstrate conditioned-kernel substrate gain over bare generation "
                     "on a small local model under Jetson Orin Nano 8GB edge budgets."
                 ),
+                "design_intent": DEFAULT_DESIGN_INTENT,
                 "active_profile": "orin_nano_8gb",
                 "session_id": "sess_auth",
                 "receipt_count_24h": 0,
@@ -65,6 +66,13 @@ def _boot(tmp_path: Path) -> tuple[Path, Path]:
 
 def test_classify_live_shapes():
     assert classify_state_question("What is the goal we're working toward?") == "goal"
+    assert classify_state_question("Name the primary research goal.") == "goal"
+    assert (
+        classify_state_question("In plain language, what is the design intent right now?")
+        == "design_intent"
+    )
+    assert classify_state_question("What are we building?") == "design_intent"
+    assert classify_state_question("What are we working toward?") == "design_intent"
     assert (
         classify_state_question("Which model or edge target are we using?")
         == "edge_or_model"
@@ -378,3 +386,72 @@ def test_recent_recall_fallback_uses_value_not_bare_user_cue(tmp_path: Path):
     assert out.get("authoritative_fallback") is True
     assert "FALCON-9-DELTA" in out["answer"]
     assert "Confirm the codeword" not in out["answer"]
+
+
+def test_design_intent_paraphrase_keeps_model_phrasing(tmp_path: Path):
+    """Owned-fact paraphrase must not be replaced for missing lexicon."""
+    from conditioned_kernel.authoritative_state import (
+        check_obligation,
+        enforce_authoritative_candidate,
+        resolve_obligation,
+    )
+
+    sd, ld = _boot(tmp_path)
+    st = SubstrateState.load(state_dir=sd, logs_dir=ld)
+    q = "In plain language, what is the design intent right now?"
+    ob = resolve_obligation(st, q, profile=load_profile("orin_nano_8gb"))
+    assert ob is not None
+    assert ob.kind == "design_intent"
+    paraphrase = (
+        "Put continuity and acceptance outside the model so a lean Jetson "
+        "box can stay honest under a short context window."
+    )
+    assert check_obligation(paraphrase, ob, q) == []
+    cand = {"parse_ok": True, "answer": paraphrase, "evidence_used": [], "pass_index": 0}
+    out, reasons = enforce_authoritative_candidate(
+        cand, ob, user_input=q, packet_id="pkt_intent"
+    )
+    assert reasons == []
+    assert out.get("authoritative_fallback") is False
+    assert out["answer"] == paraphrase
+
+
+def test_design_intent_research_goal_paste_falls_back(tmp_path: Path):
+    """Answering 'what are we building?' with the experiment abstract is wrong."""
+    from conditioned_kernel.authoritative_state import (
+        enforce_authoritative_candidate,
+        resolve_obligation,
+    )
+
+    sd, ld = _boot(tmp_path)
+    st = SubstrateState.load(state_dir=sd, logs_dir=ld)
+    q = "What are we building?"
+    ob = resolve_obligation(st, q, profile=load_profile("orin_nano_8gb"))
+    assert ob is not None
+    assert ob.kind == "design_intent"
+    goal = str(st.current["goal"])
+    cand = {"parse_ok": True, "answer": goal, "evidence_used": [], "pass_index": 0}
+    out, reasons = enforce_authoritative_candidate(
+        cand, ob, user_input=q, packet_id="pkt_intent"
+    )
+    assert "authoritative_wrong_claim" in reasons
+    assert out.get("authoritative_fallback") is True
+    assert "companion" in out["answer"].lower() or "riverbed" in out["answer"].lower()
+    assert "The current goal is:" not in out["answer"]
+
+
+def test_design_intent_empty_and_echo_fall_back(tmp_path: Path):
+    from conditioned_kernel.authoritative_state import (
+        check_obligation,
+        resolve_obligation,
+    )
+
+    sd, ld = _boot(tmp_path)
+    st = SubstrateState.load(state_dir=sd, logs_dir=ld)
+    q = "What is the design intent?"
+    ob = resolve_obligation(st, q, profile=load_profile("orin_nano_8gb"))
+    assert ob is not None
+    assert "authoritative_empty_answer" in check_obligation("", ob, q)
+    assert "authoritative_question_echo" in check_obligation(q, ob, q)
+    miss = "Something about local models in general."
+    assert "authoritative_missing_claim" in check_obligation(miss, ob, q)

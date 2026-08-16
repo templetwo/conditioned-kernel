@@ -259,6 +259,8 @@ def labeled_evidence_pool(packet: dict[str, Any]) -> list[dict[str, Any]]:
     digest = packet.get("state_digest") or {}
     if digest.get("goal"):
         add("state_digest.goal", digest["goal"])
+    if digest.get("design_intent"):
+        add("state_digest.design_intent", digest["design_intent"])
     return out
 
 
@@ -443,6 +445,9 @@ def derive_checks(
     evidence_used = [str(e) for e in (candidate.get("evidence_used") or [])]
     user_input = str(packet.get("user_input") or "")
     goal = str((packet.get("state_digest") or {}).get("goal") or "").strip()
+    design_intent = str(
+        (packet.get("state_digest") or {}).get("design_intent") or ""
+    ).strip()
     fallback = bool(candidate.get("authoritative_fallback"))
     next_state = candidate.get("next_state") if isinstance(candidate.get("next_state"), dict) else {}
     thread_touch = [str(t) for t in (next_state.get("thread_touch") or [])]
@@ -540,6 +545,48 @@ def derive_checks(
             "did not fire — token overlap with the goal is below validate.is_goal_echo's threshold",
             f"answer vs state_digest.goal ({len(goal)} chars)", "violation",
         ))
+
+    # 5b. intent_echo — same anti-paste for the design-intent sentence
+    if not (answer and design_intent and not fallback):
+        if fallback:
+            reason = (
+                "not applicable — this candidate is a substrate authoritative fallback, "
+                "which may restate the design-intent claim and is exempted by validate_candidate"
+            )
+        elif not design_intent:
+            reason = "not applicable — state_digest.design_intent is empty for this turn"
+        else:
+            reason = "not applicable — answer is empty"
+        rows.append(
+            _check_row(
+                "intent_echo",
+                "SKIP",
+                reason,
+                "answer vs state_digest.design_intent",
+                "violation",
+            )
+        )
+    elif "intent_echo" in violations:
+        rows.append(
+            _check_row(
+                "intent_echo",
+                "FAIL",
+                "answer is a near-copy of the design intent (validate.is_intent_echo)",
+                f"answer vs state_digest.design_intent ({len(design_intent)} chars)",
+                "violation",
+            )
+        )
+    else:
+        rows.append(
+            _check_row(
+                "intent_echo",
+                "PASS",
+                "did not fire — token overlap with design_intent is below "
+                "validate.is_intent_echo's threshold",
+                f"answer vs state_digest.design_intent ({len(design_intent)} chars)",
+                "violation",
+            )
+        )
 
     # 6. not_responsive — hard reject in measurement mode, advisory-only in
     # companion mode (validate.py branches on `companion` when it fires).

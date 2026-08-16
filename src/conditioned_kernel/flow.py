@@ -340,7 +340,11 @@ def _canonical_contributions(
     that kind is excluded here -- Flow gives the current message primacy
     directly, never through a contribution)."""
     available = collect_contributions(state, "", profile=profile, model=model)
-    return [c for c in available if c.kind in {"goal", "durable_fact", "runtime", "constraint"}]
+    return [
+        c
+        for c in available
+        if c.kind in {"goal", "design_intent", "durable_fact", "runtime", "constraint"}
+    ]
 
 
 def _thread_contributions(

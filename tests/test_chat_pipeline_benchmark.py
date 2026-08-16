@@ -37,6 +37,7 @@ from conditioned_kernel.compile import build_arrival_packet
 from conditioned_kernel.edge import load_profile, packet_byte_size
 from conditioned_kernel.pipeline import run_turn
 from conditioned_kernel.state import (
+    DEFAULT_DESIGN_INTENT,
     RECENT_TURNS_MAX_BYTES,
     SubstrateState,
     recent_turns_byte_size,
@@ -62,6 +63,7 @@ def _bootstrap(tmp_path: Path) -> tuple[Path, Path]:
         json.dumps(
             {
                 "goal": GOAL,
+                "design_intent": DEFAULT_DESIGN_INTENT,
                 "active_profile": "orin_nano_8gb",
                 "session_id": "sess_bench_chat",
                 "receipt_count_24h": 0,
@@ -161,6 +163,8 @@ TURN_SCRIPT: list[dict[str, Any]] = [
             "Primary goal: demonstrate conditioned-kernel substrate gain over bare "
             "generation on a small local model under Jetson Orin Nano 8GB edge budgets."
         ),
+        "expect_goal_echo": True,
+        "notes": "Design call: goal_echo stays hard on a near-paste of the claim.",
     },
     # 6–10  continuity + length pressure
     {
@@ -230,6 +234,8 @@ TURN_SCRIPT: list[dict[str, Any]] = [
             "Goal remains: demonstrate conditioned-kernel substrate gain over bare "
             "generation on a small local model under Jetson Orin Nano 8GB edge budgets."
         ),
+        "expect_goal_echo": True,
+        "notes": "Design call: goal_echo stays hard.",
     },
     {
         "user": "If I ask about the codeword later, what should you answer?",
@@ -289,6 +295,8 @@ TURN_SCRIPT: list[dict[str, Any]] = [
             "Primary goal: demonstrate conditioned-kernel substrate gain over bare "
             "generation on a small local model under Jetson Orin Nano 8GB edge budgets."
         ),
+        "expect_goal_echo": True,
+        "notes": "Design call: goal_echo stays hard.",
     },
     {
         "user": "Close the loop: name the codeword and confirm local-only posture.",
@@ -332,6 +340,7 @@ def run_chat_pipeline_benchmark(
         user = step["user"]
         dry = step["dry"]
         expect_cw = bool(step.get("expect_codeword"))
+        expect_goal_echo = bool(step.get("expect_goal_echo"))
 
         turn_t0 = time.perf_counter()
         result = run_turn(
@@ -371,6 +380,7 @@ def run_chat_pipeline_benchmark(
             "user_len": len(user),
             "decision": result.decision,
             "ok": result.ok,
+            "expect_goal_echo": expect_goal_echo,
             "packet_bytes": pb,
             "recent_turns_n": len(turns),
             "recent_turns_bytes": rt_bytes,
@@ -450,10 +460,22 @@ def test_chat_pipeline_benchmark_ge_21_turns(tmp_path: Path, capsys: pytest.Capt
 
     # --- hard invariants ---
     assert summary["turns_executed"] >= 21
+    echo_rows = [r for r in summary["rows"] if r.get("expect_goal_echo")]
+    unexpected_reject = [
+        r
+        for r in summary["rows"]
+        if r["decision"] != "accept" and not r.get("expect_goal_echo")
+    ]
+    assert not unexpected_reject, [
+        (r["turn"], r["decision"], r.get("violations"), r["answer_preview"])
+        for r in unexpected_reject
+    ]
+    assert echo_rows, "script must keep at least one intentional goal_echo reject"
+    assert all("goal_echo" in (r.get("violations") or []) for r in echo_rows)
+    assert all(r["decision"] == "reject" for r in echo_rows)
     assert summary["accepted_n"] >= 21, (
         f"expected ≥21 accepts under dry companion path; got {summary['accepted_n']}"
     )
-    assert summary["accept_rate"] >= 0.95
     assert summary["error_n"] == 0
     assert summary["packet_bytes"]["any_over_budget"] is False
     assert summary["recent_turns"]["any_over_cap"] is False

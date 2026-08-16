@@ -298,6 +298,8 @@ def enforce_packet_budget(
     digest = dict(out.get("state_digest") or {})
     if "goal" in digest:
         digest["goal"] = _clip(str(digest["goal"]), 240)
+    if "design_intent" in digest:
+        digest["design_intent"] = _clip(str(digest["design_intent"]), 420)
     out["state_digest"] = digest
 
     constraints = dict(out.get("constraints") or {})
